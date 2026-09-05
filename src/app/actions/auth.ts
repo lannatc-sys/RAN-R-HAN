@@ -79,11 +79,20 @@ export async function registerUserAction(input: RegisterInput) {
     if (shopError) {
       console.error('Error creating shop:', shopError);
     } else if (newShop) {
+      // ตรวจสอบว่าตรงกับ SUPER_ADMIN_USER ใน env หรือไม่
+      const superAdminEnv = process.env.SUPER_ADMIN_USER || process.env.SUPER_ADMIN;
+      const isSuperAdmin = superAdminEnv
+        ?.split(',')
+        .map((e) => e.trim().toLowerCase())
+        .includes(email.trim().toLowerCase());
+
+      const userRole = isSuperAdmin ? 'superadmin' : 'owner';
+
       // บันทึกโปรไฟล์ลงใน public.users
       const { error: userError } = await admin.from('users').upsert({
         id: user.id,
         shop_id: newShop.id,
-        role: 'owner',
+        role: userRole,
         full_name: fullName,
         phone: cleanPhone,
       });

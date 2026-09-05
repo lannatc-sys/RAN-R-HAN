@@ -39,7 +39,27 @@ export async function checkIsSuperadmin(): Promise<{ isSuperadmin: boolean; user
       return { isSuperadmin: true, user };
     }
 
-    // หากยังไม่มี superadmin ใดๆ ในระบบเลย ให้บัญชีแรกที่เข้ามาสามารถเป็น superadmin ได้
+    // 1. ตรวจสอบสิทธิ์จาก Environment Variable (SUPER_ADMIN_USER หรือ SUPER_ADMIN)
+    const superAdminEnv = process.env.SUPER_ADMIN_USER || process.env.SUPER_ADMIN;
+    if (superAdminEnv && user.email) {
+      const allowedEmails = superAdminEnv
+        .split(',')
+        .map((e) => e.trim().toLowerCase());
+
+      const userEmail = user.email.toLowerCase().trim();
+      if (allowedEmails.includes(userEmail)) {
+        // อัปเดต role ใน public.users ให้เป็น superadmin ทันที
+        await admin.from('users').upsert({
+          id: user.id,
+          role: 'superadmin',
+          full_name: user.user_metadata?.full_name || userEmail.split('@')[0],
+          updated_at: new Date().toISOString(),
+        });
+        return { isSuperadmin: true, user };
+      }
+    }
+
+    // 2. หากยังไม่มี superadmin ใดๆ ในระบบเลย ให้บัญชีแรกที่เข้ามาสามารถเป็น superadmin ได้
     const { count } = await admin
       .from('users')
       .select('*', { count: 'exact', head: true })
