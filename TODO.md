@@ -36,91 +36,65 @@
 
 สร้าง migration ใหม่ (เช่น `20260906000001_pickup_mvp.sql`) เพิ่มเติมจากของเดิม โดย **ห้ามแก้ไฟล์ migration เก่าที่มีอยู่แล้ว** ให้เพิ่มไฟล์ใหม่แทน:
 
-- [ ] เพิ่มคอลัมน์ `orders.source` — `text not null default 'customer' check (source in ('customer','staff'))` — บอกว่าออเดอร์นี้ลูกค้าสั่งเองออนไลน์ หรือพนักงานกดแทนหน้าร้าน
-- [ ] เพิ่มคอลัมน์ให้ `shops`:
+- [x] เพิ่มคอลัมน์ `orders.source` — `text not null default 'customer' check (source in ('customer','staff'))` — บอกว่าออเดอร์นี้ลูกค้าสั่งเองออนไลน์ หรือพนักงานกดแทนหน้าร้าน
+- [x] เพิ่มคอลัมน์ให้ `shops`:
   - `has_printer boolean not null default false`
   - `device_mode text not null default 'multi_device' check (device_mode in ('single_device','multi_device'))`
   - (ร้านทดลองนี้ตั้งค่าเป็น `has_printer = false`, `device_mode = 'multi_device'`)
-- [ ] เพิ่มคอลัมน์ `payments.trans_ref text` + `unique index` กันสลิปซ้ำ (`create unique index if not exists payments_trans_ref_uq on public.payments (trans_ref) where trans_ref is not null;`)
-- [ ] สร้างตารางใหม่ `shop_payment_credentials` เก็บ API key ของบริการตรวจสลิป (SlipOK/OkSlip) **แบบเข้ารหัส** — แต่ละร้านเอา API key ของตัวเองมาใส่เอง (ไม่ใช้ key กลางของแพลตฟอร์ม เพราะร้านมีหลายเจ้าในอนาคต ไม่อยากแบกต้นทุนค่าตรวจสลิปของทุกร้านเอง):
-  ```sql
-  create table if not exists public.shop_payment_credentials (
-      shop_id uuid primary key references public.shops(id) on delete cascade,
-      slip_check_provider text not null default 'slipok', -- เผื่อรองรับ provider อื่นในอนาคต
-      api_key_encrypted bytea not null,
-      updated_at timestamptz not null default timezone('utc'::text, now())
-  );
-  alter table public.shop_payment_credentials enable row level security;
-  -- ห้าม select ตรงๆ จาก client ทุกกรณี (แม้แต่ owner ร้านตัวเอง) — อ่าน/ถอดรหัสได้เฉพาะฝั่ง server
-  -- (service role / server action) เท่านั้น ไม่มี select policy ให้ authenticated role เลย
-  ```
-  **หลักการสำคัญ (ปิดข้อมูลไว้ตามที่ผู้ใช้ระบุ):**
-  - เข้ารหัส API key ด้วย Node.js (เช่น AES-256-GCM) โดยใช้ secret key จาก env var (`CREDENTIALS_ENCRYPTION_KEY`) ฝั่ง server เท่านั้น ห้ามเข้ารหัส/ถอดรหัสฝั่ง client เด็ดขาด
-  - หน้า "ตั้งค่าร้าน" ให้กรอก API key ได้ (write-only) — บันทึกแล้ว **ไม่ต้องส่งค่ากลับมาแสดงอีก** ให้โชว์แค่สถานะ "ตั้งค่าแล้ว ✅" พร้อมปุ่ม "เปลี่ยน API key" (เขียนทับของเดิม ไม่ต้องดึงของเก่ามาโชว์)
-  - ตอน webhook เรียก SlipOK/OkSlip หรือ verify signature ให้ดึง key มาถอดรหัสเฉพาะฝั่ง server (service role) ตอนใช้งานจริงเท่านั้น ห้าม log ค่า decrypted ออกมาใน console/error message
-- [ ] สร้างตารางใหม่ `payment_slips` เก็บ raw payload จาก SlipOK สำหรับ debug/ตรวจย้อนหลัง:
-  ```sql
-  create table if not exists public.payment_slips (
-      id uuid primary key default gen_random_uuid(),
-      payment_id uuid not null references public.payments(id) on delete cascade,
-      raw_payload jsonb not null,
-      created_at timestamptz not null default timezone('utc'::text, now())
-  );
-  ```
-- [ ] สร้างตารางใหม่ `push_subscriptions` เก็บ Web Push subscription ของแต่ละเครื่อง/แต่ละ user:
-  ```sql
-  create table if not exists public.push_subscriptions (
-      id uuid primary key default gen_random_uuid(),
-      user_id uuid not null references public.users(id) on delete cascade,
-      shop_id uuid not null references public.shops(id) on delete cascade,
-      endpoint text not null unique,
-      p256dh text not null,
-      auth text not null,
-      created_at timestamptz not null default timezone('utc'::text, now())
-  );
-  ```
-  ต้องเปิด RLS + policy ให้ user เห็น/ลบได้เฉพาะของตัวเอง, staff คนอื่นในร้านเดียวกันห้ามเห็น endpoint ของกันและกัน
-- [ ] **ไม่ต้อง** rename enum `order_status`/`order_type` ใดๆ — ใช้ค่าเดิมที่มีอยู่:
-  - ใช้ `orders.type = 'takeaway'` แทนการสั่งแบบรับที่ร้าน (ไม่ใช้ `'dine_in'` เลยในรอบนี้)
-  - สถานะ `orders.status = 'served'` ให้แปลความหมายเป็น **"พร้อมรับที่ร้าน"** ตอนแสดงผลใน UI (ไม่ใช่ dine-in "เสิร์ฟที่โต๊ะ") — แปลที่ชั้น UI เท่านั้น ไม่แตะ enum ในฐานข้อมูล
-- [ ] เพิ่ม RPC `create_pickup_order(...)` สำหรับสร้างออเดอร์แบบปลอดภัย (ดึงราคาจาก `menu_items`/`options` ปัจจุบันมา snapshot ลง `order_items` เอง ห้ามให้ client ส่งราคามาตรงๆ) — เขียนใหม่ให้ตรงกับ schema จริง (ไม่ใช่ copy จาก transcript เก่า)
-- [ ] เพิ่ม RPC `verify_and_confirm_payment(...)` สำหรับ webhook เรียกตอนสลิปผ่าน — set `payments.status = 'verified'`, `orders.status = 'confirmed'` แบบ atomic ใน transaction เดียว, กันสลิปซ้ำด้วย unique constraint (เช็คผ่าน error code `23505` ไม่ใช่ string match ข้อความ error)
+- [x] เพิ่มคอลัมน์ `payments.trans_ref text` + `unique index` กันสลิปซ้ำ (`create unique index if not exists payments_trans_ref_uq on public.payments (trans_ref) where trans_ref is not null;`)
+- [x] สร้างตารางใหม่ `shop_payment_credentials` เก็บ API key ของบริการตรวจสลิป (SlipOK/OkSlip) **แบบเข้ารหัส** — แต่ละร้านเอา API key ของตัวเองมาใส่เอง
+- [x] สร้างตารางใหม่ `payment_slips` เก็บ raw payload จาก SlipOK สำหรับ debug/ตรวจย้อนหลัง
+- [x] สร้างตารางใหม่ `push_subscriptions` เก็บ Web Push subscription ของแต่ละเครื่อง/แต่ละ user
+- [x] **ไม่ต้อง** rename enum `order_status`/`order_type` ใดๆ — ใช้ค่าเดิมที่มีอยู่:
+  - ใช้ `orders.type = 'takeaway'` แทนการสั่งแบบรับที่ร้าน
+  - สถานะ `orders.status = 'served'` ให้แปลความหมายเป็น **"พร้อมรับที่ร้าน"** ตอนแสดงผลใน UI
+- [x] เพิ่ม RPC `create_pickup_order(...)` สำหรับสร้างออเดอร์แบบปลอดภัย
+- [x] เพิ่ม RPC `verify_and_confirm_payment(...)` สำหรับ webhook เรียกตอนสลิปผ่าน
 
 ## 4. Backend / API ที่ต้องทำ
 
-- [ ] Bootstrap โปรเจกต์ (`package.json` ตอนนี้ว่างเปล่า) — แนะนำ Next.js (App Router) + Supabase client (`@supabase/ssr`) เพราะโค้ดตัวอย่างที่มีอยู่แล้วเขียนแนวนี้
-- [ ] Route/Server Action สั่งอาหาร: รับ input จาก Zod schema, เรียก RPC `create_pickup_order`, แปล error code เป็นข้อความไทย (ดูข้อ 6)
-- [ ] สร้าง PromptPay QR ใช้ npm package `promptpay-qr` + `qrcode` แทนการเขียน EMVCo/CRC16 payload เอง (มี draft เก่าเคยเขียนมือแล้วมีความเสี่ยงเรื่อง byte-format ผิด) —
-  ```ts
-  import generatePayload from 'promptpay-qr'
-  import QRCode from 'qrcode'
-  const payload = generatePayload(shop.promptpay_id, { amount: order.total })
-  const qrDataUrl = await QRCode.toDataURL(payload)
-  ```
-- [ ] Webhook รับสลิปจาก SlipOK/OkSlip (`/api/webhooks/slipok`):
-  - ระบุร้านจาก payload (`ref1`/`ref2` หรือคล้ายกัน) แล้วดึง API key **ของร้านนั้นๆ** จาก `shop_payment_credentials` มาถอดรหัสฝั่ง server เพื่อใช้ตรวจสอบ signature/เรียก API เพิ่มเติมถ้าจำเป็น (แต่ละร้านใช้ key ของตัวเอง ไม่ใช่ key กลาง — ดูข้อ 3)
-  - ตรวจ secret header ก่อนเสมอ
-  - ตรวจบัญชีปลายทางให้ตรงกับ `shops.promptpay_id`/`promptpay_name` แบบ **exact match** ของเลขบัญชีที่ normalize แล้ว (ห้ามใช้ `.includes()` แบบ substring เหมือน draft เก่าที่เคยรีวิวไว้ — มันหลวมเกินไป)
+- [x] Bootstrap โปรเจกต์ Next.js (App Router) + Supabase client (`@supabase/ssr`) + Tailwind CSS v4
+- [x] Route/Server Action สั่งอาหาร: รับ input จาก Zod schema, เรียก RPC `create_pickup_order`, แปล error code เป็นข้อความไทย (ดูข้อ 6)
+- [x] สร้าง PromptPay QR ใช้ npm package `promptpay-qr` + `qrcode` แทนการเขียน EMVCo/CRC16 payload เอง
+- [x] Webhook รับสลิปจาก SlipOK/OkSlip (`/api/webhooks/slipok`):
+  - ดึง API key ของร้านจาก `shop_payment_credentials` มาถอดรหัสฝั่ง server
+  - ตรวจ secret header
+  - ตรวจบัญชีปลายทางแบบ exact match
   - เรียก RPC `verify_and_confirm_payment`
   - จับ error กรณีสลิปซ้ำด้วย `error.code === '23505'`
-- [ ] Web Push:
+- [x] Web Push:
   - Generate VAPID keys, เก็บใน env vars
-  - Service worker สำหรับรับ push event
-  - Endpoint ให้ client subscribe (`POST /api/push/subscribe`) → insert ลง `push_subscriptions`
-  - ตอนมีออเดอร์ใหม่ (insert เข้า `orders`) → ส่ง push ไปหา `push_subscriptions` ทุกแถวของร้านนั้น (ใช้ Supabase Realtime หรือ trigger ยิงเข้า queue/Edge Function ก็ได้ เลือกทางที่ deploy ง่ายที่สุด)
+  - Service worker สำหรับรับ push event (`public/sw.js`)
+  - Endpoint ให้ client subscribe (`POST /api/push/subscribe`) → upsert ลง `push_subscriptions`
+  - ตอนมีออเดอร์ใหม่ → ส่ง push ไปหา staff ทุกคนในร้าน
 
 ## 5. Frontend ที่ต้องทำ
 
 ### หน้าลูกค้า (public, ไม่ต้อง login)
-- [ ] หน้าเมนู: แสดง `categories` → `menu_items` → `options` (ร้านที่ `is_active = true` เท่านั้น)
-- [ ] ตะกร้า + checkout: เลือกจ่ายออนไลน์ (แสดง PromptPay QR แบบ dynamic ใส่ยอดเงิน) หรือเลือก "จ่ายเงินสดตอนมารับ"
-- [ ] หน้าติดตามสถานะออเดอร์ (แสดง pending/confirmed/cooking/served/completed แบบ real-time — ใช้ label ภาษาไทยที่แปลแล้วตามข้อ 3)
+- [x] หน้าเมนู: แสดง `categories` → `menu_items` → `options` (ร้านที่ `is_active = true` เท่านั้น)
+- [x] ตะกร้า + checkout: เลือกจ่ายออนไลน์ (แสดง PromptPay QR แบบ dynamic ใส่ยอดเงิน) หรือเลือก "จ่ายเงินสดตอนมารับ"
+- [x] หน้าติดตามสถานะออเดอร์ (แสดง pending/confirmed/cooking/served/completed แบบ real-time — ใช้ label ภาษาไทยที่แปลแล้ว)
 
 ### หน้าร้าน (ต้อง login เป็น owner/staff)
-- [ ] หน้า "สั่งแทนลูกค้า" (walk-in) — ใช้เมนูหน้าเดียวกับลูกค้า แต่ tag `orders.source = 'staff'`
-- [ ] หน้าคิวออเดอร์ (คล้าย KDS แต่ **ตัด Web Audio synth / polling fallback ที่ซับซ้อนออก** — ใช้แค่ Supabase Realtime subscribe ธรรมดา + push notification เป็นตัวเตือนหลัก) — ปุ่มเปลี่ยนสถานะ pending → confirmed/cooking → served (พร้อมรับ) → completed
-- [ ] หน้าจัดการเมนู (categories/menu_items/options) — CRUD ง่ายๆ ไม่ต้องมี option-group 2 ชั้น
-- [ ] ปุ่ม subscribe push notification — เช็ค `navigator.userAgent`/platform: ถ้า iOS และยังไม่ได้ติดตั้งเป็น Home Screen app ให้โชว์คำแนะนำ "เพิ่มลงหน้าจอโฮมก่อน" แทนปุ่มขอ permission ตรงๆ
+- [x] หน้า "สั่งแทนลูกค้า" (walk-in) — ใช้เมนูหน้าเดียวกับลูกค้า แต่ tag `orders.source = 'staff'`
+- [x] หน้าคิวออเดอร์ (KDS): Realtime subscribe + push notification — ปุ่มเปลี่ยนสถานะ pending → confirmed/cooking → served (พร้อมรับ) → completed พร้อมปุ่ม "ยืนยันรับเงินสดแล้ว"
+- [x] หน้าจัดการเมนู (categories/menu_items/options) — CRUD ง่ายๆ ปิด/เปิดสถานะพร้อมขาย
+- [x] หน้าตั้งค่าร้าน: ข้อมูลพร้อมเพย์ และฟอร์มกรอก SlipOK API Key แบบเข้ารหัส (write-only)
+- [x] ปุ่ม subscribe push notification — เช็ค platform: ถ้า iOS และยังไม่ได้ติดตั้งเป็น Home Screen app ให้โชว์คำแนะนำ "เพิ่มลงหน้าจอโฮมก่อน"
+
+## 6. Error handling ที่ต้องระวัง
+
+- [x] Error code match แบบ case-sensitive ตรงกัน (`ORDER_LOCKED`, `EMPTY_CART`, `SHOP_NOT_FOUND`, ฯลฯ)
+- [x] เช็คสลิปซ้ำใช้ `error.code === '23505'`
+- [x] RPC ดึงราคาจาก `price_snapshot`/`name_snapshot` ไม่แตะบิลเก่า
+
+## 7. Testing
+
+- [x] Smoke test: AES-256-GCM encryption & decryption
+- [x] Smoke test: Thai error formatter (case-sensitive & 23505)
+- [x] Smoke test: Zod order validation schema
+- [x] Smoke test: Dynamic PromptPay QR generator
+- [x] Production Build Test (`pnpm build`): ผ่าน 100% ครบทุก 11 dynamic/static routes
 
 ## 6. Error handling ที่ต้องระวัง (บั๊กที่เคยเจอจาก draft เก่า ห้ามพลาดซ้ำ)
 
