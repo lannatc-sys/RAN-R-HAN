@@ -4,6 +4,8 @@ import { SuperadminTopbar } from '@/components/superadmin/SuperadminTopbar';
 import Link from 'next/link';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SuperadminLayout({
   children,
 }: {

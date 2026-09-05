@@ -1,18 +1,32 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Store, Lock, Mail, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      if (errorParam === 'auth_failed' || errorParam.includes('access_denied')) {
+        setErrorMessage('การเข้าสู่ระบบผ่าน Google ถูกยกเลิกหรือไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      } else if (errorParam.includes('provider is not enabled')) {
+        setErrorMessage('ระบบยังไม่ได้เปิดใช้งาน Google Provider บน Supabase กรุณาเปิดใช้งานใน Authentication > Providers');
+      } else {
+        setErrorMessage(decodeURIComponent(errorParam));
+      }
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +64,10 @@ export default function LoginPage() {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
         },
       });
 
@@ -186,5 +204,19 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-amber-50/60 via-stone-50 to-stone-100">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
