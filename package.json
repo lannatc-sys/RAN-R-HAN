@@ -9,6 +9,7 @@
     "lint": "next lint",
     "test": "npx tsx test/smoke-test.ts",
     "test:e2e": "npx tsx test/e2e-test.ts",
+    "test:superadmin": "npx tsx test/superadmin-test.ts",
     "db:setup": "node scripts/run-db.js"
   },
   "dependencies": {

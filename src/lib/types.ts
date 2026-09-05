@@ -13,12 +13,15 @@ export interface Shop {
   slug: string;
   name: string;
   logo: string | null;
+  phone?: string | null;
+  address?: string | null;
   promptpay_id: string | null;
   promptpay_name: string | null;
   plan: string;
   status: ShopStatus;
   is_active: boolean;
   expires_at: string | null;
+  plan_expires_at?: string | null;
   service_charge: number;
   vat_mode: VatMode;
   has_printer: boolean;
@@ -143,4 +146,14 @@ export interface RegisterInput {
   email: string;
   password: string;
   origin: string;
+}
+
+export interface PlatformStats {
+  totalStores: number;
+  activeStores: number;
+  suspendedStores: number;
+  totalOrders: number;
+  todayOrders: number;
+  totalRevenue: number;
+  todayRevenue: number;
 }

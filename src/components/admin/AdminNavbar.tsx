@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
-import { ChefHat, ShoppingBag, UtensilsCrossed, Settings, LogOut, Store } from 'lucide-react';
+import { ChefHat, ShoppingBag, UtensilsCrossed, Settings, LogOut, Store, Shield } from 'lucide-react';
 
 interface AdminNavbarProps {
   shopId: string;
@@ -47,15 +47,27 @@ export function AdminNavbar({ shopId, shopName }: AdminNavbarProps) {
           <PushNotificationPrompt shopId={shopId} />
         </div>
 
-        {/* Logout */}
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="text-stone-400 hover:text-stone-700 text-xs flex items-center gap-1.5 p-2 rounded-xl hover:bg-stone-100 transition-colors"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">ออกจากระบบ</span>
-        </button>
+        {/* Actions */}
+        <div className="flex items-center gap-1">
+          <Link
+            href="/superadmin"
+            className="text-stone-500 hover:text-amber-800 text-xs flex items-center gap-1.5 p-2 rounded-xl hover:bg-amber-50/80 transition-colors"
+            title="ศูนย์ควบคุม Superadmin"
+          >
+            <Shield className="w-4 h-4 text-amber-600" />
+            <span className="hidden sm:inline font-semibold">Superadmin</span>
+          </Link>
+
+          {/* Logout */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-stone-400 hover:text-stone-700 text-xs flex items-center gap-1.5 p-2 rounded-xl hover:bg-stone-100 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">ออกจากระบบ</span>
+          </button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
