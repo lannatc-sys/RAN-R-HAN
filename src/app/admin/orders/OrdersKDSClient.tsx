@@ -19,7 +19,9 @@ import {
   UserCheck,
   Globe,
   ChefHat,
+  XCircle,
 } from 'lucide-react';
+import { PinModal } from '@/components/admin/PinModal';
 
 interface OrdersKDSClientProps {
   initialOrders: Order[];
@@ -30,6 +32,7 @@ export function OrdersKDSClient({ initialOrders, shop }: OrdersKDSClientProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [activeTab, setActiveTab] = useState<'active' | 'served' | 'completed' | 'all'>('active');
   const [loadingOrderId, setLoadingOrderId] = useState<string | null>(null);
+  const [cancelOrderTarget, setCancelOrderTarget] = useState<Order | null>(null);
 
   // Subscribe to Supabase Realtime
   useEffect(() => {
@@ -425,6 +428,19 @@ export function OrdersKDSClient({ initialOrders, shop }: OrdersKDSClientProps) {
                         <span>ลูกค้ามารับแล้ว (เสร็จสิ้น)</span>
                       </button>
                     )}
+
+                    {/* ปุ่มยกเลิกออเดอร์ (ต้องใส่ PIN 4 หลัก ป้องกันพนักงานมือลั่น) */}
+                    {order.status !== 'completed' && order.status !== 'cancelled' && (
+                      <button
+                        type="button"
+                        disabled={isActing}
+                        onClick={() => setCancelOrderTarget(order)}
+                        className="w-full mt-0.5 py-1 px-2 text-[11px] font-medium text-stone-400 hover:text-rose-600 hover:bg-rose-50/70 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>ยกเลิกออเดอร์นี้ (PIN)</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -432,6 +448,22 @@ export function OrdersKDSClient({ initialOrders, shop }: OrdersKDSClientProps) {
           })}
         </div>
       )}
+
+      {/* PIN Modal สำหรับยืนยันการยกเลิกออเดอร์ */}
+      <PinModal
+        isOpen={!!cancelOrderTarget}
+        onClose={() => setCancelOrderTarget(null)}
+        expectedPin={shop.kds_pin || '0000'}
+        title={cancelOrderTarget ? `ยืนยันยกเลิกออเดอร์ #${cancelOrderTarget.order_no}` : 'ยืนยันยกเลิกออเดอร์'}
+        description="กรุณากรอกรหัส PIN 4 หลักของร้านค้าเพื่อยืนยันการยกเลิกคำสั่งซื้อนี้"
+        onSuccess={async () => {
+          if (cancelOrderTarget) {
+            const targetId = cancelOrderTarget.id;
+            setCancelOrderTarget(null);
+            await handleUpdateStatus(targetId, 'cancelled');
+          }
+        }}
+      />
     </div>
   );
 }

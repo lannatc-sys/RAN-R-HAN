@@ -10,11 +10,12 @@ alter table public.orders
     add column if not exists source text not null default 'customer'
         check (source in ('customer', 'staff'));
 
--- 2. เพิ่มคอลัมน์การตั้งค่าอุปกรณ์ใน shops
+-- 2. เพิ่มคอลัมน์การตั้งค่าอุปกรณ์และความปลอดภัยใน shops
 alter table public.shops
     add column if not exists has_printer boolean not null default false,
     add column if not exists device_mode text not null default 'multi_device'
-        check (device_mode in ('single_device', 'multi_device'));
+        check (device_mode in ('single_device', 'multi_device')),
+    add column if not exists kds_pin text not null default '0000';
 
 -- 3. เพิ่มคอลัมน์และ Unique Index ใน payments สำหรับตรวจสอบสลิปซ้ำ
 alter table public.payments

@@ -72,3 +72,47 @@ export async function saveSlipCredentialsAction(data: {
     return { success: false, error: err.message || 'Failed to encrypt and save credentials' };
   }
 }
+
+/**
+ * อัปเดตรหัสความปลอดภัย PIN 4 หลักสำหรับ KDS และตั้งค่าร้านค้า
+ */
+export async function updateKdsPinAction(data: {
+  shop_id: string;
+  current_pin?: string;
+  new_pin: string;
+}) {
+  if (!data.new_pin || !/^\d{4}$/.test(data.new_pin)) {
+    return { success: false, error: 'รหัส PIN ต้องเป็นตัวเลข 4 หลักเท่านั้น' };
+  }
+
+  const admin = createAdminClient();
+
+  // ตรวจสอบ PIN เดิมถ้าส่งมา
+  if (data.current_pin !== undefined) {
+    const { data: shop } = await admin
+      .from('shops')
+      .select('kds_pin')
+      .eq('id', data.shop_id)
+      .single();
+
+    if (shop && (shop.kds_pin || '0000') !== data.current_pin) {
+      return { success: false, error: 'รหัส PIN เดิมไม่ถูกต้อง' };
+    }
+  }
+
+  const { error } = await admin
+    .from('shops')
+    .update({
+      kds_pin: data.new_pin,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', data.shop_id);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/admin/settings');
+  revalidatePath('/admin/orders');
+  return { success: true };
+}

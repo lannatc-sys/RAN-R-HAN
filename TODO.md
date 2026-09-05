@@ -137,3 +137,21 @@
 - **Superadmin / `/root` / impersonate + audit log** — มีประโยชน์ตอนปล่อยเช่าหลายร้าน แต่รอบนี้มีร้านเดียวและเจ้าของระบบคือคนคุมเองอยู่แล้ว ไม่มีอะไรให้ "แอดมิน" จัดการ ทำตอนนี้คือ over-scope
 - **RLS แบบ `auth.jwt() -> 'shop_id'`** — RLS ที่มีอยู่แล้วใช้วิธี `has_shop_access()` เช็คตาราง `users` ซึ่งทำงานได้ดีอยู่แล้ว ไม่ต้องรื้อมาทำใหม่ตาม blueprint นี้ ไม่มีประโยชน์เพิ่ม มีแต่เสียเวลา
 - Tiered slip-verification (เริ่มจากให้เจ้าของกดยืนยันเอง แล้วค่อยขาย SlipOK เป็น add-on) — **ตัดสินใจไปแล้ว**ว่าจะใช้ SlipOK/OkSlip อัตโนมัติตั้งแต่วันแรก และ**แต่ละร้านนำ API key ของตัวเองมาใส่เอง** (เก็บแบบเข้ารหัส ดูข้อ 3) — แปลว่าแพลตฟอร์มไม่ต้องแบกต้นทุนค่าตรวจสลิปของร้านไหนเลย ยิ่งเหมาะกับตอนขยายไปหลายร้านในอนาคต ไม่ต้อง downgrade เป็น manual
+
+## 10. สิ่งที่ต้องทำเพิ่ม: ระบบความปลอดภัยหน้า KDS (PIN 4 หลัก)
+- [x] Database: อัปเดตไฟล์ migration `20260906000001_pickup_mvp.sql` เพิ่มคอลัมน์ `kds_pin text default '0000'` ลงในตาราง `shops` (เสร็จแล้ว และรัน migration ลง Supabase DB เรียบร้อย)
+- [x] UI: สร้าง Component แป้นพิมพ์ตัวเลข (Numpad) 4 หลัก (`src/components/admin/PinModal.tsx` รองรับทั้งปุ่มตัวเลขบนหน้าจอสัมผัส และคีย์บอร์ด พร้อม animation)
+- [x] KDS Logic: ผูกเงื่อนไขให้แสดง Numpad เมื่อพนักงานกดปุ่ม "ยกเลิกออเดอร์" (ป้องกันมือลั่น ใน `OrdersKDSClient.tsx`)
+- [x] Admin Logic: ผูกเงื่อนไขบังคับใส่ PIN ก่อนกดเข้าหน้า "ตั้งค่าร้าน" และ "รายงานยอดขาย" (ป้องกันพนักงานทั่วไปเข้าถึง ใน `SettingsClient.tsx` พร้อมระบบเปลี่ยน PIN และดูสรุปยอดขายวันนี้)
+
+## 6. Error handling ที่ต้องระวัง (สิ่งที่ยังต้องทำต่อ)
+- [x] Frontend/Server Action: ตรวจสอบโค้ดให้ดักจับ Error จาก RPC แบบ Case-sensitive (เช่น `.includes('ORDER_LOCKED')`) ตัวพิมพ์ใหญ่-เล็กต้องเป๊ะ เพื่อให้แสดงข้อความภาษาไทยได้ถูกต้อง (`src/lib/thai-errors.ts`)
+- [x] Webhook SlipOK: ดักจับ Error รหัส `23505` (Unique Violation ของ `trans_ref`) แทนการเช็ค string ข้อความ เพื่อป้องกันสลิปซ้ำให้รัดกุมที่สุด (`src/app/api/webhooks/slipok/route.ts`)
+- [x] RPC Review: เช็ค RPC `create_pickup_order` และอื่นๆ ให้ชัวร์ว่าบันทึกค่าลง `price_snapshot` และ `name_snapshot` ขาดตัว ห้ามมีบรรทัดไหนอ้างอิงกลับไปหาตาราง `menu_items` อีกหลังบิลถูกสร้างแล้ว (ทดสอบยืนยันใน `test/e2e-test.ts`)
+
+## 7. Testing ที่ต้องทำก่อนถือว่าเสร็จ (End-to-End Tests)
+- [x] Smoke test (PromptPay): สั่งอาหารออนไลน์ -> จำลองยิง Webhook สลิปผ่าน -> เช็คว่าออเดอร์เปลี่ยนสถานะเป็น Confirmed และเด้งเข้าหน้า KDS อัตโนมัติ (`test/e2e-test.ts` TEST 1 ผ่าน 100%)
+- [x] Smoke test (Cash): สั่งอาหารแบบจ่ายเงินสด -> พนักงานกดปุ่ม "รับเงินสดแล้ว" หน้า KDS -> เช็คตาราง `payments` ว่าเปลี่ยนเป็น Verified และบิลจบ (`test/e2e-test.ts` TEST 2 ผ่าน 100%)
+- [x] Smoke test (Price Isolation): สร้างออเดอร์ค้างไว้ -> แอดมินเข้าไปแก้ราคาเมนูให้แพงขึ้น -> กลับมาดูบิลเก่า ราคารวมและราคาต่อจานต้องเท่าเดิมเป๊ะ (`test/e2e-test.ts` TEST 3 ผ่าน 100%)
+- [ ] Device test: ทดสอบ Web Push Notification บนอุปกรณ์จริง ทั้ง Android และ iPhone (บน iPhone ต้องทดสอบหลังกด "เพิ่มลงหน้าจอโฮม" แล้วเท่านั้น)
+- [x] Security test: ลองยิง Webhook จำลองด้วย `trans_ref` ของสลิปเดิมซ้ำ 2 ครั้ง ระบบต้องตีกลับและไม่เปลี่ยนสถานะบิลซ้ำ (`test/e2e-test.ts` TEST 4 ดักจับ 23505 ผ่าน 100%)

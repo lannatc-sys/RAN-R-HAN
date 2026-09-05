@@ -39,9 +39,16 @@ async function runDatabaseSetup() {
       console.log('1. Executing supabase/migrations/run_all.sql...');
       const sql = fs.readFileSync(runAllPath, 'utf-8');
       await client.query(sql);
-      console.log('   [SUCCESS] Schema, types, RLS, and RPC functions applied.\n');
-    } else {
-      console.log('   [SKIP] run_all.sql not found.\n');
+      console.log('   [SUCCESS] Initial schema, types, and RLS applied.\n');
+    }
+
+    // 1.1 Run pickup_mvp.sql (MVP additions, kds_pin, credentials, RPC)
+    const mvpPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260906000001_pickup_mvp.sql');
+    if (fs.existsSync(mvpPath)) {
+      console.log('1.1 Executing supabase/migrations/20260906000001_pickup_mvp.sql...');
+      const mvpSql = fs.readFileSync(mvpPath, 'utf-8');
+      await client.query(mvpSql);
+      console.log('   [SUCCESS] Pickup MVP schema, kds_pin, credentials, and RPC applied.\n');
     }
 
     // 2. Run seed data (seed.sql)

@@ -1,21 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Shop } from '@/lib/types';
-import { updateShopSettingsAction, saveSlipCredentialsAction } from '@/app/actions/settings';
-import { Store, CreditCard, ShieldCheck, Check, Key, Loader2, AlertCircle } from 'lucide-react';
+import {
+  updateShopSettingsAction,
+  saveSlipCredentialsAction,
+  updateKdsPinAction,
+} from '@/app/actions/settings';
+import { PinModal } from '@/components/admin/PinModal';
+import {
+  Store,
+  CreditCard,
+  ShieldCheck,
+  Check,
+  Key,
+  Loader2,
+  AlertCircle,
+  TrendingUp,
+  Lock,
+  Shield,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 
 interface SettingsClientProps {
   shop: Shop;
   hasSlipCredentials: boolean;
   slipProvider: string;
+  todaySales?: number;
+  todayOrderCount?: number;
 }
 
 export function SettingsClient({
   shop,
   hasSlipCredentials,
   slipProvider,
+  todaySales = 0,
+  todayOrderCount = 0,
 }: SettingsClientProps) {
+  const router = useRouter();
+
+  // Security PIN Gate State
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
+
+  // Check sessionStorage on mount
+  useEffect(() => {
+    const key = `kds_pin_unlocked_${shop.id}`;
+    const unlocked = sessionStorage.getItem(key) === 'true';
+    setIsUnlocked(unlocked);
+    setIsCheckingAuth(false);
+  }, [shop.id]);
+
   // Shop Info State
   const [name, setName] = useState(shop.name);
   const [promptpayId, setPromptpayId] = useState(shop.promptpay_id || '');
@@ -35,6 +72,20 @@ export function SettingsClient({
   const [isSavingShop, setIsSavingShop] = useState(false);
   const [shopSuccess, setShopSuccess] = useState(false);
   const [shopError, setShopError] = useState<string | null>(null);
+
+  // PIN Settings State
+  const [currentPinInput, setCurrentPinInput] = useState('');
+  const [newPinInput, setNewPinInput] = useState('');
+  const [confirmPinInput, setConfirmPinInput] = useState('');
+  const [isSavingPin, setIsSavingPin] = useState(false);
+  const [pinSuccess, setPinSuccess] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [showPinCode, setShowPinCode] = useState(false);
+
+  const handleLock = () => {
+    sessionStorage.removeItem(`kds_pin_unlocked_${shop.id}`);
+    setIsUnlocked(false);
+  };
 
   const handleSaveShopInfo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,11 +137,215 @@ export function SettingsClient({
     }
   };
 
+  const handleSavePin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinError(null);
+    setPinSuccess(false);
+
+    if (newPinInput.length !== 4 || !/^\d{4}$/.test(newPinInput)) {
+      setPinError('รหัส PIN ใหม่ต้องเป็นตัวเลข 4 หลักเท่านั้น');
+      return;
+    }
+
+    if (newPinInput !== confirmPinInput) {
+      setPinError('รหัส PIN ใหม่และการยืนยันไม่ตรงกัน');
+      return;
+    }
+
+    setIsSavingPin(true);
+    const res = await updateKdsPinAction({
+      shop_id: shop.id,
+      current_pin: currentPinInput || undefined,
+      new_pin: newPinInput,
+    });
+    setIsSavingPin(false);
+
+    if (res.success) {
+      setPinSuccess(true);
+      setCurrentPinInput('');
+      setNewPinInput('');
+      setConfirmPinInput('');
+      shop.kds_pin = newPinInput;
+      setTimeout(() => setPinSuccess(false), 3000);
+    } else {
+      setPinError(res.error || 'ไม่สามารถเปลี่ยนรหัส PIN ได้');
+    }
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center py-20 text-stone-400">
+        <Loader2 className="w-6 h-6 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-stone-900">ตั้งค่าร้านค้าและการรับเงิน</h1>
-        <p className="text-xs text-stone-500">จัดการข้อมูลบัญชีพร้อมเพย์ และ API Key ตรวจสอบสลิป</p>
+      {/* PIN Modal Gate if not unlocked */}
+      <PinModal
+        isOpen={!isUnlocked}
+        onClose={() => router.push('/admin/orders')}
+        expectedPin={shop.kds_pin || '0000'}
+        title="รหัสผ่านผู้ดูแลร้าน (PIN 4 หลัก)"
+        description="กรุณากรอกรหัส PIN เพื่อเข้าถึงหน้าตั้งค่าร้านและรายงานยอดขาย"
+        onSuccess={() => {
+          setIsUnlocked(true);
+          sessionStorage.setItem(`kds_pin_unlocked_${shop.id}`, 'true');
+        }}
+      />
+
+      {/* Header & Lock Button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-stone-900">ตั้งค่าร้านค้าและรายงานยอดขาย</h1>
+          <p className="text-xs text-stone-500">จัดการข้อมูลร้าน บัญชีพร้อมเพย์ รหัส PIN และสถิติยอดขาย</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleLock}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:text-stone-900 text-xs font-semibold bg-white hover:bg-stone-50 shadow-xs transition-colors cursor-pointer"
+        >
+          <Lock className="w-3.5 h-3.5 text-stone-400" />
+          <span>ล็อคหน้าจอนี้</span>
+        </button>
+      </div>
+
+      {/* Today's Sales Report Card */}
+      <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-6 rounded-3xl text-white shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-sm">
+            <TrendingUp className="w-5 h-5 text-amber-100" />
+            <span>สรุปยอดขายวันนี้</span>
+          </div>
+          <span className="text-[11px] bg-white/20 px-2.5 py-0.5 rounded-full font-medium">
+            {new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
+          <div className="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl">
+            <div className="text-[11px] text-amber-100 font-medium">ยอดขายรวม</div>
+            <div className="text-xl sm:text-2xl font-black mt-1">
+              {todaySales.toLocaleString('th-TH')} <span className="text-xs font-normal">฿</span>
+            </div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl">
+            <div className="text-[11px] text-amber-100 font-medium">ออเดอร์ที่ยืนยันแล้ว</div>
+            <div className="text-xl sm:text-2xl font-black mt-1">
+              {todayOrderCount} <span className="text-xs font-normal">บิล</span>
+            </div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl col-span-2 sm:col-span-1">
+            <div className="text-[11px] text-amber-100 font-medium">ยอดเฉลี่ยต่อบิล</div>
+            <div className="text-xl sm:text-2xl font-black mt-1">
+              {todayOrderCount > 0 ? Math.round(todaySales / todayOrderCount).toLocaleString('th-TH') : 0}{' '}
+              <span className="text-xs font-normal">฿</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* KDS PIN Management Card */}
+      <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+            <Shield className="w-5 h-5 text-amber-600" />
+            <span>รหัสความปลอดภัย PIN 4 หลัก (KDS & ตั้งค่าร้าน)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold">
+              {showPinCode ? `PIN: ${shop.kds_pin || '0000'}` : 'PIN: ••••'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowPinCode(!showPinCode)}
+              className="text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
+            >
+              {showPinCode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        <p className="text-xs text-stone-500 leading-relaxed">
+          รหัส PIN 4 หลักใช้สำหรับยืนยันเมื่อพนักงานกดยกเลิกออเดอร์หน้าจอ KDS
+          และใช้ล็อกการเข้าถึงหน้าตั้งค่าร้านค้าและรายงานยอดขายเพื่อป้องกันพนักงานทั่วไปเข้าถึง
+          (ค่าเริ่มต้นคือ 0000)
+        </p>
+
+        {pinSuccess && (
+          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600" />
+            <span>เปลี่ยนรหัส PIN สำเร็จเรียบร้อยแล้ว</span>
+          </div>
+        )}
+
+        {pinError && (
+          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            <span>{pinError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSavePin} className="space-y-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                รหัส PIN เดิม (4 หลัก)
+              </label>
+              <input
+                type="password"
+                maxLength={4}
+                value={currentPinInput}
+                onChange={(e) => setCurrentPinInput(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="PIN เดิม (ถ้ามี)"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                รหัส PIN ใหม่ (4 หลัก)
+              </label>
+              <input
+                type="password"
+                maxLength={4}
+                required
+                value={newPinInput}
+                onChange={(e) => setNewPinInput(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="เช่น 1234"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                ยืนยันรหัส PIN ใหม่
+              </label>
+              <input
+                type="password"
+                maxLength={4}
+                required
+                value={confirmPinInput}
+                onChange={(e) => setConfirmPinInput(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="กรอกอีกครั้ง"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+              />
+            </div>
+          </div>
+
+          <div className="pt-1">
+            <button
+              type="submit"
+              disabled={isSavingPin}
+              className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {isSavingPin ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              <span>บันทึกรหัส PIN ใหม่</span>
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* SlipOK Automated Slip Check API Key (Encrypted Write-Only) */}
@@ -134,7 +389,7 @@ export function SettingsClient({
             <button
               type="button"
               onClick={() => setShowKeyInput(true)}
-              className="px-3 py-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition-colors"
+              className="px-3 py-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition-colors cursor-pointer"
             >
               เปลี่ยน API Key
             </button>
@@ -163,7 +418,7 @@ export function SettingsClient({
                 <button
                   type="button"
                   onClick={() => setShowKeyInput(false)}
-                  className="px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold"
+                  className="px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   ยกเลิก
                 </button>
@@ -171,7 +426,7 @@ export function SettingsClient({
               <button
                 type="submit"
                 disabled={isSavingCreds}
-                className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
+                className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {isSavingCreds ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -288,7 +543,7 @@ export function SettingsClient({
           <button
             type="submit"
             disabled={isSavingShop}
-            className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
+            className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
           >
             {isSavingShop ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

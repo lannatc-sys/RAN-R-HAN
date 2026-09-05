@@ -23,6 +23,7 @@ export interface Shop {
   vat_mode: VatMode;
   has_printer: boolean;
   device_mode: 'single_device' | 'multi_device';
+  kds_pin: string;
   created_at: string;
   updated_at: string;
 }

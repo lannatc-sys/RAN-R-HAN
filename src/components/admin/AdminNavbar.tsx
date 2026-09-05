@@ -25,7 +25,7 @@ export function AdminNavbar({ shopId, shopName }: AdminNavbarProps) {
     { href: '/admin/orders', label: 'คิวออเดอร์', icon: ChefHat },
     { href: '/admin/walk-in', label: 'สั่งแทนลูกค้า', icon: ShoppingBag },
     { href: '/admin/menu', label: 'จัดการเมนู', icon: UtensilsCrossed },
-    { href: '/admin/settings', label: 'ตั้งค่าร้าน', icon: Settings },
+    { href: '/admin/settings', label: 'ตั้งค่าร้าน & ยอดขาย', icon: Settings },
   ];
 
   return (
