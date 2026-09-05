@@ -28,6 +28,10 @@ export interface Shop {
   device_mode: 'single_device' | 'multi_device';
   kds_pin: string;
   support_access_expires_at?: string | null;
+  allow_dine_in?: boolean;
+  allow_takeaway?: boolean;
+  allow_delivery?: boolean;
+  is_delivery_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -112,6 +116,7 @@ export interface Order {
   id: string;
   shop_id: string;
   table_id: string | null;
+  table_no?: string | null;
   order_no: string;
   type: OrderType;
   status: OrderStatus;

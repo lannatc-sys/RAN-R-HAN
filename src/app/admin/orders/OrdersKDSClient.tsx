@@ -23,6 +23,7 @@ import {
   Bike,
   MapPin,
   ExternalLink,
+  Utensils,
 } from 'lucide-react';
 import { PinModal } from '@/components/admin/PinModal';
 
@@ -224,6 +225,8 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                 className={`bg-white rounded-3xl border p-5 shadow-xs flex flex-col justify-between space-y-4 transition-all ${
                   order.type === 'delivery'
                     ? 'border-purple-300 ring-2 ring-purple-100'
+                    : order.type === 'dine_in'
+                    ? 'border-blue-300 ring-2 ring-blue-100'
                     : order.status === 'served'
                     ? 'border-emerald-300 ring-2 ring-emerald-100'
                     : order.status === 'cooking'
@@ -243,6 +246,11 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                           <Bike className="w-3 h-3" />
                           ร้านจัดส่ง
                         </span>
+                      ) : order.type === 'dine_in' ? (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300 flex items-center gap-1">
+                          <Utensils className="w-3 h-3" />
+                          โต๊ะ {order.table_no || '-'}
+                        </span>
                       ) : order.source === 'staff' ? (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
                           <UserCheck className="w-3 h-3" />
@@ -251,7 +259,7 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                       ) : (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                           <Globe className="w-3 h-3" />
-                          ออนไลน์
+                          สั่งล่วงหน้า (รับเอง)
                         </span>
                       )}
                     </div>
@@ -277,7 +285,7 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                       {order.status === 'served' && (
                         <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-600 text-white flex items-center gap-1">
                           <Check className="w-3.5 h-3.5" />
-                          {order.type === 'delivery' ? 'พร้อมส่ง' : 'พร้อมรับ'}
+                          {order.type === 'delivery' ? 'พร้อมส่ง' : order.type === 'dine_in' ? 'พร้อมเสิร์ฟ' : 'พร้อมรับ'}
                         </span>
                       )}
                       {order.status === 'completed' && (
@@ -355,6 +363,21 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                           <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
                         </a>
                       )}
+                    </div>
+                  )}
+
+                  {/* Dine-in Info Box (for Dine-in orders) */}
+                  {order.type === 'dine_in' && (
+                    <div className="mb-3 p-3 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs space-y-1">
+                      <div className="flex items-center justify-between font-bold text-blue-900">
+                        <span className="flex items-center gap-1.5">
+                          <Utensils className="w-4 h-4 text-blue-700" />
+                          ทานที่ร้าน (Dine-in)
+                        </span>
+                        <span className="px-2.5 py-0.5 bg-blue-600 text-white rounded-lg text-xs font-black">
+                          โต๊ะ {order.table_no || 'ไม่ระบุ'}
+                        </span>
+                      </div>
                     </div>
                   )}
 
@@ -477,10 +500,18 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : order.type === 'delivery' ? (
                           <Bike className="w-3.5 h-3.5" />
+                        ) : order.type === 'dine_in' ? (
+                          <Utensils className="w-3.5 h-3.5" />
                         ) : (
                           <ShoppingBag className="w-3.5 h-3.5" />
                         )}
-                        <span>{order.type === 'delivery' ? 'อาหารเสร็จ พร้อมออกส่ง 🛵' : 'อาหารเสร็จ พร้อมให้รับ 🎉'}</span>
+                        <span>
+                          {order.type === 'delivery'
+                            ? 'อาหารเสร็จ พร้อมออกส่ง 🛵'
+                            : order.type === 'dine_in'
+                            ? 'อาหารเสร็จ พร้อมเสิร์ฟที่โต๊ะ 🍽️'
+                            : 'อาหารเสร็จ พร้อมให้รับ 🎉'}
+                        </span>
                       </button>
                     )}
 
@@ -492,7 +523,13 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                         className="w-full py-2.5 px-4 bg-stone-800 hover:bg-stone-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
                       >
                         {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                        <span>{order.type === 'delivery' ? 'จัดส่งเรียบร้อยแล้ว (เสร็จสิ้น)' : 'ลูกค้ามารับแล้ว (เสร็จสิ้น)'}</span>
+                        <span>
+                          {order.type === 'delivery'
+                            ? 'จัดส่งเรียบร้อยแล้ว (เสร็จสิ้น)'
+                            : order.type === 'dine_in'
+                            ? 'เสิร์ฟที่โต๊ะเรียบร้อย (เสร็จสิ้น)'
+                            : 'ลูกค้ามารับแล้ว (เสร็จสิ้น)'}
+                        </span>
                       </button>
                     )}
 

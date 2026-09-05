@@ -3,7 +3,8 @@ import { z } from 'zod';
 export const createOrderSchema = z
   .object({
     shop_id: z.string().uuid({ message: 'รหัสร้านค้าไม่ถูกต้อง' }),
-    type: z.enum(['takeaway', 'delivery']).default('takeaway'),
+    type: z.enum(['dine_in', 'takeaway', 'delivery']).default('takeaway'),
+    table_no: z.string().max(50, { message: 'เบอร์โต๊ะยาวเกินไป' }).optional().nullable(),
     customer_name: z.string().max(100, { message: 'ชื่อผู้สั่งยาวเกินไป' }).optional().nullable(),
     customer_phone: z
       .string()
@@ -70,6 +71,18 @@ export const createOrderSchema = z
     {
       message: 'กรุณาระบุที่อยู่จัดส่ง',
       path: ['delivery_address'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.type === 'dine_in') {
+        return Boolean(data.table_no && data.table_no.trim().length > 0);
+      }
+      return true;
+    },
+    {
+      message: 'กรุณาระบุเลขโต๊ะสำหรับทานที่ร้าน',
+      path: ['table_no'],
     }
   );
 

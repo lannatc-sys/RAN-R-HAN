@@ -9,7 +9,9 @@ import {
   updateKdsPinAction,
   grantSupportAccessAction,
   revokeSupportAccessAction,
+  updateFulfillmentChannelsAction,
 } from '@/app/actions/settings';
+import { getPlanEntitlements } from '@/lib/plans';
 import { PinModal } from '@/components/admin/PinModal';
 import {
   Store,
@@ -26,6 +28,10 @@ import {
   EyeOff,
   Headphones,
   Clock,
+  Utensils,
+  ShoppingBag,
+  Bike,
+  Sparkles,
 } from 'lucide-react';
 
 interface SettingsClientProps {
@@ -87,6 +93,40 @@ export function SettingsClient({
   const [pinSuccess, setPinSuccess] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
   const [showPinCode, setShowPinCode] = useState(false);
+
+  // Fulfillment Channels State (Governed by Plan)
+  const planEntitlements = getPlanEntitlements(shop.plan);
+  const [allowDineIn, setAllowDineIn] = useState<boolean>(shop.allow_dine_in !== false);
+  const [allowTakeaway, setAllowTakeaway] = useState<boolean>(shop.allow_takeaway !== false);
+  const [allowDelivery, setAllowDelivery] = useState<boolean>(
+    shop.allow_delivery === true || shop.is_delivery_enabled === true
+  );
+  const [isSavingChannels, setIsSavingChannels] = useState(false);
+  const [channelsSuccess, setChannelsSuccess] = useState(false);
+  const [channelsError, setChannelsError] = useState<string | null>(null);
+
+  const handleSaveChannels = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingChannels(true);
+    setChannelsError(null);
+    setChannelsSuccess(false);
+
+    const res = await updateFulfillmentChannelsAction({
+      shop_id: shop.id,
+      allow_dine_in: planEntitlements.canDineIn ? allowDineIn : false,
+      allow_takeaway: allowTakeaway,
+      allow_delivery:
+        planEntitlements.canDelivery || Boolean(shop.is_delivery_enabled) ? allowDelivery : false,
+    });
+
+    setIsSavingChannels(false);
+    if (!res.success) {
+      setChannelsError(res.error || 'ไม่สามารถบันทึกช่องทางการสั่งอาหารได้');
+      return;
+    }
+    setChannelsSuccess(true);
+    setTimeout(() => setChannelsSuccess(false), 4000);
+  };
 
   // Consent-based Support Access State
   const [supportExpiresAt, setSupportExpiresAt] = useState<string | null | undefined>(
@@ -509,6 +549,155 @@ export function SettingsClient({
             </div>
           </form>
         )}
+      </div>
+
+      {/* Fulfillment Channels Card (Governed by Plan) */}
+      <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+            <Utensils className="w-5 h-5 text-amber-600" />
+            <span>ช่องทางการสั่งอาหาร (Fulfillment Channels)</span>
+          </div>
+          <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+            แพ็กเกจ: {planEntitlements.planName}
+          </span>
+        </div>
+
+        <p className="text-xs text-stone-500 leading-relaxed">
+          กำหนดรูปแบบคำสั่งซื้อที่ร้านเปิดรับผ่านหน้าร้านออนไลน์ โดยตัวเลือกที่เปิดใช้งานจะขึ้นอยู่กับระดับแพ็กเกจ (Plan) ที่ร้านใช้งาน
+        </p>
+
+        {channelsSuccess && (
+          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>บันทึกการตั้งค่าช่องทางการสั่งอาหารเรียบร้อยแล้ว</span>
+          </div>
+        )}
+
+        {channelsError && (
+          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{channelsError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSaveChannels} className="space-y-3 pt-1">
+          {/* 1. ทานที่ร้าน (Dine-in) */}
+          <div className="p-4 rounded-2xl border border-stone-200/80 bg-stone-50/50 flex items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <Utensils className="w-4 h-4 text-blue-600" />
+                <span className="text-xs font-bold text-stone-900">ทานที่ร้าน (Dine-in)</span>
+                {!planEntitlements.canDineIn && (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-stone-200 text-stone-600 flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    Standard / Pro
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-stone-500">
+                ลูกค้าสั่งผ่านมือถือและระบุเลขโต๊ะ เพื่อให้พนักงานไปเสิร์ฟที่โต๊ะอาหาร
+              </p>
+            </div>
+
+            {planEntitlements.canDineIn ? (
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={allowDineIn}
+                  onChange={(e) => setAllowDineIn(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+              </label>
+            ) : (
+              <span className="text-xs text-stone-400 font-medium">ไม่รองรับในแพ็กเกจนี้</span>
+            )}
+          </div>
+
+          {/* 2. รับที่ร้าน (Takeaway / Pick-up) */}
+          <div className="p-4 rounded-2xl border border-stone-200/80 bg-stone-50/50 flex items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-amber-600" />
+                <span className="text-xs font-bold text-stone-900">รับหน้าร้าน / กลับบ้าน (Pick-up / Takeaway)</span>
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  ทุกแพ็กเกจ
+                </span>
+              </div>
+              <p className="text-[11px] text-stone-500">
+                ลูกค้าสั่งล่วงหน้า เลือกเวลาประมาณการมารับ แล้วมารับอาหารที่หน้าร้าน
+              </p>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={allowTakeaway}
+                onChange={(e) => setAllowTakeaway(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+            </label>
+          </div>
+
+          {/* 3. ร้านจัดส่งเอง (Store Delivery) */}
+          <div className="p-4 rounded-2xl border border-stone-200/80 bg-stone-50/50 flex items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Bike className="w-4 h-4 text-purple-600" />
+                <span className="text-xs font-bold text-stone-900">ร้านจัดส่งเอง (Store Delivery)</span>
+                {planEntitlements.canDelivery ? (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                    Pro / Premium
+                  </span>
+                ) : shop.is_delivery_enabled ? (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-purple-600" />
+                    สิทธิ์พิเศษ Superadmin
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-stone-200 text-stone-600 flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    Pro / Premium
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-stone-500">
+                ลูกค้ากรอกชื่อ เบอร์โทร ที่อยู่จัดส่ง และส่งพิกัด GPS เพื่อให้พนักงานร้านไปส่ง
+              </p>
+            </div>
+
+            {planEntitlements.canDelivery || shop.is_delivery_enabled ? (
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={allowDelivery}
+                  onChange={(e) => setAllowDelivery(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            ) : (
+              <span className="text-xs text-stone-400 font-medium">ไม่รองรับในแพ็กเกจนี้</span>
+            )}
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              disabled={isSavingChannels}
+              className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {isSavingChannels ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Check className="w-3.5 h-3.5" />
+              )}
+              <span>บันทึกการตั้งค่าช่องทาง</span>
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Consent-based Support Access Card */}

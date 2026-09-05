@@ -16,6 +16,7 @@ import {
   Check,
   Bike,
   MapPin,
+  Utensils,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -74,6 +75,7 @@ export function OrderTrackerClient({
   }, [order.id]);
 
   const isDelivery = order.type === 'delivery';
+  const isDineIn = order.type === 'dine_in';
 
   const statusSteps = [
     { key: 'pending', label: 'รอร้านรับออเดอร์', desc: 'ร้านค้ากำลังตรวจสอบรายการ', icon: Clock },
@@ -81,15 +83,23 @@ export function OrderTrackerClient({
     { key: 'cooking', label: 'กำลังปรุงอาหาร', desc: 'พ่อครัวกำลังเตรียมอาหารจานโปรด', icon: Flame },
     {
       key: 'served',
-      label: isDelivery ? 'พร้อมจัดส่ง' : 'พร้อมรับที่ร้าน',
-      desc: isDelivery ? 'อาหารเสร็จเรียบร้อย กำลังนำออกไปส่งตามที่อยู่' : 'อาหารเสร็จเรียบร้อย เชิญมารับที่หน้าร้านได้เลย',
-      icon: isDelivery ? Bike : ShoppingBag,
+      label: isDelivery ? 'พร้อมจัดส่ง' : isDineIn ? 'พร้อมเสิร์ฟที่โต๊ะ' : 'พร้อมรับที่ร้าน',
+      desc: isDelivery
+        ? 'อาหารเสร็จเรียบร้อย กำลังนำออกไปส่งตามที่อยู่'
+        : isDineIn
+        ? `อาหารเสร็จเรียบร้อย พนักงานกำลังนำไปเสิร์ฟที่โต๊ะ ${order.table_no || ''}`
+        : 'อาหารเสร็จเรียบร้อย เชิญมารับที่หน้าร้านได้เลย',
+      icon: isDelivery ? Bike : isDineIn ? Utensils : ShoppingBag,
     },
     {
       key: 'completed',
-      label: isDelivery ? 'จัดส่งเรียบร้อย' : 'รับอาหารเรียบร้อย',
-      desc: isDelivery ? 'ส่งอาหารถึงมือเรียบร้อย ขอให้อร่อยกับมื้อนี้ครับ' : 'ขอบคุณที่ใช้บริการ ขอให้อร่อยกับมื้อนี้ครับ',
-      icon: isDelivery ? Bike : Store,
+      label: isDelivery ? 'จัดส่งเรียบร้อย' : isDineIn ? 'เสิร์ฟเรียบร้อย' : 'รับอาหารเรียบร้อย',
+      desc: isDelivery
+        ? 'ส่งอาหารถึงมือเรียบร้อย ขอให้อร่อยกับมื้อนี้ครับ'
+        : isDineIn
+        ? 'เสิร์ฟถึงโต๊ะเรียบร้อย ทานให้อร่อยนะครับ'
+        : 'ขอบคุณที่ใช้บริการ ขอให้อร่อยกับมื้อนี้ครับ',
+      icon: isDelivery ? Bike : isDineIn ? Utensils : Store,
     },
   ];
 
@@ -133,6 +143,8 @@ export function OrderTrackerClient({
             order.status === 'served'
               ? isDelivery
                 ? 'bg-purple-50 border-purple-200 text-purple-950'
+                : isDineIn
+                ? 'bg-blue-50 border-blue-200 text-blue-950'
                 : 'bg-emerald-50 border-emerald-200 text-emerald-950'
               : order.status === 'cooking'
               ? 'bg-amber-50 border-amber-200 text-amber-950'
@@ -146,20 +158,52 @@ export function OrderTrackerClient({
             {order.status === 'pending' && 'กำลังรอร้านยืนยัน'}
             {order.status === 'confirmed' && 'ร้านยืนยันออเดอร์แล้ว'}
             {order.status === 'cooking' && '🔥 กำลังปรุงอาหารในครัว'}
-            {order.status === 'served' && (isDelivery ? '🛵 กำลังนำอาหารออกไปส่ง!' : '🎉 อาหารพร้อมรับที่หน้าร้านแล้ว!')}
-            {order.status === 'completed' && (isDelivery ? '✅ จัดส่งอาหารถึงมือเรียบร้อย' : '✅ รับอาหารเรียบร้อยแล้ว')}
+            {order.status === 'served' &&
+              (isDelivery
+                ? '🛵 กำลังนำอาหารออกไปส่ง!'
+                : isDineIn
+                ? `🍽️ อาหารพร้อมเสิร์ฟที่โต๊ะ ${order.table_no || ''} แล้ว!`
+                : '🎉 อาหารพร้อมรับที่หน้าร้านแล้ว!')}
+            {order.status === 'completed' &&
+              (isDelivery
+                ? '✅ จัดส่งอาหารถึงมือเรียบร้อย'
+                : isDineIn
+                ? '✅ เสิร์ฟที่โต๊ะเรียบร้อยแล้ว'
+                : '✅ รับอาหารเรียบร้อยแล้ว')}
             {order.status === 'cancelled' && '❌ ออเดอร์นี้ถูกยกเลิก'}
           </div>
           <p className="text-xs text-stone-600 max-w-sm mx-auto">
             {order.status === 'served'
               ? isDelivery
                 ? 'พนักงานส่งอาหารกำลังเดินทางไปส่งตามที่อยู่ที่ระบุไว้ โปรดเตรียมรอรับสาย'
+                : isDineIn
+                ? `พนักงานกำลังนำอาหารไปเสิร์ฟที่โต๊ะ ${order.table_no || ''} ของคุณครับ`
                 : 'กรุณาแจ้งหมายเลขคิว #' + order.order_no + ' ต่อพนักงานที่หน้าร้านเพื่อรับอาหาร'
               : order.status === 'cooking'
               ? 'ร้านกำลังปรุงอาหารสดใหม่ให้คุณ รอสักครู่เดียวครับ'
               : 'ระบบจะอัปเดตสถานะแบบเรียลไทม์อัตโนมัติ ไม่ต้องรีเฟรชหน้าจอ'}
           </p>
         </div>
+
+        {/* Dine-in Info Card (if Dine-in Order) */}
+        {isDineIn && (
+          <div className="bg-blue-50/90 border border-blue-200 p-4 rounded-3xl space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-blue-900">
+              <span className="flex items-center gap-1.5">
+                <Utensils className="w-4 h-4 text-blue-700" />
+                ทานที่ร้าน (Dine-in)
+              </span>
+              <span className="px-3 py-1 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xs">
+                โต๊ะ #{order.table_no || 'ไม่ระบุ'}
+              </span>
+            </div>
+            {order.customer_name && (
+              <div className="text-xs text-blue-950 font-medium">
+                ชื่อผู้สั่ง: คุณ{order.customer_name}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Delivery Info Card (if Delivery Order) */}
         {isDelivery && (

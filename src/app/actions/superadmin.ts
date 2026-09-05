@@ -242,6 +242,36 @@ export async function updateStorePlanAction(
 }
 
 /**
+ * Superadmin เปิด-ปิดระบบจัดส่งอาหาร (Delivery) ให้ร้านค้าเป็นรายกรณีพิเศษ (Override)
+ */
+export async function toggleStoreDeliveryOverrideAction(
+  shopId: string,
+  isEnabled: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const admin = createAdminClient();
+
+    const { error } = await admin
+      .from('shops')
+      .update({
+        is_delivery_enabled: isEnabled,
+        allow_delivery: isEnabled,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', shopId);
+
+    if (error) throw error;
+
+    safeRevalidate('/superadmin');
+    safeRevalidate('/superadmin/stores');
+    return { success: true };
+  } catch (err: any) {
+    console.error('toggleStoreDeliveryOverrideAction error:', err);
+    return { success: false, error: err.message || 'Failed to toggle store delivery override' };
+  }
+}
+
+/**
  * ลบร้านค้าออกจากระบบอย่างสมบูรณ์ (เฉพาะ Superadmin)
  */
 export async function deleteStoreAction(

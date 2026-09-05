@@ -18,6 +18,7 @@ export async function createPickupOrderAction(rawInput: CreateOrderInput) {
     const {
       shop_id,
       type,
+      table_no,
       customer_name,
       customer_phone,
       delivery_address,
@@ -45,6 +46,7 @@ export async function createPickupOrderAction(rawInput: CreateOrderInput) {
       p_delivery_address: delivery_address || null,
       p_delivery_lat: delivery_lat ?? null,
       p_delivery_lng: delivery_lng ?? null,
+      p_table_no: table_no || null,
     });
 
     if (rpcError) {
@@ -68,18 +70,24 @@ export async function createPickupOrderAction(rawInput: CreateOrderInput) {
       console.error('Failed to create payment record:', paymentError);
     }
 
-    // 4. ส่ง Web Push แจ้งเตือนร้านค้า
+    // 4. ส่ง Web Push Notification ไปยังหน้าร้าน/ครัว
     const isDelivery = type === 'delivery';
-    const paymentLabel =
-      payment_method === 'cash'
-        ? isDelivery
-          ? 'เงินสดปลายทาง COD'
-          : 'เงินสดหน้าร้าน'
-        : 'พร้อมเพย์';
-    const pushTitle = isDelivery ? `ออเดอร์จัดส่งใหม่ #${orderNo}` : `ออเดอร์ใหม่ #${orderNo}`;
-    const pushBody = isDelivery
-      ? `ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel}) • ส่งให้ ${customer_name || 'ลูกค้า'}`
-      : `ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel}) กำลังรอการยืนยัน`;
+    const isDineIn = type === 'dine_in';
+    const paymentLabel = payment_method === 'cash' ? 'เงินสด' : 'พร้อมเพย์';
+
+    let pushTitle = `ออเดอร์ใหม่ #${orderNo}`;
+    if (isDelivery) {
+      pushTitle = `🛵 ออเดอร์จัดส่งใหม่ #${orderNo}`;
+    } else if (isDineIn) {
+      pushTitle = `🍽️ ออเดอร์ทานที่ร้าน โต๊ะ ${table_no || '-'} #${orderNo}`;
+    }
+
+    let pushBody = `ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel}) กำลังรอการยืนยัน`;
+    if (isDelivery) {
+      pushBody = `ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel}) • ส่งให้ ${customer_name || 'ลูกค้า'}`;
+    } else if (isDineIn) {
+      pushBody = `โต๊ะ ${table_no || '-'} • ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel})`;
+    }
 
     await sendPushToShop(shop_id, {
       title: pushTitle,

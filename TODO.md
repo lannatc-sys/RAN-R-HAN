@@ -165,3 +165,18 @@
 - [x] Frontend (Customer): ทำปุ่ม "Get GPS" โดยใช้ `navigator.geolocation` ดึงพิกัด Lat/Lng พร้อม feedback และลิงก์แสดงผล
 - [x] Frontend (KDS): ปรับ UI การ์ดออเดอร์ให้แสดงที่อยู่จัดส่ง, ชื่อผู้รับ, เบอร์โทร และปุ่ม "เปิดแผนที่ Google Maps" นำทางได้ทันที
 - [x] Frontend (Order Tracking): ปรับหน้าติดตามออเดอร์ของลูกค้าให้แสดงสถานะ "พร้อมจัดส่ง" และข้อมูลที่อยู่จัดส่งแบบเรียลไทม์
+
+## 13. ระบบ 3 รูปแบบคำสั่งซื้อ (Dine-in, Takeaway, Delivery) ผูกตาม Plan และ Store Settings
+- [x] Database & RPC:
+  - เพิ่มคอลัมน์ `orders.table_no (text)` สำหรับระบุโต๊ะ
+  - เพิ่มคอลัมน์ควบคุมในตาราง `shops`: `allow_dine_in (boolean)`, `allow_takeaway (boolean)`, `allow_delivery (boolean)`, `is_delivery_enabled (boolean)`
+  - ปรับปรุง RPC `create_pickup_order`: รับ `p_table_no` และตรวจสอบสิทธิ์ช่องทางสั่งอาหารของร้าน (`CHANNEL_NOT_ALLOWED`)
+- [x] Plan Entitlements (`src/lib/plans.ts`):
+  - **Free / Lite / Basic**: รับที่ร้าน (Takeaway) ✅ | ทานที่ร้าน (Dine-in) ❌ | ส่งเอง (Delivery) ❌
+  - **Standard**: รับที่ร้าน (Takeaway) ✅ | ทานที่ร้าน (Dine-in) ✅ | ส่งเอง (Delivery) ❌
+  - **Pro / Premium / Enterprise**: รับที่ร้าน (Takeaway) ✅ | ทานที่ร้าน (Dine-in) ✅ | ส่งเอง (Delivery) ✅ (พร้อมระบบ GPS)
+  - **Superadmin Override**: ฟิลด์ `is_delivery_enabled` สามารถเปิดระบบจัดส่งให้ร้านค้ารายกรณีได้ทันทีโดยไม่ต้องเปลี่ยนแพ็กเกจหลัก
+- [x] Frontend (Store Settings): เพิ่มการ์ด "ช่องทางการสั่งอาหาร" เปิด/ปิด ทานที่ร้าน, รับที่ร้าน, จัดส่งเอง พร้อมล็อกการ์ดและแสดง Badge ตามแพ็กเกจ
+- [x] Frontend (Customer Checkout): เลือกระหว่าง ทานที่ร้าน (บังคับเลขโต๊ะ), รับที่ร้าน (เวลารับ), หรือจัดส่งเอง (ชื่อ/ที่อยู่/GPS) ตามสิทธิ์ที่เปิดใช้งาน
+- [x] Frontend (KDS & Order Tracker): แสดงป้ายโต๊ะสำหรับ Dine-in, ปรับปุ่มและข้อความสถานะ "พร้อมเสิร์ฟที่โต๊ะ" / "เสิร์ฟเรียบร้อย"
+- [x] Superadmin Plans UI: อัปเดตตารางฟีเจอร์ของแพ็กเกจให้สะท้อนสิทธิ์ 3 รูปแบบคำสั่งซื้ออย่างชัดเจน

@@ -178,7 +178,43 @@ export async function updateKdsPinAction(data: {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/settings');
-  revalidatePath('/admin/orders');
+  safeRevalidate('/admin/settings');
+  safeRevalidate('/admin/orders');
   return { success: true };
+}
+
+/**
+ * อัปเดตการเปิด-ปิดช่องทางการให้บริการ (Dine-in, Takeaway, Delivery)
+ */
+export async function updateFulfillmentChannelsAction(data: {
+  shop_id: string;
+  allow_dine_in: boolean;
+  allow_takeaway: boolean;
+  allow_delivery: boolean;
+}) {
+  try {
+    const admin = createAdminClient();
+
+    const { error } = await admin
+      .from('shops')
+      .update({
+        allow_dine_in: data.allow_dine_in,
+        allow_takeaway: data.allow_takeaway,
+        allow_delivery: data.allow_delivery,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', data.shop_id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    safeRevalidate('/admin/settings');
+    safeRevalidate('/[slug]');
+    safeRevalidate('/[slug]/checkout');
+    return { success: true };
+  } catch (err: any) {
+    console.error('updateFulfillmentChannelsAction error:', err);
+    return { success: false, error: err.message || 'Failed to update channels' };
+  }
 }

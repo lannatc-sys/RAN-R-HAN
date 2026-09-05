@@ -14,15 +14,20 @@ alter table public.orders
     add column if not exists customer_name text,
     add column if not exists delivery_address text,
     add column if not exists delivery_lat numeric(10, 7),
-    add column if not exists delivery_lng numeric(10, 7);
+    add column if not exists delivery_lng numeric(10, 7),
+    add column if not exists table_no text;
 
--- 2. เพิ่มคอลัมน์การตั้งค่าอุปกรณ์และความปลอดภัยใน shops
+-- 2. เพิ่มคอลัมน์การตั้งค่าอุปกรณ์ ความปลอดภัย และช่องทางให้บริการใน shops
 alter table public.shops
     add column if not exists has_printer boolean not null default false,
     add column if not exists device_mode text not null default 'multi_device'
         check (device_mode in ('single_device', 'multi_device')),
     add column if not exists kds_pin text not null default '0000',
-    add column if not exists support_access_expires_at timestamptz;
+    add column if not exists support_access_expires_at timestamptz,
+    add column if not exists allow_dine_in boolean not null default true,
+    add column if not exists allow_takeaway boolean not null default true,
+    add column if not exists allow_delivery boolean not null default false,
+    add column if not exists is_delivery_enabled boolean not null default false;
 
 -- 3. เพิ่มคอลัมน์และ Unique Index ใน payments สำหรับตรวจสอบสลิปซ้ำ
 alter table public.payments
@@ -128,6 +133,7 @@ $$ language plpgsql security definer set search_path = public;
 drop function if exists public.create_pickup_order(uuid, jsonb, text, timestamptz, text);
 drop function if exists public.create_pickup_order(uuid, jsonb, text, timestamptz, text, text);
 drop function if exists public.create_pickup_order(uuid, jsonb, text, timestamptz, text, text, text, text, text, numeric, numeric);
+drop function if exists public.create_pickup_order(uuid, jsonb, text, timestamptz, text, text, text, text, text, numeric, numeric, text);
 
 create or replace function public.create_pickup_order(
     p_shop_id uuid,
@@ -140,7 +146,8 @@ create or replace function public.create_pickup_order(
     p_customer_name text default null,
     p_delivery_address text default null,
     p_delivery_lat numeric default null,
-    p_delivery_lng numeric default null
+    p_delivery_lng numeric default null,
+    p_table_no text default null
 )
 returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -182,8 +189,19 @@ begin
 
     if p_type = 'delivery' then
         v_order_type := 'delivery'::public.order_type;
+    elsif p_type = 'dine_in' then
+        v_order_type := 'dine_in'::public.order_type;
     else
         v_order_type := 'takeaway'::public.order_type;
+    end if;
+
+    -- ตรวจสอบว่าร้านค้าเปิดรับออเดอร์ประเภทนี้หรือไม่
+    if v_order_type = 'delivery' and not coalesce(v_shop.allow_delivery, false) then
+        raise exception 'CHANNEL_NOT_ALLOWED: ร้านค้านี้ไม่ได้เปิดรับออเดอร์จัดส่ง';
+    elsif v_order_type = 'dine_in' and not coalesce(v_shop.allow_dine_in, true) then
+        raise exception 'CHANNEL_NOT_ALLOWED: ร้านค้านี้ไม่ได้เปิดรับออเดอร์ทานที่ร้าน';
+    elsif v_order_type = 'takeaway' and not coalesce(v_shop.allow_takeaway, true) then
+        raise exception 'CHANNEL_NOT_ALLOWED: ร้านค้านี้ไม่ได้เปิดรับออเดอร์สั่งกลับบ้าน';
     end if;
 
     -- 3. รันเลขที่ออเดอร์
@@ -193,6 +211,7 @@ begin
     insert into public.orders (
         shop_id,
         table_id,
+        table_no,
         order_no,
         type,
         status,
@@ -211,6 +230,7 @@ begin
     ) values (
         p_shop_id,
         null,
+        nullif(trim(p_table_no), ''),
         v_order_no,
         v_order_type,
         'pending',

@@ -18,8 +18,11 @@ import {
   LocateFixed,
   Check,
   User,
+  Utensils,
 } from 'lucide-react';
 import Link from 'next/link';
+import { OrderType } from '@/lib/types';
+import { getActiveFulfillmentModes } from '@/lib/plans';
 
 interface CheckoutClientProps {
   shop: Shop;
@@ -27,8 +30,14 @@ interface CheckoutClientProps {
 
 export function CheckoutClient({ shop }: CheckoutClientProps) {
   const router = useRouter();
+  const availableModes = getActiveFulfillmentModes(shop);
+
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [orderType, setOrderType] = useState<'takeaway' | 'delivery'>('takeaway');
+  const [orderType, setOrderType] = useState<OrderType>(() => {
+    const modes = getActiveFulfillmentModes(shop);
+    return modes.length > 0 ? modes[0] : 'takeaway';
+  });
+  const [tableNo, setTableNo] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -118,7 +127,12 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
     e.preventDefault();
     if (cart.length === 0) return;
 
-    if (orderType === 'delivery') {
+    if (orderType === 'dine_in') {
+      if (!tableNo.trim()) {
+        setErrorMessage('กรุณาระบุหมายเลขโต๊ะสำหรับทานที่ร้าน');
+        return;
+      }
+    } else if (orderType === 'delivery') {
       if (!customerName.trim()) {
         setErrorMessage('กรุณาระบุชื่อผู้สั่งสำหรับจัดส่งอาหาร');
         return;
@@ -154,8 +168,9 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
     const result = await createPickupOrderAction({
       shop_id: shop.id,
       type: orderType,
+      table_no: orderType === 'dine_in' ? tableNo.trim() : undefined,
       customer_name: orderType === 'delivery' ? customerName.trim() : undefined,
-      customer_phone: phone.trim(),
+      customer_phone: phone.trim() || undefined,
       delivery_address: orderType === 'delivery' ? deliveryAddress.trim() : undefined,
       delivery_lat: orderType === 'delivery' ? deliveryLat : undefined,
       delivery_lng: orderType === 'delivery' ? deliveryLng : undefined,
@@ -208,54 +223,98 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
 
         <form onSubmit={handleSubmitOrder} className="space-y-4">
           {/* Order Type Selector */}
-          <div className="bg-white p-5 rounded-3xl border border-stone-200/70 shadow-xs space-y-3">
-            <div className="text-stone-900 font-bold text-sm">เลือกรูปแบบการรับอาหาร</div>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setOrderType('takeaway')}
-                className={`p-3.5 rounded-2xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
-                  orderType === 'takeaway'
-                    ? 'border-amber-500 bg-amber-50/70 text-amber-900 shadow-xs ring-1 ring-amber-500'
-                    : 'border-stone-200 hover:border-stone-300 text-stone-600 bg-white'
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    orderType === 'takeaway' ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-600'
-                  }`}
-                >
-                  <Store className="w-5 h-5" />
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-xs">รับหน้าร้าน (Pick-up)</div>
-                  <div className="text-[10px] text-stone-400 mt-0.5">มารับที่ร้านด้วยตัวเอง</div>
-                </div>
-              </button>
+          {availableModes.length > 1 ? (
+            <div className="bg-white p-5 rounded-3xl border border-stone-200/70 shadow-xs space-y-3">
+              <div className="text-stone-900 font-bold text-sm">เลือกรูปแบบคำสั่งซื้อ</div>
+              <div className={`grid gap-2.5 ${availableModes.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                {availableModes.includes('dine_in') && (
+                  <button
+                    type="button"
+                    onClick={() => setOrderType('dine_in')}
+                    className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                      orderType === 'dine_in'
+                        ? 'border-blue-500 bg-blue-50/70 text-blue-900 shadow-xs ring-1 ring-blue-500'
+                        : 'border-stone-200 hover:border-stone-300 text-stone-600 bg-white'
+                    }`}
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                        orderType === 'dine_in' ? 'bg-blue-600 text-white' : 'bg-stone-100 text-stone-600'
+                      }`}
+                    >
+                      <Utensils className="w-4 h-4" />
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-xs">ทานที่ร้าน</div>
+                      <div className="text-[10px] text-stone-400">ระบุเลขโต๊ะ</div>
+                    </div>
+                  </button>
+                )}
 
-              <button
-                type="button"
-                onClick={() => setOrderType('delivery')}
-                className={`p-3.5 rounded-2xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
-                  orderType === 'delivery'
-                    ? 'border-purple-500 bg-purple-50/70 text-purple-900 shadow-xs ring-1 ring-purple-500'
-                    : 'border-stone-200 hover:border-stone-300 text-stone-600 bg-white'
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    orderType === 'delivery' ? 'bg-purple-600 text-white' : 'bg-stone-100 text-stone-600'
-                  }`}
-                >
-                  <Bike className="w-5 h-5" />
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-xs">ให้ร้านไปส่ง (Delivery)</div>
-                  <div className="text-[10px] text-stone-400 mt-0.5">ร้านจัดส่งถึงที่</div>
-                </div>
-              </button>
+                {availableModes.includes('takeaway') && (
+                  <button
+                    type="button"
+                    onClick={() => setOrderType('takeaway')}
+                    className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                      orderType === 'takeaway'
+                        ? 'border-amber-500 bg-amber-50/70 text-amber-900 shadow-xs ring-1 ring-amber-500'
+                        : 'border-stone-200 hover:border-stone-300 text-stone-600 bg-white'
+                    }`}
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                        orderType === 'takeaway' ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-600'
+                      }`}
+                    >
+                      <Store className="w-4 h-4" />
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-xs">รับที่ร้าน</div>
+                      <div className="text-[10px] text-stone-400">สั่งกลับบ้าน</div>
+                    </div>
+                  </button>
+                )}
+
+                {availableModes.includes('delivery') && (
+                  <button
+                    type="button"
+                    onClick={() => setOrderType('delivery')}
+                    className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                      orderType === 'delivery'
+                        ? 'border-purple-500 bg-purple-50/70 text-purple-900 shadow-xs ring-1 ring-purple-500'
+                        : 'border-stone-200 hover:border-stone-300 text-stone-600 bg-white'
+                    }`}
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                        orderType === 'delivery' ? 'bg-purple-600 text-white' : 'bg-stone-100 text-stone-600'
+                      }`}
+                    >
+                      <Bike className="w-4 h-4" />
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-xs">ให้ร้านไปส่ง</div>
+                      <div className="text-[10px] text-stone-400">ร้านจัดส่งถึงที่</div>
+                    </div>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-white p-4 rounded-3xl border border-stone-200/70 shadow-xs flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
+                {orderType === 'dine_in' && <Utensils className="w-4 h-4 text-blue-600" />}
+                {orderType === 'takeaway' && <Store className="w-4 h-4 text-amber-600" />}
+                {orderType === 'delivery' && <Bike className="w-4 h-4 text-purple-600" />}
+                <span>
+                  รูปแบบ: {orderType === 'dine_in' ? 'ทานที่ร้าน (Dine-in)' : orderType === 'delivery' ? 'ให้ร้านไปส่ง (Store Delivery)' : 'รับหน้าร้าน (Pick-up)'}
+                </span>
+              </div>
+              <span className="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-0.5 rounded-full font-semibold">
+                ช่องทางเดียวที่เปิดบริการ
+              </span>
+            </div>
+          )}
 
           {/* Customer Info Card */}
           <div className="bg-white p-5 rounded-3xl border border-stone-200/70 shadow-xs space-y-4">
@@ -265,13 +324,39 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
                   <Bike className="w-4 h-4 text-purple-600" />
                   <span>ข้อมูลผู้รับและที่อยู่จัดส่ง</span>
                 </>
+              ) : orderType === 'dine_in' ? (
+                <>
+                  <Utensils className="w-4 h-4 text-blue-600" />
+                  <span>ข้อมูลโต๊ะอาหารสำหรับทานที่ร้าน</span>
+                </>
               ) : (
                 <>
                   <Phone className="w-4 h-4 text-amber-600" />
-                  <span>ข้อมูลผู้สั่งอาหาร</span>
+                  <span>ข้อมูลผู้สั่งอาหาร (รับหน้าร้าน)</span>
                 </>
               )}
             </div>
+
+            {/* If Dine-in: Table Number */}
+            {orderType === 'dine_in' && (
+              <div>
+                <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                  หมายเลขโต๊ะ (Table Number) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Utensils className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={tableNo}
+                    onChange={(e) => setTableNo(e.target.value)}
+                    placeholder="เช่น โต๊ะ 1, โต๊ะ 5 หรือ T-02"
+                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-stone-900"
+                    maxLength={30}
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
             {/* If Delivery: Name Input */}
             {orderType === 'delivery' && (
@@ -299,8 +384,10 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
               <label className="block text-xs font-semibold text-stone-600 mb-1.5">
                 {orderType === 'delivery'
                   ? 'เบอร์โทรศัพท์สำหรับติดต่อจัดส่ง'
+                  : orderType === 'dine_in'
+                  ? 'เบอร์โทรศัพท์ (ระบุหรือไม่ก็ได้)'
                   : 'เบอร์โทรศัพท์สำหรับรับอาหาร'}{' '}
-                <span className="text-red-500">*</span>
+                {orderType !== 'dine_in' && <span className="text-red-500">*</span>}
               </label>
               <div className="relative">
                 <Phone className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -310,16 +397,20 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
                   onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder="เช่น 0812345678"
                   className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 ${
-                    orderType === 'delivery' ? 'focus:ring-purple-500' : 'focus:ring-amber-500'
+                    orderType === 'delivery'
+                      ? 'focus:ring-purple-500'
+                      : orderType === 'dine_in'
+                      ? 'focus:ring-blue-500'
+                      : 'focus:ring-amber-500'
                   }`}
                   maxLength={10}
-                  required
+                  required={orderType !== 'dine_in'}
                 />
               </div>
             </div>
 
             {/* If Delivery: Address & GPS */}
-            {orderType === 'delivery' ? (
+            {orderType === 'delivery' && (
               <div className="space-y-3 pt-1 border-t border-stone-100">
                 <div>
                   <label className="block text-xs font-semibold text-stone-600 mb-1.5">
@@ -378,8 +469,10 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
                   )}
                 </div>
               </div>
-            ) : (
-              /* Estimated Pickup Time (Takeaway only) */
+            )}
+
+            {/* Estimated Pickup Time (Takeaway only) */}
+            {orderType === 'takeaway' && (
               <div>
                 <label className="block text-xs font-semibold text-stone-600 mb-1.5">
                   เวลามารับอาหารโดยประมาณ
@@ -533,6 +626,8 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
             className={`w-full py-4 px-6 disabled:opacity-50 text-white font-semibold rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all text-base cursor-pointer ${
               orderType === 'delivery'
                 ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/30'
+                : orderType === 'dine_in'
+                ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30'
                 : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/30'
             }`}
           >
@@ -545,6 +640,11 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
               <>
                 <Bike className="w-5 h-5" />
                 <span>สั่งให้ร้านไปส่ง ({finalTotal.toLocaleString('th-TH')} ฿)</span>
+              </>
+            ) : orderType === 'dine_in' ? (
+              <>
+                <Utensils className="w-5 h-5" />
+                <span>สั่งทานที่ร้าน {tableNo ? `โต๊ะ ${tableNo}` : ''} ({finalTotal.toLocaleString('th-TH')} ฿)</span>
               </>
             ) : (
               <>
