@@ -230,7 +230,7 @@ export default async function SuperadminDashboardPage() {
                     </td>
                     <td className="py-3 text-right">
                       <Link
-                        href={`/order/${shop.slug}`}
+                        href={`/${shop.slug}`}
                         target="_blank"
                         className="text-amber-600 hover:text-amber-700 font-bold hover:underline"
                       >

@@ -192,7 +192,7 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                       {/* Slug */}
                       <td className="py-3.5 px-4 font-mono text-slate-600">
                         <a
-                          href={`/order/${shop.slug}`}
+                          href={`/${shop.slug}`}
                           target="_blank"
                           rel="noreferrer"
                           className="hover:text-amber-600 flex items-center gap-1 group"
