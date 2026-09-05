@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { registerUserAction } from '@/app/actions/auth';
 import {
   Store,
   User,
@@ -53,27 +52,36 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    const result = await registerUserAction({
-      shop_name: shopName,
-      first_name: firstName,
-      last_name: lastName,
-      phone,
-      email,
-      password,
-      origin: window.location.origin,
-    });
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shop_name: shopName,
+          first_name: firstName,
+          last_name: lastName,
+          phone,
+          email,
+          password,
+        }),
+      });
 
-    setIsLoading(false);
+      const result = await res.json();
+      setIsLoading(false);
 
-    if (!result.success) {
-      setErrorMessage(result.error || 'ไม่สามารถลงทะเบียนได้');
-      return;
-    }
+      if (!res.ok || !result.success) {
+        setErrorMessage(result.error || 'ไม่สามารถลงทะเบียนได้');
+        return;
+      }
 
-    if (result.requiresEmailConfirmation) {
-      setConfirmationEmail(result.email || email);
-    } else {
-      router.push('/admin/orders');
+      if (result.requiresEmailConfirmation) {
+        setConfirmationEmail(result.email || email);
+      } else {
+        router.push('/admin/orders');
+      }
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMessage(err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
     }
   };
 

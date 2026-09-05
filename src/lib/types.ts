@@ -133,3 +133,13 @@ export interface CartItem {
   note?: string;
   line_total: number;
 }
+
+export interface RegisterInput {
+  shop_name: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string;
+  password: string;
+  origin: string;
+}
