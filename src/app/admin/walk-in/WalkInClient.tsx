@@ -98,6 +98,7 @@ export function WalkInClient({ shop, categories, menuItems }: WalkInClientProps)
 
     const result = await createPickupOrderAction({
       shop_id: shop.id,
+      type: 'takeaway',
       customer_phone: phone.trim() || undefined,
       note: note.trim() || undefined,
       source: 'staff',

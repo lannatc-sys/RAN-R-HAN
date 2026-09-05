@@ -14,6 +14,8 @@ import {
   AlertCircle,
   Copy,
   Check,
+  Bike,
+  MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,14 +25,6 @@ interface OrderTrackerClientProps {
   initialPayment: Payment | null;
   qrDataUrl: string | null;
 }
-
-const STATUS_STEPS = [
-  { key: 'pending', label: 'รอร้านรับออเดอร์', desc: 'ร้านค้ากำลังตรวจสอบรายการ', icon: Clock },
-  { key: 'confirmed', label: 'ยืนยันออเดอร์แล้ว', desc: 'รับออเดอร์เข้าระบบเรียบร้อย', icon: CheckCircle2 },
-  { key: 'cooking', label: 'กำลังปรุงอาหาร', desc: 'พ่อครัวกำลังเตรียมอาหารจานโปรด', icon: Flame },
-  { key: 'served', label: 'พร้อมรับที่ร้าน', desc: 'อาหารเสร็จเรียบร้อย เชิญมารับที่หน้าร้านได้เลย', icon: ShoppingBag },
-  { key: 'completed', label: 'รับอาหารเรียบร้อย', desc: 'ขอบคุณที่ใช้บริการ ขอให้อร่อยกับมื้อนี้ครับ', icon: Store },
-];
 
 export function OrderTrackerClient({
   initialOrder,
@@ -79,7 +73,27 @@ export function OrderTrackerClient({
     };
   }, [order.id]);
 
-  const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
+  const isDelivery = order.type === 'delivery';
+
+  const statusSteps = [
+    { key: 'pending', label: 'รอร้านรับออเดอร์', desc: 'ร้านค้ากำลังตรวจสอบรายการ', icon: Clock },
+    { key: 'confirmed', label: 'ยืนยันออเดอร์แล้ว', desc: 'รับออเดอร์เข้าระบบเรียบร้อย', icon: CheckCircle2 },
+    { key: 'cooking', label: 'กำลังปรุงอาหาร', desc: 'พ่อครัวกำลังเตรียมอาหารจานโปรด', icon: Flame },
+    {
+      key: 'served',
+      label: isDelivery ? 'พร้อมจัดส่ง' : 'พร้อมรับที่ร้าน',
+      desc: isDelivery ? 'อาหารเสร็จเรียบร้อย กำลังนำออกไปส่งตามที่อยู่' : 'อาหารเสร็จเรียบร้อย เชิญมารับที่หน้าร้านได้เลย',
+      icon: isDelivery ? Bike : ShoppingBag,
+    },
+    {
+      key: 'completed',
+      label: isDelivery ? 'จัดส่งเรียบร้อย' : 'รับอาหารเรียบร้อย',
+      desc: isDelivery ? 'ส่งอาหารถึงมือเรียบร้อย ขอให้อร่อยกับมื้อนี้ครับ' : 'ขอบคุณที่ใช้บริการ ขอให้อร่อยกับมื้อนี้ครับ',
+      icon: isDelivery ? Bike : Store,
+    },
+  ];
+
+  const currentStepIndex = statusSteps.findIndex((s) => s.key === order.status);
   const isPaid = payment?.status === 'verified';
   const isPromptPayPending = payment?.method === 'promptpay' && !isPaid;
 
@@ -117,7 +131,9 @@ export function OrderTrackerClient({
         <div
           className={`p-6 rounded-3xl border shadow-xs text-center space-y-2 ${
             order.status === 'served'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+              ? isDelivery
+                ? 'bg-purple-50 border-purple-200 text-purple-950'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-950'
               : order.status === 'cooking'
               ? 'bg-amber-50 border-amber-200 text-amber-950'
               : 'bg-white border-stone-200/80 text-stone-900'
@@ -130,18 +146,52 @@ export function OrderTrackerClient({
             {order.status === 'pending' && 'กำลังรอร้านยืนยัน'}
             {order.status === 'confirmed' && 'ร้านยืนยันออเดอร์แล้ว'}
             {order.status === 'cooking' && '🔥 กำลังปรุงอาหารในครัว'}
-            {order.status === 'served' && '🎉 อาหารพร้อมรับที่หน้าร้านแล้ว!'}
-            {order.status === 'completed' && '✅ รับอาหารเรียบร้อยแล้ว'}
+            {order.status === 'served' && (isDelivery ? '🛵 กำลังนำอาหารออกไปส่ง!' : '🎉 อาหารพร้อมรับที่หน้าร้านแล้ว!')}
+            {order.status === 'completed' && (isDelivery ? '✅ จัดส่งอาหารถึงมือเรียบร้อย' : '✅ รับอาหารเรียบร้อยแล้ว')}
             {order.status === 'cancelled' && '❌ ออเดอร์นี้ถูกยกเลิก'}
           </div>
           <p className="text-xs text-stone-600 max-w-sm mx-auto">
             {order.status === 'served'
-              ? 'กรุณาแจ้งหมายเลขคิว #' + order.order_no + ' ต่อพนักงานที่หน้าร้านเพื่อรับอาหาร'
+              ? isDelivery
+                ? 'พนักงานส่งอาหารกำลังเดินทางไปส่งตามที่อยู่ที่ระบุไว้ โปรดเตรียมรอรับสาย'
+                : 'กรุณาแจ้งหมายเลขคิว #' + order.order_no + ' ต่อพนักงานที่หน้าร้านเพื่อรับอาหาร'
               : order.status === 'cooking'
               ? 'ร้านกำลังปรุงอาหารสดใหม่ให้คุณ รอสักครู่เดียวครับ'
               : 'ระบบจะอัปเดตสถานะแบบเรียลไทม์อัตโนมัติ ไม่ต้องรีเฟรชหน้าจอ'}
           </p>
         </div>
+
+        {/* Delivery Info Card (if Delivery Order) */}
+        {isDelivery && (
+          <div className="bg-purple-50/90 border border-purple-200 p-4 rounded-3xl space-y-2.5">
+            <div className="flex items-center justify-between text-xs font-bold text-purple-900">
+              <span className="flex items-center gap-1.5">
+                <Bike className="w-4 h-4 text-purple-700" />
+                บริการจัดส่งโดยร้าน (Delivery)
+              </span>
+              {order.customer_phone && (
+                <a
+                  href={`tel:${order.customer_phone}`}
+                  className="text-purple-700 hover:underline flex items-center gap-1 font-semibold"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>{order.customer_phone}</span>
+                </a>
+              )}
+            </div>
+            {order.customer_name && (
+              <div className="text-xs text-purple-950 font-semibold">
+                ชื่อผู้รับ: {order.customer_name}
+              </div>
+            )}
+            {order.delivery_address && (
+              <div className="flex items-start gap-2 text-xs text-stone-700 bg-white/80 p-3 rounded-2xl border border-purple-100">
+                <MapPin className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                <span className="break-words leading-relaxed">{order.delivery_address}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* PromptPay QR Section (if PromptPay & Pending Payment) */}
         {isPromptPayPending && qrDataUrl && (
@@ -196,7 +246,7 @@ export function OrderTrackerClient({
         {/* Cash payment notice */}
         {payment?.method === 'cash' && (
           <div className="bg-stone-100 border border-stone-200 p-3.5 rounded-2xl text-center text-xs text-stone-700">
-            ชำระด้วยเงินสดตอนมารับอาหาร: <b>{Number(order.total).toLocaleString('th-TH')} ฿</b>
+            {isDelivery ? 'ชำระด้วยเงินสดปลายทางเมื่อได้รับอาหาร' : 'ชำระด้วยเงินสดตอนมารับอาหาร'}: <b>{Number(order.total).toLocaleString('th-TH')} ฿</b>
           </div>
         )}
 
@@ -205,7 +255,7 @@ export function OrderTrackerClient({
           <div className="text-sm font-bold text-stone-900">ลำดับขั้นตอน</div>
 
           <div className="space-y-4 relative before:absolute before:inset-y-3 before:left-4 before:w-0.5 before:bg-stone-100">
-            {STATUS_STEPS.map((step, idx) => {
+            {statusSteps.map((step, idx) => {
               const isPassed = currentStepIndex >= idx && order.status !== 'cancelled';
               const isCurrent = order.status === step.key;
               const Icon = step.icon;

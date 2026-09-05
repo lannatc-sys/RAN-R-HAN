@@ -15,7 +15,20 @@ export async function createPickupOrderAction(rawInput: CreateOrderInput) {
       return { success: false, error: firstError };
     }
 
-    const { shop_id, customer_phone, pickup_at, note, source, items, payment_method } = validated.data;
+    const {
+      shop_id,
+      type,
+      customer_name,
+      customer_phone,
+      delivery_address,
+      delivery_lat,
+      delivery_lng,
+      pickup_at,
+      note,
+      source,
+      items,
+      payment_method,
+    } = validated.data;
 
     const supabase = await createClient();
 
@@ -27,6 +40,11 @@ export async function createPickupOrderAction(rawInput: CreateOrderInput) {
       p_pickup_at: pickup_at ? new Date(pickup_at).toISOString() : null,
       p_note: note || null,
       p_source: source,
+      p_type: type,
+      p_customer_name: customer_name || null,
+      p_delivery_address: delivery_address || null,
+      p_delivery_lat: delivery_lat ?? null,
+      p_delivery_lng: delivery_lng ?? null,
     });
 
     if (rpcError) {
@@ -51,10 +69,21 @@ export async function createPickupOrderAction(rawInput: CreateOrderInput) {
     }
 
     // 4. ส่ง Web Push แจ้งเตือนร้านค้า
-    const paymentLabel = payment_method === 'cash' ? 'เงินสดหน้าร้าน' : 'พร้อมเพย์';
+    const isDelivery = type === 'delivery';
+    const paymentLabel =
+      payment_method === 'cash'
+        ? isDelivery
+          ? 'เงินสดปลายทาง COD'
+          : 'เงินสดหน้าร้าน'
+        : 'พร้อมเพย์';
+    const pushTitle = isDelivery ? `ออเดอร์จัดส่งใหม่ #${orderNo}` : `ออเดอร์ใหม่ #${orderNo}`;
+    const pushBody = isDelivery
+      ? `ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel}) • ส่งให้ ${customer_name || 'ลูกค้า'}`
+      : `ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel}) กำลังรอการยืนยัน`;
+
     await sendPushToShop(shop_id, {
-      title: `ออเดอร์ใหม่ #${orderNo}`,
-      body: `ยอด ${Number(total).toLocaleString('th-TH')} บาท (${paymentLabel}) กำลังรอการยืนยัน`,
+      title: pushTitle,
+      body: pushBody,
       orderId,
       orderNo,
     });

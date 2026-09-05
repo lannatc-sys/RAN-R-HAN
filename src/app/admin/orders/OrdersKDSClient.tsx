@@ -20,6 +20,9 @@ import {
   Globe,
   ChefHat,
   XCircle,
+  Bike,
+  MapPin,
+  ExternalLink,
 } from 'lucide-react';
 import { PinModal } from '@/components/admin/PinModal';
 
@@ -219,7 +222,9 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
               <div
                 key={order.id}
                 className={`bg-white rounded-3xl border p-5 shadow-xs flex flex-col justify-between space-y-4 transition-all ${
-                  order.status === 'served'
+                  order.type === 'delivery'
+                    ? 'border-purple-300 ring-2 ring-purple-100'
+                    : order.status === 'served'
                     ? 'border-emerald-300 ring-2 ring-emerald-100'
                     : order.status === 'cooking'
                     ? 'border-amber-300 ring-2 ring-amber-100'
@@ -233,7 +238,12 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                       <span className="text-lg font-black text-stone-900">
                         #{order.order_no}
                       </span>
-                      {order.source === 'staff' ? (
+                      {order.type === 'delivery' ? (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-1">
+                          <Bike className="w-3 h-3" />
+                          ร้านจัดส่ง
+                        </span>
+                      ) : order.source === 'staff' ? (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
                           <UserCheck className="w-3 h-3" />
                           หน้าร้าน
@@ -267,7 +277,7 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                       {order.status === 'served' && (
                         <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-600 text-white flex items-center gap-1">
                           <Check className="w-3.5 h-3.5" />
-                          พร้อมรับ
+                          {order.type === 'delivery' ? 'พร้อมส่ง' : 'พร้อมรับ'}
                         </span>
                       )}
                       {order.status === 'completed' && (
@@ -285,7 +295,7 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
 
                   {/* Customer and Time */}
                   <div className="flex items-center justify-between text-xs text-stone-500 pt-2 pb-3">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-wrap">
                       <Clock className="w-3.5 h-3.5 text-stone-400" />
                       <span>
                         {new Date(order.created_at).toLocaleTimeString('th-TH', {
@@ -293,20 +303,60 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                           minute: '2-digit',
                         })}
                       </span>
+                      {order.customer_name && (
+                        <span className="font-bold text-stone-800 ml-1">
+                          • คุณ{order.customer_name}
+                        </span>
+                      )}
                     </div>
 
                     {order.customer_phone ? (
                       <a
                         href={`tel:${order.customer_phone}`}
-                        className="flex items-center gap-1 font-semibold text-amber-700 hover:underline"
+                        className="flex items-center gap-1 font-semibold text-amber-700 hover:underline shrink-0"
                       >
                         <Phone className="w-3.5 h-3.5" />
                         <span>{order.customer_phone}</span>
                       </a>
                     ) : (
-                      <span className="text-stone-400">ไม่ระบุเบอร์</span>
+                      <span className="text-stone-400 shrink-0">ไม่ระบุเบอร์</span>
                     )}
                   </div>
+
+                  {/* Delivery Info Box (for Delivery orders) */}
+                  {order.type === 'delivery' && (
+                    <div className="mb-3 p-3 rounded-2xl bg-purple-50/80 border border-purple-200 text-xs space-y-2">
+                      <div className="flex items-center justify-between font-bold text-purple-900">
+                        <span className="flex items-center gap-1.5">
+                          <Bike className="w-4 h-4 text-purple-700" />
+                          ส่งโดยร้าน (Delivery)
+                        </span>
+                        {order.customer_name && (
+                          <span className="text-purple-800 font-semibold">ผู้รับ: {order.customer_name}</span>
+                        )}
+                      </div>
+
+                      {order.delivery_address && (
+                        <div className="flex items-start gap-1.5 text-stone-700 font-medium">
+                          <MapPin className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                          <span className="break-words leading-relaxed">{order.delivery_address}</span>
+                        </div>
+                      )}
+
+                      {order.delivery_lat && order.delivery_lng && (
+                        <a
+                          href={`https://maps.google.com/?q=${order.delivery_lat},${order.delivery_lng}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-all w-full justify-center mt-1"
+                        >
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>เปิดแผนที่ Google Maps</span>
+                          <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                        </a>
+                      )}
+                    </div>
+                  )}
 
                   {/* Note */}
                   {order.note && (
@@ -423,8 +473,14 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                         onClick={() => handleUpdateStatus(order.id, 'served')}
                         className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
                       >
-                        {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShoppingBag className="w-3.5 h-3.5" />}
-                        <span>อาหารเสร็จ พร้อมให้รับ 🎉</span>
+                        {isActing ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : order.type === 'delivery' ? (
+                          <Bike className="w-3.5 h-3.5" />
+                        ) : (
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                        )}
+                        <span>{order.type === 'delivery' ? 'อาหารเสร็จ พร้อมออกส่ง 🛵' : 'อาหารเสร็จ พร้อมให้รับ 🎉'}</span>
                       </button>
                     )}
 
@@ -436,7 +492,7 @@ export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: 
                         className="w-full py-2.5 px-4 bg-stone-800 hover:bg-stone-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
                       >
                         {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                        <span>ลูกค้ามารับแล้ว (เสร็จสิ้น)</span>
+                        <span>{order.type === 'delivery' ? 'จัดส่งเรียบร้อยแล้ว (เสร็จสิ้น)' : 'ลูกค้ามารับแล้ว (เสร็จสิ้น)'}</span>
                       </button>
                     )}
 

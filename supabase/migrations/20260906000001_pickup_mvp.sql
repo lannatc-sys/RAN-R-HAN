@@ -5,10 +5,16 @@
 --              slip logs, web push, and security-definer RPCs for order/payment
 -- ==============================================================================
 
--- 1. เพิ่มคอลัมน์ใน orders
+-- 1. เพิ่มค่า enum และคอลัมน์ใน orders สำหรับ Delivery & Takeaway
+alter type public.order_type add value if not exists 'delivery';
+
 alter table public.orders
     add column if not exists source text not null default 'customer'
-        check (source in ('customer', 'staff'));
+        check (source in ('customer', 'staff')),
+    add column if not exists customer_name text,
+    add column if not exists delivery_address text,
+    add column if not exists delivery_lat numeric(10, 7),
+    add column if not exists delivery_lng numeric(10, 7);
 
 -- 2. เพิ่มคอลัมน์การตั้งค่าอุปกรณ์และความปลอดภัยใน shops
 alter table public.shops
@@ -34,6 +40,7 @@ create table if not exists public.shop_payment_credentials (
     updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+drop trigger if exists trg_shop_payment_credentials_updated_at on public.shop_payment_credentials;
 create trigger trg_shop_payment_credentials_updated_at
     before update on public.shop_payment_credentials
     for each row execute function public.handle_updated_at();
@@ -43,6 +50,7 @@ alter table public.shop_payment_credentials enable row level security;
 -- นโยบาย RLS: ป้องกันการ SELECT ตรงจาก client ทุกกรณี (แม้กระทั่ง owner)
 -- อ่าน/เขียนได้เฉพาะฝั่ง server ผ่าน service role key เท่านั้น
 -- สำหรับ owner อนุญาตเฉพาะ INSERT / UPDATE (write-only) ผ่าน application
+drop policy if exists "Owners can insert or update their shop payment credentials" on public.shop_payment_credentials;
 create policy "Owners can insert or update their shop payment credentials"
     on public.shop_payment_credentials
     for all
@@ -63,6 +71,7 @@ create table if not exists public.payment_slips (
 
 alter table public.payment_slips enable row level security;
 
+drop policy if exists "Shop members can view payment slips" on public.payment_slips;
 create policy "Shop members can view payment slips"
     on public.payment_slips
     for select
@@ -89,6 +98,7 @@ create table if not exists public.push_subscriptions (
 
 alter table public.push_subscriptions enable row level security;
 
+drop policy if exists "Users can manage own push subscriptions" on public.push_subscriptions;
 create policy "Users can manage own push subscriptions"
     on public.push_subscriptions
     for all
@@ -114,14 +124,23 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 -- 8. RPC: create_pickup_order
--- สร้างออเดอร์ Takeaway/Pickup อย่างปลอดภัย โดยดึงราคาจาก DB เท่านั้น (ห้ามเชื่อราคาจาก client)
+-- สร้างออเดอร์ Takeaway/Pickup หรือ Delivery อย่างปลอดภัย โดยดึงราคาจาก DB เท่านั้น (ห้ามเชื่อราคาจาก client)
+drop function if exists public.create_pickup_order(uuid, jsonb, text, timestamptz, text);
+drop function if exists public.create_pickup_order(uuid, jsonb, text, timestamptz, text, text);
+drop function if exists public.create_pickup_order(uuid, jsonb, text, timestamptz, text, text, text, text, text, numeric, numeric);
+
 create or replace function public.create_pickup_order(
     p_shop_id uuid,
     p_items jsonb, -- Array of: { "menu_item_id": "uuid", "qty": 1, "option_ids": ["uuid"], "note": "" }
     p_customer_phone text default null,
     p_pickup_at timestamptz default null,
     p_note text default null,
-    p_source text default 'customer'
+    p_source text default 'customer',
+    p_type text default 'takeaway',
+    p_customer_name text default null,
+    p_delivery_address text default null,
+    p_delivery_lat numeric default null,
+    p_delivery_lng numeric default null
 )
 returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -141,6 +160,7 @@ declare
     v_options_delta numeric(10, 2) := 0.00;
     v_item_unit_price numeric(10, 2) := 0.00;
     v_line_total numeric(10, 2) := 0.00;
+    v_order_type public.order_type := 'takeaway'::public.order_type;
 begin
     -- 1. ตรวจสอบร้านค้า
     select * into v_shop
@@ -160,6 +180,12 @@ begin
         raise exception 'INVALID_SOURCE: แหล่งที่มาของออเดอร์ไม่ถูกต้อง';
     end if;
 
+    if p_type = 'delivery' then
+        v_order_type := 'delivery'::public.order_type;
+    else
+        v_order_type := 'takeaway'::public.order_type;
+    end if;
+
     -- 3. รันเลขที่ออเดอร์
     v_order_no := public.generate_order_no(p_shop_id);
 
@@ -171,7 +197,11 @@ begin
         type,
         status,
         source,
+        customer_name,
         customer_phone,
+        delivery_address,
+        delivery_lat,
+        delivery_lng,
         pickup_at,
         note,
         subtotal,
@@ -182,10 +212,14 @@ begin
         p_shop_id,
         null,
         v_order_no,
-        'takeaway',
+        v_order_type,
         'pending',
         p_source,
+        nullif(trim(p_customer_name), ''),
         nullif(trim(p_customer_phone), ''),
+        nullif(trim(p_delivery_address), ''),
+        p_delivery_lat,
+        p_delivery_lng,
         p_pickup_at,
         nullif(trim(p_note), ''),
         0.00,

@@ -157,3 +157,11 @@
 - [x] Store Consent Controls: เพิ่มการ์ดจัดการสิทธิ์ในหน้าตั้งค่าร้านค้า (`SettingsClient.tsx`) ให้ร้านกดยินยอมให้ทีมงานเข้าถึงข้อมูลชั่วคราว (24 หรือ 48 ชม.) พร้อมปุ่มยกเลิกสิทธิ์ทันที
 - [x] Superadmin Privacy Mode & Censorship: ตรวจสอบเวลาหมดอายุเมื่อ Superadmin กด Impersonate หากไม่มีสิทธิ์หรือหมดอายุ จะเซ็นเซอร์ยอดเงินทั้งหมดเป็น `*** ฿` ทั้งหน้า KDS และ Settings พร้อมแถบแจ้งเตือน Privacy Mode
 - [x] Verification: ชุดทดสอบครอบคลุมทั้ง `test/privacy-consent-test.ts`, `test/superadmin-test.ts`, `test/e2e-test.ts` และ `test/smoke-test.ts` ผ่าน 100% ครบทุกข้อ
+
+## 12. สิ่งที่ต้องทำเพิ่ม: ระบบร้านจัดส่งเอง (Store Delivery)
+- [x] Database: อัปเดต migration เพิ่ม `customer_name`, `delivery_address`, `delivery_lat`, `delivery_lng` ในตาราง `orders` (รันลงฐานข้อมูล Supabase เรียบร้อย)
+- [x] Frontend (Customer): เพิ่มปุ่มเลือกประเภทออเดอร์ (Pick-up / Delivery) ในหน้าตะกร้าสินค้า
+- [x] Frontend (Customer): สร้างฟอร์มกรอกข้อมูลจัดส่ง (ชื่อ, เบอร์, ที่อยู่)
+- [x] Frontend (Customer): ทำปุ่ม "Get GPS" โดยใช้ `navigator.geolocation` ดึงพิกัด Lat/Lng พร้อม feedback และลิงก์แสดงผล
+- [x] Frontend (KDS): ปรับ UI การ์ดออเดอร์ให้แสดงที่อยู่จัดส่ง, ชื่อผู้รับ, เบอร์โทร และปุ่ม "เปิดแผนที่ Google Maps" นำทางได้ทันที
+- [x] Frontend (Order Tracking): ปรับหน้าติดตามออเดอร์ของลูกค้าให้แสดงสถานะ "พร้อมจัดส่ง" และข้อมูลที่อยู่จัดส่งแบบเรียลไทม์

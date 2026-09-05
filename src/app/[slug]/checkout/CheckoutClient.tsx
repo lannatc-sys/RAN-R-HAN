@@ -4,7 +4,21 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shop, CartItem } from '@/lib/types';
 import { createPickupOrderAction } from '@/app/actions/order';
-import { ArrowLeft, Phone, Clock, CreditCard, Banknote, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Phone,
+  Clock,
+  CreditCard,
+  Banknote,
+  AlertCircle,
+  Loader2,
+  Store,
+  Bike,
+  MapPin,
+  LocateFixed,
+  Check,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface CheckoutClientProps {
@@ -14,7 +28,15 @@ interface CheckoutClientProps {
 export function CheckoutClient({ shop }: CheckoutClientProps) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [orderType, setOrderType] = useState<'takeaway' | 'delivery'>('takeaway');
+  const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryLat, setDeliveryLat] = useState<number | null>(null);
+  const [deliveryLng, setDeliveryLng] = useState<number | null>(null);
+  const [isGettingGps, setIsGettingGps] = useState(false);
+  const [gpsSuccess, setGpsSuccess] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
   const [pickupMinutes, setPickupMinutes] = useState<number>(15);
   const [note, setNote] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'promptpay' | 'cash'>('promptpay');
@@ -55,13 +77,65 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
     finalTotal += vatAmount;
   }
 
+  // ดึงพิกัด GPS ผ่าน HTML5 Geolocation API
+  const handleGetGPS = () => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      setGpsError('อุปกรณ์หรือเบราว์เซอร์ของคุณไม่รองรับการดึงพิกัด GPS');
+      return;
+    }
+
+    setIsGettingGps(true);
+    setGpsError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = Number(position.coords.latitude.toFixed(6));
+        const lng = Number(position.coords.longitude.toFixed(6));
+        setDeliveryLat(lat);
+        setDeliveryLng(lng);
+        setGpsSuccess(true);
+        setIsGettingGps(false);
+      },
+      (error) => {
+        setIsGettingGps(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setGpsError('กรุณาอนุญาตการเข้าถึงตำแหน่งในเบราว์เซอร์ หรือพิมพ์ที่อยู่จัดส่งด้านบน');
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          setGpsError('ไม่สามารถระบุพิกัดได้ในขณะนี้ กรุณากรอกที่อยู่จัดส่งแบบพิมพ์เอง');
+        } else {
+          setGpsError('การค้นหาพิกัด GPS ใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 10000,
+      }
+    );
+  };
+
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
 
-    if (!phone || phone.trim().length < 9) {
-      setErrorMessage('กรุณาระบุเบอร์โทรศัพท์อย่างน้อย 9 หลัก เพื่อใช้ติดต่อรับอาหาร');
-      return;
+    if (orderType === 'delivery') {
+      if (!customerName.trim()) {
+        setErrorMessage('กรุณาระบุชื่อผู้สั่งสำหรับจัดส่งอาหาร');
+        return;
+      }
+      if (!phone || phone.trim().length < 9) {
+        setErrorMessage('กรุณาระบุเบอร์โทรศัพท์อย่างน้อย 9 หลัก เพื่อใช้ติดต่อจัดส่ง');
+        return;
+      }
+      if (!deliveryAddress.trim()) {
+        setErrorMessage('กรุณาระบุที่อยู่จัดส่ง หรือจุดสังเกต');
+        return;
+      }
+    } else {
+      if (!phone || phone.trim().length < 9) {
+        setErrorMessage('กรุณาระบุเบอร์โทรศัพท์อย่างน้อย 9 หลัก เพื่อใช้ติดต่อรับอาหาร');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -79,8 +153,13 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
 
     const result = await createPickupOrderAction({
       shop_id: shop.id,
+      type: orderType,
+      customer_name: orderType === 'delivery' ? customerName.trim() : undefined,
       customer_phone: phone.trim(),
-      pickup_at: pickupDate.toISOString(),
+      delivery_address: orderType === 'delivery' ? deliveryAddress.trim() : undefined,
+      delivery_lat: orderType === 'delivery' ? deliveryLat : undefined,
+      delivery_lng: orderType === 'delivery' ? deliveryLng : undefined,
+      pickup_at: orderType === 'takeaway' ? pickupDate.toISOString() : undefined,
       note: note.trim() || undefined,
       source: 'customer',
       payment_method: paymentMethod,
@@ -128,51 +207,202 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
         )}
 
         <form onSubmit={handleSubmitOrder} className="space-y-4">
+          {/* Order Type Selector */}
+          <div className="bg-white p-5 rounded-3xl border border-stone-200/70 shadow-xs space-y-3">
+            <div className="text-stone-900 font-bold text-sm">เลือกรูปแบบการรับอาหาร</div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setOrderType('takeaway')}
+                className={`p-3.5 rounded-2xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                  orderType === 'takeaway'
+                    ? 'border-amber-500 bg-amber-50/70 text-amber-900 shadow-xs ring-1 ring-amber-500'
+                    : 'border-stone-200 hover:border-stone-300 text-stone-600 bg-white'
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    orderType === 'takeaway' ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-600'
+                  }`}
+                >
+                  <Store className="w-5 h-5" />
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-xs">รับหน้าร้าน (Pick-up)</div>
+                  <div className="text-[10px] text-stone-400 mt-0.5">มารับที่ร้านด้วยตัวเอง</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOrderType('delivery')}
+                className={`p-3.5 rounded-2xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                  orderType === 'delivery'
+                    ? 'border-purple-500 bg-purple-50/70 text-purple-900 shadow-xs ring-1 ring-purple-500'
+                    : 'border-stone-200 hover:border-stone-300 text-stone-600 bg-white'
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    orderType === 'delivery' ? 'bg-purple-600 text-white' : 'bg-stone-100 text-stone-600'
+                  }`}
+                >
+                  <Bike className="w-5 h-5" />
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-xs">ให้ร้านไปส่ง (Delivery)</div>
+                  <div className="text-[10px] text-stone-400 mt-0.5">ร้านจัดส่งถึงที่</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
           {/* Customer Info Card */}
           <div className="bg-white p-5 rounded-3xl border border-stone-200/70 shadow-xs space-y-4">
             <div className="flex items-center gap-2 text-stone-900 font-bold text-sm">
-              <Phone className="w-4 h-4 text-amber-600" />
-              <span>ข้อมูลผู้สั่งอาหาร</span>
+              {orderType === 'delivery' ? (
+                <>
+                  <Bike className="w-4 h-4 text-purple-600" />
+                  <span>ข้อมูลผู้รับและที่อยู่จัดส่ง</span>
+                </>
+              ) : (
+                <>
+                  <Phone className="w-4 h-4 text-amber-600" />
+                  <span>ข้อมูลผู้สั่งอาหาร</span>
+                </>
+              )}
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                เบอร์โทรศัพท์สำหรับรับอาหาร <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                placeholder="เช่น 0812345678"
-                className="w-full px-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                maxLength={10}
-                required
-              />
-            </div>
+            {/* If Delivery: Name Input */}
+            {orderType === 'delivery' && (
+              <div>
+                <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                  ชื่อผู้สั่ง / ผู้รับอาหาร <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="เช่น คุณสมชาย หรือ แพนด้า"
+                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    maxLength={60}
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
-            {/* Estimated Pickup Time */}
+            {/* Phone Input */}
             <div>
               <label className="block text-xs font-semibold text-stone-600 mb-1.5">
-                เวลามารับอาหารโดยประมาณ
+                {orderType === 'delivery'
+                  ? 'เบอร์โทรศัพท์สำหรับติดต่อจัดส่ง'
+                  : 'เบอร์โทรศัพท์สำหรับรับอาหาร'}{' '}
+                <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {[15, 30, 45].map((mins) => (
-                  <button
-                    key={mins}
-                    type="button"
-                    onClick={() => setPickupMinutes(mins)}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
-                      pickupMinutes === mins
-                        ? 'border-amber-500 bg-amber-50/70 text-amber-800'
-                        : 'border-stone-200 hover:border-stone-300 text-stone-600'
-                    }`}
-                  >
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>อีก {mins} นาที</span>
-                  </button>
-                ))}
+              <div className="relative">
+                <Phone className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="เช่น 0812345678"
+                  className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 ${
+                    orderType === 'delivery' ? 'focus:ring-purple-500' : 'focus:ring-amber-500'
+                  }`}
+                  maxLength={10}
+                  required
+                />
               </div>
             </div>
+
+            {/* If Delivery: Address & GPS */}
+            {orderType === 'delivery' ? (
+              <div className="space-y-3 pt-1 border-t border-stone-100">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                    ที่อยู่จัดส่งแบบพิมพ์เอง / จุดสังเกต <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    placeholder="ระบุบ้านเลขที่, ซอย, ตึก, ชั้น หรือจุดสังเกต เช่น บ้านรั้วสีขาวตรงข้ามเซเว่น..."
+                    className="w-full px-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"
+                    maxLength={400}
+                    required
+                  />
+                </div>
+
+                {/* GPS Button */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-stone-600">พิกัดแผนที่ (GPS)</span>
+                    <span className="text-[11px] text-stone-400">ช่วยให้ไรเดอร์ไปส่งถึงที่ได้แม่นยำ</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleGetGPS}
+                    disabled={isGettingGps}
+                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                      gpsSuccess
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                        : 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
+                    }`}
+                  >
+                    {isGettingGps ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                        <span>กำลังค้นหาพิกัดดาวเทียม GPS...</span>
+                      </>
+                    ) : gpsSuccess ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-600" />
+                        <span>พิกัด GPS: {deliveryLat}, {deliveryLng} (บันทึกแล้ว ✓)</span>
+                      </>
+                    ) : (
+                      <>
+                        <LocateFixed className="w-4 h-4 text-purple-600" />
+                        <span>📍 ดึงตำแหน่งปัจจุบัน (Get GPS)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {gpsError && (
+                    <div className="text-[11px] text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                      {gpsError}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Estimated Pickup Time (Takeaway only) */
+              <div>
+                <label className="block text-xs font-semibold text-stone-600 mb-1.5">
+                  เวลามารับอาหารโดยประมาณ
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[15, 30, 45].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => setPickupMinutes(mins)}
+                      className={`py-2.5 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
+                        pickupMinutes === mins
+                          ? 'border-amber-500 bg-amber-50/70 text-amber-800'
+                          : 'border-stone-200 hover:border-stone-300 text-stone-600'
+                      }`}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>อีก {mins} นาที</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Note to Kitchen */}
             <div>
@@ -236,8 +466,12 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
                   <Banknote className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-bold text-xs">เงินสดตอนรับที่ร้าน</div>
-                  <div className="text-[10px] text-stone-400 mt-0.5">จ่ายเมื่อมารับอาหาร</div>
+                  <div className="font-bold text-xs">
+                    {orderType === 'delivery' ? 'เงินสดปลายทาง (COD)' : 'เงินสดตอนรับที่ร้าน'}
+                  </div>
+                  <div className="text-[10px] text-stone-400 mt-0.5">
+                    {orderType === 'delivery' ? 'จ่ายกับคนส่งเมื่อถึง' : 'จ่ายเมื่อมารับอาหาร'}
+                  </div>
                 </div>
               </label>
             </div>
@@ -296,15 +530,27 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
           <button
             type="submit"
             disabled={isLoading || cart.length === 0}
-            className="w-full py-4 px-6 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-semibold rounded-2xl shadow-xl shadow-amber-600/30 flex items-center justify-center gap-2 transition-all text-base"
+            className={`w-full py-4 px-6 disabled:opacity-50 text-white font-semibold rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all text-base cursor-pointer ${
+              orderType === 'delivery'
+                ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/30'
+                : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/30'
+            }`}
           >
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span>กำลังส่งคำสั่งซื้อ...</span>
               </>
+            ) : orderType === 'delivery' ? (
+              <>
+                <Bike className="w-5 h-5" />
+                <span>สั่งให้ร้านไปส่ง ({finalTotal.toLocaleString('th-TH')} ฿)</span>
+              </>
             ) : (
-              <span>ยืนยันการสั่งอาหาร ({finalTotal.toLocaleString('th-TH')} ฿)</span>
+              <>
+                <Store className="w-5 h-5" />
+                <span>ยืนยันการสั่งอาหาร ({finalTotal.toLocaleString('th-TH')} ฿)</span>
+              </>
             )}
           </button>
         </form>

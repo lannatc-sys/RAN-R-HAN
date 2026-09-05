@@ -1,7 +1,7 @@
 export type ShopStatus = 'active' | 'suspended' | 'expired';
 export type UserRole = 'superadmin' | 'owner' | 'staff';
 export type VatMode = 'none' | 'inclusive' | 'exclusive';
-export type OrderType = 'dine_in' | 'takeaway';
+export type OrderType = 'dine_in' | 'takeaway' | 'delivery';
 export type OrderStatus = 'pending' | 'confirmed' | 'cooking' | 'served' | 'completed' | 'cancelled';
 export type OrderItemStatus = 'pending' | 'cooking' | 'served' | 'cancelled';
 export type OrderSource = 'customer' | 'staff';
@@ -121,7 +121,11 @@ export interface Order {
   vat_amount: number;
   total: number;
   note: string | null;
+  customer_name?: string | null;
   customer_phone: string | null;
+  delivery_address?: string | null;
+  delivery_lat?: number | null;
+  delivery_lng?: number | null;
   pickup_at: string | null;
   created_at: string;
   updated_at: string;
