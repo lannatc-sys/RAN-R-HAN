@@ -35,7 +35,7 @@ BEGIN
 
     -- 1. สร้างข้อมูลร้าน (Shops)
     INSERT INTO shops (
-        id, slug, name, logo, promptpay_id, promptpay_name,
+        id, slug, name, logo_url, promptpay_id, promptpay_name,
         plan, status, expires_at, service_charge, vat_mode
     ) VALUES (
         v_shop_id,
@@ -53,13 +53,18 @@ BEGIN
     ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         slug = EXCLUDED.slug,
+        logo_url = EXCLUDED.logo_url,
         promptpay_id = EXCLUDED.promptpay_id,
         promptpay_name = EXCLUDED.promptpay_name;
 
-    -- 2. ข้อมูลเจ้าของร้าน (Users)
-    INSERT INTO users (id, shop_id, role)
-    VALUES (v_owner_id, v_shop_id, 'owner')
-    ON CONFLICT (id) DO NOTHING;
+    -- 2. ข้อมูลเจ้าของร้าน (Users) - ข้ามหากไม่มี user ใน auth.users
+    BEGIN
+        INSERT INTO users (id, shop_id, role)
+        VALUES (v_owner_id, v_shop_id, 'owner')
+        ON CONFLICT (id) DO NOTHING;
+    EXCEPTION
+        WHEN foreign_key_violation THEN NULL;
+    END;
 
     -- 3. หมวดหมู่อาหาร (Categories)
     INSERT INTO categories (id, shop_id, name, sort_order) VALUES
