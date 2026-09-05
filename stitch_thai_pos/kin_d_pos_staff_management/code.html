@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ครัวรสเลิศ POS - จัดการพนักงาน &amp; สิทธิ์</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- IBM Plex Sans Thai -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with custom config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed": "#ffddb8",
+            "on-secondary": "#ffffff",
+            "inverse-primary": "#ffb95f",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "secondary-fixed-dim": "#ffb599",
+            "secondary-fixed": "#ffdbce",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#e3e2e2",
+            "surface-variant": "#e3e2e2",
+            "surface": "#fbf9f9",
+            "on-error-container": "#93000a",
+            "surface-dim": "#dbdad9",
+            "error-container": "#ffdad6",
+            "inverse-surface": "#303031",
+            "outline-variant": "#d8c3ad",
+            "outline": "#867461",
+            "on-surface": "#1b1c1c",
+            "on-tertiary-container": "#003ba1",
+            "on-secondary-container": "#571a00",
+            "on-tertiary": "#ffffff",
+            "surface-container-high": "#e9e8e7",
+            "on-primary": "#ffffff",
+            "background": "#fbf9f9",
+            "primary": "#855300",
+            "tertiary-container": "#94aeff",
+            "secondary": "#a73a00",
+            "on-primary-fixed": "#2a1700",
+            "surface-bright": "#fbf9f9",
+            "on-secondary-fixed": "#370e00",
+            "on-surface-variant": "#534434",
+            "tertiary": "#0053db",
+            "on-tertiary-fixed": "#00174b",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "surface-container-low": "#f5f3f3",
+            "primary-container": "#f59e0b",
+            "primary-fixed-dim": "#ffb95f",
+            "on-error": "#ffffff",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "secondary-container": "#fd651e",
+            "surface-container": "#efeded",
+            "on-primary-fixed-variant": "#653e00",
+            "on-primary-container": "#613b00",
+            "tertiary-fixed": "#dbe1ff",
+            "error": "#ba1a1a",
+            "surface-tint": "#855300",
+            "inverse-on-surface": "#f2f0f0",
+            "on-background": "#1b1c1c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-1": "4px",
+            "min-target": "48px",
+            "space-8": "32px",
+            "space-6": "24px",
+            "space-2": "8px",
+            "space-5": "20px",
+            "space-3": "12px",
+            "grid-base": "4px",
+            "space-4": "16px",
+            "card-p-mobile": "16px"
+          },
+          "fontFamily": {
+            "price-display": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "price-total": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-strong": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-sm": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""]
+          },
+          "fontSize": {
+            "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "price-total": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body class="h-full bg-surface text-on-surface antialiased flex overflow-hidden">
+<!-- ========================================================================= -->
+<!-- SIDEBAR NAVIGATION (SHARED COMPONENT: SideNavBar)                          -->
+<!-- ========================================================================= -->
+<aside class="fixed top-0 left-0 h-screen w-64 z-40 p-4 bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline shadow-sm flex flex-col justify-between">
+<!-- Brand Header & Action -->
+<div>
+<div class="flex items-center gap-3 px-2 py-2 mb-4">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-headline-sm shadow-sm">
+<span class="material-symbols-outlined text-2xl" data-icon="restaurant">restaurant</span>
+</div>
+<div class="overflow-hidden">
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-surface truncate">ครัวรสเลิศ POS</h1>
+<p class="text-label-md font-label-md text-on-surface-variant truncate">สาขา สยามสแควร์</p>
+</div>
+</div>
+<!-- CTA Button: เปิดโต๊ะใหม่ -->
+<button class="w-full h-12 mb-5 rounded-xl bg-secondary-container text-on-secondary font-label-lg flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span>เปิดโต๊ะใหม่</span>
+</button>
+<!-- Main Navigation Tabs -->
+<nav class="space-y-1">
+<!-- แดชบอร์ด -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>แดชบอร์ด</span>
+</a>
+<!-- ออเดอร์ & ครัว -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="soup_kitchen">soup_kitchen</span>
+<span>ออเดอร์ &amp; ครัว</span>
+</a>
+<!-- โต๊ะ & บิล -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="table_restaurant">table_restaurant</span>
+<span>โต๊ะ &amp; บิล</span>
+</a>
+<!-- เมนูอาหาร -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span>เมนูอาหาร</span>
+</a>
+<!-- รายงานยอดขาย -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>รายงานยอดขาย</span>
+</a>
+<!-- Divider -->
+<div class="py-2">
+<div class="border-t border-outline-variant/50"></div>
+</div>
+<!-- ตั้งค่าระบบ (Active for Staff Management) -->
+<div class="space-y-1">
+<a class="flex items-center justify-between px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md active:scale-[0.98]" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>ตั้งค่าระบบ</span>
+</div>
+<span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+</a>
+<!-- Sub-menu -->
+<div class="pl-8 pr-2 py-1 space-y-1">
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-fixed text-on-primary-fixed font-label-md text-label-md font-semibold" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>จัดการพนักงาน &amp; สิทธิ์</span>
+</a>
+<a class="flex items-center gap-2 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-md text-label-md" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-transparent"></span>
+<span>เครื่องพิมพ์ &amp; ใบเสร็จ</span>
+</a>
+</div>
+</div>
+</nav>
+</div>
+<!-- Footer Navigation (Logout) -->
+<div class="border-t border-outline-variant/60 pt-3">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-error hover:bg-error-container/40 transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>ออกจากระบบ</span>
+</a>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE                                                            -->
+<!-- ========================================================================= -->
+<div class="pl-64 flex flex-col flex-1 h-screen overflow-hidden">
+<!-- Top Navigation Bar (SHARED COMPONENT: TopNavBar) -->
+<header class="sticky top-0 z-30 flex items-center justify-between px-6 py-3 w-full bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant shadow-sm shrink-0">
+<!-- Breadcrumb & Search -->
+<div class="flex items-center gap-6 flex-1 max-w-2xl">
+<div class="flex items-center gap-2 text-label-md font-label-md text-on-surface-variant">
+<span class="font-bold text-on-surface">สาขา สยามสแควร์ (เปิดบริการ)</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-semibold">จัดการพนักงาน &amp; สิทธิ์</span>
+</div>
+</div>
+<!-- Trailing Action Icons & Owner Profile -->
+<div class="flex items-center gap-3">
+<!-- Notifications -->
+<button class="p-2.5 rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant relative active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface-container-lowest"></span>
+</button>
+<!-- Receipt Logs -->
+<button class="p-2.5 rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant active:scale-95" title="ประวัติบิลด่วน">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</button>
+<!-- Profile Capsule -->
+<div class="flex items-center gap-3 pl-3 border-l border-outline-variant">
+<div class="w-9 h-9 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-label-md shadow-sm">
+            สม
+          </div>
+<div class="text-left hidden lg:block">
+<p class="font-label-md text-label-md text-on-surface leading-tight">คุณสมชาย</p>
+<span class="text-xs font-medium text-secondary">เจ้าของร้าน</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-base cursor-pointer" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+</div>
+</header>
+<!-- Scrollable Workspace Body -->
+<main class="flex-1 overflow-y-auto p-8 space-y-8 bg-surface">
+<!-- Top Title Bar & Control Cluster -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<div>
+<div class="flex items-center gap-3">
+<h2 class="text-headline-lg font-headline-lg text-on-surface">จัดการพนักงาน (Staff &amp; Permissions)</h2>
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-label-md font-label-md">
+              พนักงานทั้งหมด 5 คน
+            </span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1 flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>พร้อมทำงาน 4 คน</span>
+<span class="text-outline-variant">•</span>
+<span class="inline-block w-2 h-2 rounded-full bg-neutral-400"></span>
+<span>ปิดใช้งาน 1 คน</span>
+</p>
+</div>
+<!-- Controls: Search, Filter, Add Staff Button -->
+<div class="flex items-center gap-3 flex-wrap">
+<!-- Search input -->
+<div class="relative w-64 md:w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl" data-icon="search">search</span>
+<input class="w-full h-11 pl-10 pr-4 bg-surface-container-lowest border border-outline-variant rounded-xl text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" placeholder="ค้นหาชื่อ, อีเมล หรือตำแหน่ง..." type="text"/>
+</div>
+<!-- Filter Button -->
+<button class="h-11 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-md flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="tune">tune</span>
+<span>สถานะ: ทั้งหมด</span>
+</button>
+<!-- Primary CTA Button (Triggers Dialog) -->
+<button class="h-11 px-5 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md flex items-center gap-2 shadow-sm active:scale-95 transition-all" id="openModalBtn">
+<span class="material-symbols-outlined text-xl" data-icon="person_add">person_add</span>
+<span>เพิ่มพนักงานใหม่</span>
+</button>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- STAFF CARDS LIST                                                          -->
+<!-- ========================================================================= -->
+<section class="space-y-3">
+<!-- CARD 1: Owner (คุณสมชาย รัตนวิจิตร) -->
+<div class="bg-surface-container-lowest border-2 border-primary-container rounded-2xl p-5 shadow-sm bg-gradient-to-r from-primary-fixed/20 via-surface-container-lowest to-surface-container-lowest flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-all">
+<div class="flex items-center gap-4">
+<!-- Avatar -->
+<div class="w-14 h-14 rounded-2xl bg-primary-container/30 text-on-primary-container font-bold text-xl flex items-center justify-center shrink-0 border border-primary-container/40">
+              สช
+            </div>
+<!-- Details -->
+<div>
+<div class="flex items-center gap-3">
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold">สมชาย รัตนวิจิตร (คุณ)</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary text-xs font-semibold tracking-wide shadow-xs">
+                  เจ้าของร้าน (Owner)
+                </span>
+</div>
+<div class="flex items-center gap-4 mt-1 text-sm text-on-surface-variant flex-wrap">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="mail">mail</span>
+                  somchai.owner@kindpos.com
+                </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="call">call</span>
+                  081-234-5678
+                </span>
+<span>•</span>
+<span class="text-xs text-outline">เข้าร่วม: 1 ม.ค. 2023</span>
+</div>
+</div>
+</div>
+<!-- Status & Actions -->
+<div class="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-outline-variant/30">
+<!-- Active indicator -->
+<div class="flex items-center gap-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+<span class="text-sm font-semibold text-emerald-700">ออนไลน์อยู่</span>
+</div>
+<!-- Locked Switch -->
+<div class="flex items-center gap-2 text-xs text-on-surface-variant/70" title="บัญชีเจ้าของร้านไม่สามารถปิดการใช้งานได้">
+<div class="w-11 h-6 bg-primary-container rounded-full relative p-0.5 cursor-not-allowed opacity-80">
+<div class="w-5 h-5 bg-white rounded-full shadow-sm translate-x-5"></div>
+</div>
+<span class="material-symbols-outlined text-base text-outline" data-icon="lock">lock</span>
+</div>
+<!-- Empty spacer instead of action menu for owner protection -->
+<div class="w-8 h-8"></div>
+</div>
+</div>
+<!-- CARD 2: Manager (สมศรี บุญมี) -->
+<div class="bg-surface-container-lowest border border-outline-variant/70 hover:border-primary-container/60 rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-all">
+<div class="flex items-center gap-4">
+<!-- Avatar -->
+<div class="w-14 h-14 rounded-2xl bg-tertiary-fixed text-on-tertiary-fixed font-bold text-xl flex items-center justify-center shrink-0">
+              สบ
+            </div>
+<!-- Details -->
+<div>
+<div class="flex items-center gap-3">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">สมศรี บุญมี</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-tertiary font-semibold text-xs">
+                  ผู้จัดการ (Manager)
+                </span>
+</div>
+<div class="flex items-center gap-4 mt-1 text-sm text-on-surface-variant flex-wrap">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="mail">mail</span>
+                  somsri.m@kindpos.com
+                </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="call">call</span>
+                  089-876-5432
+                </span>
+<span>•</span>
+<span class="text-xs text-outline">เข้าร่วม: 15 มี.ค. 2023</span>
+</div>
+</div>
+</div>
+<!-- Status & Actions -->
+<div class="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<span class="text-sm font-medium text-emerald-700">ออนไลน์ (เคาน์เตอร์ 1)</span>
+</div>
+<!-- Active Toggle -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+<!-- Menu Button -->
+<button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- CARD 3: Staff (อรรถพล มีชัย) -->
+<div class="bg-surface-container-lowest border border-outline-variant/70 hover:border-primary-container/60 rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-800 font-bold text-xl flex items-center justify-center shrink-0">
+              อป
+            </div>
+<div>
+<div class="flex items-center gap-3">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">อรรถพล มีชัย</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-medium text-xs">
+                  พนักงาน (Staff)
+                </span>
+</div>
+<div class="flex items-center gap-4 mt-1 text-sm text-on-surface-variant flex-wrap">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="mail">mail</span>
+                  attapol.staff@kindpos.com
+                </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="call">call</span>
+                  082-111-9988
+                </span>
+<span>•</span>
+<span class="text-xs text-outline">เข้าร่วม: 1 มิ.ย. 2023</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<span class="text-sm font-medium text-emerald-700">ออนไลน์ (แท็บเล็ต 2)</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+<button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- CARD 4: Staff (กานต์ สดใส) -->
+<div class="bg-surface-container-lowest border border-outline-variant/70 hover:border-primary-container/60 rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-900 font-bold text-xl flex items-center justify-center shrink-0">
+              กส
+            </div>
+<div>
+<div class="flex items-center gap-3">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">กานต์ สดใส</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-medium text-xs">
+                  พนักงาน (Staff)
+                </span>
+</div>
+<div class="flex items-center gap-4 mt-1 text-sm text-on-surface-variant flex-wrap">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="mail">mail</span>
+                  karn.s@kindpos.com
+                </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="call">call</span>
+                  085-443-2211
+                </span>
+<span>•</span>
+<span class="text-xs text-outline">เข้าร่วม: 10 ก.ค. 2023</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-neutral-300"></span>
+<span class="text-sm font-normal text-on-surface-variant">ใช้งานล่าสุด 45 นาทีที่แล้ว</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+<button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- CARD 5: Inactive Part-time (นภา ใจดี) -->
+<div class="bg-surface-container-lowest/60 border border-outline-variant/40 rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-all opacity-60 hover:opacity-90">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-highest text-on-surface-variant font-bold text-xl flex items-center justify-center shrink-0">
+              นจ
+            </div>
+<div>
+<div class="flex items-center gap-3">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">นภา ใจดี</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-normal text-xs">
+                  พนักงาน (Staff)
+                </span>
+</div>
+<div class="flex items-center gap-4 mt-1 text-sm text-on-surface-variant flex-wrap">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="mail">mail</span>
+                  napa.parttime@kindpos.com
+                </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="call">call</span>
+                  086-777-3344
+                </span>
+<span>•</span>
+<span class="text-xs text-outline">เข้าร่วม: 1 ส.ค. 2023</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-neutral-400"></span>
+<span class="text-sm font-normal text-on-surface-variant">ปิดการใช้งานชั่วคราว (ลาพักงาน)</span>
+</div>
+<!-- Inactive Toggle -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+<button class="w-9 h-9 rounded-lg hover:bg-surface-container-low text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- RECENT ACTIVITY AUDIT LOG (VERTICAL TIMELINE)                             -->
+<!-- ========================================================================= -->
+<section class="bg-surface-container-lowest border border-outline-variant/70 rounded-2xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="history">history</span>
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">ประวัติกิจกรรมของพนักงานล่าสุด (Recent Activity Audit Log)</h3>
+<p class="text-label-md font-label-md text-on-surface-variant">บันทึกการทำงานแบบเรียลไทม์เพื่อความโปร่งใสของร้าน</p>
+</div>
+</div>
+<button class="text-primary hover:text-secondary font-label-md text-label-md flex items-center gap-1 transition-colors">
+<span>ดูประวัติทั้งหมด</span>
+<span class="material-symbols-outlined text-base" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Vertical Timeline List -->
+<div class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-outline-variant/40">
+<!-- Event 1 -->
+<div class="relative flex items-start gap-4">
+<span class="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full bg-secondary ring-4 ring-surface-container-lowest"></span>
+<div class="flex-1 bg-surface-container-low/50 hover:bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30 flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all">
+<div class="flex items-center gap-3">
+<span class="text-label-md font-label-md font-semibold text-secondary min-w-[70px]">12:45 น.</span>
+<span class="px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-xs font-semibold">คุณสมชาย (เจ้าของร้าน)</span>
+<span class="text-body-md font-body-md text-on-surface">อนุมัติส่วนลดพิเศษ 10% ให้บิล <span class="font-semibold text-on-surface">#A0042</span> โต๊ะ 5</span>
+</div>
+<span class="text-xs text-outline font-medium">ห้องอาหารโซน A</span>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="relative flex items-start gap-4">
+<span class="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-4 ring-surface-container-lowest"></span>
+<div class="flex-1 bg-surface-container-low/50 hover:bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30 flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all">
+<div class="flex items-center gap-3">
+<span class="text-label-md font-label-md font-semibold text-on-surface min-w-[70px]">12:38 น.</span>
+<span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant text-xs font-medium">อรรถพล มีชัย (พนักงาน)</span>
+<span class="text-body-md font-body-md text-on-surface">รับออเดอร์ <span class="font-semibold text-on-surface">#A0045</span> จาก โต๊ะ 5 (3 รายการ ฿365)</span>
+</div>
+<span class="text-xs text-outline font-medium">แท็บเล็ต 2</span>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="relative flex items-start gap-4">
+<span class="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-4 ring-surface-container-lowest"></span>
+<div class="flex-1 bg-surface-container-low/50 hover:bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30 flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all">
+<div class="flex items-center gap-3">
+<span class="text-label-md font-label-md font-semibold text-on-surface min-w-[70px]">12:22 น.</span>
+<span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant text-xs font-medium">กานต์ สดใส (พนักงาน)</span>
+<span class="text-body-md font-body-md text-on-surface">กดยืนยันเสิร์ฟครบ โต๊ะ 8 (บิล #A0044)</span>
+</div>
+<span class="text-xs text-outline font-medium">KDS ครัวร้อน</span>
+</div>
+</div>
+<!-- Event 4 -->
+<div class="relative flex items-start gap-4">
+<span class="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full bg-tertiary ring-4 ring-surface-container-lowest"></span>
+<div class="flex-1 bg-surface-container-low/50 hover:bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30 flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all">
+<div class="flex items-center gap-3">
+<span class="text-label-md font-label-md font-semibold text-on-surface min-w-[70px]">11:58 น.</span>
+<span class="px-2 py-0.5 rounded-md bg-tertiary-fixed text-tertiary text-xs font-semibold">สมศรี บุญมี (ผู้จัดการ)</span>
+<span class="text-body-md font-body-md text-on-surface">เปิดกะการขายกลางวัน และตรวจนับเงินสดยกมา ฿3,000</span>
+</div>
+<span class="text-xs text-outline font-medium">แคชเชียร์ 1</span>
+</div>
+</div>
+<!-- Event 5 -->
+<div class="relative flex items-start gap-4">
+<span class="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full bg-error ring-4 ring-surface-container-lowest"></span>
+<div class="flex-1 bg-surface-container-low/50 hover:bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30 flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all">
+<div class="flex items-center gap-3">
+<span class="text-label-md font-label-md font-semibold text-on-surface min-w-[70px]">11:45 น.</span>
+<span class="px-2 py-0.5 rounded-md bg-tertiary-fixed text-tertiary text-xs font-semibold">สมศรี บุญมี (ผู้จัดการ)</span>
+<span class="text-body-md font-body-md text-on-surface">ปิดสถานะเมนู 'ปลากะพงทอดน้ำปลา' (วัตถุดิบหมดชั่วคราว)</span>
+</div>
+<span class="text-xs text-outline font-medium">จัดการสต็อก</span>
+</div>
+</div>
+<!-- Event 6 -->
+<div class="relative flex items-start gap-4">
+<span class="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full bg-secondary ring-4 ring-surface-container-lowest"></span>
+<div class="flex-1 bg-surface-container-low/50 hover:bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30 flex flex-col md:flex-row md:items-center md:justify-between gap-2 transition-all">
+<div class="flex items-center gap-3">
+<span class="text-label-md font-label-md font-semibold text-on-surface min-w-[70px]">10:15 น.</span>
+<span class="px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-xs font-semibold">คุณสมชาย (เจ้าของร้าน)</span>
+<span class="text-body-md font-body-md text-on-surface">แก้ไขราคาเมนู 'ข้าวกะเพราหมูกรอบ' จาก ฿90 เป็น ฿95</span>
+</div>
+<span class="text-xs text-outline font-medium">ระบบหลังร้าน POS</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom padding spacing -->
+<div class="h-6"></div>
+</main>
+</div>
+<!-- ========================================================================= -->
+<!-- MODAL / DIALOG: เพิ่มพนักงานใหม่ (Invite Staff Member)                     -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-200" id="staffModal">
+<div class="bg-surface-container-lowest rounded-2xl w-full max-w-xl shadow-2xl border border-outline-variant overflow-hidden flex flex-col">
+<!-- Modal Header -->
+<div class="px-6 py-4 border-b border-outline-variant/60 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-2xl" data-icon="person_add">person_add</span>
+</div>
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold">เพิ่มพนักงานใหม่</h3>
+<p class="text-xs text-on-surface-variant">Invite Staff Member to สาขา สยามสแควร์</p>
+</div>
+</div>
+<button class="w-9 h-9 rounded-full hover:bg-surface-container-low text-on-surface-variant flex items-center justify-center transition-colors" id="closeModalBtn">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-6 space-y-5 overflow-y-auto max-h-[calc(85vh-130px)]">
+<!-- Name field -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1.5">
+            ชื่อ-นามสกุลพนักงาน <span class="text-error">*</span>
+</label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="เช่น วีระศักดิ์ มั่นคง" type="text"/>
+</div>
+<!-- Email field -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1.5">
+            อีเมลสำหรับส่งลิงก์ตั้งรหัสผ่าน <span class="text-error">*</span>
+</label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="staff@example.com" type="email"/>
+<p class="text-xs text-on-surface-variant mt-1">ระบบจะส่งลิงก์เชิญเข้าสู่ระบบทางอีเมลนี้ภายใน 24 ชม.</p>
+</div>
+<!-- Phone field -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1.5">
+            เบอร์โทรศัพท์ (ไม่บังคับ)
+          </label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="08X-XXX-XXXX" type="tel"/>
+</div>
+<!-- Role Selector (2 Radio Cards) -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-2">
+            เลือกระดับสิทธิ์และบทบาท <span class="text-error">*</span>
+</label>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<!-- Radio Card 1: Staff (Checked Active) -->
+<label class="relative flex flex-col p-4 rounded-xl border-2 border-primary-container bg-primary-fixed/20 cursor-pointer shadow-xs transition-all">
+<input checked="" class="sr-only" name="role" type="radio" value="staff"/>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg font-label-lg text-on-surface font-bold">พนักงาน (Staff)</span>
+<span class="w-5 h-5 rounded-full border-2 border-secondary bg-secondary flex items-center justify-center text-white">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                รับออเดอร์หน้าร้าน, เช็คบิลเก็บเงิน, ดูสถานะโต๊ะและคิวครัว
+              </p>
+</label>
+<!-- Radio Card 2: Manager -->
+<label class="relative flex flex-col p-4 rounded-xl border border-outline-variant bg-surface-container-lowest hover:border-outline cursor-pointer transition-all">
+<input class="sr-only" name="role" type="radio" value="manager"/>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg font-label-lg text-on-surface font-bold">ผู้จัดการ (Manager)</span>
+<span class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center"></span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                เพิ่มสิทธิ์แก้ไขรายการเมนู, จัดการสต็อก, ดูรายงานยอดขายและแดชบอร์ด
+              </p>
+</label>
+</div>
+</div>
+<!-- Warning tip -->
+<div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="info">info</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+            เฉพาะบัญชี "เจ้าของร้าน" เท่านั้นที่สามารถเปลี่ยนระดับสิทธิ์และกำหนดสิทธิ์ผู้จัดการได้
+          </p>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-6 py-4 bg-surface-container-low/40 border-t border-outline-variant/60 flex items-center justify-end gap-3">
+<button class="h-12 px-6 rounded-xl border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md transition-all" id="cancelModalBtn">
+          ยกเลิก
+        </button>
+<button class="h-12 px-6 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md flex items-center gap-2 shadow-sm active:scale-95 transition-all" id="submitModalBtn">
+<span class="material-symbols-outlined text-lg" data-icon="send">send</span>
+<span>ส่งคำเชิญเข้าร่วมร้าน</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Micro-interaction script for Dialog preview toggling -->
+<script>
+    const modal = document.getElementById('staffModal');
+    const openBtn = document.getElementById('openModalBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelModalBtn');
+    const submitBtn = document.getElementById('submitModalBtn');
+
+    function toggleModal(show) {
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    // Modal controls
+    openBtn.addEventListener('click', () => toggleModal(true));
+    closeBtn.addEventListener('click', () => toggleModal(false));
+    cancelBtn.addEventListener('click', () => toggleModal(false));
+    submitBtn.addEventListener('click', () => {
+      alert('ส่งคำเชิญเข้าร่วมร้านเรียบร้อยแล้ว!');
+      toggleModal(false);
+    });
+
+    // Close on click outside
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        toggleModal(false);
+      }
+    });
+
+    // Handle Role Radio selection styling
+    const roleLabels = document.querySelectorAll('input[name="role"]');
+    roleLabels.forEach(radio => {
+      radio.addEventListener('change', () => {
+        roleLabels.forEach(r => {
+          const card = r.closest('label');
+          const indicator = card.querySelector('div > span:last-child');
+          if (r.checked) {
+            card.classList.add('border-2', 'border-primary-container', 'bg-primary-fixed/20');
+            card.classList.remove('border', 'border-outline-variant', 'bg-surface-container-lowest');
+            indicator.className = 'w-5 h-5 rounded-full border-2 border-secondary bg-secondary flex items-center justify-center text-white';
+            indicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-white"></span>';
+          } else {
+            card.classList.remove('border-2', 'border-primary-container', 'bg-primary-fixed/20');
+            card.classList.add('border', 'border-outline-variant', 'bg-surface-container-lowest');
+            indicator.className = 'w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center';
+            indicator.innerHTML = '';
+          }
+        });
+      });
+    });
+  </script>
+</body></html>

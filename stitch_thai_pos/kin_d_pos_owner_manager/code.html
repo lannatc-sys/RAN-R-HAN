@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D POS (ครัวกินดี) - ภาพรวมแดชบอร์ด</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: IBM Plex Sans Thai -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim from Design System Tokens -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#003ea8",
+            "secondary-fixed-dim": "#ffb599",
+            "on-error": "#ffffff",
+            "tertiary-container": "#94aeff",
+            "on-surface-variant": "#534434",
+            "secondary-container": "#fd651e",
+            "outline-variant": "#d8c3ad",
+            "inverse-on-surface": "#f2f0f0",
+            "outline": "#867461",
+            "inverse-surface": "#303031",
+            "background": "#fbf9f9",
+            "error": "#ba1a1a",
+            "surface-container-high": "#e9e8e7",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "primary-container": "#f59e0b",
+            "on-tertiary-fixed": "#00174b",
+            "on-error-container": "#93000a",
+            "secondary": "#a73a00",
+            "on-secondary-fixed": "#370e00",
+            "primary-fixed-dim": "#ffb95f",
+            "secondary-fixed": "#ffdbce",
+            "tertiary": "#0053db",
+            "inverse-primary": "#ffb95f",
+            "surface-container-low": "#f5f3f3",
+            "on-secondary": "#ffffff",
+            "surface-bright": "#fbf9f9",
+            "on-surface": "#1b1c1c",
+            "on-primary-container": "#613b00",
+            "on-background": "#1b1c1c",
+            "primary": "#855300",
+            "surface-variant": "#e3e2e2",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#003ba1",
+            "surface-tint": "#855300",
+            "error-container": "#ffdad6",
+            "surface": "#fbf9f9",
+            "surface-container-highest": "#e3e2e2",
+            "on-tertiary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "primary-fixed": "#ffddb8",
+            "on-primary-fixed": "#2a1700",
+            "surface-dim": "#dbdad9",
+            "on-secondary-container": "#571a00",
+            "surface-container": "#efeded",
+            "tertiary-fixed": "#dbe1ff",
+            "on-primary-fixed-variant": "#653e00"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "min-target": "48px",
+            "grid-base": "4px",
+            "space-6": "24px",
+            "space-8": "32px",
+            "space-1": "4px",
+            "card-p-mobile": "16px",
+            "space-3": "12px",
+            "space-2": "8px",
+            "space-5": "20px",
+            "space-4": "16px"
+          },
+          "fontFamily": {
+            "headline-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-sm": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-total": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-strong": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-display": ["\"IBM Plex Sans Thai\", sans-serif"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "price-total": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="h-full bg-background text-on-surface font-body-md text-body-md antialiased flex flex-col md:flex-row overflow-x-hidden">
+<!-- Desktop Side Navigation Bar (Anchored from Shared Components JSON) -->
+<aside class="hidden md:flex fixed top-0 left-0 h-screen w-64 z-40 p-4 bg-surface-container-lowest border-r border-outline-variant shadow-sm flex-col justify-between">
+<div class="flex flex-col gap-6">
+<!-- Brand & Branch Header -->
+<div class="flex items-center gap-3 px-2 py-2">
+<div class="w-11 h-11 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm">
+<span class="material-symbols-outlined text-2xl" data-icon="restaurant" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface truncate">ครัวรสเลิศ POS</span>
+<span class="text-label-md font-label-md text-on-surface-variant flex items-center gap-1 truncate">
+<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+            สาขา สยามสแควร์
+          </span>
+</div>
+</div>
+<!-- Quick Action CTA -->
+<button class="w-full flex items-center justify-center gap-2 bg-secondary text-on-secondary py-3 px-4 rounded-xl font-label-lg text-label-lg shadow-sm hover:opacity-90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+<span>เปิดโต๊ะใหม่</span>
+</button>
+<!-- Main Navigation Menu (Intent Active State: 'แดชบอร์ด') -->
+<nav aria-label="แถบนำทางหลัก" class="flex flex-col gap-1.5">
+<!-- Item 1: แดชบอร์ด (ACTIVE) -->
+<a aria-current="page" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md transition-colors" href="#dashboard">
+<span class="material-symbols-outlined text-xl" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span>แดชบอร์ด</span>
+</a>
+<!-- Item 2: ออเดอร์ & ครัว -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#orders">
+<span class="material-symbols-outlined text-xl" data-icon="soup_kitchen">soup_kitchen</span>
+<span>ออเดอร์ &amp; ครัว</span>
+<span class="ml-auto bg-secondary-container text-white text-xs px-2 py-0.5 rounded-full font-bold">3</span>
+</a>
+<!-- Item 3: โต๊ะ & บิล -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#tables">
+<span class="material-symbols-outlined text-xl" data-icon="table_restaurant">table_restaurant</span>
+<span>โต๊ะ &amp; บิล</span>
+</a>
+<!-- Item 4: เมนูอาหาร -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#menu">
+<span class="material-symbols-outlined text-xl" data-icon="restaurant_menu">restaurant_menu</span>
+<span>เมนูอาหาร</span>
+</a>
+<!-- Item 5: รายงานยอดขาย -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#reports">
+<span class="material-symbols-outlined text-xl" data-icon="analytics">analytics</span>
+<span>รายงานยอดขาย</span>
+</a>
+</nav>
+</div>
+<!-- Footer System Actions -->
+<div class="flex flex-col gap-1 pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#settings">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+<span>ตั้งค่าระบบ</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-error hover:bg-error-container/40 transition-colors font-label-md text-label-md" href="#logout">
+<span class="material-symbols-outlined text-xl" data-icon="logout">logout</span>
+<span>ออกจากระบบ</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Layout (Offset for desktop side nav) -->
+<div class="flex-1 flex flex-col md:pl-64 min-h-screen">
+<!-- Top Expiration Warning Banner -->
+<section aria-label="แถบแจ้งเตือนสถานะแพ็กเกจ" class="bg-amber-50 border-b border-amber-200 px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3 text-amber-900 shadow-sm">
+<div class="flex items-center gap-3 min-w-0">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-200/70 flex items-center justify-center text-amber-800">
+<span class="material-symbols-outlined text-lg" data-icon="warning">warning</span>
+</div>
+<p class="font-body-strong text-body-strong text-amber-950 text-sm md:text-base leading-snug">
+          แพ็กเกจการใช้งานจะหมดอายุในอีก <span class="font-bold text-amber-900 underline">5 วัน</span> (15 พ.ค. 2024) ต่ออายุเพื่อการใช้งานที่ไม่สะดุด
+        </p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-4 py-1.5 bg-primary-container text-on-primary-container hover:bg-amber-500 font-label-md text-label-md rounded-full shadow-sm active:scale-95 transition-all" type="button">
+          ต่ออายุแพ็กเกจ
+        </button>
+</div>
+</section>
+<!-- Top Bar Navigation / Header Bar -->
+<header class="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 w-full bg-surface-container-lowest border-b border-outline-variant shadow-sm">
+<div class="flex items-center gap-3">
+<!-- Mobile Drawer Toggle button -->
+<button aria-label="เปิดเมนู" class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-surface">สาขา สยามสแควร์ (เปิดบริการ)</h1>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5 animate-pulse"></span>
+              ระบบออนไลน์
+            </span>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant hidden sm:block">ระบบจัดการร้านอาหาร Kin-D POS Terminal v2.4</p>
+</div>
+</div>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-2 md:gap-3">
+<button aria-label="การแจ้งเตือน" class="p-2.5 rounded-full hover:bg-surface-container-low text-on-surface-variant relative active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary"></span>
+</button>
+<button aria-label="ประวัติใบเสร็จ" class="p-2.5 rounded-full hover:bg-surface-container-low text-on-surface-variant active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="receipt_long">receipt_long</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-1 hidden sm:block"></div>
+<div class="flex items-center gap-2.5 pl-1">
+<div class="w-9 h-9 rounded-full bg-primary-container/30 border border-primary-container text-on-primary-container flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-xl" data-icon="person">person</span>
+</div>
+<div class="hidden lg:flex flex-col text-left">
+<span class="font-body-strong text-body-strong text-sm">คุณสมชาย (ผู้จัดการ)</span>
+<span class="text-xs text-on-surface-variant">รหัสพนักงาน #M004</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Canvas Scroll Area -->
+<main class="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-12 space-y-6">
+<!-- Manager Greeting Bar & Quick Actions -->
+<section class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<h2 class="text-headline-lg font-headline-lg text-on-surface">สวัสดีครับ คุณสมชาย</h2>
+<span class="text-label-md font-label-md px-2.5 py-0.5 rounded-md bg-surface-container text-on-surface-variant">ผู้จัดการร้าน</span>
+</div>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-3 text-label-md font-label-md text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="calendar_today">calendar_today</span>
+              วันศุกร์ที่ 10 พฤษภาคม 2567
+            </span>
+<span>•</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              12:45:18 น. • กะกลางวัน
+            </span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-label-lg text-label-lg hover:bg-surface-container-low transition-colors flex items-center gap-2 active:scale-95 shadow-sm" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="refresh">refresh</span>
+<span>รีเฟรชข้อมูล</span>
+</button>
+<button class="h-12 px-5 rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg hover:brightness-95 transition-all flex items-center gap-2 shadow-sm active:scale-95" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="flash_on" style="font-variation-settings: 'FILL' 1;">flash_on</span>
+<span>เปิดโต๊ะใหม่ / รับออเดอร์ด่วน</span>
+</button>
+</div>
+</section>
+<!-- KPI Overview Grid (4 Cards: 2x2 on mobile, 4 in a row on Desktop) -->
+<section aria-label="ตัวชี้วัดสำคัญของร้าน" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- KPI 1: ยอดขายวันนี้ -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between mb-3">
+<span class="text-label-md font-label-md text-on-surface-variant">ยอดขายสุทธิวันนี้</span>
+<div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl" data-icon="payments">payments</span>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-price-total font-price-total text-on-surface tabular-nums">฿12,450</p>
+<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+<span class="material-symbols-outlined text-sm leading-none" data-icon="trending_up">trending_up</span>
+<span>+15% ↑ เทียบกับเมื่อวาน</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: ออเดอร์วันนี้ -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between mb-3">
+<span class="text-label-md font-label-md text-on-surface-variant">จำนวนออเดอร์ทั้งหมด</span>
+<div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl" data-icon="receipt_long">receipt_long</span>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-price-total font-price-total text-on-surface tabular-nums">48 บิล</p>
+<p class="text-label-md font-label-md text-on-surface-variant">เฉลี่ย ฿259 / บิล</p>
+</div>
+</div>
+<!-- KPI 3: ออเดอร์ค้างทำในครัว -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-1.5">
+<span class="text-label-md font-label-md text-on-surface-variant">กำลังปรุงในครัว</span>
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+</div>
+<div class="w-10 h-10 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl" data-icon="soup_kitchen">soup_kitchen</span>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-price-total font-price-total text-secondary tabular-nums flex items-baseline gap-2">
+              3 รายการ
+              <span class="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">เร่งด่วน</span>
+</p>
+<p class="text-label-md font-label-md text-on-surface-variant">เวลารอเฉลี่ย 8 นาที</p>
+</div>
+</div>
+<!-- KPI 4: สถานะโต๊ะปัจจุบัน -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between mb-3">
+<span class="text-label-md font-label-md text-on-surface-variant">สถานะโต๊ะปัจจุบัน</span>
+<div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xl" data-icon="table_restaurant">table_restaurant</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex items-baseline justify-between">
+<p class="text-price-total font-price-total text-on-surface tabular-nums">6/12 โต๊ะ</p>
+<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">50% มีลูกค้า</span>
+</div>
+<!-- Progress Meter -->
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-indigo-600 h-full rounded-full w-1/2"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Dual-Column Content Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column (Recent Orders - 7 cols on large desktop) -->
+<div class="lg:col-span-7 space-y-4">
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-4 md:p-6">
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="reorder">reorder</span>
+<div>
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface">ออเดอร์ล่าสุด</h3>
+<p class="text-xs text-on-surface-variant">อัปเดตเรียลไทม์จากระบบสั่งอาหาร</p>
+</div>
+</div>
+<a class="text-label-md font-label-md text-secondary hover:underline flex items-center gap-1" href="#all-orders">
+<span>ดูทั้งหมด</span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+<!-- Order Ticket List (5 Items) -->
+<div class="divide-y divide-outline-variant">
+<!-- Order 1: โต๊ะ 5 (กำลังทำ) -->
+<article class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container-low/50 px-2 rounded-lg transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-xl bg-amber-100 border border-amber-300 flex flex-col items-center justify-center text-amber-900 font-bold flex-shrink-0">
+<span class="text-xs uppercase">โต๊ะ</span>
+<span class="text-lg leading-none">5</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-body-strong text-body-strong text-on-surface">บิล #A0042</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                        12:38 น.
+                      </span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1">3 รายการ: ข้าวกะเพราหมูกรอบ, ต้มยำกุ้ง, ชาไทยเย็น</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-3 pl-15 sm:pl-0">
+<span class="text-price-display font-price-display text-on-surface tabular-nums">฿290</span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span>
+                    กำลังทำ
+                  </span>
+</div>
+</article>
+<!-- Order 2: โต๊ะ 2 (เสิร์ฟแล้ว) -->
+<article class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container-low/50 px-2 rounded-lg transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 flex flex-col items-center justify-center text-blue-900 font-bold flex-shrink-0">
+<span class="text-xs uppercase">โต๊ะ</span>
+<span class="text-lg leading-none">2</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-body-strong text-body-strong text-on-surface">บิล #A0041</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                        12:25 น.
+                      </span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1">2 รายการ: ผัดไทยกุ้งสด, ชาไทยเย็น</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-3 pl-15 sm:pl-0">
+<span class="text-price-display font-price-display text-on-surface tabular-nums">฿120</span>
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                    เสิร์ฟแล้ว
+                  </span>
+</div>
+</article>
+<!-- Order 3: โต๊ะ 8 (รอเช็คบิล) -->
+<article class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container-low/50 px-2 rounded-lg transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-xl bg-orange-100 border border-orange-300 flex flex-col items-center justify-center text-orange-950 font-bold flex-shrink-0">
+<span class="text-xs uppercase">โต๊ะ</span>
+<span class="text-lg leading-none">8</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-body-strong text-body-strong text-on-surface">บิล #A0040</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                        12:12 น.
+                      </span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1">4 รายการ: ปีกไก่ทอดเกลือ, ต้มยำ, ข้าวเปล่า (2)</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-3 pl-15 sm:pl-0">
+<span class="text-price-display font-price-display text-on-surface tabular-nums">฿310</span>
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-900 border border-orange-300">
+                    รอเช็คบิล
+                  </span>
+</div>
+</article>
+<!-- Order 4: โต๊ะ 1 (ชำระแล้ว) -->
+<article class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container-low/50 px-2 rounded-lg transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-xl bg-neutral-100 border border-neutral-300 flex flex-col items-center justify-center text-neutral-800 font-bold flex-shrink-0">
+<span class="text-xs uppercase">โต๊ะ</span>
+<span class="text-lg leading-none">1</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-body-strong text-body-strong text-on-surface">บิล #A0039</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                        11:58 น.
+                      </span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1">1 รายการ: ข้าวกะเพราหมูกรอบไข่ดาว</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-3 pl-15 sm:pl-0">
+<span class="text-price-display font-price-display text-on-surface tabular-nums">฿85</span>
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-neutral-100 text-neutral-700">
+                    ชำระแล้ว
+                  </span>
+</div>
+</article>
+<!-- Order 5: โต๊ะ 3 (ชำระแล้ว) -->
+<article class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container-low/50 px-2 rounded-lg transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-xl bg-neutral-100 border border-neutral-300 flex flex-col items-center justify-center text-neutral-800 font-bold flex-shrink-0">
+<span class="text-xs uppercase">โต๊ะ</span>
+<span class="text-lg leading-none">3</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-body-strong text-body-strong text-on-surface">บิล #A0038</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                        11:45 น.
+                      </span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1">2 รายการ: ผัดซีอิ๊วหมูนุ่ม, ชามะนาวเย็น</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-3 pl-15 sm:pl-0">
+<span class="text-price-display font-price-display text-on-surface tabular-nums">฿135</span>
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-neutral-100 text-neutral-700">
+                    ชำระแล้ว
+                  </span>
+</div>
+</article>
+</div>
+</div>
+</div>
+<!-- Right Column (Best Sellers Top 5 & Payment Distribution - 5 cols on large desktop) -->
+<div class="lg:col-span-5 space-y-6">
+<!-- Best Sellers Card -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-4 md:p-6">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant">
+<div>
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface">เมนูขายดีวันนี้ (Top 5)</h3>
+<p class="text-xs text-on-surface-variant">จัดอันดับตามจำนวนจานที่สั่ง</p>
+</div>
+<!-- Period Filter Switch -->
+<div class="inline-flex p-1 bg-surface-container rounded-lg text-xs font-medium">
+<button class="px-2.5 py-1 bg-surface-container-lowest text-on-surface rounded shadow-sm font-semibold">วันนี้</button>
+<button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface">สัปดาห์นี้</button>
+</div>
+</div>
+<!-- Top 5 List with Progress Bars -->
+<div class="pt-3 space-y-4">
+<!-- Item #1 -->
+<div>
+<div class="flex items-center justify-between text-sm mb-1">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center text-xs flex-shrink-0">1</span>
+<span class="font-body-strong text-body-strong text-on-surface">ข้าวกะเพราหมูกรอบไข่ดาว</span>
+</div>
+<div class="text-right">
+<span class="font-bold tabular-nums">28 จาน</span>
+<span class="text-xs text-on-surface-variant ml-1">(฿2,940)</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+<!-- Item #2 -->
+<div>
+<div class="flex items-center justify-between text-sm mb-1">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-amber-400 text-amber-950 font-bold flex items-center justify-center text-xs flex-shrink-0">2</span>
+<span class="font-body-strong text-body-strong text-on-surface">ต้มยำกุ้งแม่น้ำน้ำข้น</span>
+</div>
+<div class="text-right">
+<span class="font-bold tabular-nums">18 ชาม</span>
+<span class="text-xs text-on-surface-variant ml-1">(฿2,700)</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 65%;"></div>
+</div>
+</div>
+<!-- Item #3 -->
+<div>
+<div class="flex items-center justify-between text-sm mb-1">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-amber-300 text-amber-950 font-bold flex items-center justify-center text-xs flex-shrink-0">3</span>
+<span class="font-body-strong text-body-strong text-on-surface">ชาไทยเย็นโบราณ</span>
+</div>
+<div class="text-right">
+<span class="font-bold tabular-nums">34 แก้ว</span>
+<span class="text-xs text-on-surface-variant ml-1">(฿1,190)</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%;"></div>
+</div>
+</div>
+<!-- Item #4 -->
+<div>
+<div class="flex items-center justify-between text-sm mb-1">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant font-bold flex items-center justify-center text-xs flex-shrink-0">4</span>
+<span class="font-body-strong text-body-strong text-on-surface">ผัดไทยกุ้งสดห่อไข่</span>
+</div>
+<div class="text-right">
+<span class="font-bold tabular-nums">14 จาน</span>
+<span class="text-xs text-on-surface-variant ml-1">(฿1,190)</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 50%;"></div>
+</div>
+</div>
+<!-- Item #5 -->
+<div>
+<div class="flex items-center justify-between text-sm mb-1">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant font-bold flex items-center justify-center text-xs flex-shrink-0">5</span>
+<span class="font-body-strong text-body-strong text-on-surface">ไก่ทอดเกลือสมุนไพร</span>
+</div>
+<div class="text-right">
+<span class="font-bold tabular-nums">12 จาน</span>
+<span class="text-xs text-on-surface-variant ml-1">(฿1,080)</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 42%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Summary Status Widget: Payment Channels & Staff on Duty -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-4 md:p-6 space-y-4">
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="pie_chart">pie_chart</span>
+<span>สัดส่วนการชำระเงินวันนี้</span>
+</h3>
+<!-- Combined Bar Visual -->
+<div class="w-full h-4 bg-surface-container rounded-full flex overflow-hidden">
+<div class="bg-blue-600 h-full" style="width: 65%;" title="พร้อมเพย์ 65%"></div>
+<div class="bg-emerald-500 h-full" style="width: 35%;" title="เงินสด 35%"></div>
+</div>
+<!-- Legend Info -->
+<div class="grid grid-cols-2 gap-3 pt-1">
+<div class="flex items-start gap-2 p-2 rounded-lg bg-blue-50/60 border border-blue-100">
+<span class="w-3 h-3 rounded-full bg-blue-600 mt-1 flex-shrink-0"></span>
+<div class="flex flex-col">
+<span class="text-xs text-blue-900 font-medium">PromptPay QR (65%)</span>
+<span class="text-sm font-bold text-blue-950 tabular-nums">฿8,090</span>
+</div>
+</div>
+<div class="flex items-start gap-2 p-2 rounded-lg bg-emerald-50/60 border border-emerald-100">
+<span class="w-3 h-3 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></span>
+<div class="flex flex-col">
+<span class="text-xs text-emerald-900 font-medium">เงินสด (35%)</span>
+<span class="text-sm font-bold text-emerald-950 tabular-nums">฿4,360</span>
+</div>
+</div>
+</div>
+<!-- Staff Status Bar -->
+<div class="pt-3 border-t border-outline-variant flex items-center justify-between text-xs text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="badge">badge</span>
+<span>พนักงานประจำการขณะนี้:</span>
+<strong class="text-on-surface">4 คน</strong>
+</span>
+<span class="bg-surface-container px-2 py-0.5 rounded text-neutral-700">แคชเชียร์ 1 • เสิร์ฟ 2 • เชฟ 1</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Mobile Bottom Navigation Bar (Visible on mobile/tablet viewports, suppressed on md:flex screens) -->
+<nav aria-label="แถบนำทางล่าง" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest border-t border-outline-variant shadow-lg px-2 py-1.5 flex items-center justify-around">
+<!-- Tab 1: หน้าแรก / แดชบอร์ด (Active) -->
+<a aria-current="page" class="flex flex-col items-center justify-center py-1 px-3 text-primary font-bold transition-transform active:scale-90" href="#dashboard">
+<span class="material-symbols-outlined text-2xl" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-xs tracking-tight">หน้าแรก</span>
+</a>
+<!-- Tab 2: ออเดอร์ -->
+<a class="flex flex-col items-center justify-center py-1 px-3 text-on-surface-variant hover:text-on-surface relative transition-transform active:scale-90" href="#orders">
+<span class="material-symbols-outlined text-2xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-xs tracking-tight">ออเดอร์</span>
+<span class="absolute top-1 right-3 w-2 h-2 rounded-full bg-secondary"></span>
+</a>
+<!-- Tab 3: Quick POS Action (Center highlight button) -->
+<a aria-label="รับออเดอร์" class="flex flex-col items-center justify-center -mt-5 transition-transform active:scale-95" href="#quick-pos">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-2xl" data-icon="point_of_sale" style="font-variation-settings: 'FILL' 1;">point_of_sale</span>
+</div>
+<span class="text-xs font-semibold text-primary mt-0.5">POS</span>
+</a>
+<!-- Tab 4: โต๊ะ -->
+<a class="flex flex-col items-center justify-center py-1 px-3 text-on-surface-variant hover:text-on-surface transition-transform active:scale-90" href="#tables">
+<span class="material-symbols-outlined text-2xl" data-icon="table_restaurant">table_restaurant</span>
+<span class="text-xs tracking-tight">โต๊ะ</span>
+</a>
+<!-- Tab 5: เพิ่มเติม -->
+<a class="flex flex-col items-center justify-center py-1 px-3 text-on-surface-variant hover:text-on-surface transition-transform active:scale-90" href="#more">
+<span class="material-symbols-outlined text-2xl" data-icon="menu">menu</span>
+<span class="text-xs tracking-tight">เพิ่มเติม</span>
+</a>
+</nav>
+<!-- Live Micro-interaction for POS Clock -->
+<script>
+    // Lightweight vanilla JS clock updater for POS floor authenticity
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Kin-D POS Terminal Ready. Loaded in 2ms.');
+    });
+  </script>
+</body></html>

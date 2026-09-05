@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D POS โต๊ะ 4 (กะเช้า) - คิวออเดอร์ Realtime</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Thai Google Font IBM Plex Sans Thai -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-container": "#fd651e",
+            "tertiary": "#0053db",
+            "primary-container": "#f59e0b",
+            "on-primary": "#ffffff",
+            "on-primary-fixed": "#2a1700",
+            "primary": "#855300",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed": "#dbe1ff",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "on-primary-fixed-variant": "#653e00",
+            "primary-fixed-dim": "#ffb95f",
+            "error": "#ba1a1a",
+            "inverse-on-surface": "#f2f0f0",
+            "on-primary-container": "#613b00",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#efeded",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "on-surface": "#1b1c1c",
+            "primary-fixed": "#ffddb8",
+            "surface": "#fbf9f9",
+            "surface-variant": "#e3e2e2",
+            "surface-container-high": "#e9e8e7",
+            "surface-dim": "#dbdad9",
+            "on-secondary-container": "#571a00",
+            "on-background": "#1b1c1c",
+            "outline-variant": "#d8c3ad",
+            "on-surface-variant": "#534434",
+            "surface-tint": "#855300",
+            "tertiary-container": "#94aeff",
+            "on-tertiary-fixed": "#00174b",
+            "surface-container-highest": "#e3e2e2",
+            "secondary-fixed": "#ffdbce",
+            "inverse-primary": "#ffb95f",
+            "outline": "#867461",
+            "on-tertiary-container": "#003ba1",
+            "on-secondary-fixed": "#370e00",
+            "on-secondary": "#ffffff",
+            "background": "#fbf9f9",
+            "surface-bright": "#fbf9f9",
+            "inverse-surface": "#303031",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "error-container": "#ffdad6",
+            "secondary-fixed-dim": "#ffb599",
+            "surface-container-low": "#f5f3f3",
+            "secondary": "#a73a00",
+            "tertiary-fixed-dim": "#b4c5ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "card-p-mobile": "16px",
+            "min-target": "48px",
+            "grid-base": "4px",
+            "space-2": "8px",
+            "space-6": "24px",
+            "space-8": "32px",
+            "space-5": "20px",
+            "space-1": "4px",
+            "space-3": "12px",
+            "space-4": "16px"
+          },
+          "fontFamily": {
+            "body-strong": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-sm": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-total": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-display": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-md": ["\"IBM Plex Sans Thai\", sans-serif"]
+          },
+          "fontSize": {
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "price-total": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Custom smooth pulsing animation for new orders */
+    @keyframes pulse-ring {
+      0% {
+        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.5);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(234, 88, 12, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0);
+      }
+    }
+
+    .pulse-urgent {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col antialiased select-none pb-28">
+<!-- ========================================== -->
+<!-- TOP APP BAR (Shared Components JSON Anchor) -->
+<!-- ========================================== -->
+<header class="sticky top-0 z-40 bg-surface shadow-sm border-b border-outline-variant">
+<div class="flex justify-between items-center w-full px-space-4 py-space-2 max-w-[390px] md:max-w-4xl mx-auto">
+<!-- Leading Icon / Table Badge -->
+<div class="flex items-center gap-space-2">
+<div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-primary active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="table_restaurant">table_restaurant</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary tracking-tight">Kin-D POS โต๊ะ 4 (กะเช้า)</h1>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-label-md font-label-md text-emerald-700">เชื่อมต่ออยู่ (Realtime)</span>
+</div>
+</div>
+</div>
+<!-- Trailing Controls: Mute Toggle & Refresh & Bill Icon -->
+<div class="flex items-center gap-1">
+<!-- Sound Alert Toggle -->
+<button aria-label="เปิด/ปิดเสียงเตือน" class="w-10 h-10 rounded-xl bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant active:scale-95 transition-all" id="soundToggleBtn" onclick="toggleSound()">
+<span class="material-symbols-outlined text-primary" data-icon="volume_up" id="soundIcon">volume_up</span>
+</button>
+<!-- Refresh Button -->
+<button aria-label="รีเฟรชออเดอร์" class="w-10 h-10 rounded-xl bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant active:scale-95 transition-all" onclick="refreshOrders()">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="refresh">refresh</span>
+</button>
+<!-- Trailing JSON Action -->
+<button aria-label="ใบเสร็จ / บิล" class="w-10 h-10 rounded-xl bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant active:scale-95 transition-all ml-1">
+<span class="material-symbols-outlined text-primary" data-icon="receipt_long">receipt_long</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ========================================== -->
+<!-- SUB-HEADER & FILTER TABS                   -->
+<!-- ========================================== -->
+<section class="bg-surface-container-lowest border-b border-outline-variant sticky top-[61px] z-30 shadow-sm">
+<div class="max-w-[390px] md:max-w-4xl mx-auto px-space-4 py-space-2">
+<!-- Kitchen Status Banner & Sound notification tip -->
+<div class="flex items-center justify-between pb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="skillet">skillet</span>
+<span class="text-body-strong font-body-strong text-on-surface">คิวครัว &amp; บิลรอเสิร์ฟ</span>
+</div>
+<div class="text-xs font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1" id="soundToast">
+<span class="material-symbols-outlined text-xs" data-icon="notifications_active">notifications_active</span>
+          เสียงเตือนพร้อม
+        </div>
+</div>
+<!-- Horizontal Scrollable Tabs -->
+<div class="flex items-center gap-space-2 overflow-x-auto no-scrollbar py-1 text-label-md font-label-md">
+<!-- Tab 1: All -->
+<button class="filter-tab active flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-primary-container text-on-primary-container font-semibold whitespace-nowrap shadow-sm min-h-min-target transition-all" onclick="filterTab('all', this)">
+<span>ทั้งหมด</span>
+<span class="px-2 py-0.5 text-xs rounded-full bg-on-primary-container text-surface-container-lowest font-bold">12</span>
+</button>
+<!-- Tab 2: Pending (Waiting acceptance) -->
+<button class="filter-tab flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container text-on-surface-variant whitespace-nowrap border border-outline-variant/60 min-h-min-target hover:bg-surface-container-high transition-all" onclick="filterTab('pending', this)">
+<span>รอรับ</span>
+<span class="px-2 py-0.5 text-xs rounded-full bg-error text-on-error font-bold animate-pulse">3</span>
+</button>
+<!-- Tab 3: Cooking -->
+<button class="filter-tab flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container text-on-surface-variant whitespace-nowrap border border-outline-variant/60 min-h-min-target hover:bg-surface-container-high transition-all" onclick="filterTab('cooking', this)">
+<span>กำลังทำ</span>
+<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-900 font-bold">5</span>
+</button>
+<!-- Tab 4: Served -->
+<button class="filter-tab flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container text-on-surface-variant whitespace-nowrap border border-outline-variant/60 min-h-min-target hover:bg-surface-container-high transition-all" onclick="filterTab('served', this)">
+<span>เสิร์ฟแล้ว</span>
+<span class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-900 font-bold">4</span>
+</button>
+</div>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- MAIN ORDERS FEED                           -->
+<!-- ========================================== -->
+<main class="flex-1 w-full max-w-[390px] md:max-w-4xl mx-auto px-space-4 py-space-4">
+<!-- Kitchen Queue Progress Strip -->
+<div class="mb-4 bg-surface-container-lowest rounded-xl p-3 border border-outline-variant/50 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="speed">speed</span>
+<div>
+<p class="text-xs text-on-surface-variant font-medium">เวลารอเฉลี่ยปัจจุบัน</p>
+<p class="text-body-strong font-body-strong text-on-surface font-bold">11 นาที <span class="text-xs text-emerald-700 font-normal">(ปกติ)</span></p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs text-on-surface-variant font-medium">รายการอาหารทั้งหมด</p>
+<p class="text-body-strong font-body-strong text-secondary font-bold">28 จาน</p>
+</div>
+</div>
+<!-- Cards Container -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-4" id="ordersList">
+<!-- CARD 1: รอรับ (ใหม่ล่าสุด - มี Pulse Ring & Urgent Ping) -->
+<article class="order-card relative bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden pulse-urgent" data-status="pending">
+<!-- Top color border strip (ส้มแดง สำหรับรอรับ) -->
+<div class="h-1.5 w-full bg-gradient-to-r from-red-500 to-amber-500"></div>
+<div class="p-space-4">
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-2 border-b border-outline-variant/50 pb-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md font-bold text-on-surface">โต๊ะ 5</span>
+<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 animate-bounce">ออเดอร์ใหม่!</span>
+</div>
+<p class="text-xs text-on-surface-variant font-mono mt-0.5">บิล #A0045 • 12:28 น.</p>
+</div>
+<!-- Wait time badge + Order Source -->
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                รอ 3 นาที
+              </span>
+<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">
+<span class="material-symbols-outlined text-xs" data-icon="qr_code_scanner">qr_code_scanner</span>
+                ลูกค้าสั่งเอง
+              </span>
+</div>
+</div>
+<!-- Items List -->
+<div class="py-3 space-y-2.5">
+<!-- Item 1 -->
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">1×</span> ข้าวกะเพราหมูกรอบ
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(ไข่ดาวกรอบ, เผ็ดมาก)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿95</span>
+</div>
+<!-- Item 2 -->
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">1×</span> ต้มยำกุ้งแม่น้ำน้ำข้น
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(รสจัดจ้าน, หม้อไฟเล็ก)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿180</span>
+</div>
+<!-- Item 3 -->
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">2×</span> ชาไทยเย็นโบราณ
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(หวานน้อย 50%)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿90</span>
+</div>
+<!-- Kitchen Note Box -->
+<div class="mt-2.5 p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 flex items-start gap-2">
+<span class="material-symbols-outlined text-amber-700 text-base flex-shrink-0 mt-0.5" data-icon="edit_note">edit_note</span>
+<p class="text-xs text-amber-900 font-medium">หมายเหตุ: กะเพราผัดแห้งๆ ไม่ใส่น้ำตาล, แยกน้ำแข็งชาไทย</p>
+</div>
+</div>
+<!-- Total & Card Footer Actions -->
+<div class="pt-3 border-t border-outline-variant/50">
+<div class="flex justify-between items-baseline mb-3">
+<span class="text-xs text-on-surface-variant font-medium">จำนวน 3 รายการ (4 จาน)</span>
+<div class="text-right">
+<span class="text-xs text-on-surface-variant mr-1">ยอดรวม</span>
+<span class="text-price-display font-price-display text-secondary font-bold">฿365</span>
+</div>
+</div>
+<!-- Action Buttons for 'Pending' -->
+<div class="grid grid-cols-2 gap-2">
+<button class="h-12 min-h-min-target rounded-xl border border-outline-variant bg-surface-container-low hover:bg-red-50 hover:text-red-700 text-on-surface font-semibold text-label-lg active:scale-95 transition-all flex items-center justify-center gap-1.5" onclick="rejectOrder(this)">
+<span class="material-symbols-outlined text-lg" data-icon="close">close</span>
+                ยกเลิก
+              </button>
+<button class="h-12 min-h-min-target rounded-xl bg-primary-container hover:bg-amber-600 text-on-primary-container font-bold text-label-lg active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1.5" onclick="acceptOrder(this)">
+<span class="material-symbols-outlined text-lg" data-icon="check_circle">check_circle</span>
+                รับออเดอร์
+              </button>
+</div>
+</div>
+</div>
+</article>
+<!-- CARD 2: กำลังทำ (เกิน 15 นาที -> ตัวหนังสือเตือนสีแดงสด) -->
+<article class="order-card relative bg-surface-container-lowest rounded-2xl border-2 border-red-300 shadow-sm overflow-hidden" data-status="cooking">
+<!-- Top color border strip (แดงเตือน เกินเวลามาตรฐาน) -->
+<div class="h-1.5 w-full bg-red-600"></div>
+<div class="p-space-4">
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-2 border-b border-outline-variant/50 pb-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md font-bold text-on-surface">โต๊ะ 2</span>
+<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">ทำอยู่</span>
+</div>
+<p class="text-xs text-on-surface-variant font-mono mt-0.5">บิล #A0042 • 12:12 น.</p>
+</div>
+<!-- Wait time badge Over 15 mins (Urgent Red Warning) -->
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700 border border-red-300 animate-pulse">
+<span class="material-symbols-outlined text-sm" data-icon="alarm">alarm</span>
+                รอ 18 นาที (ช้า)
+              </span>
+<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-100">
+<span class="material-symbols-outlined text-xs" data-icon="badge">badge</span>
+                พนักงานสั่ง (กานต์)
+              </span>
+</div>
+</div>
+<!-- Items List -->
+<div class="py-3 space-y-2.5">
+<!-- Item 1 -->
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">1×</span> ปลากะพงทอดน้ำปลา
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(ยำมะม่วงรสเปรี้ยวนำ)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿380</span>
+</div>
+<!-- Item 2 -->
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">2×</span> ข้าวผัดปูจานกลาง
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(พริกน้ำปลา 3 ถ้วย)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿260</span>
+</div>
+<!-- Item 3 -->
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">1×</span> แกงส้มชะอมไข่กุ้งสด
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(เผ็ดกลาง)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿190</span>
+</div>
+</div>
+<!-- Total & Card Footer Actions -->
+<div class="pt-3 border-t border-outline-variant/50">
+<div class="flex justify-between items-baseline mb-3">
+<span class="text-xs text-red-600 font-bold">เตือน: เกินกำหนดเวลา 15 นาที</span>
+<div class="text-right">
+<span class="text-xs text-on-surface-variant mr-1">ยอดรวม</span>
+<span class="text-price-display font-price-display text-secondary font-bold">฿830</span>
+</div>
+</div>
+<!-- Action Button: 'กำลังทำ' -> 'เสิร์ฟแล้ว' (Emerald Button) -->
+<button class="w-full h-12 min-h-min-target rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-label-lg active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2" onclick="serveOrder(this)">
+<span class="material-symbols-outlined text-xl" data-icon="room_service">room_service</span>
+              เสิร์ฟครบแล้ว
+            </button>
+</div>
+</div>
+</article>
+<!-- CARD 3: กำลังทำ (เวลาปกติ 8 นาที) -->
+<article class="order-card relative bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden" data-status="cooking">
+<!-- Top color border strip (อำพัน/เหลือง สำหรับกำลังทำ) -->
+<div class="h-1.5 w-full bg-amber-500"></div>
+<div class="p-space-4">
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-2 border-b border-outline-variant/50 pb-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md font-bold text-on-surface">โต๊ะ 8</span>
+<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">ทำอยู่</span>
+</div>
+<p class="text-xs text-on-surface-variant font-mono mt-0.5">บิล #A0044 • 12:22 น.</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                รอ 8 นาที
+              </span>
+<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">
+<span class="material-symbols-outlined text-xs" data-icon="qr_code_scanner">qr_code_scanner</span>
+                ลูกค้าสั่งเอง
+              </span>
+</div>
+</div>
+<!-- Items List -->
+<div class="py-3 space-y-2.5">
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">2×</span> ผัดไทยกุ้งสดห่อไข่
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(ไม่ใส่ถั่วงอกดิบ, ถั่วลิสงแยก)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿190</span>
+</div>
+<div class="flex justify-between items-start">
+<div class="flex-1 pr-2">
+<p class="text-body-strong font-body-strong text-on-surface">
+<span class="font-bold text-primary mr-1">1×</span> ส้มตำไทยไข่เค็ม
+                </p>
+<p class="text-xs text-on-surface-variant mt-0.5 pl-5">(เผ็ด 2 เม็ด)</p>
+</div>
+<span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿85</span>
+</div>
+</div>
+<!-- Total & Card Footer Actions -->
+<div class="pt-3 border-t border-outline-variant/50">
+<div class="flex justify-between items-baseline mb-3">
+<span class="text-xs text-on-surface-variant font-medium">รวม 2 รายการ</span>
+<div class="text-right">
+<span class="text-xs text-on-surface-variant mr-1">ยอดรวม</span>
+<span class="text-price-display font-price-display text-secondary font-bold">฿275</span>
+</div>
+</div>
+<button class="w-full h-12 min-h-min-target rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-label-lg active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2" onclick="serveOrder(this)">
+<span class="material-symbols-outlined text-xl" data-icon="room_service">room_service</span>
+              เสิร์ฟครบแล้ว
+            </button>
+</div>
+</div>
+</article>
+<!-- CARD 4: เสิร์ฟแล้ว (รอเช็คบิล) -->
+<article class="order-card relative bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden opacity-95" data-status="served">
+<!-- Top color border strip (เขียว เสิร์ฟครบ) -->
+<div class="h-1.5 w-full bg-emerald-500"></div>
+<div class="p-space-4">
+<!-- Card Header -->
+<div class="flex items-start justify-between gap-2 border-b border-outline-variant/50 pb-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md font-bold text-on-surface">โต๊ะ 12</span>
+<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">เสิร์ฟแล้ว</span>
+</div>
+<p class="text-xs text-on-surface-variant font-mono mt-0.5">บิล #A0039 • 11:55 น.</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-xs" data-icon="done_all">done_all</span>
+                ครบทุกจาน
+              </span>
+<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-100">
+<span class="material-symbols-outlined text-xs" data-icon="badge">badge</span>
+                พนักงานสั่ง (สมชาย)
+              </span>
+</div>
+</div>
+<!-- Items List Preview -->
+<div class="py-3 space-y-2">
+<div class="flex justify-between items-start text-on-surface-variant">
+<span class="text-body-md font-body-md">2× ข้าวหมูกรอบทอดน้ำปลา</span>
+<span class="tabular-nums font-semibold">฿160</span>
+</div>
+<div class="flex justify-between items-start text-on-surface-variant">
+<span class="text-body-md font-body-md">1× ต้มแซ่บกระดูกอ่อน</span>
+<span class="tabular-nums font-semibold">฿150</span>
+</div>
+<div class="flex justify-between items-start text-on-surface-variant">
+<span class="text-body-md font-body-md">2× ชามะนาวเย็น</span>
+<span class="tabular-nums font-semibold">฿90</span>
+</div>
+</div>
+<!-- Total & Card Footer Actions -->
+<div class="pt-3 border-t border-outline-variant/50">
+<div class="flex justify-between items-baseline mb-3">
+<span class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle">check_circle</span>
+                ลูกค้ากำลังรับประทาน
+              </span>
+<div class="text-right">
+<span class="text-xs text-on-surface-variant mr-1">ยอดรวม</span>
+<span class="text-price-display font-price-display text-secondary font-bold">฿400</span>
+</div>
+</div>
+<!-- Action Button: 'เสิร์ฟแล้ว' -> 'เก็บเงิน / เรียกเช็คบิล' (Blue Button) -->
+<button class="w-full h-12 min-h-min-target rounded-xl bg-tertiary hover:bg-blue-700 text-white font-bold text-label-lg active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2" onclick="requestPayment(this)">
+<span class="material-symbols-outlined text-xl" data-icon="payments">payments</span>
+              เรียกเช็คบิล / ชำระเงิน (฿400)
+            </button>
+</div>
+</div>
+</article>
+</div>
+<!-- Empty State (ซ่อนไว้สำหรับสลับโหมดจำลอง) -->
+<div class="hidden flex-col items-center justify-center text-center p-8 bg-surface-container-lowest rounded-2xl border border-outline-variant my-6" id="emptyState">
+<div class="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center text-primary mb-3">
+<span class="material-symbols-outlined text-4xl" data-icon="dinner_dining">dinner_dining</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface font-bold">ยังไม่มีออเดอร์ในสถานะนี้</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1 max-w-xs">
+        ครัวเคลียร์คิวเรียบร้อย พร้อมรับออเดอร์ใหม่จากลูกค้าทันที
+      </p>
+<button class="mt-4 px-5 py-2.5 rounded-xl bg-primary-container text-on-primary-container font-semibold text-sm active:scale-95" onclick="filterTab('all', document.querySelector('.filter-tab'))">
+        ดูออเดอร์ทั้งหมด
+      </button>
+</div>
+<!-- Quick Simulation Controls (Floor Staff Testing Tool) -->
+<div class="mt-8 pt-4 border-t border-outline-variant/60 flex flex-wrap items-center justify-between gap-2 text-xs text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="tune">tune</span>
+<span>โหมดจำลองสถานการณ์ POS:</span>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface active:scale-95 transition-all border border-outline-variant font-medium" onclick="simulateIncomingOrder()">
+          + จำลองออเดอร์ใหม่
+        </button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface active:scale-95 transition-all border border-outline-variant font-medium" onclick="toggleEmptyView()">
+          สลับดู Empty State
+        </button>
+</div>
+</div>
+</main>
+<!-- ========================================== -->
+<!-- BOTTOM NAV BAR (Shared Components JSON)   -->
+<!-- ========================================== -->
+<!-- Prohibit top border lines, using tonal shift and shadow -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest shadow-sm border-t border-outline-variant">
+<div class="flex justify-around items-center px-space-2 py-space-1 max-w-[390px] md:max-w-4xl mx-auto">
+<!-- Destination 1: สั่งอาหาร -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-space-3 py-space-1 min-h-min-target min-w-min-target hover:bg-surface-container active:scale-95 transition-transform duration-150" href="#ordering">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="text-label-md font-label-md mt-0.5">สั่งอาหาร</span>
+</a>
+<!-- Destination 2: รายการบิล (ACTIVE STATE - Primary Queue Screen) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-space-3 py-space-1 min-h-min-target min-w-min-target shadow-sm active:scale-95 transition-transform duration-150" href="#bills">
+<span class="material-symbols-outlined font-bold" data-icon="receipt">receipt</span>
+<span class="text-label-md font-label-md font-bold mt-0.5">รายการบิล</span>
+</a>
+<!-- Destination 3: สถานะโต๊ะ -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-space-3 py-space-1 min-h-min-target min-w-min-target hover:bg-surface-container active:scale-95 transition-transform duration-150" href="#tables">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="text-label-md font-label-md mt-0.5">สถานะโต๊ะ</span>
+</a>
+<!-- Destination 4: ตั้งค่ากะ -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-space-3 py-space-1 min-h-min-target min-w-min-target hover:bg-surface-container active:scale-95 transition-transform duration-150" href="#settings">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="text-label-md font-label-md mt-0.5">ตั้งค่ากะ</span>
+</a>
+</div>
+</nav>
+<!-- Sound Audio Simulator Script & Interactive Actions -->
+<script>
+    let soundEnabled = true;
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('soundIcon');
+      const toast = document.getElementById('soundToast');
+      if (soundEnabled) {
+        icon.textContent = 'volume_up';
+        icon.setAttribute('data-icon', 'volume_up');
+        toast.innerHTML = '<span class="material-symbols-outlined text-xs">notifications_active</span> เสียงเตือนเปิด';
+        toast.className = "text-xs font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1";
+      } else {
+        icon.textContent = 'volume_off';
+        icon.setAttribute('data-icon', 'volume_off');
+        toast.innerHTML = '<span class="material-symbols-outlined text-xs">notifications_off</span> ปิดเสียงเตือนแล้ว';
+        toast.className = "text-xs font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-300 flex items-center gap-1";
+      }
+    }
+
+    function refreshOrders() {
+      const main = document.getElementById('ordersList');
+      main.classList.add('opacity-40');
+      setTimeout(() => {
+        main.classList.remove('opacity-40');
+      }, 350);
+    }
+
+    function filterTab(status, element) {
+      // update tab styles
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.className = "filter-tab flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container text-on-surface-variant whitespace-nowrap border border-outline-variant/60 min-h-min-target hover:bg-surface-container-high transition-all";
+      });
+      element.className = "filter-tab active flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-primary-container text-on-primary-container font-semibold whitespace-nowrap shadow-sm min-h-min-target transition-all";
+
+      const cards = document.querySelectorAll('.order-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        if (status === 'all' || card.getAttribute('data-status') === status) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      const empty = document.getElementById('emptyState');
+      if (visibleCount === 0) {
+        empty.classList.remove('hidden');
+        empty.classList.add('flex');
+      } else {
+        empty.classList.add('hidden');
+        empty.classList.remove('flex');
+      }
+    }
+
+    function acceptOrder(btn) {
+      const card = btn.closest('.order-card');
+      card.classList.remove('pulse-urgent');
+      card.setAttribute('data-status', 'cooking');
+      
+      // change header badge
+      const headerDiv = card.querySelector('.text-headline-md').parentElement;
+      const oldBadge = headerDiv.querySelector('span:nth-child(2)');
+      if (oldBadge) {
+        oldBadge.className = "px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800";
+        oldBadge.textContent = "ทำอยู่";
+      }
+
+      // update action button to Serve
+      const footer = btn.parentElement;
+      footer.innerHTML = `
+        <button onclick="serveOrder(this)" class="w-full h-12 min-h-min-target rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-label-lg active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-xl" data-icon="room_service">room_service</span>
+          เสิร์ฟครบแล้ว
+        </button>
+      `;
+    }
+
+    function rejectOrder(btn) {
+      if (confirm("ยืนยันยกเลิกออเดอร์นี้หรือไม่?")) {
+        const card = btn.closest('.order-card');
+        card.remove();
+      }
+    }
+
+    function serveOrder(btn) {
+      const card = btn.closest('.order-card');
+      card.setAttribute('data-status', 'served');
+      
+      const headerDiv = card.querySelector('.text-headline-md').parentElement;
+      const oldBadge = headerDiv.querySelector('span:nth-child(2)');
+      if (oldBadge) {
+        oldBadge.className = "px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800";
+        oldBadge.textContent = "เสิร์ฟแล้ว";
+      }
+
+      btn.parentElement.innerHTML = `
+        <button onclick="requestPayment(this)" class="w-full h-12 min-h-min-target rounded-xl bg-tertiary hover:bg-blue-700 text-white font-bold text-label-lg active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-xl" data-icon="payments">payments</span>
+          เรียกเช็คบิล / รับชำระ
+        </button>
+      `;
+    }
+
+    function requestPayment(btn) {
+      alert("เปิดหน้าต่างชำระเงินสำหรับโต๊ะนี้ (เชื่อมต่อระบบแคชเชียร์ Kin-D POS)");
+    }
+
+    function toggleEmptyView() {
+      const list = document.getElementById('ordersList');
+      const empty = document.getElementById('emptyState');
+      if (list.classList.contains('hidden')) {
+        list.classList.remove('hidden');
+        empty.classList.add('hidden');
+        empty.classList.remove('flex');
+      } else {
+        list.classList.add('hidden');
+        empty.classList.remove('hidden');
+        empty.classList.add('flex');
+      }
+    }
+
+    function simulateIncomingOrder() {
+      const list = document.getElementById('ordersList');
+      list.classList.remove('hidden');
+      document.getElementById('emptyState').classList.add('hidden');
+      
+      const newCard = document.createElement('article');
+      newCard.setAttribute('data-status', 'pending');
+      newCard.className = "order-card relative bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden pulse-urgent animate-bounce";
+      newCard.innerHTML = `
+        <div class="h-1.5 w-full bg-gradient-to-r from-red-500 to-amber-500"></div>
+        <div class="p-space-4">
+          <div class="flex items-start justify-between gap-2 border-b border-outline-variant/50 pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-headline-md font-headline-md font-bold text-on-surface">โต๊ะ 9</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 animate-pulse">เพิ่งสั่ง!</span>
+              </div>
+              <p class="text-xs text-on-surface-variant font-mono mt-0.5">บิล #A0046 • เมื่อสักครู่</p>
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              <span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                <span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                รอ 1 นาที
+              </span>
+              <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">
+                <span class="material-symbols-outlined text-xs" data-icon="qr_code_scanner">qr_code_scanner</span>
+                ลูกค้าสั่งเอง
+              </span>
+            </div>
+          </div>
+          <div class="py-3 space-y-2">
+            <div class="flex justify-between items-start">
+              <p class="text-body-strong font-body-strong text-on-surface">
+                <span class="font-bold text-primary mr-1">1×</span> สุกี้แห้งทะเลรวมมิตร
+              </p>
+              <span class="text-body-strong font-body-strong tabular-nums text-on-surface">฿120</span>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-outline-variant/50">
+            <div class="flex justify-between items-baseline mb-3">
+              <span class="text-xs text-on-surface-variant font-medium">รวม 1 รายการ</span>
+              <span class="text-price-display font-price-display text-secondary font-bold">฿120</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="rejectOrder(this)" class="h-12 min-h-min-target rounded-xl border border-outline-variant bg-surface-container-low text-on-surface font-semibold text-label-lg active:scale-95 transition-all flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-base" data-icon="close">close</span> ยกเลิก
+              </button>
+              <button onclick="acceptOrder(this)" class="h-12 min-h-min-target rounded-xl bg-primary-container text-on-primary-container font-bold text-label-lg active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-base" data-icon="check_circle">check_circle</span> รับออเดอร์
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      list.prepend(newCard);
+      setTimeout(() => newCard.classList.remove('animate-bounce'), 1000);
+    }
+  </script>
+</body></html>

@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D Super Admin - Platform Analytics &amp; Churn Prediction</title>
+<!-- Google Fonts: IBM Plex Sans & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Verbatim Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#131b2e",
+            "on-secondary-container": "#684000",
+            "tertiary-fixed": "#6ffbbe",
+            "error": "#ba1a1a",
+            "primary-fixed": "#dae2fd",
+            "on-secondary-fixed-variant": "#653e00",
+            "background": "#f8f9ff",
+            "primary-container": "#131b2e",
+            "outline": "#76777d",
+            "primary": "#000000",
+            "on-secondary": "#ffffff",
+            "surface-container-highest": "#d3e4fe",
+            "secondary-container": "#fea619",
+            "tertiary-fixed-dim": "#4edea3",
+            "inverse-surface": "#213145",
+            "secondary-fixed": "#ffddb8",
+            "on-primary": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-surface": "#0b1c30",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-background": "#0b1c30",
+            "primary-fixed-dim": "#bec6e0",
+            "on-error": "#ffffff",
+            "tertiary": "#000000",
+            "surface-container": "#e5eeff",
+            "surface-variant": "#d3e4fe",
+            "surface-container-high": "#dce9ff",
+            "on-surface-variant": "#45464d",
+            "outline-variant": "#c6c6cd",
+            "surface-tint": "#565e74",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#eff4ff",
+            "inverse-on-surface": "#eaf1ff",
+            "secondary-fixed-dim": "#ffb95f",
+            "on-tertiary-fixed": "#002113",
+            "on-tertiary-container": "#009668",
+            "on-primary-fixed-variant": "#3f465c",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-container": "#002113",
+            "on-primary-container": "#7c839b",
+            "surface": "#f8f9ff",
+            "inverse-primary": "#bec6e0",
+            "on-secondary-fixed": "#2a1700",
+            "secondary": "#855300",
+            "surface-bright": "#f8f9ff",
+            "surface-dim": "#cbdbf5"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "topbar-height": "4rem",
+            "margin-mobile": "1rem",
+            "gutter-xl": "2rem",
+            "margin-desktop": "2rem",
+            "sidebar-width-expanded": "16.25rem",
+            "gutter-sm": "0.5rem",
+            "gutter-md": "1rem",
+            "sidebar-width-collapsed": "4.5rem",
+            "gutter-lg": "1.5rem",
+            "gutter-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "label-md": ["IBM Plex Sans"],
+            "body-sm": ["Inter"],
+            "headline-xl-mobile": ["IBM Plex Sans"],
+            "body-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["IBM Plex Sans"],
+            "headline-xl": ["IBM Plex Sans"],
+            "label-sm": ["IBM Plex Sans"],
+            "headline-lg": ["IBM Plex Sans"],
+            "data-mono": ["IBM Plex Sans"],
+            "label-lg": ["IBM Plex Sans"],
+            "headline-md": ["IBM Plex Sans"]
+          },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "headline-xl-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Thin precision scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f8f9ff;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c6c6cd;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #76777d;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased h-full overflow-hidden flex">
+<!-- ================= SIDEBAR (SideNavBar Shared Component) ================= -->
+<aside class="fixed top-0 left-0 h-screen w-sidebar-width-expanded z-40 bg-primary-container text-on-primary border-r border-outline-variant/20 flex flex-col justify-between p-4 select-none">
+<div class="flex flex-col gap-6">
+<!-- Brand & Header -->
+<div class="flex items-center gap-3 px-2 pt-1">
+<div class="w-9 h-9 rounded-lg bg-secondary-container flex items-center justify-center text-primary-container shadow-sm">
+<span class="material-symbols-outlined fill-icon text-[22px]">restaurant_menu</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-md font-headline-md font-bold text-on-primary tracking-tight">Kin-D Platform</span>
+<span class="text-label-sm font-label-sm text-secondary-container font-semibold tracking-wider uppercase">Super Admin</span>
+</div>
+</div>
+<!-- Navigation Tabs (7 tabs defined in JSON) -->
+<!-- Mapping Active: Screen is Platform Analytics ("วิเคราะห์") -->
+<nav aria-label="Main Navigation" class="flex flex-col gap-1.5">
+<!-- Tab 0: ภาพรวม -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#overview">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-label-md font-label-md">ภาพรวม</span>
+</a>
+<!-- Tab 1: ร้านค้า -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#merchants">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+<span class="text-label-md font-label-md">ร้านค้า</span>
+</a>
+<!-- Tab 2: บิล -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#billing">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="text-label-md font-label-md">บิล</span>
+</a>
+<!-- Tab 3: แจ้งปัญหา -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#tickets">
+<span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+<span class="text-label-md font-label-md">แจ้งปัญหา</span>
+<span class="ml-auto bg-error-container text-on-error-container text-label-sm font-label-sm px-1.5 py-0.5 rounded-full font-bold">3</span>
+</a>
+<!-- Tab 4: ประกาศ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#announcements">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+<span class="text-label-md font-label-md">ประกาศ</span>
+</a>
+<!-- Tab 5: วิเคราะห์ [ACTIVE MATCH] -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container/20 text-on-primary font-semibold border-l-4 border-secondary-container transition-all duration-200 active:scale-[0.99]" href="#analytics">
+<span class="material-symbols-outlined text-[20px] text-secondary-container">analytics</span>
+<span class="text-label-md font-label-md">วิเคราะห์</span>
+<span class="ml-auto flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary-container"></span>
+</span>
+</a>
+<!-- Tab 6: บันทึกระบบ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#audit-logs">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span class="text-label-md font-label-md">บันทึกระบบ</span>
+</a>
+</nav>
+</div>
+<!-- Footer Controls -->
+<div class="border-t border-outline-variant/20 pt-4 flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined text-secondary-container text-[20px]">shield_person</span>
+<div class="flex flex-col truncate">
+<span class="text-label-md font-label-md text-on-primary truncate">Super Admin (Owner)</span>
+<span class="text-body-sm font-body-sm text-outline-variant">admin@kin-d.pos</span>
+</div>
+</div>
+<button class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 text-label-md font-label-md transition-colors w-full text-left" type="button">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span>ออกจากระบบ</span>
+</button>
+</div>
+</aside>
+<!-- ================= MAIN WRAPPER (Offset by sidebar width) ================= -->
+<div class="ml-sidebar-width-expanded flex-1 flex flex-col h-screen overflow-hidden">
+<!-- ================= TOP NAV BAR (TopNavBar Shared Component) ================= -->
+<header class="sticky top-0 right-0 z-30 h-topbar-height bg-surface-container-lowest border-b border-outline-variant/40 shadow-sm flex items-center justify-between px-gutter-lg w-full shrink-0">
+<!-- Left: Breadcrumb & Search -->
+<div class="flex items-center gap-5">
+<div class="flex items-center gap-2 text-body-md font-body-md">
+<span class="text-on-surface-variant font-label-md">แพลตฟอร์ม</span>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<span class="text-on-surface font-headline-sm font-bold">ข้อมูลและสถิติวิเคราะห์ (Analytics)</span>
+</div>
+<div class="h-5 w-[1px] bg-outline-variant/60 hidden md:block"></div>
+<!-- System Status from JSON nav link -->
+<div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-low border border-outline-variant/30 text-on-tertiary-container text-label-sm font-label-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim inline-block animate-pulse"></span>
+<span>ทุกระบบปกติ 99.9%</span>
+</div>
+</div>
+<!-- Right: Realtime status, Search input & Trailing actions -->
+<div class="flex items-center gap-3">
+<!-- Live Indicator Badge -->
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-label-sm font-label-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+<span>ระบบวิเคราะห์ข้อมูลสด Realtime</span>
+</div>
+<!-- Global Search -->
+<div class="relative w-56 hidden xl:block">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full h-8 pl-8 pr-3 text-body-sm font-body-sm bg-surface-container-lowest rounded-lg border border-outline-variant/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary-container" placeholder="ค้นหาชื่อร้าน หรือ Merchant ID..." type="text"/>
+</div>
+<!-- Trailing Icon Actions: notifications, help, settings -->
+<div class="flex items-center gap-1 text-on-surface-variant">
+<button aria-label="แจ้งเตือน" class="p-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors relative" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button aria-label="ศูนย์ช่วยเหลือ" class="p-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<button aria-label="การตั้งค่า" class="p-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant/60 mx-1"></div>
+<!-- Primary Action -->
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-container hover:bg-primary-container/90 text-on-primary text-label-md font-label-md shadow-sm transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">tune</span>
+<span>จัดการระบบ</span>
+</button>
+</div>
+</header>
+<!-- ================= CANVAS / SCROLLABLE CONTENT ================= -->
+<main class="flex-1 overflow-y-auto p-gutter-lg space-y-6 bg-surface">
+<!-- SUB-HEADER: Date Range & Action Toolbar -->
+<section class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/40 shadow-sm">
+<div class="flex flex-wrap items-center gap-2">
+<!-- Date Range Selector -->
+<div class="inline-flex items-center bg-surface-container-low border border-outline-variant/60 rounded-lg p-1">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-surface-container-lowest shadow-sm text-on-surface text-label-md font-label-md">
+<span class="material-symbols-outlined text-secondary text-[18px]">calendar_today</span>
+<span>30 วันล่าสุด (1 - 30 ก.ย. 2569)</span>
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+</div>
+<!-- Compare Toggle -->
+<button class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant text-label-md font-label-md transition-colors">
+<span class="material-symbols-outlined text-[18px]">compare_arrows</span>
+<span>เทียบเดือนก่อนหน้า (+14.2%)</span>
+</button>
+<!-- Refresh Button -->
+<button class="p-2 rounded-lg border border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant transition-colors" title="รีเฟรชข้อมูล">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+<!-- Export Actions -->
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/60 hover:bg-surface-container-low text-on-surface text-label-md font-label-md shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[18px] text-secondary">file_download</span>
+<span>ส่งออกรายงาน CSV/PDF</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-secondary-container hover:bg-secondary-container/90 text-on-secondary-container font-label-md text-label-md shadow-sm transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add_alert</span>
+<span>ตั้งเตือน Churn Risk</span>
+</button>
+</div>
+</section>
+<!-- ================= SECTION 2: CONVERSION FUNNEL (Horizontal) ================= -->
+<section class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm">
+<div class="flex items-center justify-between pb-4 mb-4 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-secondary-container/20 text-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">filter_alt</span>
+</div>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">ช่องทางการเปลี่ยนผ่านผู้ใช้งาน (Conversion Funnel)</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">เส้นทางร้านค้าตั้งแต่เข้าเยี่ยมชมหน้าเว็บไซต์ จนตัดสินใจชำระค่าบริการรายเดือน</p>
+</div>
+</div>
+<div class="flex items-center gap-4 text-right">
+<div class="px-3 py-1 rounded bg-secondary-fixed/40 border border-secondary-fixed text-on-secondary-fixed-variant">
+<span class="text-label-sm font-label-sm block">ระยะเวลาเฉลี่ยทดลองก่อนจ่ายจริง</span>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">8.4 วัน</span>
+</div>
+<div class="px-3 py-1 rounded bg-surface-container border border-outline-variant/40">
+<span class="text-label-sm font-label-sm text-on-surface-variant block">Overall Conversion</span>
+<span class="text-headline-sm font-headline-sm font-bold text-secondary">10.0%</span>
+</div>
+</div>
+</div>
+<!-- 4-Step Funnel Layout -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+<!-- Step 1: Visitors -->
+<div class="relative bg-surface-container-low rounded-lg p-4 border border-outline-variant/40 flex flex-col justify-between h-36">
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm uppercase px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold">ขั้นที่ 1</span>
+<span class="material-symbols-outlined text-outline text-[20px]">language</span>
+</div>
+<div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">เข้าชมหน้าเว็บ (Visitors)</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-headline-xl font-headline-xl font-bold text-on-surface">420</span>
+<span class="text-body-sm font-body-sm text-outline">คน</span>
+</div>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-full"></div>
+</div>
+</div>
+<!-- Step 2: Free Trial (with conversion badge on border) -->
+<div class="relative bg-surface-container-low rounded-lg p-4 border border-outline-variant/40 flex flex-col justify-between h-36">
+<!-- Inter-step indicator arrow on desktop -->
+<div class="hidden md:flex absolute -left-3.5 top-1/2 -translate-y-1/2 z-10 bg-surface-container-lowest border border-outline-variant/60 rounded-full px-1.5 py-0.5 shadow-sm items-center gap-0.5">
+<span class="text-label-sm font-label-sm text-secondary font-bold">16.2%</span>
+<span class="material-symbols-outlined text-[12px] text-secondary">arrow_forward</span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm uppercase px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold">ขั้นที่ 2</span>
+<span class="material-symbols-outlined text-outline text-[20px]">app_registration</span>
+</div>
+<div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">สมัครทดลองใช้ (Free Trial)</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-headline-xl font-headline-xl font-bold text-on-surface">68</span>
+<span class="text-body-sm font-body-sm text-outline">ร้านค้า</span>
+</div>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[65%]"></div>
+</div>
+</div>
+<!-- Step 3: Active Store -->
+<div class="relative bg-surface-container-low rounded-lg p-4 border border-outline-variant/40 flex flex-col justify-between h-36">
+<!-- Inter-step indicator arrow -->
+<div class="hidden md:flex absolute -left-3.5 top-1/2 -translate-y-1/2 z-10 bg-surface-container-lowest border border-outline-variant/60 rounded-full px-1.5 py-0.5 shadow-sm items-center gap-0.5">
+<span class="text-label-sm font-label-sm text-secondary font-bold">75.0%</span>
+<span class="material-symbols-outlined text-[12px] text-secondary">arrow_forward</span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm uppercase px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold">ขั้นที่ 3</span>
+<span class="material-symbols-outlined text-outline text-[20px]">point_of_sale</span>
+</div>
+<div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">เปิดบิลใช้งานจริง (Active Store)</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-headline-xl font-headline-xl font-bold text-on-surface">51</span>
+<span class="text-body-sm font-body-sm text-outline">ร้านค้า</span>
+</div>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[48%]"></div>
+</div>
+</div>
+<!-- Step 4: Paid Subscription -->
+<div class="relative bg-secondary-fixed/20 rounded-lg p-4 border-2 border-secondary-container flex flex-col justify-between h-36 shadow-sm">
+<!-- Inter-step indicator arrow -->
+<div class="hidden md:flex absolute -left-3.5 top-1/2 -translate-y-1/2 z-10 bg-secondary-container text-on-secondary-container border border-secondary-container rounded-full px-1.5 py-0.5 shadow-sm items-center gap-0.5">
+<span class="text-label-sm font-label-sm font-bold">82.4%</span>
+<span class="material-symbols-outlined text-[12px]">arrow_forward</span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-label-sm font-label-sm uppercase px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-bold">ขั้นที่ 4 (สำเร็จ)</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">workspace_premium</span>
+</div>
+<div>
+<span class="text-body-sm font-body-sm font-semibold text-secondary">จ่ายเงินแพ็กเกจ (Paid)</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-headline-xl font-headline-xl font-bold text-on-surface">42</span>
+<span class="text-body-sm font-body-sm text-secondary font-medium">ร้านค้า</span>
+</div>
+</div>
+<div class="w-full bg-outline-variant/30 h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full w-[100%]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= 2-COLUMN GRID: CHANNELS & RETENTION ================= -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- SECTION 3: Acquisition Channels & Paid Conversion (7 Cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-3 mb-4 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">hub</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">ช่องทางที่มาและประสิทธิภาพการแปลงยอด (Acquisition Channels)</h3>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant bg-surface-container-low px-2 py-1 rounded">สัดส่วนตามช่องทาง</span>
+</div>
+<!-- Bar Rows -->
+<div class="space-y-4">
+<!-- Channel 1: Referral -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+<span class="font-medium text-on-surface">แนะนำต่อ (Referral / Word of Mouth)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant">สมัคร 28 | จ่ายจริง <strong class="text-on-surface">24</strong> ร้าน</span>
+<span class="text-label-md font-label-md text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">85.7% Paid</span>
+</div>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-secondary-container h-full" style="width: 85.7%"></div>
+<div class="bg-primary-container/20 h-full" style="width: 14.3%"></div>
+</div>
+</div>
+<!-- Channel 2: Facebook Ads -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<span class="font-medium text-on-surface">Facebook Ads</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant">สมัคร 20 | จ่ายจริง <strong class="text-on-surface">10</strong> ร้าน</span>
+<span class="text-label-md font-label-md text-on-surface bg-surface-container-low px-2 py-0.5 rounded font-bold">50.0% Paid</span>
+</div>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-primary-container h-full" style="width: 50.0%"></div>
+<div class="bg-primary-container/20 h-full" style="width: 50.0%"></div>
+</div>
+</div>
+<!-- Channel 3: Direct Sales -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-surface-tint"></span>
+<span class="font-medium text-on-surface">ทีมขายเดินเข้าไปหา (Direct Sales / Walk-in)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant">สมัคร 12 | จ่ายจริง <strong class="text-on-surface">6</strong> ร้าน</span>
+<span class="text-label-md font-label-md text-on-surface bg-surface-container-low px-2 py-0.5 rounded font-bold">50.0% Paid</span>
+</div>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-surface-tint h-full" style="width: 50.0%"></div>
+<div class="bg-surface-tint/20 h-full" style="width: 50.0%"></div>
+</div>
+</div>
+<!-- Channel 4: Google Search -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+<span class="font-medium text-on-surface">Google Search (SEO / Ads)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant">สมัคร 6 | จ่ายจริง <strong class="text-on-surface">2</strong> ร้าน</span>
+<span class="text-label-md font-label-md text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded font-bold">33.3% Paid</span>
+</div>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-outline h-full" style="width: 33.3%"></div>
+<div class="bg-outline/20 h-full" style="width: 66.7%"></div>
+</div>
+</div>
+<!-- Channel 5: Others -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+<span class="font-medium text-on-surface">อื่น ๆ (TikTok, กลุ่มร้านอาหาร)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant">สมัคร 2 | จ่ายจริง <strong class="text-on-surface">0</strong> ร้าน</span>
+<span class="text-label-md font-label-md text-error bg-error-container/30 px-2 py-0.5 rounded font-bold">0.0% Paid</span>
+</div>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="bg-outline-variant h-full" style="width: 0%"></div>
+<div class="bg-outline-variant/30 h-full" style="width: 100%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="w-3 h-2 rounded bg-secondary-container inline-block"></span> ลูกค้าเปลี่ยนเป็นสมาชิกชำระเงินจริง
+            </span>
+<span class="flex items-center gap-1.5">
+<span class="w-3 h-2 rounded bg-primary-container/20 inline-block"></span> ร้านค้าที่อยู่ในสถานะทดลองใช้
+            </span>
+</div>
+</div>
+<!-- SECTION 4: Cohort Retention Rate Curve (5 Cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-3 mb-2 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">show_chart</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">อัตราคงอยู่ของร้านค้า (Cohort Retention)</h3>
+</div>
+</div>
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">คงอยู่ในเดือนที่ 6 (Month 6 Retention)</span>
+<div class="text-headline-xl font-headline-xl font-bold text-on-surface">81.0%</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-label-sm font-label-sm font-bold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +9.0%
+                </span>
+<p class="text-body-sm font-body-sm text-outline mt-0.5">เทียบเฉลี่ยอุตสาหกรรม (72%)</p>
+</div>
+</div>
+<!-- SVG Retention Chart Visual -->
+<div class="w-full h-44 relative mt-2">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 360 140">
+<defs>
+<lineargradient id="retentionGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#fea619" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#fea619" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid Lines -->
+<line stroke="#e5eeff" stroke-width="1" x1="0" x2="360" y1="20" y2="20"></line>
+<line stroke="#e5eeff" stroke-width="1" x1="0" x2="360" y1="50" y2="50"></line>
+<line stroke="#e5eeff" stroke-width="1" x1="0" x2="360" y1="80" y2="80"></line>
+<line stroke="#e5eeff" stroke-width="1" x1="0" x2="360" y1="110" y2="110"></line>
+<!-- Benchmark Line (72% industry baseline) -->
+<line stroke="#94a3b8" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="360" y1="78" y2="78"></line>
+<text fill="#64748b" font-family="IBM Plex Sans" font-size="9" text-anchor="end" x="355" y="74">Benchmark 72%</text>
+<!-- Area Fill under Curve -->
+<polygon fill="url(#retentionGradient)" points="10,20 78,35 146,45 214,52 282,56 350,60 350,130 10,130"></polygon>
+<!-- Main Retention Curve -->
+<polyline fill="none" points="10,20 78,35 146,45 214,52 282,56 350,60" stroke="#fea619" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></polyline>
+<!-- Data Points & Labels -->
+<circle cx="10" cy="20" fill="#ffffff" r="4" stroke="#fea619" stroke-width="2.5"></circle>
+<circle cx="78" cy="35" fill="#ffffff" r="4" stroke="#fea619" stroke-width="2.5"></circle>
+<circle cx="146" cy="45" fill="#ffffff" r="4" stroke="#fea619" stroke-width="2.5"></circle>
+<circle cx="214" cy="52" fill="#ffffff" r="4" stroke="#fea619" stroke-width="2.5"></circle>
+<circle cx="282" cy="56" fill="#ffffff" r="4" stroke="#fea619" stroke-width="2.5"></circle>
+<circle cx="350" cy="60" fill="#131b2e" r="4" stroke="#fea619" stroke-width="2.5"></circle>
+</svg>
+<!-- X-Axis Labels -->
+<div class="flex justify-between text-label-sm font-label-sm text-outline mt-1 px-1">
+<span>เดือน 1 (100%)</span>
+<span>เดือน 2 (92%)</span>
+<span>เดือน 3 (88%)</span>
+<span>เดือน 4 (85%)</span>
+<span>เดือน 5 (83%)</span>
+<span class="font-bold text-on-surface">เดือน 6 (81%)</span>
+</div>
+</div>
+</div>
+<div class="mt-4 p-2.5 rounded bg-surface-container-low border border-outline-variant/30 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified</span>
+<span class="text-body-sm font-body-sm text-on-surface">Kin-D มีอัตราคงอยู่สูงกว่าค่าเฉลี่ย B2B SaaS F&amp;B ต่อเนื่องตลอด 4 ไตรมาส</span>
+</div>
+</div>
+</div>
+<!-- ================= SECTION 5: CHURN RISK WATCHLIST ================= -->
+<section class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-outline-variant/20">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[22px]">warning</span>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-bold">ตารางเฝ้าระวังร้านค้าที่เสี่ยงเลิกใช้งาน (Churn Risk Watchlist)</h2>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+              ตรวจจับสัญญาณการใช้งานลดลงผิดปกติ เช่น ไม่มียอดเปิดบิล เครื่องพิมพ์ Error ต่อเนื่อง เพื่อให้ทีมซัพพอร์ตติดต่อช่วยเหลือทันเวลา
+            </p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded-full bg-error-container text-on-error-container text-label-sm font-label-sm font-bold">
+              ต้องติดตามเร่งด่วน: 4 ร้านค้า
+            </span>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant/40 text-label-sm font-label-sm text-on-surface-variant uppercase">
+<th class="py-3 px-4">ชื่อร้านค้า / รหัสร้าน</th>
+<th class="py-3 px-4">ยอดออเดอร์ (สัปดาห์นี้ vs ก่อนหน้า)</th>
+<th class="py-3 px-4">เข้าใช้งานล่าสุด</th>
+<th class="py-3 px-4 w-44">คะแนนความเสี่ยง (Churn Score)</th>
+<th class="py-3 px-4">สาเหตุวิเคราะห์เบื้องต้น</th>
+<th class="py-3 px-4 text-right">การจัดการ</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 text-body-sm font-body-sm">
+<!-- Risk Store 1: ร้านส้มตำป้าสมศรี (Critical) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-error-container text-on-error-container flex items-center justify-center font-bold text-label-md">
+                      ส
+                    </div>
+<div>
+<div class="font-semibold text-on-surface">ร้านส้มตำป้าสมศรี</div>
+<div class="text-data-mono font-data-mono text-outline text-[12px]">KD-88201 · สาขาลาดพร้าว</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="text-data-mono font-data-mono font-semibold text-on-surface">0 ออเดอร์</span>
+<span class="text-outline">vs 45</span>
+<span class="inline-flex items-center text-label-sm font-label-sm text-error bg-error-container/50 px-1.5 py-0.5 rounded font-bold">
+                      -100%
+                    </span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="text-error font-medium">6 วันที่แล้ว</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-label-sm font-label-sm font-bold text-error">เสี่ยงสูงมาก</span>
+<span class="text-data-mono font-data-mono font-bold text-error">92/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 92%"></div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-error text-[16px]">print_disabled</span>
+<span>แจ้งปัญหาเครื่องพิมพ์บ่อย (3 ครั้งใน 48 ชม.)</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-3 py-1.5 rounded-md bg-primary-container text-on-primary text-label-md font-label-md hover:bg-primary-container/90 transition-all flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary-container">call</span>
+<span>ติดต่อร้านค้า</span>
+</button>
+<button class="p-1.5 rounded-md hover:bg-surface-container border border-outline-variant/60 text-outline">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Risk Store 2: โทราโนสุเกะ อิซากายะ -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-error-container text-on-error-container flex items-center justify-center font-bold text-label-md">
+                      ท
+                    </div>
+<div>
+<div class="font-semibold text-on-surface">โทราโนสุเกะ อิซากายะ</div>
+<div class="text-data-mono font-data-mono text-outline text-[12px]">KD-74910 · สาขาทองหล่อ</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="text-data-mono font-data-mono font-semibold text-on-surface">42 ออเดอร์</span>
+<span class="text-outline">vs 180</span>
+<span class="inline-flex items-center text-label-sm font-label-sm text-error bg-error-container/50 px-1.5 py-0.5 rounded font-bold">
+                      -76.6%
+                    </span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="text-error font-medium">4 วันที่แล้ว</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-label-sm font-label-sm font-bold text-error">เสี่ยงสูงมาก</span>
+<span class="text-data-mono font-data-mono font-bold text-error">88/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 88%"></div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[16px]">trending_down</span>
+<span>ยอดขายลดลงฮวบฮาบ / พนักงานลาออก</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-3 py-1.5 rounded-md bg-primary-container text-on-primary text-label-md font-label-md hover:bg-primary-container/90 transition-all flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary-container">call</span>
+<span>ติดต่อร้านค้า</span>
+</button>
+<button class="p-1.5 rounded-md hover:bg-surface-container border border-outline-variant/60 text-outline">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Risk Store 3: คาเฟ่ริมคลอง -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-secondary-fixed text-on-secondary-fixed-variant flex items-center justify-center font-bold text-label-md">
+                      ค
+                    </div>
+<div>
+<div class="font-semibold text-on-surface">คาเฟ่ริมคลอง</div>
+<div class="text-data-mono font-data-mono text-outline text-[12px]">KD-61204 · สาขานนทบุรี</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="text-data-mono font-data-mono font-semibold text-on-surface">65 ออเดอร์</span>
+<span class="text-outline">vs 150</span>
+<span class="inline-flex items-center text-label-sm font-label-sm text-secondary bg-secondary-fixed/50 px-1.5 py-0.5 rounded font-bold">
+                      -56.6%
+                    </span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="text-on-surface-variant">2 วันที่แล้ว</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-label-sm font-label-sm font-bold text-secondary">เสี่ยงสูง</span>
+<span class="text-data-mono font-data-mono font-bold text-secondary">78/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full" style="width: 78%"></div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-outline text-[16px]">edit_off</span>
+<span>ไม่มีการบันทึกเมนูใหม่ / เลิกใช้ QR เมนู</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-3 py-1.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-label-md font-label-md transition-all flex items-center gap-1 border border-outline-variant/60">
+<span class="material-symbols-outlined text-[16px] text-secondary">chat</span>
+<span>ทัก LINE</span>
+</button>
+<button class="p-1.5 rounded-md hover:bg-surface-container border border-outline-variant/60 text-outline">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Risk Store 4: ครัวคุณต้อย -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-surface-container text-on-surface-variant flex items-center justify-center font-bold text-label-md">
+                      ต
+                    </div>
+<div>
+<div class="font-semibold text-on-surface">ครัวคุณต้อย</div>
+<div class="text-data-mono font-data-mono text-outline text-[12px]">KD-55102 · สาขาพระราม 2</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="text-data-mono font-data-mono font-semibold text-on-surface">110 ออเดอร์</span>
+<span class="text-outline">vs 195</span>
+<span class="inline-flex items-center text-label-sm font-label-sm text-secondary bg-secondary-fixed/50 px-1.5 py-0.5 rounded font-bold">
+                      -43.5%
+                    </span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="text-on-surface-variant">เมื่อวาน</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-label-sm font-label-sm font-bold text-amber-700">เสี่ยงปานกลาง</span>
+<span class="text-data-mono font-data-mono font-bold text-amber-700">64/100</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden">
+<div class="bg-amber-400 h-full rounded-full" style="width: 64%"></div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-outline text-[16px]">credit_card_off</span>
+<span>สแกนจ่าย QR มีปัญหาเครือข่ายบ่อย</span>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="px-3 py-1.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-label-md font-label-md transition-all flex items-center gap-1 border border-outline-variant/60">
+<span class="material-symbols-outlined text-[16px] text-secondary">chat</span>
+<span>ทัก LINE</span>
+</button>
+<button class="p-1.5 rounded-md hover:bg-surface-container border border-outline-variant/60 text-outline">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- ================= SECTION 6: FEATURE ADOPTION & ENGAGEMENT ================= -->
+<section class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">extension</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">ฟีเจอร์และเมนูที่ร้านใช้บ่อยที่สุด (Feature Adoption &amp; Engagement)</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">ความถี่ในการเปิดใช้เครื่องมือแต่ละส่วน เพื่อวางแผน Roadmaps และจัดคอร์สเทรนนิ่ง</p>
+</div>
+</div>
+<button class="flex items-center gap-1 text-label-md font-label-md text-secondary hover:underline">
+<span>ดูรายงานเชิงลึกรายฟังก์ชัน</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Feature 1: POS Terminal -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40 flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-primary-container text-on-primary">
+<span class="material-symbols-outlined text-[20px]">point_of_sale</span>
+</div>
+<div>
+<h4 class="text-label-lg font-label-lg text-on-surface">รับออเดอร์ &amp; ส่งครัว (POS)</h4>
+<span class="text-body-sm font-body-sm text-outline">ใช้งานประจำทุกวัน</span>
+</div>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">98%</span>
+</div>
+<div class="w-full bg-outline-variant/40 h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 98%"></div>
+</div>
+</div>
+<!-- Feature 2: Table QR Code -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40 flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-surface-container-highest text-on-surface">
+<span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+</div>
+<div>
+<h4 class="text-label-lg font-label-lg text-on-surface">QR Code สั่งอาหารที่โต๊ะ</h4>
+<span class="text-body-sm font-body-sm text-outline">ลูกค้าสแกนสั่งเอง</span>
+</div>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">86%</span>
+</div>
+<div class="w-full bg-outline-variant/40 h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 86%"></div>
+</div>
+</div>
+<!-- Feature 3: PromptPay Slip Verification -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40 flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-secondary-fixed text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined text-[20px]">receipt</span>
+</div>
+<div>
+<h4 class="text-label-lg font-label-lg text-on-surface">ตรวจสลิป AI PromptPay</h4>
+<span class="text-body-sm font-body-sm text-outline">ตรวจยอดสลิปอัตโนมัติ</span>
+</div>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">79%</span>
+</div>
+<div class="w-full bg-outline-variant/40 h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full" style="width: 79%"></div>
+</div>
+</div>
+<!-- Feature 4: Table Management -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40 flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-surface-container-highest text-on-surface">
+<span class="material-symbols-outlined text-[20px]">table_restaurant</span>
+</div>
+<div>
+<h4 class="text-label-lg font-label-lg text-on-surface">จัดการโต๊ะและผังร้าน</h4>
+<span class="text-body-sm font-body-sm text-outline">ตั้งค่าผังโซน &amp; โต๊ะ</span>
+</div>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">64%</span>
+</div>
+<div class="w-full bg-outline-variant/40 h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full" style="width: 64%"></div>
+</div>
+</div>
+<!-- Feature 5: Sales & Shift Summary -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40 flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-surface-container-highest text-on-surface">
+<span class="material-symbols-outlined text-[20px]">stacked_bar_chart</span>
+</div>
+<div>
+<h4 class="text-label-lg font-label-lg text-on-surface">สรุปยอด &amp; กะพนักงาน</h4>
+<span class="text-body-sm font-body-sm text-outline">ปิดกะและรายงานรายวัน</span>
+</div>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">58%</span>
+</div>
+<div class="w-full bg-outline-variant/40 h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full" style="width: 58%"></div>
+</div>
+</div>
+<!-- Feature 6: Stock & Inventory (Opportunity highlight) -->
+<div class="p-4 rounded-lg bg-surface-container border border-secondary-container/50 flex flex-col justify-between relative overflow-hidden">
+<div class="absolute right-0 top-0 bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-0.5 rounded-bl">
+              โอกาสจัดเทรนนิ่งเพิ่ม
+            </div>
+<div class="flex items-start justify-between mt-1">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-surface-container-lowest text-secondary">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+</div>
+<div>
+<h4 class="text-label-lg font-label-lg text-on-surface">จัดการสต็อกวัตถุดิบ</h4>
+<span class="text-body-sm font-body-sm text-outline">ตัดสต็อกสูตรอาหาร</span>
+</div>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">22%</span>
+</div>
+<div class="w-full bg-outline-variant/40 h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-outline h-full rounded-full" style="width: 22%"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Footer / Timestamp Status -->
+<footer class="pt-2 pb-6 text-center text-label-sm font-label-sm text-outline flex items-center justify-between border-t border-outline-variant/30">
+<div>
+<span>Kin-D Enterprise Super Admin Platform · เวอร์ชัน v4.12.0-b2</span>
+</div>
+<div class="flex items-center gap-4">
+<span>ประมวลผลข้อมูลล่าสุด: 30 ก.ย. 2569 เวลา 14:32:05 น.</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span class="text-secondary font-medium">Auto-sync ทุก 60 วินาที</span>
+</div>
+</footer>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D POS - จัดการโต๊ะ &amp; ผังร้าน (Tables &amp; QR Code)</title>
+<!-- Google Fonts: IBM Plex Sans Thai -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim as mandated -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface": "#fbf9f9",
+            "primary-fixed-dim": "#ffb95f",
+            "inverse-primary": "#ffb95f",
+            "on-tertiary": "#ffffff",
+            "secondary-container": "#fd651e",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "primary": "#855300",
+            "secondary-fixed-dim": "#ffb599",
+            "tertiary-fixed": "#dbe1ff",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "on-secondary": "#ffffff",
+            "on-surface": "#1b1c1c",
+            "on-primary": "#ffffff",
+            "secondary-fixed": "#ffdbce",
+            "surface-dim": "#dbdad9",
+            "surface-tint": "#855300",
+            "primary-fixed": "#ffddb8",
+            "on-tertiary-container": "#003ba1",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed": "#2a1700",
+            "surface-container": "#efeded",
+            "background": "#fbf9f9",
+            "surface-container-high": "#e9e8e7",
+            "tertiary": "#0053db",
+            "error": "#ba1a1a",
+            "surface-container-low": "#f5f3f3",
+            "surface-container-highest": "#e3e2e2",
+            "inverse-surface": "#303031",
+            "tertiary-container": "#94aeff",
+            "on-primary-container": "#613b00",
+            "surface-variant": "#e3e2e2",
+            "on-background": "#1b1c1c",
+            "inverse-on-surface": "#f2f0f0",
+            "on-error-container": "#93000a",
+            "on-secondary-fixed": "#370e00",
+            "on-primary-fixed-variant": "#653e00",
+            "on-surface-variant": "#534434",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "surface-bright": "#fbf9f9",
+            "on-tertiary-fixed": "#00174b",
+            "outline-variant": "#d8c3ad",
+            "outline": "#867461",
+            "secondary": "#a73a00",
+            "on-secondary-container": "#571a00",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "primary-container": "#f59e0b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "grid-base": "4px",
+            "space-4": "16px",
+            "min-target": "48px",
+            "space-1": "4px",
+            "space-3": "12px",
+            "space-5": "20px",
+            "space-6": "24px",
+            "space-2": "8px",
+            "space-8": "32px",
+            "card-p-mobile": "16px"
+          },
+          "fontFamily": {
+            "price-display": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "body-md": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "headline-sm": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "body-strong": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "label-lg": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "headline-lg": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "label-md": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "body-lg": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "price-total": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ],
+            "headline-md": [
+              "\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""
+            ]
+          },
+          "fontSize": {
+            "price-display": [
+              "20px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "600"
+              }
+            ],
+            "body-md": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "400"
+              }
+            ],
+            "headline-sm": [
+              "18px",
+              {
+                "lineHeight": "26px",
+                "fontWeight": "600"
+              }
+            ],
+            "body-strong": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "600"
+              }
+            ],
+            "label-lg": [
+              "16px",
+              {
+                "lineHeight": "20px",
+                "fontWeight": "600"
+              }
+            ],
+            "headline-lg": [
+              "24px",
+              {
+                "lineHeight": "32px",
+                "fontWeight": "600"
+              }
+            ],
+            "label-md": [
+              "14px",
+              {
+                "lineHeight": "18px",
+                "fontWeight": "600"
+              }
+            ],
+            "body-lg": [
+              "18px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "400"
+              }
+            ],
+            "price-total": [
+              "26px",
+              {
+                "lineHeight": "32px",
+                "fontWeight": "700"
+              }
+            ],
+            "headline-md": [
+              "20px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "600"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-feature-settings: "tnum" 1;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .font-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Print Specific Media Query */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-modal-container, #print-modal-container * {
+        visibility: visible;
+      }
+      #print-modal-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .a4-sheet {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+<div class="min-h-screen flex bg-surface">
+<!-- ==================== 1. SIDEBAR (Mandatory Shared Component: SideNavBar) ==================== -->
+<aside class="fixed top-0 left-0 h-screen w-64 z-40 p-4 bg-surface-container-lowest border-r border-outline-variant shadow-sm flex flex-col justify-between hidden lg:flex no-print">
+<!-- Top Brand Anchor -->
+<div>
+<div class="flex items-center gap-3 px-2 py-2 mb-6">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center font-bold shadow-sm">
+<span class="material-symbols-outlined" data-icon="restaurant" style="font-size: 24px;">restaurant</span>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface leading-tight">ครัวรสเลิศ POS</h1>
+<p class="text-label-md font-label-md text-on-surface-variant">สาขา สยามสแควร์</p>
+</div>
+</div>
+<!-- Call To Action Button (From Shared Component JSON) -->
+<button class="w-full mb-6 min-h-[48px] px-4 py-3 bg-[#EA580C] hover:bg-[#c2410c] text-white rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.98]" onclick="openDrawer('โต๊ะ 13 (โต๊ะใหม่)', 'กำลังสร้าง', '฿0', '0')">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span>เปิดโต๊ะใหม่</span>
+</button>
+<!-- Main Navigation Links -->
+<nav class="space-y-1.5">
+<!-- 1. แดชบอร์ด (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#dashboard">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>แดชบอร์ด</span>
+</a>
+<!-- 2. ออร์เดอร์ & ครัว (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#kitchen">
+<span class="material-symbols-outlined" data-icon="soup_kitchen">soup_kitchen</span>
+<span>ออร์เดอร์ &amp; ครัว</span>
+</a>
+<!-- 3. โต๊ะ & บิล (ACTIVE MAPPED DESTINATION) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md shadow-sm" href="#tables">
+<span class="material-symbols-outlined" data-icon="table_restaurant" style="font-variation-settings: 'FILL' 1;">table_restaurant</span>
+<span>โต๊ะ &amp; บิล</span>
+</a>
+<!-- 4. เมนูอาหาร (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#menu">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span>เมนูอาหาร</span>
+</a>
+<!-- 5. รายงานยอดขาย (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#analytics">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>รายงานยอดขาย</span>
+</a>
+</nav>
+</div>
+<!-- Footer Action Links (From Shared Component JSON) -->
+<div class="pt-4 border-t border-outline-variant space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="#settings">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>ตั้งค่าระบบ</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-error hover:bg-error-container/30 transition-colors font-label-md text-label-md" href="#logout">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>ออกจากระบบ</span>
+</a>
+</div>
+</aside>
+<!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+<div class="flex-1 lg:ml-64 flex flex-col min-w-0">
+<!-- ==================== 2. TOP NAV BAR (Mandatory Shared Component: TopNavBar) ==================== -->
+<header class="sticky top-0 z-30 flex items-center justify-between px-6 py-3 w-full bg-surface-container-lowest border-b border-outline-variant shadow-sm no-print">
+<!-- Search bar on left / Branch status info -->
+<div class="flex items-center gap-4 flex-1 max-w-lg">
+<button class="lg:hidden text-on-surface p-1 rounded-lg hover:bg-surface-container-low" onclick="alert('เมนูมือถือ')">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full min-h-[44px] pl-10 pr-4 py-2 bg-surface-container-low rounded-xl border border-outline-variant focus:outline-none focus:ring-2 focus:ring-primary-container text-body-md font-body-md placeholder-outline transition" id="table-search-input" onkeyup="filterTableSearch()" placeholder="ค้นหาโต๊ะ, หมายเลขบิล, หรือโซนที่นั่ง..." type="text"/>
+</div>
+</div>
+<!-- Trailing Actions (From Shared Component JSON) -->
+<div class="flex items-center gap-2 md:gap-3 ml-4">
+<!-- Branch badge -->
+<div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-label-md font-label-md border border-outline-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>สาขา สยามสแควร์ (เปิดบริการ)</span>
+</div>
+<button class="p-2.5 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:scale-95" title="การแจ้งเตือน">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2.5 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:scale-95" onclick="toggleViewMode('list')" title="สลับมุมมองบิล">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-1"></div>
+<!-- Profile -->
+<button class="flex items-center gap-2 p-1.5 pr-2.5 hover:bg-surface-container-low rounded-full transition-colors active:scale-95">
+<div class="w-8 h-8 rounded-full bg-amber-200 text-amber-900 font-bold flex items-center justify-center text-label-md">
+              ผจ
+            </div>
+<span class="hidden md:inline text-label-md font-label-md text-on-surface">ผู้จัดการสาขา</span>
+</button>
+</div>
+</header>
+<!-- ==================== 3. PAGE BODY / WORKSPACE ==================== -->
+<main class="flex-1 p-4 md:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+<!-- Page Header & Action Buttons -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">จัดการโต๊ะ &amp; ผังร้าน (Tables &amp; QR Code)</h2>
+<span class="px-2.5 py-0.5 rounded-md bg-primary-fixed text-on-primary-fixed text-label-md font-label-md font-semibold">12 โต๊ะ</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-0.5">ระบบจัดการผังโต๊ะ อัปเดตสถานะอัตโนมัติ และพิมพ์ป้าย QR Code สั่งอาหารออนไลน์</p>
+</div>
+<!-- Action Buttons Group -->
+<div class="flex flex-wrap items-center gap-2.5 no-print">
+<!-- 1. Print All QR (A4) Outline Button -->
+<button class="min-h-[48px] px-4 py-2.5 bg-surface-container-lowest border border-outline hover:bg-surface-container text-on-surface rounded-xl font-label-lg text-label-lg flex items-center gap-2 shadow-sm transition active:scale-[0.98]" onclick="openPrintModal()">
+<span class="material-symbols-outlined text-[#EA580C]" data-icon="print">print</span>
+<span>พิมพ์ QR ทั้งหมด (A4)</span>
+</button>
+<!-- 2. Organize Zones Outline Button -->
+<button class="min-h-[48px] px-4 py-2.5 bg-surface-container-lowest border border-outline-variant hover:bg-surface-container text-on-surface rounded-xl font-label-lg text-label-lg flex items-center gap-2 shadow-sm transition active:scale-[0.98]" onclick="alert('จัดระเบียบโซน: คุณสามารถลากและจัดหมวดหมู่โต๊ะตามห้องได้')">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="hidden sm:inline">จัดระเบียบโซน</span>
+</button>
+<!-- 3. Add Table Primary Button (#F59E0B / Amber-500) -->
+<button class="min-h-[48px] px-5 py-2.5 bg-[#F59E0B] hover:bg-[#d97706] text-neutral-900 rounded-xl font-label-lg text-label-lg flex items-center gap-2 shadow-sm font-semibold transition active:scale-[0.98]" onclick="openDrawer('โต๊ะใหม่ (Table 13)', 'กำลังสร้าง', '฿0', '0')">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span>+ เพิ่มโต๊ะใหม่</span>
+</button>
+</div>
+</div>
+<!-- ==================== 4. STATUS SUMMARY BADGES & CONTROLS ==================== -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 md:p-5 shadow-sm space-y-4">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Left: Table Status Badges -->
+<div class="flex flex-wrap items-center gap-2.5">
+<!-- All Tables Badge -->
+<div class="px-3.5 py-2 rounded-xl bg-surface-container border border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-outline" data-icon="store">store</span>
+<span class="text-body-strong font-body-strong text-on-surface">ทั้งหมด <strong class="font-tabular text-headline-sm">12</strong> โต๊ะ</span>
+</div>
+<!-- Available Badge (ว่าง 6) -->
+<div class="px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-slate-300 flex items-center gap-2 shadow-xs">
+<span class="w-3 h-3 rounded-full bg-slate-300 border border-slate-400"></span>
+<span class="text-label-lg font-label-lg text-slate-700">ว่าง <strong class="font-tabular font-bold text-slate-900">6</strong></span>
+</div>
+<!-- Occupied Badge (ใช้อยู่ 5) -->
+<div class="px-3.5 py-2 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 flex items-center gap-2 shadow-xs">
+<span class="material-symbols-outlined text-amber-800" data-icon="group" style="font-size: 18px;">group</span>
+<span class="text-label-lg font-label-lg">ใช้อยู่ <strong class="font-tabular font-bold text-amber-950">5</strong></span>
+</div>
+<!-- Waiting for Payment Badge (รอเก็บเงิน 1) -->
+<div class="px-3.5 py-2 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-900 flex items-center gap-2 shadow-xs">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-600"></span>
+</span>
+<span class="text-label-lg font-label-lg">รอเก็บเงิน <strong class="font-tabular font-bold text-emerald-950">1</strong></span>
+</div>
+</div>
+<!-- Right: View Mode Toggle -->
+<div class="flex items-center bg-surface-container-low p-1 rounded-xl border border-outline-variant self-start lg:self-auto">
+<button class="px-3.5 py-1.5 rounded-lg bg-[#F59E0B] text-neutral-900 font-label-md font-semibold flex items-center gap-1.5 shadow-sm transition" id="btn-view-grid" onclick="toggleViewMode('grid')">
+<span class="material-symbols-outlined" data-icon="grid_view" style="font-size: 18px;">grid_view</span>
+<span>ผังโต๊ะ (Grid)</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-md font-label-md flex items-center gap-1.5 transition" id="btn-view-list" onclick="toggleViewMode('list')">
+<span class="material-symbols-outlined" data-icon="view_list" style="font-size: 18px;">view_list</span>
+<span>ตาราง (List)</span>
+</button>
+</div>
+</div>
+<div class="h-px bg-outline-variant/60 w-full"></div>
+<!-- Zone Filters (Pill Carousel) -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+<span class="text-label-md font-label-md text-on-surface-variant whitespace-nowrap mr-1 flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="filter_list" style="font-size: 16px;">filter_list</span>
+              โซนที่นั่ง:
+            </span>
+<button class="zone-pill px-4 py-1.5 rounded-full bg-[#F59E0B] text-neutral-900 font-label-md font-semibold border border-transparent shadow-xs transition min-h-[38px]" onclick="filterZone('all', this)">
+              ทั้งหมด (12)
+            </button>
+<button class="zone-pill px-4 py-1.5 rounded-full bg-white text-neutral-700 font-label-md border border-outline-variant hover:bg-surface-container transition min-h-[38px]" onclick="filterZone('zone-floor1', this)">
+              ชั้น 1 ห้องโถง (6)
+            </button>
+<button class="zone-pill px-4 py-1.5 rounded-full bg-white text-neutral-700 font-label-md border border-outline-variant hover:bg-surface-container transition min-h-[38px]" onclick="filterZone('zone-floor2', this)">
+              ชั้น 2 (ห้องแอร์) (4)
+            </button>
+<button class="zone-pill px-4 py-1.5 rounded-full bg-white text-neutral-700 font-label-md border border-outline-variant hover:bg-surface-container transition min-h-[38px]" onclick="filterZone('zone-balcony', this)">
+              ระเบียงด้านนอก Outdoor (2)
+            </button>
+</div>
+</div>
+<!-- ==================== 5. INTERACTIVE FLOOR PLAN GRID ==================== -->
+<div class="transition-opacity duration-200" id="grid-view-container">
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+<!-- Card 01: ว่าง (Available) -->
+<div class="table-card aspect-square bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between group" data-table="01" data-zone="zone-floor1" onclick="openDrawer('โต๊ะ 01 (ชั้น 1)', 'ว่าง', '฿0', '0')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-slate-400">ชั้น 1</span>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ว่าง</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-slate-700 font-tabular group-hover:scale-105 transition-transform">01</div>
+<div class="text-xs text-slate-400 mt-0.5 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined" data-icon="chair" style="font-size: 14px;">chair</span> 4 ที่นั่ง
+                </div>
+</div>
+<div class="text-center pt-2 border-t border-slate-100">
+<span class="text-xs text-slate-400 group-hover:text-primary transition-colors">แตะเพื่อเปิดบิล</span>
+</div>
+</div>
+<!-- Card 02: ใช้อยู่ (Occupied) -->
+<div class="table-card aspect-square bg-amber-50 border-2 border-amber-400 rounded-2xl p-3.5 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group" data-table="02" data-zone="zone-floor1" onclick="openDrawer('โต๊ะ 02 (ชั้น 1)', 'กำลังใช้อยู่', '฿520', '4 รายการ', '35 นาที', '#A0038')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-amber-800 font-medium">ชั้น 1</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-xs font-semibold">ใช้อยู่</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-amber-950 font-tabular leading-tight">02</div>
+<div class="text-xs font-semibold text-amber-800 mt-0.5">4 รายการ</div>
+</div>
+<div class="bg-amber-100/70 rounded-xl p-2 border border-amber-300/60 text-xs text-amber-950 flex flex-col gap-0.5">
+<div class="flex justify-between font-bold">
+<span>ยอดบิล</span>
+<span class="font-tabular text-sm">฿520</span>
+</div>
+<div class="flex justify-between text-[11px] text-amber-800">
+<span>#A0038</span>
+<span>35 นาที</span>
+</div>
+</div>
+</div>
+<!-- Card 03: ว่าง (Available) -->
+<div class="table-card aspect-square bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between group" data-table="03" data-zone="zone-floor1" onclick="openDrawer('โต๊ะ 03 (ชั้น 1)', 'ว่าง', '฿0', '0')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-slate-400">ชั้น 1</span>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ว่าง</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-slate-700 font-tabular group-hover:scale-105 transition-transform">03</div>
+<div class="text-xs text-slate-400 mt-0.5 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined" data-icon="chair" style="font-size: 14px;">chair</span> 2 ที่นั่ง
+                </div>
+</div>
+<div class="text-center pt-2 border-t border-slate-100">
+<span class="text-xs text-slate-400 group-hover:text-primary transition-colors">แตะเพื่อเปิดบิล</span>
+</div>
+</div>
+<!-- Card 04: ใช้อยู่ (Occupied) -->
+<div class="table-card aspect-square bg-amber-50 border-2 border-amber-400 rounded-2xl p-3.5 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group" data-table="04" data-zone="zone-floor1" onclick="openDrawer('โต๊ะ 04 (ชั้น 1)', 'กำลังใช้อยู่', '฿210', '2 รายการ', '18 นาที', '#A0041')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-amber-800 font-medium">ชั้น 1</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-xs font-semibold">ใช้อยู่</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-amber-950 font-tabular leading-tight">04</div>
+<div class="text-xs font-semibold text-amber-800 mt-0.5">2 รายการ</div>
+</div>
+<div class="bg-amber-100/70 rounded-xl p-2 border border-amber-300/60 text-xs text-amber-950 flex flex-col gap-0.5">
+<div class="flex justify-between font-bold">
+<span>ยอดบิล</span>
+<span class="font-tabular text-sm">฿210</span>
+</div>
+<div class="flex justify-between text-[11px] text-amber-800">
+<span>#A0041</span>
+<span>18 นาที</span>
+</div>
+</div>
+</div>
+<!-- Card 05: ใช้อยู่ (Occupied - HIGHLIGHT SAMPLE FOR USER IN PROMPT) -->
+<div class="table-card aspect-square bg-amber-50 border-2 border-amber-400 rounded-2xl p-3.5 shadow-sm hover:shadow-md ring-2 ring-amber-300/60 transition-all cursor-pointer flex flex-col justify-between group" data-table="05" data-zone="zone-floor1" onclick="openDrawer('โต๊ะ 5 (ชั้น 1)', 'กำลังใช้อยู่', '฿340', '3 รายการ', '45 นาที', '#A0042')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-amber-800 font-semibold">ชั้น 1</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-xs font-bold">ใช้อยู่</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-amber-950 font-tabular leading-tight">05</div>
+<div class="text-xs font-semibold text-amber-800 mt-0.5">3 รายการ</div>
+</div>
+<div class="bg-amber-100/90 rounded-xl p-2 border border-amber-300/80 text-xs text-amber-950 flex flex-col gap-0.5">
+<div class="flex justify-between font-bold">
+<span>ยอดบิล</span>
+<span class="font-tabular text-sm text-primary font-bold">฿340</span>
+</div>
+<div class="flex justify-between text-[11px] text-amber-800">
+<span>#A0042</span>
+<span>45 นาที</span>
+</div>
+</div>
+</div>
+<!-- Card 06: ว่าง (Available) -->
+<div class="table-card aspect-square bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between group" data-table="06" data-zone="zone-floor1" onclick="openDrawer('โต๊ะ 06 (ชั้น 1)', 'ว่าง', '฿0', '0')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-slate-400">ชั้น 1</span>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ว่าง</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-slate-700 font-tabular group-hover:scale-105 transition-transform">06</div>
+<div class="text-xs text-slate-400 mt-0.5 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined" data-icon="chair" style="font-size: 14px;">chair</span> 6 ที่นั่ง
+                </div>
+</div>
+<div class="text-center pt-2 border-t border-slate-100">
+<span class="text-xs text-slate-400 group-hover:text-primary transition-colors">แตะเพื่อเปิดบิล</span>
+</div>
+</div>
+<!-- Card 07: ว่าง (Available - ชั้น 2) -->
+<div class="table-card aspect-square bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between group" data-table="07" data-zone="zone-floor2" onclick="openDrawer('โต๊ะ 07 (ชั้น 2)', 'ว่าง', '฿0', '0')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-slate-400">ชั้น 2 แอร์</span>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ว่าง</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-slate-700 font-tabular group-hover:scale-105 transition-transform">07</div>
+<div class="text-xs text-slate-400 mt-0.5 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined" data-icon="chair" style="font-size: 14px;">chair</span> 4 ที่นั่ง
+                </div>
+</div>
+<div class="text-center pt-2 border-t border-slate-100">
+<span class="text-xs text-slate-400 group-hover:text-primary transition-colors">แตะเพื่อเปิดบิล</span>
+</div>
+</div>
+<!-- Card 08: ใช้อยู่ (Occupied - ชั้น 2) -->
+<div class="table-card aspect-square bg-amber-50 border-2 border-amber-400 rounded-2xl p-3.5 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group" data-table="08" data-zone="zone-floor2" onclick="openDrawer('โต๊ะ 08 (ชั้น 2)', 'กำลังใช้อยู่', '฿780', '5 รายการ', '52 นาที', '#A0035')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-amber-800 font-medium">ชั้น 2 แอร์</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-xs font-semibold">ใช้อยู่</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-amber-950 font-tabular leading-tight">08</div>
+<div class="text-xs font-semibold text-amber-800 mt-0.5">5 รายการ</div>
+</div>
+<div class="bg-amber-100/70 rounded-xl p-2 border border-amber-300/60 text-xs text-amber-950 flex flex-col gap-0.5">
+<div class="flex justify-between font-bold">
+<span>ยอดบิล</span>
+<span class="font-tabular text-sm">฿780</span>
+</div>
+<div class="flex justify-between text-[11px] text-amber-800">
+<span>#A0035</span>
+<span>52 นาที</span>
+</div>
+</div>
+</div>
+<!-- Card 09: ว่าง (Available - ชั้น 2) -->
+<div class="table-card aspect-square bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between group" data-table="09" data-zone="zone-floor2" onclick="openDrawer('โต๊ะ 09 (ชั้น 2)', 'ว่าง', '฿0', '0')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-slate-400">ชั้น 2 แอร์</span>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ว่าง</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-slate-700 font-tabular group-hover:scale-105 transition-transform">09</div>
+<div class="text-xs text-slate-400 mt-0.5 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined" data-icon="chair" style="font-size: 14px;">chair</span> 4 ที่นั่ง
+                </div>
+</div>
+<div class="text-center pt-2 border-t border-slate-100">
+<span class="text-xs text-slate-400 group-hover:text-primary transition-colors">แตะเพื่อเปิดบิล</span>
+</div>
+</div>
+<!-- Card 10: ว่าง (Available - ชั้น 2) -->
+<div class="table-card aspect-square bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between group" data-table="10" data-zone="zone-floor2" onclick="openDrawer('โต๊ะ 10 (ชั้น 2)', 'ว่าง', '฿0', '0')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-slate-400">ชั้น 2 แอร์</span>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">ว่าง</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-slate-700 font-tabular group-hover:scale-105 transition-transform">10</div>
+<div class="text-xs text-slate-400 mt-0.5 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined" data-icon="chair" style="font-size: 14px;">chair</span> 8 ที่นั่ง VIP
+                </div>
+</div>
+<div class="text-center pt-2 border-t border-slate-100">
+<span class="text-xs text-slate-400 group-hover:text-primary transition-colors">แตะเพื่อเปิดบิล</span>
+</div>
+</div>
+<!-- Card 11: ใช้อยู่ (Occupied - ระเบียง) -->
+<div class="table-card aspect-square bg-amber-50 border-2 border-amber-400 rounded-2xl p-3.5 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group" data-table="11" data-zone="zone-balcony" onclick="openDrawer('โต๊ะ 11 (ระเบียง)', 'กำลังใช้อยู่', '฿195', '2 รายการ', '15 นาที', '#A0044')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-amber-800 font-medium">ระเบียง</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-xs font-semibold">ใช้อยู่</span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-amber-950 font-tabular leading-tight">11</div>
+<div class="text-xs font-semibold text-amber-800 mt-0.5">2 รายการ</div>
+</div>
+<div class="bg-amber-100/70 rounded-xl p-2 border border-amber-300/60 text-xs text-amber-950 flex flex-col gap-0.5">
+<div class="flex justify-between font-bold">
+<span>ยอดบิล</span>
+<span class="font-tabular text-sm">฿195</span>
+</div>
+<div class="flex justify-between text-[11px] text-amber-800">
+<span>#A0044</span>
+<span>15 นาที</span>
+</div>
+</div>
+</div>
+<!-- Card 12: รอเก็บเงิน (Waiting for payment - ระเบียง) -->
+<div class="table-card aspect-square bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-3.5 shadow-sm hover:shadow-md ring-2 ring-emerald-300/50 transition-all cursor-pointer flex flex-col justify-between group animate-pulse" data-table="12" data-zone="zone-balcony" onclick="openDrawer('โต๊ะ 12 (ระเบียง)', 'รอเก็บเงิน', '฿400', '3 รายการ', '68 นาที', '#A0030')">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-emerald-800 font-semibold">ระเบียง</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> รอเช็คบิล
+                </span>
+</div>
+<div class="text-center my-auto">
+<div class="text-[32px] font-bold text-emerald-950 font-tabular leading-tight">12</div>
+<div class="text-xs font-bold text-emerald-800 mt-0.5">เรียกพนักงานเก็บเงิน</div>
+</div>
+<div class="bg-emerald-100 rounded-xl p-2 border border-emerald-300 text-xs text-emerald-950 flex flex-col gap-0.5">
+<div class="flex justify-between font-bold text-emerald-900">
+<span>ยอดรอชำระ</span>
+<span class="font-tabular text-sm font-extrabold text-emerald-800">฿400</span>
+</div>
+<div class="flex justify-between text-[11px] text-emerald-700">
+<span>#A0030</span>
+<span>68 นาที</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== 5.2 ALTERNATIVE LIST VIEW (Hidden by default) ==================== -->
+<div class="hidden bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm" id="list-view-container">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-body-md font-body-md">
+<thead class="bg-surface-container text-on-surface-variant text-label-md font-label-md uppercase tracking-wider border-b border-outline-variant">
+<tr>
+<th class="py-3 px-4">เลขโต๊ะ</th>
+<th class="py-3 px-4">โซน</th>
+<th class="py-3 px-4">ความจุ</th>
+<th class="py-3 px-4">สถานะ</th>
+<th class="py-3 px-4">เลขออร์เดอร์</th>
+<th class="py-3 px-4">ระยะเวลานั่ง</th>
+<th class="py-3 px-4 text-right">ยอดรวม</th>
+<th class="py-3 px-4 text-center">จัดการ</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50">
+<tr class="hover:bg-surface-container-low transition">
+<td class="py-3.5 px-4 font-bold text-on-surface">โต๊ะ 01</td>
+<td class="py-3.5 px-4 text-on-surface-variant">ชั้น 1</td>
+<td class="py-3.5 px-4">4 ที่นั่ง</td>
+<td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">ว่าง</span></td>
+<td class="py-3.5 px-4 text-on-surface-variant">-</td>
+<td class="py-3.5 px-4 text-on-surface-variant">-</td>
+<td class="py-3.5 px-4 text-right font-tabular">-</td>
+<td class="py-3.5 px-4 text-center">
+<button class="text-primary hover:text-primary-container p-1" onclick="openTableQrSheet('โต๊ะ 01')"><span class="material-symbols-outlined" data-icon="qr_code_2">qr_code_2</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low bg-amber-50/40 transition">
+<td class="py-3.5 px-4 font-bold text-amber-950">โต๊ะ 05</td>
+<td class="py-3.5 px-4 text-on-surface-variant">ชั้น 1</td>
+<td class="py-3.5 px-4">4 ที่นั่ง</td>
+<td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">ใช้อยู่</span></td>
+<td class="py-3.5 px-4 font-mono text-xs">#A0042</td>
+<td class="py-3.5 px-4 text-on-surface-variant">45 นาที</td>
+<td class="py-3.5 px-4 text-right font-bold font-tabular text-[#EA580C]">฿340</td>
+<td class="py-3.5 px-4 text-center">
+<button class="text-primary hover:text-primary-container p-1" onclick="openDrawer('โต๊ะ 5 (ชั้น 1)', 'กำลังใช้อยู่', '฿340', '3 รายการ', '45 นาที', '#A0042')"><span class="material-symbols-outlined" data-icon="more_vert">more_vert</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low bg-emerald-50/40 transition">
+<td class="py-3.5 px-4 font-bold text-emerald-950">โต๊ะ 12</td>
+<td class="py-3.5 px-4 text-on-surface-variant">ระเบียงด้านนอก</td>
+<td class="py-3.5 px-4">4 ที่นั่ง</td>
+<td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">รอเก็บเงิน</span></td>
+<td class="py-3.5 px-4 font-mono text-xs">#A0030</td>
+<td class="py-3.5 px-4 text-on-surface-variant">68 นาที</td>
+<td class="py-3.5 px-4 text-right font-bold font-tabular text-emerald-700">฿400</td>
+<td class="py-3.5 px-4 text-center">
+<button class="text-emerald-700 hover:text-emerald-900 p-1" onclick="openDrawer('โต๊ะ 12 (ระเบียง)', 'รอเก็บเงิน', '฿400', '3 รายการ', '68 นาที', '#A0030')"><span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Quick Hint Bar -->
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-label-md text-on-surface-variant no-print">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<span>แตะที่การ์ดโต๊ะเพื่อดูบิลสด, พิมพ์ QR หรือสร้างโทเค็น QR ใหม่สำหรับลูกค้าโต๊ะถัดไป</span>
+</div>
+<button class="font-semibold text-primary hover:underline flex items-center gap-1" onclick="openTableQrSheet('โต๊ะ 5')">
+<span>ทดสอบเปิด QR โต๊ะ 5 ด่วน</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward" style="font-size: 16px;">arrow_forward</span>
+</button>
+</div>
+</main>
+</div>
+</div>
+<!-- ==================== 6. DRAWER: TABLE ACTIONS (DRAWER / MODAL) ==================== -->
+<div class="fixed inset-0 bg-neutral-900/50 backdrop-blur-xs z-50 transition-opacity opacity-0 pointer-events-none duration-200" id="table-action-drawer-backdrop" onclick="closeDrawer()"></div>
+<div class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-surface-container-lowest shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between border-l border-outline-variant" id="table-action-drawer">
+<!-- Drawer Header -->
+<div class="p-5 border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xl">
+<span class="material-symbols-outlined" data-icon="table_bar" style="font-size: 28px;">table_bar</span>
+</div>
+<div>
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface" id="drawer-table-name">โต๊ะ 5 (ชั้น 1)</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold" id="drawer-status-badge">กำลังใช้อยู่</span>
+<span class="text-xs text-on-surface-variant font-tabular" id="drawer-bill-time">นั่งมาแล้ว 45 นาที</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition" onclick="closeDrawer()">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Drawer Content / Quick Actions List -->
+<div class="p-5 flex-1 overflow-y-auto space-y-4">
+<!-- Current Bill Card Preview -->
+<div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant space-y-3">
+<div class="flex justify-between items-center text-label-md text-on-surface-variant">
+<span id="drawer-bill-no">บิลเลขที่: #A0042</span>
+<span class="font-semibold text-on-surface" id="drawer-item-count">3 รายการอาหาร</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-body-md font-body-md text-on-surface-variant">ยอดรวมปัจจุบัน:</span>
+<span class="text-price-total font-price-total text-[#EA580C] font-tabular" id="drawer-bill-total">฿340</span>
+</div>
+<button class="w-full min-h-[48px] py-2.5 px-4 rounded-xl bg-[#EA580C] hover:bg-[#c2410c] text-white font-label-lg font-semibold flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.98]" onclick="alert('ไปยังหน้ารายละเอียดบิล โต๊ะ 5')">
+<span class="material-symbols-outlined" data-icon="receipt">receipt</span>
+<span>ดูบิลปัจจุบัน &amp; จัดการออเดอร์</span>
+</button>
+</div>
+<!-- Action Links List -->
+<div class="space-y-2 pt-2">
+<p class="text-label-md font-label-md text-on-surface-variant px-1 font-semibold uppercase tracking-wider">คำสั่งจัดการโต๊ะ &amp; QR</p>
+<!-- [ดู QR Code ประจำโต๊ะ] -->
+<button class="w-full min-h-[48px] px-4 py-3 bg-surface-container-lowest hover:bg-surface-container border border-outline-variant rounded-xl text-left flex items-center justify-between text-on-surface transition active:scale-[0.99]" onclick="openTableQrSheet(document.getElementById('drawer-table-name').innerText)">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="qr_code_2">qr_code_2</span>
+<div>
+<span class="font-semibold block text-body-md">ดู QR Code ประจำโต๊ะ</span>
+<span class="text-xs text-on-surface-variant">สแกนสั่งอาหารสำหรับลูกค้าโต๊ะนี้</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- [เปลี่ยนชื่อโต๊ะ / ย้ายโต๊ะ] -->
+<button class="w-full min-h-[48px] px-4 py-3 bg-surface-container-lowest hover:bg-surface-container border border-outline-variant rounded-xl text-left flex items-center justify-between text-on-surface transition active:scale-[0.99]" onclick="alert('ย้ายโต๊ะ: เลือกโต๊ะปลายทางที่ต้องการย้ายออร์เดอร์')">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#0053db]" data-icon="swap_horiz">swap_horiz</span>
+<div>
+<span class="font-semibold block text-body-md">ย้ายโต๊ะ / เปลี่ยนชื่อโต๊ะ</span>
+<span class="text-xs text-on-surface-variant">ย้ายรายการสั่งอาหารไปยังโต๊ะอื่น</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- [รีเซ็ต QR Code] -->
+<button class="w-full min-h-[48px] px-4 py-3 bg-surface-container-lowest hover:bg-amber-50 border border-outline-variant hover:border-amber-400 rounded-xl text-left flex items-center justify-between text-on-surface transition active:scale-[0.99]" onclick="resetQrToken()">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-amber-700" data-icon="restart_alt">restart_alt</span>
+<div>
+<span class="font-semibold block text-body-md text-amber-900">รีเซ็ต QR Code (สร้างโทเค็นใหม่)</span>
+<span class="text-xs text-on-surface-variant">ตัดการเชื่อมต่อลูกค้าเดิมเมื่อเช็คบิลเสร็จ</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-amber-600" data-icon="cached">cached</span>
+</button>
+</div>
+<!-- Delete Table Button -->
+<div class="pt-4 border-t border-outline-variant/60">
+<button class="w-full min-h-[48px] px-4 py-3 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-label-lg font-semibold flex items-center justify-center gap-2 transition active:scale-[0.98]" onclick="confirm('ต้องการลบโต๊ะนี้ออกจากระบบหรือไม่?') &amp;&amp; closeDrawer()">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+<span>ลบโต๊ะนี้</span>
+</button>
+</div>
+</div>
+<!-- Drawer Footer -->
+<div class="p-4 border-t border-outline-variant bg-surface-container-low flex gap-3">
+<button class="flex-1 min-h-[48px] py-2.5 rounded-xl border border-outline bg-white text-on-surface font-label-md font-semibold hover:bg-surface-container transition" onclick="closeDrawer()">
+        ปิดหน้าต่าง
+      </button>
+</div>
+</div>
+<!-- ==================== 7. MODAL: TABLE QR CODE SHEET MODAL ==================== -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-xs hidden no-print" id="table-qr-modal">
+<div class="bg-surface-container-lowest rounded-3xl max-w-md w-full border border-outline-variant shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
+<!-- Modal Top bar -->
+<div class="p-4 px-6 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2 text-on-surface font-bold text-headline-sm">
+<span class="material-symbols-outlined text-[#EA580C]" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span>QR Code สั่งอาหาร</span>
+</div>
+<button class="w-9 h-9 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition" onclick="closeTableQrSheet()">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Card Body: The Standee Preview -->
+<div class="p-6 text-center space-y-4">
+<!-- Table Tent Display Card -->
+<div class="bg-gradient-to-b from-amber-500/10 to-transparent p-6 rounded-2xl border-2 border-amber-400/80 shadow-sm relative overflow-hidden">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-neutral-900 text-xs font-bold mb-3">
+<span class="material-symbols-outlined" data-icon="restaurant" style="font-size: 14px;">restaurant</span>
+<span>Kin-D POS • ครัวรสเลิศ</span>
+</div>
+<h3 class="text-headline-lg font-headline-lg font-extrabold text-neutral-900" id="modal-qr-table-title">โต๊ะ 5 (Table 05)</h3>
+<p class="text-xs text-neutral-600 mb-4">สแกนเพื่อเปิดเมนู สั่งอาหาร และติดตามสถานะบิล</p>
+<!-- Crisp High-Fidelity SVG QR Representation -->
+<div class="w-[260px] h-[260px] mx-auto bg-white p-3.5 rounded-2xl shadow-md border border-slate-200 flex items-center justify-center relative">
+<!-- Render Crisp SVG Mock QR -->
+<svg class="w-full h-full text-neutral-900" fill="currentColor" viewbox="0 0 100 100">
+<!-- Corner 1 -->
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="0"></rect>
+<rect fill="white" height="20" rx="2" width="20" x="5" y="5"></rect>
+<rect fill="#EA580C" height="10" rx="1" width="10" x="10" y="10"></rect>
+<!-- Corner 2 -->
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="70" y="0"></rect>
+<rect fill="white" height="20" rx="2" width="20" x="75" y="5"></rect>
+<rect fill="#EA580C" height="10" rx="1" width="10" x="80" y="10"></rect>
+<!-- Corner 3 -->
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="70"></rect>
+<rect fill="white" height="20" rx="2" width="20" x="5" y="75"></rect>
+<rect fill="#EA580C" height="10" rx="1" width="10" x="10" y="80"></rect>
+<!-- Modules / Pattern -->
+<rect height="6" rx="1" width="6" x="36" y="6"></rect>
+<rect height="18" rx="1" width="6" x="48" y="6"></rect>
+<rect height="6" rx="1" width="6" x="58" y="12"></rect>
+<rect height="6" rx="1" width="8" x="36" y="24"></rect>
+<rect height="12" rx="1" width="6" x="6" y="36"></rect>
+<rect height="6" rx="1" width="18" x="18" y="36"></rect>
+<rect height="14" rx="1" width="6" x="18" y="48"></rect>
+<rect height="8" rx="1" width="8" x="30" y="42"></rect>
+<rect height="6" rx="1" width="16" x="42" y="36"></rect>
+<rect height="8" rx="1" width="8" x="42" y="48"></rect>
+<rect height="12" rx="1" width="10" x="56" y="42"></rect>
+<rect height="6" rx="1" width="8" x="72" y="36"></rect>
+<rect height="18" rx="1" width="8" x="86" y="36"></rect>
+<rect height="12" rx="1" width="8" x="72" y="48"></rect>
+<rect height="6" rx="1" width="18" x="36" y="62"></rect>
+<rect height="12" rx="1" width="8" x="36" y="74"></rect>
+<rect height="6" rx="1" width="14" x="48" y="80"></rect>
+<rect height="6" rx="1" width="26" x="68" y="66"></rect>
+<rect height="16" rx="1" width="16" x="78" y="78"></rect>
+<rect height="8" rx="1" width="6" x="68" y="86"></rect>
+</svg>
+<!-- Center Logo Overlay -->
+<div class="absolute inset-0 m-auto w-12 h-12 rounded-xl bg-amber-500 border-2 border-white shadow-sm flex items-center justify-center text-neutral-950 font-bold">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-size: 24px;">restaurant_menu</span>
+</div>
+</div>
+<!-- URL string with token -->
+<div class="mt-4 p-2 bg-white/80 rounded-xl border border-amber-200 text-xs font-mono text-neutral-700 select-all flex items-center justify-between">
+<span class="truncate" id="qr-target-url">order.kind-pos.com/t/5?token=kd78x</span>
+<button class="p-1 text-primary hover:text-primary-container" onclick="navigator.clipboard.writeText('https://order.kind-pos.com/t/5?token=kd78x'); alert('คัดลอกลิงก์เรียบร้อย!');" title="คัดลอกลิงก์">
+<span class="material-symbols-outlined" data-icon="content_copy" style="font-size: 16px;">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Action buttons -->
+<div class="grid grid-cols-2 gap-3 pt-2">
+<button class="min-h-[48px] px-3 py-2.5 rounded-xl border border-outline bg-white hover:bg-surface-container font-label-md font-semibold text-on-surface flex items-center justify-center gap-1.5 shadow-sm transition active:scale-[0.98]" onclick="alert('ดาวน์โหลดรูปภาพ QR Code โต๊ะ 5 ขนาดคมชัด PNG สำเร็จ')">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+<span>ดาวน์โหลด PNG</span>
+</button>
+<button class="min-h-[48px] px-3 py-2.5 rounded-xl bg-[#EA580C] hover:bg-[#c2410c] text-white font-label-md font-semibold flex items-center justify-center gap-1.5 shadow-sm transition active:scale-[0.98]" onclick="openPrintModal()">
+<span class="material-symbols-outlined" data-icon="print">print</span>
+<span>พิมพ์ป้ายโต๊ะนี้</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== 8. A4 PRINT PREVIEW MODAL & PRINTABLE CANVAS ==================== -->
+<div class="fixed inset-0 z-50 bg-neutral-900/80 backdrop-blur-md overflow-y-auto hidden" id="print-modal-container">
+<!-- Floating Toolbar on Top (Screen Only) -->
+<div class="sticky top-0 z-50 bg-surface-container-lowest/95 backdrop-blur border-b border-outline-variant px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-md no-print">
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-xl hover:bg-surface-container text-on-surface-variant transition" onclick="closePrintModal()">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div>
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface">พรีวิวการพิมพ์ป้าย QR ทั้งหมด (A4 Table Standee)</h3>
+<p class="text-xs text-on-surface-variant">แบบ 2 คอลัมน์ x 3 แถว (รวม 6 ป้ายต่อหน้ากระดาษ A4 พร้อมเส้นประตัดกรรไกร)</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-on-surface-variant hidden sm:inline">ขนาดกระดาษแนะนำ: A4 แนวตั้ง (Portrait)</span>
+<button class="min-h-[48px] px-6 py-2.5 bg-[#EA580C] hover:bg-[#c2410c] text-white rounded-xl font-label-lg font-semibold flex items-center gap-2 shadow-md transition active:scale-[0.98]" onclick="window.print()">
+<span class="material-symbols-outlined" data-icon="print">print</span>
+<span>สั่งพิมพ์ทันที (Print Now)</span>
+</button>
+<button class="min-h-[48px] px-4 py-2.5 bg-surface-container-low border border-outline text-on-surface rounded-xl font-label-md font-semibold hover:bg-surface-container transition" onclick="closePrintModal()">
+          ปิด
+        </button>
+</div>
+</div>
+<!-- The A4 Sheet Canvas Container (Centered on Screen, Clean in Print) -->
+<div class="py-8 px-4 flex justify-center">
+<!-- A4 Page Simulation: 210mm x 297mm ratio (~794px x 1123px) -->
+<div class="a4-sheet w-full max-w-[840px] bg-white rounded-xl shadow-2xl p-6 md:p-8 border border-neutral-300 text-neutral-900 space-y-4">
+<!-- Header Sheet Banner -->
+<div class="border-b-2 border-neutral-800 pb-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-600" data-icon="restaurant" style="font-size: 26px;">restaurant</span>
+<div>
+<h2 class="text-lg font-extrabold tracking-tight">Kin-D POS • ครัวรสเลิศ (สาขาสยามสแควร์)</h2>
+<p class="text-[11px] text-neutral-500">แผ่นป้ายสแกนสั่งอาหารประจำโต๊ะ (Table Stand QR Card Pack)</p>
+</div>
+</div>
+<div class="text-right text-[11px] text-neutral-500">
+<div>พิมพ์เมื่อ: มีนาคม 2025</div>
+<div class="font-bold text-neutral-700">หน้า 1 จาก 2 (โต๊ะ 01 - 06)</div>
+</div>
+</div>
+<!-- 2 Columns x 3 Rows = 6 Table Cards Grid -->
+<div class="grid grid-cols-2 gap-4">
+<!-- QR Card 01 -->
+<div class="relative border-2 border-dashed border-neutral-300 rounded-2xl p-4 bg-neutral-50/50 flex flex-col items-center justify-between text-center min-h-[320px]">
+<span class="absolute -top-3 left-4 bg-white px-2 text-[10px] text-neutral-400 font-mono flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="content_cut" style="font-size: 12px;">content_cut</span> เส้นตัดกรรไกร
+            </span>
+<div class="flex items-center gap-1 text-xs font-bold text-amber-700">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-size: 14px;">restaurant_menu</span>
+<span>Kin-D POS</span>
+</div>
+<div class="my-1">
+<h4 class="text-sm font-semibold text-neutral-600">สแกนเพื่อสั่งอาหาร &amp; ดูเมนู</h4>
+<div class="text-2xl font-black text-neutral-900 tracking-tight">โต๊ะ 01</div>
+</div>
+<!-- QR code SVG 180px -->
+<div class="w-[170px] h-[170px] bg-white p-2.5 rounded-xl border border-neutral-200 shadow-xs flex items-center justify-center relative my-1">
+<svg class="w-full h-full text-neutral-900" fill="currentColor" viewbox="0 0 100 100">
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="0"></rect><rect fill="white" height="20" width="20" x="5" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="70" y="0"></rect><rect fill="white" height="20" width="20" x="75" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="80" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="70"></rect><rect fill="white" height="20" width="20" x="5" y="75"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="80"></rect>
+<rect height="8" width="8" x="36" y="8"></rect><rect height="8" width="10" x="52" y="8"></rect><rect height="8" width="26" x="36" y="24"></rect>
+<rect height="8" width="20" x="10" y="40"></rect><rect height="12" width="12" x="36" y="40"></rect><rect height="18" width="8" x="56" y="40"></rect>
+<rect height="8" width="18" x="72" y="38"></rect><rect height="8" width="14" x="40" y="60"></rect><rect height="8" width="22" x="68" y="60"></rect>
+<rect height="12" width="10" x="36" y="78"></rect><rect height="12" width="38" x="52" y="78"></rect>
+</svg>
+<div class="absolute inset-0 m-auto w-8 h-8 rounded-md bg-amber-500 border border-white flex items-center justify-center font-bold text-xs text-neutral-950">KD</div>
+</div>
+<div class="text-[11px] text-neutral-500 font-medium">
+              เปิดกล้องมือถือสแกนเพื่อเริ่มสั่งได้ทันที
+            </div>
+</div>
+<!-- QR Card 02 -->
+<div class="relative border-2 border-dashed border-neutral-300 rounded-2xl p-4 bg-neutral-50/50 flex flex-col items-center justify-between text-center min-h-[320px]">
+<span class="absolute -top-3 left-4 bg-white px-2 text-[10px] text-neutral-400 font-mono flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="content_cut" style="font-size: 12px;">content_cut</span> เส้นตัดกรรไกร
+            </span>
+<div class="flex items-center gap-1 text-xs font-bold text-amber-700">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-size: 14px;">restaurant_menu</span>
+<span>Kin-D POS</span>
+</div>
+<div class="my-1">
+<h4 class="text-sm font-semibold text-neutral-600">สแกนเพื่อสั่งอาหาร &amp; ดูเมนู</h4>
+<div class="text-2xl font-black text-neutral-900 tracking-tight">โต๊ะ 02</div>
+</div>
+<div class="w-[170px] h-[170px] bg-white p-2.5 rounded-xl border border-neutral-200 shadow-xs flex items-center justify-center relative my-1">
+<svg class="w-full h-full text-neutral-900" fill="currentColor" viewbox="0 0 100 100">
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="0"></rect><rect fill="white" height="20" width="20" x="5" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="70" y="0"></rect><rect fill="white" height="20" width="20" x="75" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="80" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="70"></rect><rect fill="white" height="20" width="20" x="5" y="75"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="80"></rect>
+<rect height="8" width="12" x="36" y="8"></rect><rect height="8" width="8" x="54" y="8"></rect><rect height="8" width="20" x="36" y="24"></rect>
+<rect height="8" width="14" x="10" y="40"></rect><rect height="10" width="16" x="36" y="40"></rect><rect height="18" width="8" x="56" y="40"></rect>
+<rect height="8" width="18" x="72" y="38"></rect><rect height="8" width="14" x="40" y="60"></rect><rect height="8" width="22" x="68" y="60"></rect>
+<rect height="12" width="12" x="36" y="78"></rect><rect height="12" width="36" x="54" y="78"></rect>
+</svg>
+<div class="absolute inset-0 m-auto w-8 h-8 rounded-md bg-amber-500 border border-white flex items-center justify-center font-bold text-xs text-neutral-950">KD</div>
+</div>
+<div class="text-[11px] text-neutral-500 font-medium">
+              เปิดกล้องมือถือสแกนเพื่อเริ่มสั่งได้ทันที
+            </div>
+</div>
+<!-- QR Card 03 -->
+<div class="relative border-2 border-dashed border-neutral-300 rounded-2xl p-4 bg-neutral-50/50 flex flex-col items-center justify-between text-center min-h-[320px]">
+<span class="absolute -top-3 left-4 bg-white px-2 text-[10px] text-neutral-400 font-mono flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="content_cut" style="font-size: 12px;">content_cut</span> เส้นตัดกรรไกร
+            </span>
+<div class="flex items-center gap-1 text-xs font-bold text-amber-700">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-size: 14px;">restaurant_menu</span>
+<span>Kin-D POS</span>
+</div>
+<div class="my-1">
+<h4 class="text-sm font-semibold text-neutral-600">สแกนเพื่อสั่งอาหาร &amp; ดูเมนู</h4>
+<div class="text-2xl font-black text-neutral-900 tracking-tight">โต๊ะ 03</div>
+</div>
+<div class="w-[170px] h-[170px] bg-white p-2.5 rounded-xl border border-neutral-200 shadow-xs flex items-center justify-center relative my-1">
+<svg class="w-full h-full text-neutral-900" fill="currentColor" viewbox="0 0 100 100">
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="0"></rect><rect fill="white" height="20" width="20" x="5" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="70" y="0"></rect><rect fill="white" height="20" width="20" x="75" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="80" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="70"></rect><rect fill="white" height="20" width="20" x="5" y="75"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="80"></rect>
+<rect height="8" width="8" x="36" y="8"></rect><rect height="8" width="12" x="50" y="8"></rect><rect height="8" width="26" x="36" y="24"></rect>
+<rect height="8" width="20" x="10" y="40"></rect><rect height="12" width="12" x="36" y="40"></rect><rect height="18" width="8" x="56" y="40"></rect>
+<rect height="8" width="18" x="72" y="38"></rect><rect height="8" width="14" x="40" y="60"></rect><rect height="8" width="22" x="68" y="60"></rect>
+<rect height="12" width="10" x="36" y="78"></rect><rect height="12" width="38" x="52" y="78"></rect>
+</svg>
+<div class="absolute inset-0 m-auto w-8 h-8 rounded-md bg-amber-500 border border-white flex items-center justify-center font-bold text-xs text-neutral-950">KD</div>
+</div>
+<div class="text-[11px] text-neutral-500 font-medium">
+              เปิดกล้องมือถือสแกนเพื่อเริ่มสั่งได้ทันที
+            </div>
+</div>
+<!-- QR Card 04 -->
+<div class="relative border-2 border-dashed border-neutral-300 rounded-2xl p-4 bg-neutral-50/50 flex flex-col items-center justify-between text-center min-h-[320px]">
+<span class="absolute -top-3 left-4 bg-white px-2 text-[10px] text-neutral-400 font-mono flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="content_cut" style="font-size: 12px;">content_cut</span> เส้นตัดกรรไกร
+            </span>
+<div class="flex items-center gap-1 text-xs font-bold text-amber-700">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-size: 14px;">restaurant_menu</span>
+<span>Kin-D POS</span>
+</div>
+<div class="my-1">
+<h4 class="text-sm font-semibold text-neutral-600">สแกนเพื่อสั่งอาหาร &amp; ดูเมนู</h4>
+<div class="text-2xl font-black text-neutral-900 tracking-tight">โต๊ะ 04</div>
+</div>
+<div class="w-[170px] h-[170px] bg-white p-2.5 rounded-xl border border-neutral-200 shadow-xs flex items-center justify-center relative my-1">
+<svg class="w-full h-full text-neutral-900" fill="currentColor" viewbox="0 0 100 100">
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="0"></rect><rect fill="white" height="20" width="20" x="5" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="70" y="0"></rect><rect fill="white" height="20" width="20" x="75" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="80" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="70"></rect><rect fill="white" height="20" width="20" x="5" y="75"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="80"></rect>
+<rect height="8" width="14" x="36" y="8"></rect><rect height="8" width="8" x="54" y="8"></rect><rect height="8" width="20" x="36" y="24"></rect>
+<rect height="8" width="14" x="10" y="40"></rect><rect height="10" width="16" x="36" y="40"></rect><rect height="18" width="8" x="56" y="40"></rect>
+<rect height="8" width="18" x="72" y="38"></rect><rect height="8" width="14" x="40" y="60"></rect><rect height="8" width="22" x="68" y="60"></rect>
+<rect height="12" width="14" x="36" y="78"></rect><rect height="12" width="36" x="54" y="78"></rect>
+</svg>
+<div class="absolute inset-0 m-auto w-8 h-8 rounded-md bg-amber-500 border border-white flex items-center justify-center font-bold text-xs text-neutral-950">KD</div>
+</div>
+<div class="text-[11px] text-neutral-500 font-medium">
+              เปิดกล้องมือถือสแกนเพื่อเริ่มสั่งได้ทันที
+            </div>
+</div>
+<!-- QR Card 05 (Requested Highlight) -->
+<div class="relative border-2 border-dashed border-amber-400 rounded-2xl p-4 bg-amber-50/30 flex flex-col items-center justify-between text-center min-h-[320px]">
+<span class="absolute -top-3 left-4 bg-white px-2 text-[10px] text-amber-600 font-mono flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined" data-icon="content_cut" style="font-size: 12px;">content_cut</span> เส้นตัดกรรไกร
+            </span>
+<div class="flex items-center gap-1 text-xs font-bold text-amber-800">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-size: 14px;">restaurant_menu</span>
+<span>Kin-D POS</span>
+</div>
+<div class="my-1">
+<h4 class="text-sm font-semibold text-neutral-700">สแกนเพื่อสั่งอาหาร &amp; ดูเมนู</h4>
+<div class="text-3xl font-black text-amber-950 tracking-tight">โต๊ะ 05</div>
+</div>
+<div class="w-[170px] h-[170px] bg-white p-2.5 rounded-xl border border-neutral-200 shadow-xs flex items-center justify-center relative my-1">
+<svg class="w-full h-full text-neutral-900" fill="currentColor" viewbox="0 0 100 100">
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="0"></rect><rect fill="white" height="20" width="20" x="5" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="70" y="0"></rect><rect fill="white" height="20" width="20" x="75" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="80" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="70"></rect><rect fill="white" height="20" width="20" x="5" y="75"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="80"></rect>
+<rect height="6" width="6" x="36" y="6"></rect><rect height="18" width="6" x="48" y="6"></rect><rect height="6" width="6" x="58" y="12"></rect>
+<rect height="6" width="8" x="36" y="24"></rect><rect height="12" width="6" x="6" y="36"></rect><rect height="6" width="18" x="18" y="36"></rect>
+<rect height="14" width="6" x="18" y="48"></rect><rect height="8" width="8" x="30" y="42"></rect><rect height="6" width="16" x="42" y="36"></rect>
+<rect height="8" width="8" x="42" y="48"></rect><rect height="12" width="10" x="56" y="42"></rect><rect height="6" width="8" x="72" y="36"></rect>
+<rect height="18" width="8" x="86" y="36"></rect><rect height="12" width="8" x="72" y="48"></rect><rect height="6" width="18" x="36" y="62"></rect>
+<rect height="12" width="8" x="36" y="74"></rect><rect height="6" width="14" x="48" y="80"></rect><rect height="6" width="26" x="68" y="66"></rect>
+<rect height="16" width="16" x="78" y="78"></rect><rect height="8" width="6" x="68" y="86"></rect>
+</svg>
+<div class="absolute inset-0 m-auto w-8 h-8 rounded-md bg-amber-500 border border-white flex items-center justify-center font-bold text-xs text-neutral-950">KD</div>
+</div>
+<div class="text-[11px] text-neutral-600 font-medium">
+              เปิดกล้องมือถือสแกนเพื่อเริ่มสั่งได้ทันที
+            </div>
+</div>
+<!-- QR Card 06 -->
+<div class="relative border-2 border-dashed border-neutral-300 rounded-2xl p-4 bg-neutral-50/50 flex flex-col items-center justify-between text-center min-h-[320px]">
+<span class="absolute -top-3 left-4 bg-white px-2 text-[10px] text-neutral-400 font-mono flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="content_cut" style="font-size: 12px;">content_cut</span> เส้นตัดกรรไกร
+            </span>
+<div class="flex items-center gap-1 text-xs font-bold text-amber-700">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-size: 14px;">restaurant_menu</span>
+<span>Kin-D POS</span>
+</div>
+<div class="my-1">
+<h4 class="text-sm font-semibold text-neutral-600">สแกนเพื่อสั่งอาหาร &amp; ดูเมนู</h4>
+<div class="text-2xl font-black text-neutral-900 tracking-tight">โต๊ะ 06</div>
+</div>
+<div class="w-[170px] h-[170px] bg-white p-2.5 rounded-xl border border-neutral-200 shadow-xs flex items-center justify-center relative my-1">
+<svg class="w-full h-full text-neutral-900" fill="currentColor" viewbox="0 0 100 100">
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="0"></rect><rect fill="white" height="20" width="20" x="5" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="70" y="0"></rect><rect fill="white" height="20" width="20" x="75" y="5"></rect><rect fill="#EA580C" height="10" width="10" x="80" y="10"></rect>
+<rect fill="#1b1c1c" height="30" rx="3" width="30" x="0" y="70"></rect><rect fill="white" height="20" width="20" x="5" y="75"></rect><rect fill="#EA580C" height="10" width="10" x="10" y="80"></rect>
+<rect height="8" width="8" x="36" y="8"></rect><rect height="8" width="10" x="52" y="8"></rect><rect height="8" width="26" x="36" y="24"></rect>
+<rect height="8" width="20" x="10" y="40"></rect><rect height="12" width="12" x="36" y="40"></rect><rect height="18" width="8" x="56" y="40"></rect>
+<rect height="8" width="18" x="72" y="38"></rect><rect height="8" width="14" x="40" y="60"></rect><rect height="8" width="22" x="68" y="60"></rect>
+<rect height="12" width="10" x="36" y="78"></rect><rect height="12" width="38" x="52" y="78"></rect>
+</svg>
+<div class="absolute inset-0 m-auto w-8 h-8 rounded-md bg-amber-500 border border-white flex items-center justify-center font-bold text-xs text-neutral-950">KD</div>
+</div>
+<div class="text-[11px] text-neutral-500 font-medium">
+              เปิดกล้องมือถือสแกนเพื่อเริ่มสั่งได้ทันที
+            </div>
+</div>
+</div>
+<!-- Footer Notice on A4 Sheet -->
+<div class="pt-3 border-t border-neutral-200 text-center text-[10px] text-neutral-400">
+          ระบบจัดการร้านอาหาร Kin-D POS • สามารถเคลือบพลาสติกใสเพื่อป้องกันน้ำและคราบอาหาร
+        </div>
+</div>
+</div>
+</div>
+<!-- ==================== 9. INLINE INTERACTIVE JAVASCRIPT ==================== -->
+<script>
+    // 1. Table Action Drawer Logic
+    function openDrawer(tableName, status, billTotal, itemCount, timeText, billNo) {
+      document.getElementById('drawer-table-name').innerText = tableName;
+      const statusBadge = document.getElementById('drawer-status-badge');
+      statusBadge.innerText = status;
+      
+      if (status.includes('ใช้อยู่')) {
+        statusBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold';
+      } else if (status.includes('รอเก็บเงิน')) {
+        statusBadge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold';
+      } else {
+        statusBadge.className = 'px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold';
+      }
+
+      document.getElementById('drawer-bill-total').innerText = billTotal || '฿0';
+      document.getElementById('drawer-item-count').innerText = itemCount || 'ไม่มีรายการ';
+      document.getElementById('drawer-bill-time').innerText = timeText ? `นั่งมาแล้ว ${timeText}` : 'โต๊ะว่าง';
+      document.getElementById('drawer-bill-no').innerText = billNo ? `บิลเลขที่: ${billNo}` : 'ยังไม่มีบิล';
+
+      const drawer = document.getElementById('table-action-drawer');
+      const backdrop = document.getElementById('table-action-drawer-backdrop');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100');
+      drawer.classList.remove('translate-x-full');
+    }
+
+    function closeDrawer() {
+      const drawer = document.getElementById('table-action-drawer');
+      const backdrop = document.getElementById('table-action-drawer-backdrop');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      backdrop.classList.remove('opacity-100');
+      drawer.classList.add('translate-x-full');
+    }
+
+    // 2. Table QR Modal Logic
+    function openTableQrSheet(tableName) {
+      document.getElementById('modal-qr-table-title').innerText = tableName || 'โต๊ะ 5 (Table 05)';
+      const cleanNum = (tableName.match(/\d+/) || ['5'])[0];
+      const randomToken = Math.random().toString(36).substring(2, 7);
+      document.getElementById('qr-target-url').innerText = `order.kind-pos.com/t/${cleanNum}?token=kd${randomToken}`;
+      document.getElementById('table-qr-modal').classList.remove('hidden');
+    }
+
+    function closeTableQrSheet() {
+      document.getElementById('table-qr-modal').classList.add('hidden');
+    }
+
+    // 3. Reset QR Token Action
+    function resetQrToken() {
+      const newTk = Math.random().toString(36).substring(2, 7);
+      alert(`รีเซ็ต QR Token สำเร็จ! ลูกค้าเดิมจะไม่สามารถสั่งอาหารเพิ่มเติมจากมือถือได้\nToken ใหม่: kd${newTk}`);
+      document.getElementById('qr-target-url').innerText = `order.kind-pos.com/t/5?token=kd${newTk}`;
+    }
+
+    // 4. Print Modal Logic
+    function openPrintModal() {
+      closeDrawer();
+      closeTableQrSheet();
+      document.getElementById('print-modal-container').classList.remove('hidden');
+    }
+
+    function closePrintModal() {
+      document.getElementById('print-modal-container').classList.add('hidden');
+    }
+
+    // 5. Zone Filtering Logic
+    function filterZone(zoneClass, btn) {
+      document.querySelectorAll('.zone-pill').forEach(b => {
+        b.className = 'zone-pill px-4 py-1.5 rounded-full bg-white text-neutral-700 font-label-md border border-outline-variant hover:bg-surface-container transition min-h-[38px]';
+      });
+      btn.className = 'zone-pill px-4 py-1.5 rounded-full bg-[#F59E0B] text-neutral-900 font-label-md font-semibold border border-transparent shadow-xs transition min-h-[38px]';
+
+      const cards = document.querySelectorAll('.table-card');
+      cards.forEach(card => {
+        if (zoneClass === 'all' || card.dataset.zone === zoneClass) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    // 6. View Switcher (Grid vs List)
+    function toggleViewMode(mode) {
+      const gridView = document.getElementById('grid-view-container');
+      const listView = document.getElementById('list-view-container');
+      const btnGrid = document.getElementById('btn-view-grid');
+      const btnList = document.getElementById('btn-view-list');
+
+      if (mode === 'grid') {
+        gridView.classList.remove('hidden');
+        listView.classList.add('hidden');
+        btnGrid.className = 'px-3.5 py-1.5 rounded-lg bg-[#F59E0B] text-neutral-900 font-label-md font-semibold flex items-center gap-1.5 shadow-sm transition';
+        btnList.className = 'px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-md font-label-md flex items-center gap-1.5 transition';
+      } else {
+        gridView.classList.add('hidden');
+        listView.classList.remove('hidden');
+        btnList.className = 'px-3.5 py-1.5 rounded-lg bg-[#F59E0B] text-neutral-900 font-label-md font-semibold flex items-center gap-1.5 shadow-sm transition';
+        btnGrid.className = 'px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-md font-label-md flex items-center gap-1.5 transition';
+      }
+    }
+
+    // 7. Search Input Filter
+    function filterTableSearch() {
+      const val = document.getElementById('table-search-input').value.toLowerCase().trim();
+      const cards = document.querySelectorAll('.table-card');
+      cards.forEach(card => {
+        const tNum = card.dataset.table || '';
+        const tContent = card.innerText.toLowerCase();
+        if (tNum.includes(val) || tContent.includes(val)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+</body></html>

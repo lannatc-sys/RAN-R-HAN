@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Kin-D POS - สั่งอาหาร โต๊ะ 5</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed-dim": "#ffb599",
+            "inverse-surface": "#303031",
+            "surface-variant": "#e3e2e2",
+            "primary-fixed": "#ffddb8",
+            "secondary-fixed": "#ffdbce",
+            "on-tertiary-container": "#003ba1",
+            "primary": "#855300",
+            "on-primary-container": "#613b00",
+            "outline-variant": "#d8c3ad",
+            "tertiary-fixed": "#dbe1ff",
+            "on-primary": "#ffffff",
+            "on-secondary-container": "#571a00",
+            "on-primary-fixed": "#2a1700",
+            "primary-fixed-dim": "#ffb95f",
+            "on-tertiary": "#ffffff",
+            "background": "#fbf9f9",
+            "inverse-on-surface": "#f2f0f0",
+            "secondary-container": "#fd651e",
+            "on-tertiary-fixed": "#00174b",
+            "on-error-container": "#93000a",
+            "surface-container": "#efeded",
+            "on-secondary": "#ffffff",
+            "surface-container-highest": "#e3e2e2",
+            "inverse-primary": "#ffb95f",
+            "tertiary-container": "#94aeff",
+            "surface-container-high": "#e9e8e7",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "on-surface-variant": "#534434",
+            "on-secondary-fixed": "#370e00",
+            "secondary": "#a73a00",
+            "on-error": "#ffffff",
+            "surface-bright": "#fbf9f9",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "on-background": "#1b1c1c",
+            "surface-tint": "#855300",
+            "error-container": "#ffdad6",
+            "surface": "#fbf9f9",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#653e00",
+            "outline": "#867461",
+            "tertiary": "#0053db",
+            "surface-dim": "#dbdad9",
+            "error": "#ba1a1a",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "on-surface": "#1b1c1c",
+            "primary-container": "#f59e0b",
+            "surface-container-low": "#f5f3f3"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-2": "8px",
+            "card-p-mobile": "16px",
+            "space-4": "16px",
+            "grid-base": "4px",
+            "min-target": "48px",
+            "space-6": "24px",
+            "space-1": "4px",
+            "space-8": "32px",
+            "space-5": "20px",
+            "space-3": "12px"
+          },
+          "fontFamily": {
+            "body-strong": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-sm": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-display": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-total": ["\"IBM Plex Sans Thai\", sans-serif"]
+          },
+          "fontSize": {
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "price-total": ["26px", { "lineHeight": "32px", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d8c3ad;
+      border-radius: 4px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex justify-center items-center select-none overflow-hidden">
+<!-- Mobile Viewport Container (390px Simulated Screen) -->
+<div class="relative w-full max-w-[390px] h-screen max-h-[844px] bg-surface flex flex-col shadow-2xl overflow-hidden">
+<!-- BACKGROUND: Simulated Kin-D POS Menu Behind Backdrop -->
+<header class="flex justify-between items-center w-full px-space-4 py-space-2 max-w-[390px] mx-auto bg-surface border-b border-outline-variant shadow-sm z-0">
+<div class="flex items-center gap-space-2">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="table_restaurant">table_restaurant</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">Kin-D POS โต๊ะ 4 (กะเช้า)</span>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</button>
+</header>
+<!-- Simulated Menu List Behind Blur -->
+<main class="flex-1 overflow-y-auto p-space-4 space-y-space-4 opacity-50 filter blur-[2px]">
+<div class="bg-surface-container-lowest p-space-4 rounded-2xl border border-outline-variant shadow-sm flex gap-3">
+<div class="w-20 h-20 rounded-xl bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sizzling plate of authentic Thai stir-fried holy basil with extra crispy pork belly and fresh red bird's eye chilies. Soft morning kitchen lighting creates a rich golden glow on the glistening pork skin, presented in a clean modern Thai restaurant setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQAEFhGwm8lX158UWRuxn3hCFNVLdzjNva2Q0_Qosh_IuA5mEnwUmQ_qFXIKgS9xQBVqZOtvRRNerModAVTlW1oeowi02k1u1DXtlPJm8P4EXEPIF830ijXmbOdqLHL_dYQaVXj7Bd0euSmNdco7ae68WKRjIvU1ttZQzjN4V4i_f3vKwaTNRElYasW-H93z26GQaO0FuNBnqcOsR_QBY3949g_ZDezaP-Q_3_pFwXi9QK7dgS67dz"/>
+</div>
+<div class="flex-1">
+<h4 class="font-body-strong text-body-strong text-on-surface">ข้าวกะเพราหมูกรอบ</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">หมูกรอบคัดพิเศษ ใบกะเพราป่าแท้</p>
+<p class="font-price-display text-price-display text-primary mt-1">฿75</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-4 rounded-2xl border border-outline-variant shadow-sm flex gap-3">
+<div class="w-20 h-20 rounded-xl bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A steaming clay pot of creamy Thai tom yum kung soup with succulent king prawns, fragrant galangal, lemongrass, and aromatic kaffir lime leaves. Soft diffuse daylight enhances the vibrant reddish-orange spicy broth with droplets of chili oil." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0gTooawtgaGaowdh-kXdfe53y9EonHtjNJI0tO1yF4cq1zsHkfZpWjI0SD53Evrx9l6ZHkHSee3tFZYW17iaKlu4H_j0T88jOm5JqfW-RrtpMgInONPLZPxtplLrBwBCEFepRSG0Q2E-s8Hp50FXDPjaRYSpS-LOnZTg0nClNxcyRtD1IxaZG3vt5pcE-nDpLD_kp1UdZ1lfH1fxwHCmzvks5ACkDLvaH35N3wu03uupeo7FrbV4b"/>
+</div>
+<div class="flex-1">
+<h4 class="font-body-strong text-body-strong text-on-surface">ต้มยำกุ้งน้ำข้น</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">กุ้งแม่น้ำ เห็ดฟาง นมสด</p>
+<p class="font-price-display text-price-display text-primary mt-1">฿150</p>
+</div>
+</div>
+</main>
+<!-- BACKDROP: Scrim Overlay with blur -->
+<div class="absolute inset-0 bg-inverse-surface/60 backdrop-blur-sm z-30 transition-opacity duration-300" id="backdrop"></div>
+<!-- BOTTOM SHEET: Interactive Ordering Drawer -->
+<div class="absolute bottom-0 inset-x-0 max-w-[390px] mx-auto bg-surface-container-lowest rounded-t-3xl shadow-2xl z-40 flex flex-col max-h-[813px] border-t border-outline-variant animate-in slide-in-from-bottom duration-300 overflow-hidden">
+<!-- Drag Handle Indicator -->
+<div class="w-full pt-3 pb-2 flex justify-center items-center cursor-grab active:cursor-grabbing bg-surface-container-lowest shrink-0">
+<div class="w-12 h-1.5 bg-outline-variant/60 rounded-full"></div>
+</div>
+<!-- Scrollable Food Item Details & Configurator -->
+<div class="flex-1 overflow-y-auto custom-scrollbar px-space-4 pb-4 space-y-5">
+<!-- 1. Hero Food Image (16:9) with Close Button -->
+<div class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A mouth-watering, close-up photograph of Thai holy basil stir-fried crispy pork belly topped with a perfectly fried sunny-side-up egg on steamed jasmine rice. Warm directional light highlights the crispy textures and spicy red chili glazes, set inside a welcoming contemporary bistro aesthetic with clean warm earth tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGQ5f_42d5XcbEBv6ted4NbKWQicpUGB-7UuYsMIOJv_gFLW00PAqo3iXzawKL6A34O0QUFGWmBu3O1YbAu1MXmKHCuTi0heMTcnb9D0ufQkrb-o70kR_PEp0ADRdawjytFkJBguHOjBZA7Ui6DoMqy_QRJ70RbzdAV1DN4wCDbCrWRKtbpJavHaKSKODsSsfT_lQ_hdSEmU4oRnD_qlahZP9s4aIYEiHAqEzf0HctIVNncNc-YiYl"/>
+<button class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-md active:scale-90 transition-transform" id="close-sheet-btn">
+<span class="material-symbols-outlined text-xl" data-icon="close">close</span>
+</button>
+</div>
+<!-- 2. Menu Item Info & Base Price -->
+<div class="border-b border-outline-variant/50 pb-4">
+<div class="flex justify-between items-start gap-2">
+<h1 class="font-headline-md text-headline-md text-on-surface font-bold">ข้าวกะเพราหมูกรอบ</h1>
+<div class="text-right shrink-0">
+<span class="font-price-total text-headline-lg font-bold text-primary-container tabular-nums">฿75</span>
+</div>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1.5 leading-relaxed">
+            หมูกรอบคัดพิเศษ ใบกะเพราป่าแท้ ผัดแห้งหอมกลิ่นกระทะ เสิร์ฟร้อนๆ
+          </p>
+</div>
+<!-- 3. Mandatory Group (Radio): ระดับความเผ็ด -->
+<div class="space-y-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-body-strong text-body-strong text-on-surface">ระดับความเผ็ด</span>
+<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">จำเป็น</span>
+</div>
+<span class="font-label-md text-label-md text-outline">เลือกได้ 1 อย่าง</span>
+</div>
+<div class="grid grid-cols-2 gap-2" id="spicy-radio-group">
+<!-- Radio Option 1: ไม่เผ็ด -->
+<label class="cursor-pointer border border-outline-variant rounded-xl p-3 flex items-center justify-between bg-surface transition hover:bg-surface-container-high">
+<input class="sr-only" name="spice_level" type="radio" value="0"/>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">ไม่เผ็ด</span>
+<span class="text-xs text-on-surface-variant">ไม่ใส่พริก</span>
+</div>
+<span class="radio-indicator w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center">
+<span class="dot w-2.5 h-2.5 rounded-full bg-transparent"></span>
+</span>
+</label>
+<!-- Radio Option 2: เผ็ดน้อย -->
+<label class="cursor-pointer border border-outline-variant rounded-xl p-3 flex items-center justify-between bg-surface transition hover:bg-surface-container-high">
+<input class="sr-only" name="spice_level" type="radio" value="0"/>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">เผ็ดน้อย</span>
+<span class="text-xs text-on-surface-variant">พริก 1 เม็ด</span>
+</div>
+<span class="radio-indicator w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center">
+<span class="dot w-2.5 h-2.5 rounded-full bg-transparent"></span>
+</span>
+</label>
+<!-- Radio Option 3: เผ็ดกลาง (Selected by default) -->
+<label class="cursor-pointer border-2 border-primary-container bg-primary-fixed/30 rounded-xl p-3 flex items-center justify-between transition">
+<input checked="" class="sr-only" name="spice_level" type="radio" value="0"/>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">เผ็ดกลาง</span>
+<span class="text-xs text-on-primary-container">ปกติ (มาตรฐาน)</span>
+</div>
+<span class="radio-indicator w-5 h-5 rounded-full border-2 border-primary-container bg-primary-container flex items-center justify-center">
+<span class="dot w-2 h-2 rounded-full bg-on-primary"></span>
+</span>
+</label>
+<!-- Radio Option 4: เผ็ดมาก -->
+<label class="cursor-pointer border border-outline-variant rounded-xl p-3 flex items-center justify-between bg-surface transition hover:bg-surface-container-high">
+<input class="sr-only" name="spice_level" type="radio" value="0"/>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">เผ็ดมาก</span>
+<span class="text-xs text-on-surface-variant">พริก 5 เม็ด 🔥</span>
+</div>
+<span class="radio-indicator w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center">
+<span class="dot w-2.5 h-2.5 rounded-full bg-transparent"></span>
+</span>
+</label>
+</div>
+</div>
+<!-- 4. Optional Add-ons (Checkbox Group) -->
+<div class="space-y-2.5 pt-1">
+<div class="flex items-center justify-between">
+<span class="font-body-strong text-body-strong text-on-surface">ตัวเลือกเพิ่มเติม</span>
+<span class="font-label-md text-label-md text-outline">เลือกได้หลายรายการ</span>
+</div>
+<div class="space-y-2" id="addon-group">
+<!-- Addon 1: ไข่ดาวกรอบ (+฿10) [Checked by default] -->
+<label class="cursor-pointer flex items-center justify-between p-3 rounded-xl border-2 border-primary-container bg-primary-fixed/20 transition">
+<div class="flex items-center gap-3">
+<input checked="" class="addon-checkbox w-5 h-5 rounded text-primary-container border-outline focus:ring-primary-container focus:ring-offset-0" data-price="10" type="checkbox"/>
+<span class="font-label-lg text-label-lg text-on-surface">ไข่ดาวกรอบ</span>
+</div>
+<span class="font-label-lg text-label-lg font-semibold text-primary tabular-nums">+฿10</span>
+</label>
+<!-- Addon 2: พิเศษหมูกรอบ (+฿20) [Checked by default] -->
+<label class="cursor-pointer flex items-center justify-between p-3 rounded-xl border-2 border-primary-container bg-primary-fixed/20 transition">
+<div class="flex items-center gap-3">
+<input checked="" class="addon-checkbox w-5 h-5 rounded text-primary-container border-outline focus:ring-primary-container focus:ring-offset-0" data-price="20" type="checkbox"/>
+<span class="font-label-lg text-label-lg text-on-surface">พิเศษหมูกรอบ</span>
+</div>
+<span class="font-label-lg text-label-lg font-semibold text-primary tabular-nums">+฿20</span>
+</label>
+<!-- Addon 3: ข้าวสวยเพิ่ม (+฿10) -->
+<label class="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-outline-variant bg-surface hover:bg-surface-container-high transition">
+<div class="flex items-center gap-3">
+<input class="addon-checkbox w-5 h-5 rounded text-primary-container border-outline focus:ring-primary-container focus:ring-offset-0" data-price="10" type="checkbox"/>
+<span class="font-label-lg text-label-lg text-on-surface">ข้าวสวยเพิ่ม</span>
+</div>
+<span class="font-label-lg text-label-lg font-semibold text-outline tabular-nums">+฿10</span>
+</label>
+</div>
+</div>
+<!-- 5. Chef Note (Textarea) -->
+<div class="space-y-1.5 pt-1">
+<div class="flex justify-between items-center">
+<label class="font-body-strong text-body-strong text-on-surface" for="chef-note">หมายเหตุถึงพ่อครัว</label>
+<span class="text-xs font-medium text-outline tabular-nums" id="char-counter">0/100</span>
+</div>
+<div class="relative">
+<textarea class="w-full rounded-xl border border-outline-variant p-3 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition resize-none bg-surface" id="chef-note" maxlength="100" placeholder="เช่น ไม่ใส่น้ำตาล, ผัดแห้งๆ, แยกน้ำปลาพริก" rows="2"></textarea>
+</div>
+</div>
+<!-- 6. Quantity Stepper -->
+<div class="pt-2 flex items-center justify-between border-t border-outline-variant/50">
+<span class="font-body-strong text-body-strong text-on-surface">จำนวน</span>
+<div class="flex items-center gap-3 bg-surface-container-low p-1.5 rounded-2xl border border-outline-variant">
+<!-- Minus Button -->
+<button class="w-11 h-11 rounded-xl bg-surface-container-lowest border border-outline-variant text-on-surface flex items-center justify-center font-bold active:scale-90 transition disabled:opacity-40" id="qty-minus">
+<span class="material-symbols-outlined text-lg" data-icon="remove">remove</span>
+</button>
+<!-- Quantity Counter -->
+<span class="w-8 text-center font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" id="qty-count">1</span>
+<!-- Plus Button -->
+<button class="w-11 h-11 rounded-xl bg-primary-container text-on-surface flex items-center justify-center font-bold active:scale-90 transition shadow-sm" id="qty-plus">
+<span class="material-symbols-outlined text-lg text-white" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 7. Sticky Bottom Button -->
+<div class="p-space-4 bg-surface-container-lowest border-t border-outline-variant shrink-0">
+<button class="w-full h-14 bg-primary-container hover:bg-amber-600 active:scale-[0.98] text-white font-headline-sm text-headline-sm font-bold rounded-2xl shadow-md transition flex items-center justify-center gap-2" id="add-to-cart-btn">
+<span class="material-symbols-outlined text-xl" data-icon="shopping_bag">shopping_bag</span>
+<span id="btn-total-label">เพิ่มลงตะกร้า • ฿105</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Interactive Logic for Pricing, Stepper & Form Controls -->
+<script>
+    const basePrice = 75;
+    let quantity = 1;
+
+    const qtyCountEl = document.getElementById('qty-count');
+    const qtyMinusBtn = document.getElementById('qty-minus');
+    const qtyPlusBtn = document.getElementById('qty-plus');
+    const btnTotalLabel = document.getElementById('btn-total-label');
+    const chefNoteInput = document.getElementById('chef-note');
+    const charCounter = document.getElementById('char-counter');
+    const checkboxes = document.querySelectorAll('.addon-checkbox');
+    const radioLabels = document.querySelectorAll('#spicy-radio-group label');
+
+    function calculateTotal() {
+      let addonTotal = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          addonTotal += parseInt(cb.dataset.price || 0, 10);
+        }
+      });
+      const singleItemPrice = basePrice + addonTotal;
+      const grandTotal = singleItemPrice * quantity;
+      btnTotalLabel.textContent = `เพิ่มลงตะกร้า • ฿${grandTotal.toLocaleString()}`;
+    }
+
+    // Stepper Handlers
+    qtyMinusBtn.addEventListener('click', () => {
+      if (quantity > 1) {
+        quantity--;
+        qtyCountEl.textContent = quantity;
+        calculateTotal();
+      }
+    });
+
+    qtyPlusBtn.addEventListener('click', () => {
+      quantity++;
+      qtyCountEl.textContent = quantity;
+      calculateTotal();
+    });
+
+    // Checkbox toggling & styling update
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const parentLabel = e.target.closest('label');
+        if (e.target.checked) {
+          parentLabel.classList.remove('border-outline-variant', 'bg-surface');
+          parentLabel.classList.add('border-2', 'border-primary-container', 'bg-primary-fixed/20');
+        } else {
+          parentLabel.classList.remove('border-2', 'border-primary-container', 'bg-primary-fixed/20');
+          parentLabel.classList.add('border-outline-variant', 'bg-surface');
+        }
+        calculateTotal();
+      });
+    });
+
+    // Spicy Radio Group Styling
+    radioLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        radioLabels.forEach(l => {
+          l.classList.remove('border-2', 'border-primary-container', 'bg-primary-fixed/30');
+          l.classList.add('border-outline-variant', 'bg-surface');
+          const ind = l.querySelector('.radio-indicator');
+          ind.classList.remove('border-primary-container', 'bg-primary-container');
+          ind.classList.add('border-outline-variant');
+          const dot = ind.querySelector('.dot');
+          dot.classList.remove('bg-on-primary', 'w-2', 'h-2');
+          dot.classList.add('bg-transparent', 'w-2.5', 'h-2.5');
+        });
+
+        label.classList.remove('border-outline-variant', 'bg-surface');
+        label.classList.add('border-2', 'border-primary-container', 'bg-primary-fixed/30');
+        const activeInd = label.querySelector('.radio-indicator');
+        activeInd.classList.add('border-primary-container', 'bg-primary-container');
+        activeInd.classList.remove('border-outline-variant');
+        const activeDot = activeInd.querySelector('.dot');
+        activeDot.classList.add('bg-on-primary', 'w-2', 'h-2');
+        activeDot.classList.remove('bg-transparent', 'w-2.5', 'h-2.5');
+      });
+    });
+
+    // Note Char Counter
+    chefNoteInput.addEventListener('input', (e) => {
+      charCounter.textContent = `${e.target.value.length}/100`;
+    });
+
+    // Close Interaction
+    document.getElementById('close-sheet-btn').addEventListener('click', () => {
+      alert('ปิดหน้าต่างการเลือกเมนู');
+    });
+
+    // Initial total calculation
+    calculateTotal();
+  </script>
+</body></html>

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D Super Admin - จัดการประกาศระบบ (Platform Announcements)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: IBM Plex Sans & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=Sarabun:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline": "#76777d",
+            "on-primary-fixed": "#131b2e",
+            "on-secondary": "#ffffff",
+            "primary-fixed-dim": "#bec6e0",
+            "surface-dim": "#cbdbf5",
+            "outline-variant": "#c6c6cd",
+            "surface-variant": "#d3e4fe",
+            "tertiary-container": "#002113",
+            "surface-container-high": "#dce9ff",
+            "on-secondary-fixed": "#2a1700",
+            "primary": "#000000",
+            "secondary": "#855300",
+            "surface-bright": "#f8f9ff",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-primary-container": "#7c839b",
+            "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-container-highest": "#d3e4fe",
+            "inverse-primary": "#bec6e0",
+            "primary-container": "#131b2e",
+            "secondary-fixed-dim": "#ffb95f",
+            "on-surface-variant": "#45464d",
+            "inverse-surface": "#213145",
+            "surface-tint": "#565e74",
+            "background": "#f8f9ff",
+            "secondary-fixed": "#ffddb8",
+            "tertiary": "#000000",
+            "on-error": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#3f465c",
+            "on-secondary-fixed-variant": "#653e00",
+            "on-tertiary-container": "#009668",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#eff4ff",
+            "on-secondary-container": "#684000",
+            "primary-fixed": "#dae2fd",
+            "on-background": "#0b1c30",
+            "tertiary-fixed-dim": "#4edea3",
+            "tertiary-fixed": "#6ffbbe",
+            "on-tertiary-fixed": "#002113",
+            "surface": "#f8f9ff",
+            "on-surface": "#0b1c30",
+            "on-error-container": "#93000a",
+            "secondary-container": "#fea619",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "surface-container": "#e5eeff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "sidebar-width-collapsed": "4.5rem",
+            "topbar-height": "4rem",
+            "gutter-xl": "2rem",
+            "margin-mobile": "1rem",
+            "gutter-lg": "1.5rem",
+            "gutter-xs": "0.25rem",
+            "gutter-md": "1rem",
+            "margin-desktop": "2rem",
+            "sidebar-width-expanded": "16.25rem",
+            "gutter-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "data-mono": ["IBM Plex Sans", "monospace"],
+            "label-lg": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "headline-md": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "headline-xl-mobile": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "body-sm": ["Inter", "Sarabun", "sans-serif"],
+            "label-sm": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "headline-xl": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "label-md": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "headline-sm": ["IBM Plex Sans", "Sarabun", "sans-serif"],
+            "body-md": ["Inter", "Sarabun", "sans-serif"],
+            "body-lg": ["Inter", "Sarabun", "sans-serif"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Custom scrollbar for dense data panels */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c6c6cd;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #76777d;
+    }
+  </style>
+</head>
+<body class="h-full bg-surface text-on-surface font-body-md antialiased overflow-x-hidden">
+<!-- ========================================================================= -->
+<!-- SIDEBAR NAVIGATION (Shared Component: SideNavBar)                          -->
+<!-- ========================================================================= -->
+<aside class="fixed top-0 left-0 h-screen w-sidebar-width-expanded z-40 bg-primary-container text-on-primary border-r border-outline-variant/20 flex flex-col justify-between p-4 select-none">
+<!-- Brand Anchor Header -->
+<div>
+<div class="flex items-center gap-3 px-2 py-3 mb-6 border-b border-outline-variant/10">
+<div class="w-9 h-9 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container font-headline-md font-bold shadow-sm">
+          K
+        </div>
+<div class="flex flex-col">
+<span class="text-headline-md font-headline-md font-bold text-on-primary tracking-tight">Kin-D Platform</span>
+<span class="text-label-sm font-label-sm text-on-primary-container tracking-wider uppercase">Super Admin</span>
+</div>
+</div>
+<!-- Navigation Tabs (7 tabs per JSON Blueprint, tab 5 "ประกาศ" is ACTIVE) -->
+<nav aria-label="Main Navigation" class="space-y-1.5">
+<!-- 1. ภาพรวม -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">ภาพรวม</span>
+</a>
+<!-- 2. ร้านค้า -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="storefront">storefront</span>
+<span class="text-label-md font-label-md">ร้านค้า</span>
+</a>
+<!-- 3. บิล -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-label-md font-label-md">บิล</span>
+</a>
+<!-- 4. แจ้งปัญหา -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="confirmation_number">confirmation_number</span>
+<span class="text-label-md font-label-md">แจ้งปัญหา</span>
+</a>
+<!-- 5. ประกาศ (ACTIVE - EXACT JSON MATCH & STYLED VIA style_active_navigation) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container/20 text-on-primary font-semibold border-l-4 border-secondary-container transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl text-secondary-container fill-icon" data-icon="campaign" style="font-variation-settings: 'FILL' 1;">campaign</span>
+<span class="text-label-md font-label-md text-on-primary">ประกาศ</span>
+</a>
+<!-- 6. วิเคราะห์ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="analytics">analytics</span>
+<span class="text-label-md font-label-md">วิเคราะห์</span>
+</a>
+<!-- 7. บันทึกระบบ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="terminal">terminal</span>
+<span class="text-label-md font-label-md">บันทึกระบบ</span>
+</a>
+</nav>
+</div>
+<!-- Footer Controls (Exact labels from JSON) -->
+<div class="pt-4 border-t border-outline-variant/10 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 transition-colors">
+<span class="material-symbols-outlined text-xl text-secondary-container" data-icon="shield_person">shield_person</span>
+<div class="flex flex-col truncate">
+<span class="text-label-md font-label-md text-on-primary truncate">Super Admin (Owner)</span>
+<span class="text-body-sm font-body-sm text-on-primary-container truncate">admin@kind-pos.io</span>
+</div>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-primary-container hover:text-error hover:bg-error/10 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="logout">logout</span>
+<span class="text-label-md font-label-md">ออกจากระบบ</span>
+</a>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE & CANVASES                                                 -->
+<!-- ========================================================================= -->
+<div class="pl-sidebar-width-expanded min-h-screen flex flex-col bg-surface">
+<!-- ======================================================================= -->
+<!-- TOP UTILITY NAVBAR (Shared Component: TopNavBar)                        -->
+<!-- ======================================================================= -->
+<header class="sticky top-0 right-0 z-30 h-topbar-height bg-surface-container-lowest border-b border-outline-variant/40 shadow-sm flex items-center justify-between px-gutter-lg w-full select-none">
+<!-- Search on Left (Per JSON search_bar: "on_left") -->
+<div class="flex items-center gap-4 w-96">
+<div class="relative w-full">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="search">search</span>
+</span>
+<input class="w-full h-9 pl-9 pr-4 text-body-sm font-body-sm bg-surface-container-low border border-outline-variant/60 rounded-lg text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-secondary-container transition-all" placeholder="ค้นหาประกาศ, หัวข้อ, หรือรหัสแท็ก..." type="text"/>
+</div>
+</div>
+<!-- Navigation links & Status indicator -->
+<div class="flex items-center gap-6">
+<!-- Exact link label: "ทุกระบบปกติ 99.9%" -->
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-label-sm font-label-sm text-emerald-800 font-semibold tracking-wide">ทุกระบบปกติ 99.9%</span>
+</div>
+<!-- Trailing Icon Actions: notifications, help, settings -->
+<div class="flex items-center gap-1">
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="การแจ้งเตือน" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container"></span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="ช่วยเหลือ" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="help">help</span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="ตั้งค่าระบบ" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+</button>
+</div>
+<!-- Trailing Primary Action & Avatar -->
+<div class="flex items-center gap-3 pl-3 border-l border-outline-variant/30">
+<button class="px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary text-label-md font-label-md hover:bg-primary-container/90 transition-all active:scale-95 shadow-sm flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-base" data-icon="tune">tune</span>
+<span>จัดการระบบ</span>
+</button>
+<div class="w-8 h-8 rounded-full ring-2 ring-outline-variant/40 overflow-hidden bg-surface-container-highest flex items-center justify-center font-bold text-on-surface-variant text-label-sm">
+            SA
+          </div>
+</div>
+</div>
+</header>
+<!-- ======================================================================= -->
+<!-- CONTENT CANVAS                                                          -->
+<!-- ======================================================================= -->
+<main class="flex-1 p-gutter-lg max-w-[1720px] w-full mx-auto space-y-6">
+<!-- SECTION 1: Page Header & Executive Metric Strip -->
+<div class="flex flex-col gap-6">
+<!-- Title bar + Primary Action CTA -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-md bg-surface-container text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">Communication Hub</span>
+<span class="text-outline-variant">•</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Global POS Feed</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight mt-1">
+              ประกาศและการสื่อสารแพลตฟอร์ม (Platform Announcements)
+            </h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-0.5">
+              ส่งข่าวสาร อัปเดตฟีเจอร์ และแจ้งเตือนสำคัญไปยังหน้าร้านและหน้าแคชเชียร์ POS แบบเรียลไทม์
+            </p>
+</div>
+<!-- Primary CTA Button (Warm Amber / Brand Accent) -->
+<div class="flex items-center gap-2.5 shrink-0">
+<button class="px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-on-surface text-label-md font-label-md hover:bg-surface-container-low transition-all flex items-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-base" data-icon="history">history</span>
+<span>ประวัติการส่ง</span>
+</button>
+<button class="px-4 py-2 rounded-lg bg-secondary-container text-on-secondary-container hover:brightness-105 active:scale-95 text-label-md font-label-md font-semibold transition-all flex items-center gap-2 shadow-sm" type="button">
+<span class="material-symbols-outlined text-lg fill-icon" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span>+ สร้างประกาศใหม่</span>
+</button>
+</div>
+</div>
+<!-- 3 Executive KPI Cards (Exact Metrics from Prompt) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!-- Card 1: Active Announcements -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm flex items-start justify-between">
+<div class="space-y-1.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant text-label-md font-label-md">
+<span class="material-symbols-outlined text-base text-secondary-container" data-icon="campaign">campaign</span>
+<span>ประกาศที่กำลังแสดงผล</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl text-on-surface">3</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">ประกาศพร้อมกัน</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant/80">
+                ครอบคลุม POS 42 จุดขายทั่วประเทศ
+              </p>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              เผยแพร่อยู่
+            </span>
+</div>
+<!-- Card 2: Average Read Rate -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm flex items-start justify-between">
+<div class="space-y-1.5 w-full pr-4">
+<div class="flex items-center gap-1.5 text-on-surface-variant text-label-md font-label-md">
+<span class="material-symbols-outlined text-base text-on-tertiary-container" data-icon="mark_email_read">mark_email_read</span>
+<span>ร้านค้าที่เปิดอ่านแล้วเฉลี่ย</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl text-on-surface">84.5%</span>
+<span class="text-label-sm font-label-sm text-emerald-700 font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span> +3.2%
+                </span>
+</div>
+<!-- Progress bar container -->
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-emerald-600 h-1.5 rounded-full" style="width: 84.5%"></div>
+</div>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-low text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-xl" data-icon="visibility">visibility</span>
+</div>
+</div>
+<!-- Card 3: New Feature Feedback -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 p-5 shadow-sm flex items-start justify-between">
+<div class="space-y-1.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant text-label-md font-label-md">
+<span class="material-symbols-outlined text-base text-indigo-600" data-icon="thumb_up">thumb_up</span>
+<span>การตอบรับฟีเจอร์ใหม่</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl text-on-surface">96%</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">ยอมรับ &amp; รับทราบ</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant/80">
+                จากการสำรวจ 40 ผู้จัดการสาขา
+              </p>
+</div>
+<span class="inline-flex items-center px-2 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              ยอดเยี่ยม
+            </span>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Split View (Left: Table List / Right: Form & Live Preview) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+<!-- =================================================================== -->
+<!-- ก) ฝั่งซ้าย/ตารางรายการประกาศ (Announcements List Table - 7 Cols)   -->
+<!-- =================================================================== -->
+<section class="xl:col-span-7 bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm overflow-hidden flex flex-col">
+<!-- Table Controls Toolbar -->
+<div class="p-4 border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<!-- Filter Tabs -->
+<div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
+<button class="px-3 py-1.5 rounded-md text-label-sm font-label-sm text-on-surface bg-surface-container-lowest font-semibold shadow-xs" type="button">
+                ทั้งหมด (8)
+              </button>
+<button class="px-3 py-1.5 rounded-md text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+                กำลังเผยแพร่ (3)
+              </button>
+<button class="px-3 py-1.5 rounded-md text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+                ฉบับร่าง (2)
+              </button>
+<button class="px-3 py-1.5 rounded-md text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+                สิ้นสุดแล้ว (3)
+              </button>
+</div>
+<!-- Table Quick Search & Actions -->
+<div class="flex items-center gap-2">
+<div class="relative w-48">
+<span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-sm" data-icon="search">search</span>
+</span>
+<input class="w-full h-8 pl-8 pr-2.5 text-label-sm font-label-sm bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-on-surface focus:outline-none focus:border-primary-container" placeholder="ค้นหาประกาศ..." type="text"/>
+</div>
+<button class="p-1.5 rounded-lg border border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-low" title="ตัวกรองเพิ่มเติม" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/70 border-b border-outline-variant/30 text-on-surface-variant text-label-sm font-label-sm tracking-wider uppercase">
+<th class="py-3 px-4">หัวข้อประกาศ &amp; ประเภท</th>
+<th class="py-3 px-3">ผู้รับ</th>
+<th class="py-3 px-3">อัตราการอ่าน</th>
+<th class="py-3 px-3">สถานะ</th>
+<th class="py-3 px-3 text-right">การจัดการ</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 text-body-sm font-body-sm">
+<!-- ROW 1: Active - System Update -->
+<tr class="hover:bg-surface-container-low/40 transition-colors bg-secondary-container/5 border-l-2 border-secondary-container">
+<td class="py-3.5 px-4 max-w-xs">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        อัปเดตระบบ
+                      </span>
+<span class="text-outline text-[11px] font-data-mono">10 ต.ค. 69 - 25 ต.ค. 69</span>
+</div>
+<a class="font-headline-sm text-body-md text-on-surface hover:text-secondary-container font-semibold line-clamp-1" href="#">
+                      เตรียมอัปเดตระบบ v4.3.0 รองรับเครื่องสแกนบาร์โค้ดไร้สาย
+                    </a>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="text-label-sm font-label-sm text-on-surface font-medium">ทุกร้านค้า (42 ร้าน)</span>
+<span class="block text-[11px] text-outline">POS Terminal ทุกจุด</span>
+</td>
+<td class="py-3.5 px-3 min-w-[140px]">
+<div class="flex items-center justify-between text-label-sm font-label-sm mb-1">
+<span class="text-on-surface font-semibold">38/42 ร้าน</span>
+<span class="text-emerald-700 font-bold">90%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-emerald-500 h-1.5 rounded-full" style="width: 90%"></div>
+</div>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      กำลังเผยแพร่
+                    </span>
+</td>
+<td class="py-3.5 px-3 text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="แก้ไข" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="สถิติ" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="bar_chart">bar_chart</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-amber-700 hover:bg-amber-50" title="ปิดประกาศชั่วคราว" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="pause_circle">pause_circle</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2: Maintenance Outage -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4 max-w-xs">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                        ปิดปรับปรุง
+                      </span>
+<span class="text-outline text-[11px] font-data-mono">15 ต.ค. 69 (02:00 - 04:00)</span>
+</div>
+<a class="font-headline-sm text-body-md text-on-surface hover:text-secondary-container font-semibold line-clamp-1" href="#">
+                      แจ้งปิดปรับปรุงเซิร์ฟเวอร์สำรองประจำเดือน (ดึกวันพุธ 02:00 - 04:00 น.)
+                    </a>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="text-label-sm font-label-sm text-on-surface font-medium">ทุกร้านค้า (42 ร้าน)</span>
+<span class="block text-[11px] text-outline">แบนเนอร์แจ้งเตือนด่วน</span>
+</td>
+<td class="py-3.5 px-3 min-w-[140px]">
+<div class="flex items-center justify-between text-label-sm font-label-sm mb-1">
+<span class="text-on-surface font-semibold">32/42 ร้าน</span>
+<span class="text-emerald-700 font-bold">76%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-emerald-500 h-1.5 rounded-full" style="width: 76%"></div>
+</div>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      กำลังเผยแพร่
+                    </span>
+</td>
+<td class="py-3.5 px-3 text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="แก้ไข" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="สถิติ" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="bar_chart">bar_chart</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-amber-700 hover:bg-amber-50" title="ปิดประกาศ" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="pause_circle">pause_circle</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 3: Promo / Subscription Extension -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4 max-w-xs">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                        ข่าวสาร &amp; โปร
+                      </span>
+<span class="text-outline text-[11px] font-data-mono">1 ต.ค. 69 - 31 ต.ค. 69</span>
+</div>
+<a class="font-headline-sm text-body-md text-on-surface hover:text-secondary-container font-semibold line-clamp-1" href="#">
+                      ขยายเวลาโปรโมชั่นต่ออายุแพ็กเกจ Pro ราย 6 เดือน รับส่วนลดพิเศษ
+                    </a>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="text-label-sm font-label-sm text-on-surface font-medium">เลือกร้านค้า (ร้านใกล้หมดอายุ 5 ร้าน)</span>
+<span class="block text-[11px] text-outline">เป้าหมายเฉพาะกลุ่ม</span>
+</td>
+<td class="py-3.5 px-3 min-w-[140px]">
+<div class="flex items-center justify-between text-label-sm font-label-sm mb-1">
+<span class="text-on-surface font-semibold">4/5 ร้าน</span>
+<span class="text-emerald-700 font-bold">80%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-emerald-500 h-1.5 rounded-full" style="width: 80%"></div>
+</div>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      กำลังเผยแพร่
+                    </span>
+</td>
+<td class="py-3.5 px-3 text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="แก้ไข" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="สถิติ" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="bar_chart">bar_chart</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-amber-700 hover:bg-amber-50" title="ปิดประกาศ" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="pause_circle">pause_circle</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: Expired Warning / PromptPay Setup -->
+<tr class="hover:bg-surface-container-low/40 transition-colors opacity-75">
+<td class="py-3.5 px-4 max-w-xs">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                        แจ้งเตือน
+                      </span>
+<span class="text-outline text-[11px] font-data-mono">สิ้นสุด 30 ก.ย. 69</span>
+</div>
+<span class="font-headline-sm text-body-md text-on-surface line-clamp-1">
+                      คำแนะนำการตั้งค่าพร้อมเพย์รูปแบบใหม่เพื่อลดข้อผิดพลาดการโอน
+                    </span>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="text-label-sm font-label-sm text-on-surface font-medium">ทุกร้านค้า</span>
+<span class="block text-[11px] text-outline">เสร็จสิ้นสมบูรณ์</span>
+</td>
+<td class="py-3.5 px-3 min-w-[140px]">
+<div class="flex items-center justify-between text-label-sm font-label-sm mb-1">
+<span class="text-on-surface font-semibold">41/42 ร้าน</span>
+<span class="text-outline font-bold">97%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-outline h-1.5 rounded-full" style="width: 97%"></div>
+</div>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                      หมดอายุแล้ว
+                    </span>
+</td>
+<td class="py-3.5 px-3 text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="ดูรายละเอียด" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="visibility">visibility</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="สถิติ" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="bar_chart">bar_chart</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 5: Draft Survey -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4 max-w-xs">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-container-high text-on-surface-variant border border-outline-variant/40">
+                        ข่าวสาร
+                      </span>
+<span class="text-outline text-[11px] font-data-mono">ยังไม่ได้กำหนดเวลา</span>
+</div>
+<span class="font-headline-sm text-body-md text-on-surface line-clamp-1">
+                      สำรวจความพึงพอใจการใช้งานฟังก์ชันสแกน QR โต๊ะอาหาร
+                    </span>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="text-label-sm font-label-sm text-on-surface font-medium">เลือกร้านค้า (15 ร้าน)</span>
+<span class="block text-[11px] text-outline">กลุ่มร้านอาหาร Dine-in</span>
+</td>
+<td class="py-3.5 px-3 min-w-[140px]">
+<div class="flex items-center justify-between text-label-sm font-label-sm mb-1">
+<span class="text-on-surface-variant">0/15 ร้าน</span>
+<span class="text-outline">0%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-outline/30 h-1.5 rounded-full" style="width: 0%"></div>
+</div>
+</td>
+<td class="py-3.5 px-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                      แบบร่าง
+                    </span>
+</td>
+<td class="py-3.5 px-3 text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="แก้ไขฉบับร่าง" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-error hover:bg-error/10" title="ลบแบบร่าง" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer Pagination Strip -->
+<div class="p-3.5 bg-surface-container-lowest border-t border-outline-variant/30 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>แสดง 1 - 5 จากทั้งหมด 8 รายการ</span>
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 rounded border border-outline-variant/50 hover:bg-surface-container-low disabled:opacity-40" disabled="" type="button">ก่อนหน้า</button>
+<button class="w-7 h-7 rounded bg-primary-container text-on-primary font-semibold flex items-center justify-center" type="button">1</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container-low flex items-center justify-center" type="button">2</button>
+<button class="px-2.5 py-1 rounded border border-outline-variant/50 hover:bg-surface-container-low" type="button">ถัดไป</button>
+</div>
+</div>
+</section>
+<!-- =================================================================== -->
+<!-- ข) แผงฟอร์มสร้างประกาศ & Live Preview (Side Form & Live Simulation) -->
+<!-- =================================================================== -->
+<section class="xl:col-span-5 space-y-6">
+<!-- FORM CONTAINER -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm overflow-hidden">
+<!-- Form Header with Status Indicator -->
+<div class="px-5 py-4 border-b border-outline-variant/30 bg-surface-container-low/30 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container" data-icon="edit_note">edit_note</span>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">สร้างและตั้งค่าการเผยแพร่ประกาศ</h2>
+</div>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                โหมดร่างสด (Editing)
+              </span>
+</div>
+<!-- Form Content -->
+<div class="p-5 space-y-4">
+<!-- 1. หัวข้อประกาศ (Input) -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1.5">
+                  หัวข้อประกาศ <span class="text-error">*</span>
+</label>
+<input class="w-full h-10 px-3.5 text-body-md font-body-md bg-surface-container-lowest border border-outline-variant/80 rounded-lg text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-secondary-container/40 transition-all font-medium" type="text" value="เตรียมอัปเดตระบบ v4.3.0 รองรับเครื่องสแกนบาร์โค้ดไร้สาย"/>
+</div>
+<!-- 2. หมวดหมู่/ประเภท (Pill Radios) -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1.5">
+                  หมวดหมู่ประกาศ
+                </label>
+<div class="grid grid-cols-4 gap-2">
+<label class="cursor-pointer">
+<input class="peer sr-only" name="announcement_type" type="radio"/>
+<div class="text-center py-2 px-1 text-label-sm font-label-sm rounded-lg border border-outline-variant/60 peer-checked:bg-primary-container peer-checked:text-on-primary peer-checked:border-primary-container peer-checked:font-semibold text-on-surface-variant hover:bg-surface-container-low transition-all">
+                      ข่าวสาร
+                    </div>
+</label>
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="announcement_type" type="radio"/>
+<div class="text-center py-2 px-1 text-label-sm font-label-sm rounded-lg border border-indigo-600 bg-indigo-50 text-indigo-800 font-semibold peer-checked:bg-indigo-600 peer-checked:text-white transition-all shadow-xs">
+                      อัปเดตระบบ
+                    </div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="announcement_type" type="radio"/>
+<div class="text-center py-2 px-1 text-label-sm font-label-sm rounded-lg border border-outline-variant/60 peer-checked:bg-primary-container peer-checked:text-on-primary peer-checked:border-primary-container peer-checked:font-semibold text-on-surface-variant hover:bg-surface-container-low transition-all">
+                      แจ้งเตือน
+                    </div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="announcement_type" type="radio"/>
+<div class="text-center py-2 px-1 text-label-sm font-label-sm rounded-lg border border-outline-variant/60 peer-checked:bg-primary-container peer-checked:text-on-primary peer-checked:border-primary-container peer-checked:font-semibold text-on-surface-variant hover:bg-surface-container-low transition-all">
+                      ปิดปรับปรุง
+                    </div>
+</label>
+</div>
+</div>
+<!-- 3. กลุ่มผู้รับ (Audience Selector) -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1.5">
+                  กลุ่มเป้าหมายผู้รับสาร (Target Audience)
+                </label>
+<div class="space-y-2 p-3 rounded-lg border border-outline-variant/40 bg-surface-container-low/30">
+<label class="flex items-center gap-2.5 cursor-pointer">
+<input checked="" class="w-4 h-4 text-secondary-container focus:ring-secondary-container" name="target_audience" type="radio"/>
+<span class="text-label-md font-label-md text-on-surface font-medium">ทุกร้านค้าในระบบ (42 ร้านทั้งหมด)</span>
+</label>
+<label class="flex items-center gap-2.5 cursor-pointer">
+<input class="w-4 h-4 text-secondary-container focus:ring-secondary-container" name="target_audience" type="radio"/>
+<span class="text-label-md font-label-md text-on-surface-variant">กำหนดเฉพาะกลุ่มร้านค้า (เช่น ร้านทดลองใช้, ร้านใกล้หมดอายุ, เลือกระบุร้าน...)</span>
+</label>
+</div>
+</div>
+<!-- 4. ช่วงเวลาแสดงผล (Date/Time Range + Popup Checkbox) -->
+<div>
+<label class="block text-label-md font-label-md text-on-surface mb-1.5">
+                  ช่วงเวลาแสดงผลประกาศ
+                </label>
+<div class="grid grid-cols-2 gap-2.5">
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_today">calendar_today</span>
+</span>
+<input class="w-full h-9 pl-8 pr-2.5 text-label-sm font-label-sm bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-on-surface" type="text" value="12 ต.ค. 2569"/>
+</div>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-outline">
+<span class="material-symbols-outlined text-sm" data-icon="event">event</span>
+</span>
+<input class="w-full h-9 pl-8 pr-2.5 text-label-sm font-label-sm bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-on-surface" type="text" value="25 ต.ค. 2569"/>
+</div>
+</div>
+<!-- Checkbox Popup Banner -->
+<div class="mt-2.5 flex items-start gap-2">
+<input checked="" class="w-4 h-4 mt-0.5 rounded text-secondary-container border-outline-variant/70 focus:ring-secondary-container" id="popup_banner" type="checkbox"/>
+<label class="text-body-sm font-body-sm text-on-surface cursor-pointer select-none" for="popup_banner">
+<span class="font-semibold text-on-surface">แสดงเป็นป๊อปอัปแจ้งเตือนด่วน (High Priority Modal)</span>
+<span class="text-on-surface-variant block text-xs">บังคับให้หน้าจอแคชเชียร์ POS แสดงกล่องข้อความทันทีเมื่อเปิดกะ</span>
+</label>
+</div>
+</div>
+<!-- 5. เนื้อหารายละเอียด (Markdown Toolbar + Textarea) -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="text-label-md font-label-md text-on-surface">
+                    เนื้อหารายละเอียดประกาศ
+                  </label>
+<!-- Markdown Controls -->
+<div class="flex items-center gap-0.5 bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant/40">
+<button class="p-1 text-on-surface-variant hover:text-on-surface" title="ตัวหนา" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="format_bold">format_bold</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface" title="ตัวเอียง" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="format_italic">format_italic</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface" title="รายการแบบจุด" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="format_list_bulleted">format_list_bulleted</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface" title="แทรกลิงก์" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+</button>
+</div>
+</div>
+<textarea class="w-full p-3 text-body-sm font-body-sm bg-surface-container-lowest border border-outline-variant/80 rounded-lg text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-secondary-container/40 leading-relaxed transition-all" rows="4">เรียน เจ้าของร้าน Kin-D POS ทุกท่าน
+
+ทางทีมงานจะทำการอัปเดตเวอร์ชัน 4.3.0 ในคืนวันอังคารนี้ โดยจะรองรับเครื่องสแกนบาร์โค้ดไร้สาย Sunmi และการพิมพ์บิลแบบสองภาษาโดยอัตโนมัติ กรุณาอย่าปิดเราเตอร์อินเทอร์เน็ตช่วงเวลา 02:00 - 04:00 น.</textarea>
+</div>
+</div>
+<!-- Form Actions Strip -->
+<div class="px-5 py-3.5 bg-surface-container-low border-t border-outline-variant/30 flex items-center justify-between gap-3">
+<button class="px-3 py-2 text-label-md font-label-md text-on-surface-variant hover:text-error transition-colors" type="button">
+                ยกเลิก
+              </button>
+<div class="flex items-center gap-2.5">
+<button class="px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/70 text-on-surface text-label-md font-label-md hover:bg-surface-container transition-all" type="button">
+                  บันทึกเป็นฉบับร่าง
+                </button>
+<button class="px-4 py-2 rounded-lg bg-secondary-container text-on-secondary-container hover:brightness-105 active:scale-95 text-label-md font-label-md font-semibold transition-all shadow-sm flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-base fill-icon" data-icon="rocket_launch" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+<span>บันทึกและเผยแพร่ประกาศทันที</span>
+</button>
+</div>
+</div>
+</div>
+<!-- LIVE PREVIEW SECTION (Simulated Merchant POS Screen) -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm p-4 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-600 text-lg" data-icon="preview">preview</span>
+<h3 class="text-label-lg font-label-lg text-on-surface">จำลองมุมมองหน้าร้าน POS (Live Terminal Preview)</h3>
+</div>
+<span class="text-label-sm font-label-sm text-outline">Resolution: 1024 x 768 (Tablet)</span>
+</div>
+<!-- Simulated POS Surface Canvas (Dark Neutral POS UI Backdrop) -->
+<div class="relative bg-slate-900 rounded-lg p-5 overflow-hidden border border-slate-800 shadow-inner">
+<!-- Subtle Background Mockup of POS Register Items -->
+<div class="opacity-15 pointer-events-none select-none">
+<div class="flex justify-between items-center pb-2 border-b border-slate-700 text-xs text-white">
+<span>โต๊ะ A-04 (กำลังรับออเดอร์)</span>
+<span>บิล #10892</span>
+</div>
+<div class="py-2 space-y-1 text-[11px] text-slate-400">
+<div class="flex justify-between"><span>1x ข้าวมันไก่สิงคโปร์</span><span>฿85.00</span></div>
+<div class="flex justify-between"><span>2x ชาเย็นโบราณ (หวานน้อย)</span><span>฿90.00</span></div>
+</div>
+</div>
+<!-- Simulated Popup Notification Card (Floating Modal on POS screen) -->
+<div class="relative z-10 bg-white rounded-lg shadow-2xl border border-indigo-200 overflow-hidden mt-1">
+<!-- Modal Top Stripe -->
+<div class="bg-indigo-600 px-4 py-2 flex items-center justify-between text-white">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm fill-icon" data-icon="campaign" style="font-variation-settings: 'FILL' 1;">campaign</span>
+<span class="text-label-sm font-label-sm font-semibold tracking-wide">Kin-D Platform Update Broadcast</span>
+</div>
+<span class="text-[10px] bg-indigo-700 px-2 py-0.5 rounded font-data-mono">ระบบ v4.3.0</span>
+</div>
+<!-- Modal Body -->
+<div class="p-4 space-y-2.5">
+<div class="flex items-start gap-3">
+<div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+<span class="material-symbols-outlined text-xl" data-icon="system_update_alt">system_update_alt</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 text-[10px] font-bold">อัปเดตระบบ</span>
+<span class="text-[10px] text-slate-400 font-data-mono">12 ต.ค. 2569</span>
+</div>
+<h4 class="text-label-md font-label-md font-bold text-slate-900 mt-0.5">
+                        เตรียมอัปเดตระบบ v4.3.0 รองรับเครื่องสแกนบาร์โค้ดไร้สาย
+                      </h4>
+</div>
+</div>
+<p class="text-[12px] text-slate-600 leading-relaxed pl-12">
+                    เรียน เจ้าของร้าน Kin-D POS ทุกท่าน ทางทีมงานจะทำการอัปเดตเวอร์ชัน 4.3.0 ในคืนวันอังคารนี้ โดยจะรองรับเครื่องสแกน Sunmi และการพิมพ์บิลแบบสองภาษา...
+                  </p>
+<!-- Modal Action Buttons for Cashier -->
+<div class="pt-2 pl-12 flex items-center gap-2">
+<button class="px-3 py-1.5 rounded text-[11px] font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-xs" type="button">
+                      รับทราบ / ปิดหน้าต่างนี้
+                    </button>
+<button class="px-3 py-1.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors border border-slate-300" type="button">
+                      ดูบันทึกการเปลี่ยนแปลง (Changelog)
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<p class="text-body-sm font-body-sm text-outline-variant text-center">
+              พรีวิวนี้จำลองการแสดงผลบนหน้าจอแคชเชียร์ POS แบบเรียลไทม์ตามการตั้งค่าปัจจุบัน
+            </p>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Toast Notification Demo Micro-interaction Script -->
+<script>
+    // Lightweight atmospheric effect and micro-interaction
+    document.addEventListener('DOMContentLoaded', () => {
+      const liveTitleInput = document.querySelector('input[value*="เตรียมอัปเดตระบบ v4.3.0"]');
+      const previewTitle = document.querySelector('h4.text-label-md');
+
+      if (liveTitleInput && previewTitle) {
+        liveTitleInput.addEventListener('input', (e) => {
+          previewTitle.textContent = e.target.value || 'หัวข้อประกาศตัวอย่าง...';
+        });
+      }
+    });
+  </script>
+</body></html>

@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D Super Admin - ศูนย์ควบคุมภาพรวมแพลตฟอร์ม</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts: IBM Plex Sans & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with CDN plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim from Design System -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f8f9ff",
+            "surface-container-low": "#eff4ff",
+            "secondary-fixed": "#ffddb8",
+            "on-error": "#ffffff",
+            "surface": "#f8f9ff",
+            "outline": "#76777d",
+            "on-secondary": "#ffffff",
+            "outline-variant": "#c6c6cd",
+            "secondary-fixed-dim": "#ffb95f",
+            "error": "#ba1a1a",
+            "on-tertiary-container": "#009668",
+            "inverse-primary": "#bec6e0",
+            "tertiary-container": "#002113",
+            "on-tertiary": "#ffffff",
+            "tertiary-fixed": "#6ffbbe",
+            "on-background": "#0b1c30",
+            "primary-fixed": "#dae2fd",
+            "surface-container-high": "#dce9ff",
+            "on-surface": "#0b1c30",
+            "on-tertiary-fixed": "#002113",
+            "on-primary-fixed-variant": "#3f465c",
+            "primary-fixed-dim": "#bec6e0",
+            "primary-container": "#131b2e",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#565e74",
+            "surface-dim": "#cbdbf5",
+            "inverse-on-surface": "#eaf1ff",
+            "on-secondary-fixed": "#2a1700",
+            "surface-container-highest": "#d3e4fe",
+            "inverse-surface": "#213145",
+            "on-surface-variant": "#45464d",
+            "tertiary-fixed-dim": "#4edea3",
+            "secondary-container": "#fea619",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-primary-fixed": "#131b2e",
+            "background": "#f8f9ff",
+            "on-primary-container": "#7c839b",
+            "error-container": "#ffdad6",
+            "surface-variant": "#d3e4fe",
+            "on-secondary-fixed-variant": "#653e00",
+            "on-primary": "#ffffff",
+            "tertiary": "#000000",
+            "surface-container": "#e5eeff",
+            "on-secondary-container": "#684000",
+            "secondary": "#855300",
+            "primary": "#000000"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-sm": "0.5rem",
+            "sidebar-width-collapsed": "4.5rem",
+            "topbar-height": "4rem",
+            "gutter-lg": "1.5rem",
+            "margin-mobile": "1rem",
+            "gutter-xs": "0.25rem",
+            "sidebar-width-expanded": "16.25rem",
+            "gutter-xl": "2rem",
+            "gutter-md": "1rem",
+            "margin-desktop": "2rem"
+          },
+          "fontFamily": {
+            "body-lg": ["Inter"],
+            "label-lg": ["IBM Plex Sans"],
+            "headline-xl": ["IBM Plex Sans"],
+            "label-md": ["IBM Plex Sans"],
+            "body-sm": ["Inter"],
+            "headline-lg": ["IBM Plex Sans"],
+            "body-md": ["Inter"],
+            "headline-sm": ["IBM Plex Sans"],
+            "label-sm": ["IBM Plex Sans"],
+            "data-mono": ["IBM Plex Sans"],
+            "headline-xl-mobile": ["IBM Plex Sans"],
+            "headline-md": ["IBM Plex Sans"]
+          },
+          "fontSize": {
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-xl-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="h-full bg-[#f8fafc] text-on-surface antialiased overflow-x-hidden">
+<!-- ========================================================================= -->
+<!-- SHARED COMPONENT 1: SideNavBar                                            -->
+<!-- ========================================================================= -->
+<aside aria-label="เมนูหลักการจัดการ" class="fixed top-0 left-0 h-screen w-sidebar-width-expanded z-40 bg-primary-container border-r border-outline-variant/20 flex flex-col justify-between p-4 select-none">
+<!-- Top Segment: Brand & Main Navigation -->
+<div class="flex flex-col space-y-6">
+<!-- Brand Logo / Header -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-9 h-9 rounded-lg bg-secondary-container flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold shadow-sm ring-2 ring-secondary-container/30">
+          K
+        </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="text-headline-sm font-headline-sm font-bold text-on-primary tracking-tight">Kin-D Platform</span>
+<span class="inline-block w-2 h-2 rounded-full bg-secondary-container animate-pulse" title="ระบบปฏิบัติการ Active"></span>
+</div>
+<span class="text-body-sm font-body-sm text-on-primary-container">Super Admin</span>
+</div>
+</div>
+<!-- Navigation List (7 Tabs from JSON) -->
+<!-- Active Intent: ภาพรวม (Platform Overview) -->
+<nav aria-label="แถบนำทาง" class="flex flex-col space-y-1.5">
+<!-- Tab 0: ภาพรวม (ACTIVE) -->
+<a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container/20 text-on-primary font-semibold border-l-4 border-secondary-container transition-all duration-200" href="#">
+<span class="material-symbols-outlined filled text-secondary-container" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">ภาพรวม</span>
+</a>
+<!-- Tab 1: ร้านค้า -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-colors duration-150 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="text-label-md font-label-md">ร้านค้า</span>
+</a>
+<!-- Tab 2: บิล -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-colors duration-150 active:scale-[0.99]" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-label-md font-label-md">บิล</span>
+</div>
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm bg-secondary-container text-on-secondary-container rounded font-bold">3</span>
+</a>
+<!-- Tab 3: แจ้งปัญหา -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-colors duration-150 active:scale-[0.99]" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+<span class="text-label-md font-label-md">แจ้งปัญหา</span>
+</div>
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm bg-rose-500/20 text-rose-300 rounded font-bold">2</span>
+</a>
+<!-- Tab 4: ประกาศ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-colors duration-150 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+<span class="text-label-md font-label-md">ประกาศ</span>
+</a>
+<!-- Tab 5: วิเคราะห์ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-colors duration-150 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-label-md font-label-md">วิเคราะห์</span>
+</a>
+<!-- Tab 6: บันทึกระบบ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-colors duration-150 active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="text-label-md font-label-md">บันทึกระบบ</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Segment: Platform Owner / Log out -->
+<div class="pt-4 border-t border-outline-variant/10 flex flex-col space-y-2">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-high/5">
+<div class="flex items-center gap-2.5 overflow-hidden">
+<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-on-primary font-bold text-xs ring-1 ring-white/20 flex-shrink-0">
+<span class="material-symbols-outlined text-sm" data-icon="shield_person">shield_person</span>
+</div>
+<div class="flex flex-col truncate">
+<span class="text-label-md font-label-md text-on-primary truncate">Super Admin (Owner)</span>
+<span class="text-label-sm font-label-sm text-emerald-400">Online • Primary Key</span>
+</div>
+</div>
+</div>
+<button class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-primary-container hover:text-rose-400 hover:bg-rose-500/10 transition-colors duration-150 text-left w-full" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span class="text-label-md font-label-md">ออกจากระบบ</span>
+</button>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE & TOP UTILITY BAR                                          -->
+<!-- ========================================================================= -->
+<div class="ml-sidebar-width-expanded min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component 2) -->
+<header class="sticky top-0 right-0 z-30 h-topbar-height bg-surface-container-lowest border-b border-outline-variant/40 shadow-sm flex items-center justify-between px-gutter-lg">
+<!-- Left: System Quick Search & Scope -->
+<div class="flex items-center gap-4 flex-1 max-w-xl">
+<div class="relative w-full max-w-md">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-sm">search</span>
+</div>
+<input class="w-full pl-9 pr-4 py-1.5 text-body-md font-body-md bg-[#f8fafc] border border-outline-variant/50 rounded-lg text-on-surface placeholder:text-outline focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary-container/40 focus:border-on-surface transition-all" placeholder="ค้นหาร้านค้า, เลขประจำตัวผู้เสียภาษี, เบอร์โทร หรือบิล..." type="text"/>
+<span class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+<kbd class="px-1.5 py-0.5 text-[10px] font-semibold text-outline-variant bg-white border border-outline-variant rounded">⌘K</kbd>
+</span>
+</div>
+<!-- Telemetry Status Pill -->
+<div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-label-sm font-label-sm text-emerald-800 font-medium">ทุกระบบปกติ 99.9%</span>
+</div>
+</div>
+<!-- Right: Utility Actions & CTA -->
+<div class="flex items-center gap-3">
+<!-- Notification Icon with Indicator -->
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-150" title="การแจ้งเตือนระบบ" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-white"></span>
+</button>
+<!-- Help Document -->
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-150" title="ศูนย์ช่วยเหลือและเอกสาร API" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="help">help</span>
+</button>
+<!-- Settings -->
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors duration-150" title="ตั้งค่าเซิร์ฟเวอร์ &amp; Webhook" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+</button>
+<div class="h-5 w-px bg-outline-variant/40 mx-1"></div>
+<!-- Trailing Primary Action from JSON -->
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-primary text-on-primary rounded-lg text-label-md font-label-md hover:bg-slate-800 transition-all duration-150 active:scale-95 shadow-sm" type="button">
+<span class="material-symbols-outlined text-sm">tune</span>
+<span>จัดการระบบ</span>
+</button>
+</div>
+</header>
+<!-- Canvas Content -->
+<main class="flex-1 p-gutter-lg space-y-6 max-w-[1600px] w-full mx-auto">
+<!-- ========================================================================= -->
+<!-- SECTION 0: BREADCRUMB & DASHBOARD CONTROLS                                -->
+<!-- ========================================================================= -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">ภาพรวมแพลตฟอร์ม (Platform Overview)</h1>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              ระบบเซิร์ฟเวอร์ &amp; Webhook ปกติ 99.98%
+            </span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-0.5">
+            ศูนย์ควบคุมและบริหารจัดการร้านค้า Kin-D POS ทั้งหมดในระบบ
+          </p>
+</div>
+<!-- Action Bar: Date Picker & Refresh -->
+<div class="flex items-center gap-2.5">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-outline-variant/60 rounded-lg text-label-md font-label-md text-on-surface shadow-sm">
+<span class="material-symbols-outlined text-slate-500 text-sm">calendar_today</span>
+<span>30 วันล่าสุด (1 - 30 ก.ย. 2569)</span>
+<span class="material-symbols-outlined text-xs text-slate-400">arrow_drop_down</span>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-outline-variant/60 rounded-lg text-label-md font-label-md text-on-surface hover:bg-slate-50 transition-colors shadow-sm active:scale-95" title="รีเฟรชข้อมูลล่าสุด" type="button">
+<span class="material-symbols-outlined text-sm text-slate-600">sync</span>
+<span>รีเฟรช</span>
+</button>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- SECTION 1: 4 KEY STAT METRIC CARDS                                        -->
+<!-- ========================================================================= -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Card 1: ร้านทั้งหมด -->
+<div class="bg-white border border-outline-variant/50 rounded-lg p-5 shadow-[0px_1px_3px_rgba(15,23,42,0.04)] flex flex-col justify-between transition-all hover:border-slate-300">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant font-medium">ร้านทั้งหมดในระบบ</span>
+<div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
+<span class="material-symbols-outlined text-lg" data-icon="storefront">storefront</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl text-on-surface font-bold tracking-tight">42</span>
+<span class="text-body-sm font-body-sm text-slate-500">ร้าน</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 text-label-sm font-label-sm text-emerald-700">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+<span>+4 ร้านในเดือนนี้</span>
+<span class="text-slate-400 font-normal">| เป้าหมาย Q3 สำเร็จ</span>
+</div>
+</div>
+</div>
+<!-- Card 2: ใช้งานอยู่ (Active) -->
+<div class="bg-white border border-outline-variant/50 rounded-lg p-5 shadow-[0px_1px_3px_rgba(15,23,42,0.04)] flex flex-col justify-between transition-all hover:border-slate-300">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant font-medium">เปิดบิลใช้งานสม่ำเสมอ</span>
+<div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="verified">verified</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl text-emerald-600 font-bold tracking-tight">38</span>
+<span class="text-body-sm font-body-sm text-slate-500">ร้าน</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 text-label-sm font-label-sm text-slate-600">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="font-semibold text-on-surface">อัตราการใช้งาน 90.5%</span>
+<span class="text-slate-400">(มีออเดอร์ใน 7 วัน)</span>
+</div>
+</div>
+</div>
+<!-- Card 3: รายได้ต่อเดือน (MRR) -->
+<div class="bg-white border border-outline-variant/50 rounded-lg p-5 shadow-[0px_1px_3px_rgba(15,23,42,0.04)] flex flex-col justify-between transition-all hover:border-slate-300">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant font-medium">รายได้ประจำเดือน (MRR)</span>
+<div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="payments">payments</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl text-on-surface font-bold tracking-tight">฿24,780</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 text-label-sm font-label-sm text-emerald-700">
+<span class="material-symbols-outlined text-xs">arrow_upward</span>
+<span class="font-semibold">+18.4% MoM</span>
+<span class="text-slate-400 font-normal">(เทียบ ส.ค. ฿20,930)</span>
+</div>
+</div>
+</div>
+<!-- Card 4: ใกล้หมดอายุ (<7 วัน) - WARNING CARD -->
+<div class="bg-amber-50/70 border-2 border-secondary-container/80 rounded-lg p-5 shadow-[0px_1px_3px_rgba(245,158,11,0.1)] flex flex-col justify-between relative overflow-hidden transition-all hover:bg-amber-50">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="text-label-md font-label-md text-amber-900 font-bold">ใกล้หมดอายุ (&lt; 7 วัน)</span>
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+</div>
+<div class="w-9 h-9 rounded-lg bg-amber-100/80 text-amber-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="warning_amber">warning_amber</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl text-amber-950 font-bold tracking-tight">5</span>
+<span class="text-body-sm font-body-sm text-amber-800">ร้าน</span>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-amber-800 font-medium">ต้องต่ออายุเพื่อใช้งานต่อ</span>
+<a class="text-label-sm font-label-sm font-bold text-amber-900 hover:text-amber-700 underline flex items-center gap-0.5" href="#inactivity-watchlist">
+                ดูและกรองรายการ →
+              </a>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- SECTION 2: AREA & LINE GROWTH CHART (12 MONTHS)                           -->
+<!-- ========================================================================= -->
+<section class="bg-white border border-outline-variant/50 rounded-lg p-6 shadow-[0px_1px_3px_rgba(15,23,42,0.04)]">
+<!-- Chart Header & Meta -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/20">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-bold">การเติบโตของร้านค้าและรายได้ประจำเดือน (MRR 12 เดือน)</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">เปรียบเทียบยอดร้านค้าสะสมและรายได้จริงจากแพ็กเกจ Subscription</p>
+</div>
+<!-- Legend Pill Box -->
+<div class="flex items-center gap-4 bg-slate-50 px-3 py-1.5 rounded-lg border border-outline-variant/30 text-label-sm font-label-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-blue-600"></span>
+<span class="text-slate-700">รายได้ MRR (บาท)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-sm bg-secondary-container"></span>
+<span class="text-slate-700">จำนวนร้านค้าสะสม (ร้าน)</span>
+</div>
+<div class="h-3 w-px bg-slate-300"></div>
+<span class="text-slate-500">เป้าสิ้นปี: 60 ร้าน</span>
+</div>
+</div>
+<!-- SVG Dual Axis Dynamic Graphic Visualization -->
+<div class="mt-6 relative">
+<!-- Background Grid Lines & SVG Graphic -->
+<div class="w-full h-72 sm:h-80">
+<svg class="w-full h-full overflow-visible" fill="none" viewbox="0 0 1000 320" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Blue Gradient for MRR Area -->
+<lineargradient id="blueAreaGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#2563eb" stop-opacity="0.22"></stop>
+<stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"></stop>
+</lineargradient>
+<!-- Amber Subtle Gradient for Stores Area -->
+<lineargradient id="amberAreaGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#f59e0b" stop-opacity="0.18"></stop>
+<stop offset="100%" stop-color="#f59e0b" stop-opacity="0.01"></stop>
+</lineargradient>
+</defs>
+<!-- Grid Horizontal Guide Lines -->
+<line stroke="#f1f5f9" stroke-dasharray="4 4" stroke-width="1" x1="50" x2="960" y1="30" y2="30"></line>
+<line stroke="#f1f5f9" stroke-dasharray="4 4" stroke-width="1" x1="50" x2="960" y1="90" y2="90"></line>
+<line stroke="#f1f5f9" stroke-dasharray="4 4" stroke-width="1" x1="50" x2="960" y1="150" y2="150"></line>
+<line stroke="#f1f5f9" stroke-dasharray="4 4" stroke-width="1" x1="50" x2="960" y1="210" y2="210"></line>
+<line stroke="#e2e8f0" stroke-width="1.5" x1="50" x2="960" y1="270" y2="270"></line>
+<!-- Left Axis Labels (MRR) -->
+<text class="text-[11px] fill-slate-400 font-mono" text-anchor="end" x="42" y="34">฿25k</text>
+<text class="text-[11px] fill-slate-400 font-mono" text-anchor="end" x="42" y="94">฿20k</text>
+<text class="text-[11px] fill-slate-400 font-mono" text-anchor="end" x="42" y="154">฿15k</text>
+<text class="text-[11px] fill-slate-400 font-mono" text-anchor="end" x="42" y="214">฿10k</text>
+<text class="text-[11px] fill-slate-400 font-mono" text-anchor="end" x="42" y="274">฿0</text>
+<!-- Right Axis Labels (Store Count) -->
+<text class="text-[11px] fill-amber-600 font-mono font-semibold" text-anchor="start" x="968" y="34">50 ร้าน</text>
+<text class="text-[11px] fill-amber-600 font-mono font-semibold" text-anchor="start" x="968" y="94">38 ร้าน</text>
+<text class="text-[11px] fill-amber-600 font-mono font-semibold" text-anchor="start" x="968" y="154">25 ร้าน</text>
+<text class="text-[11px] fill-amber-600 font-mono font-semibold" text-anchor="start" x="968" y="214">12 ร้าน</text>
+<!-- AREA 1: Stores Cumulative (Amber Area) -->
+<!-- Points from Month 1 (x=80) to Month 12 (x=940) -->
+<path d="M 80 270 
+                   L 80 216 
+                   L 158 208 
+                   L 236 198 
+                   L 314 186 
+                   L 392 174 
+                   L 470 160 
+                   L 548 145 
+                   L 626 130 
+                   L 704 112 
+                   L 782 92 
+                   L 860 76 
+                   L 938 58 
+                   L 938 270 Z" fill="url(#amberAreaGrad)"></path>
+<path d="M 80 216 
+                   L 158 208 
+                   L 236 198 
+                   L 314 186 
+                   L 392 174 
+                   L 470 160 
+                   L 548 145 
+                   L 626 130 
+                   L 704 112 
+                   L 782 92 
+                   L 860 76 
+                   L 938 58" stroke="#f59e0b" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<!-- AREA 2: MRR Revenue Line & Fill (Blue) -->
+<path d="M 80 270 
+                   L 80 228 
+                   L 158 220 
+                   L 236 205 
+                   L 314 190 
+                   L 392 170 
+                   L 470 152 
+                   L 548 132 
+                   L 626 118 
+                   L 704 96 
+                   L 782 72 
+                   L 860 52 
+                   L 938 34 
+                   L 938 270 Z" fill="url(#blueAreaGrad)"></path>
+<path d="M 80 228 
+                   L 158 220 
+                   L 236 205 
+                   L 314 190 
+                   L 392 170 
+                   L 470 152 
+                   L 548 132 
+                   L 626 118 
+                   L 704 96 
+                   L 782 72 
+                   L 860 52 
+                   L 938 34" stroke="#2563eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<!-- Milestone Nodes -->
+<!-- Month 6 Launch campaign -->
+<circle cx="470" cy="152" fill="#ffffff" r="4.5" stroke="#2563eb" stroke-width="2.5"></circle>
+<!-- Current Month Peak (Month 12) -->
+<circle cx="938" cy="34" fill="#2563eb" r="6" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="938" cy="58" fill="#f59e0b" r="5.5" stroke="#ffffff" stroke-width="2.5"></circle>
+<!-- Active Tooltip Indicator Line for Month 12 -->
+<line opacity="0.6" stroke="#0f172a" stroke-dasharray="3 3" stroke-width="1.5" x1="938" x2="938" y1="30" y2="270"></line>
+<!-- X-Axis Months -->
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="80" y="294">ต.ค. 68</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="158" y="294">พ.ย.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="236" y="294">ธ.ค.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="314" y="294">ม.ค. 69</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="392" y="294">ก.พ.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="470" y="294">มี.ค.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="548" y="294">เม.ย.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="626" y="294">พ.ค.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="704" y="294">มิ.ย.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="782" y="294">ก.ค.</text>
+<text class="text-[11px] fill-slate-400 font-sans" text-anchor="middle" x="860" y="294">ส.ค.</text>
+<text class="text-[11px] fill-slate-900 font-bold font-sans" text-anchor="middle" x="938" y="294">ก.ย. 69 (ปัจจุบัน)</text>
+</svg>
+<!-- Dynamic Mock Hover Tooltip Floating over Month 12 -->
+<div class="absolute right-6 top-4 bg-slate-900 text-white rounded-lg p-3 shadow-xl border border-slate-700 pointer-events-none text-xs w-48 backdrop-blur-sm bg-slate-900/95">
+<div class="font-semibold text-slate-300 border-b border-slate-700 pb-1 mb-1.5 flex justify-between">
+<span>กันยายน 2569</span>
+<span class="text-emerald-400">จุดสูงสุดใหม่ 🎉</span>
+</div>
+<div class="flex items-center justify-between text-[11px] text-slate-300 py-0.5">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                  รายได้ MRR:
+                </span>
+<span class="font-bold text-white">฿24,780</span>
+</div>
+<div class="flex items-center justify-between text-[11px] text-slate-300 py-0.5">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-sm bg-amber-500"></span>
+                  ร้านค้าสะสม:
+                </span>
+<span class="font-bold text-white">42 ร้าน</span>
+</div>
+<div class="mt-1 pt-1 border-t border-slate-800 text-[10px] text-slate-400 flex justify-between">
+<span>อัตราเติบโต MoM:</span>
+<span class="text-emerald-400 font-semibold">+18.4%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 3: 2 COLUMN QUICK ACTION & RECENT ACQUISITIONS                    -->
+<!-- ========================================================================= -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: งานที่ต้องจัดการด่วน (Action Required) -->
+<div class="lg:col-span-5 bg-white border border-outline-variant/50 rounded-lg p-6 shadow-[0px_1px_3px_rgba(15,23,42,0.04)] flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-rose-500" data-icon="notification_important">notification_important</span>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-bold">งานที่ต้องจัดการด่วน</h2>
+</div>
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                6 รายการ
+              </span>
+</div>
+<!-- Action Rows -->
+<div class="divide-y divide-outline-variant/20 mt-1">
+<!-- Row 1: บิลรอตรวจสลิป -->
+<div class="py-3.5 flex items-center justify-between group hover:bg-slate-50 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-sm">receipt</span>
+</div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">บิลรอตรวจสลิปโอนเงิน</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">ลูกค้าแนบสลิปผ่านหน้าเว็บ รอเปิดสิทธิ์ระบบ</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-amber-100 text-amber-800">
+                    3 รายการ
+                  </span>
+<a class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-800 text-label-sm font-label-sm font-medium flex items-center gap-0.5 transition-all" href="#">
+<span>จัดการ</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Row 2: เรื่องแจ้งปัญหาใหม่ -->
+<div class="py-3.5 flex items-center justify-between group hover:bg-slate-50 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-sm">headset_mic</span>
+</div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">เรื่องแจ้งปัญหาใหม่จากร้านค้า</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">ปัญหาการเชื่อมต่อเครื่องพิมพ์บลูทูธ 2 ร้าน</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-rose-100 text-rose-800">
+                    2 เรื่อง
+                  </span>
+<a class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-800 text-label-sm font-label-sm font-medium flex items-center gap-0.5 transition-all" href="#">
+<span>จัดการ</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Row 3: ร้านหมดอายุวันนี้ -->
+<div class="py-3.5 flex items-center justify-between group hover:bg-slate-50 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-sm">timer_off</span>
+</div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">ร้านหมดอายุการใช้งานวันนี้</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">ครัวริมน้ำ บางแสน หมดอายุสัญญาช่วง 23:59 น.</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-red-100 text-red-800">
+                    1 ร้าน
+                  </span>
+<a class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-800 text-label-sm font-label-sm font-medium flex items-center gap-0.5 transition-all" href="#">
+<span>จัดการ</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Summary Alert -->
+<div class="mt-4 p-3 bg-slate-50 border border-outline-variant/30 rounded-lg flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-emerald-600 text-sm">check_circle</span>
+              ระบบจัดการอัตโนมัติเปิดทำงานปกติ
+            </span>
+<span class="text-label-sm font-label-sm text-slate-500 font-mono">CRON: ทุก 5 นาที</span>
+</div>
+</div>
+<!-- Right Column: ร้านสมัครใหม่ล่าสุด (New Stores Acquisition) -->
+<div class="lg:col-span-7 bg-white border border-outline-variant/50 rounded-lg p-6 shadow-[0px_1px_3px_rgba(15,23,42,0.04)]">
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant/30">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-bold">ร้านสมัครใหม่ล่าสุด (5 ร้านล่าสุด)</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">รายชื่อผู้ประกอบการที่ลงทะเบียนเข้าใช้งานแพลตฟอร์ม Kin-D POS</p>
+</div>
+<a class="text-label-sm font-label-sm font-semibold text-slate-700 hover:text-black flex items-center gap-0.5" href="#">
+<span>ดูทั้งหมด (42 ร้าน)</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+</a>
+</div>
+<!-- Stores List -->
+<div class="divide-y divide-outline-variant/20">
+<!-- Store 1 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-800 flex items-center justify-center font-bold text-sm">
+                  ปส
+                </div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">ร้านป้าสมศรี ส้มตำแซ่บ</h3>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      รายเดือน (฿590)
+                    </span>
+<span>• ที่มา: <strong class="text-slate-700 font-medium">แนะนำต่อ (Referral)</strong></span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-sm font-label-sm text-slate-400 block">2 ชม. ที่แล้ว</span>
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500" title="กำลังใช้งาน"></span>
+</div>
+</div>
+<!-- Store 2 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center font-bold text-sm">
+                  UB
+                </div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">The Urban Cafe x Bakery</h3>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                      รายปี (฿5,490) ⭐
+                    </span>
+<span>• ที่มา: <strong class="text-slate-700 font-medium">Google Search</strong></span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-sm font-label-sm text-slate-400 block">5 ชม. ที่แล้ว</span>
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500" title="กำลังใช้งาน"></span>
+</div>
+</div>
+<!-- Store 3 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center font-bold text-sm">
+                  คร
+                </div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">ครัวริมน้ำ บางแสน</h3>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                      ทดลองใช้งาน (Trial 14 วัน)
+                    </span>
+<span>• ที่มา: <strong class="text-slate-700 font-medium">Facebook Ads</strong></span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-sm font-label-sm text-slate-400 block">เมื่อวานนี้</span>
+<span class="inline-block w-2 h-2 rounded-full bg-amber-400" title="ใกล้หมดอายุทดลอง"></span>
+</div>
+</div>
+<!-- Store 4 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center font-bold text-sm">
+                  กอ
+                </div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">ก๋วยเตี๋ยวเรืออยุธยา รสเด็ด</h3>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                      ราย 6 เดือน (฿2,990)
+                    </span>
+<span>• ที่มา: <strong class="text-slate-700 font-medium">TikTok Content</strong></span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-sm font-label-sm text-slate-400 block">2 วันที่แล้ว</span>
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500" title="กำลังใช้งาน"></span>
+</div>
+</div>
+<!-- Store 5 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-lg transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm">
+                  SB
+                </div>
+<div>
+<h3 class="text-label-lg font-label-lg text-on-surface font-semibold">Slow Bar Coffee Sukhumvit</h3>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      รายเดือน (฿590)
+                    </span>
+<span>• ที่มา: <strong class="text-slate-700 font-medium">Walk-in / Direct</strong></span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-sm font-label-sm text-slate-400 block">3 วันที่แล้ว</span>
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500" title="กำลังใช้งาน"></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- SECTION 4: INACTIVITY WATCHLIST (CHURN RISK MONITOR)                      -->
+<!-- ========================================================================= -->
+<section class="bg-white border border-outline-variant/50 rounded-lg shadow-[0px_1px_3px_rgba(15,23,42,0.04)] overflow-hidden" id="inactivity-watchlist">
+<!-- Table Header Banner -->
+<div class="p-6 border-b border-outline-variant/30 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-white via-white to-amber-50/40">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-600">crisis_alert</span>
+<h2 class="text-headline-sm font-headline-sm text-on-surface font-bold">
+                ร้านที่เงียบผิดปกติ (เฝ้าระวังก่อนยกเลิกการใช้งาน / Churn Risk)
+              </h2>
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                ไม่มีออเดอร์ &gt; 7 วัน
+              </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+              ร้านค้าที่ไม่มีการเปิดบิลออเดอร์เกิน 7 วัน ควรโทรหรือทัก LINE สอบถามและช่วยแก้ปัญหาการใช้งานด่วน
+            </p>
+</div>
+<!-- Quick Action Buttons on Watchlist -->
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 bg-white border border-outline-variant/60 rounded-lg text-label-sm font-label-sm text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-xs">download</span>
+<span>ส่งออกรายชื่อ (CSV)</span>
+</button>
+<button class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-lg text-label-sm font-label-sm font-bold flex items-center gap-1.5 shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-xs">mark_chat_unread</span>
+<span>ส่งบรอดแคสต์ทักทาย (LINE)</span>
+</button>
+</div>
+</div>
+<!-- High Density Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#f8fafc] border-b border-outline-variant/30 text-label-sm font-label-sm text-slate-500 uppercase tracking-wider">
+<th class="py-3 px-4 font-semibold" scope="col">ชื่อร้านค้า &amp; ข้อมูลเจ้าของ</th>
+<th class="py-3 px-4 font-semibold" scope="col">สาขา &amp; ประเภท</th>
+<th class="py-3 px-4 font-semibold" scope="col">ออเดอร์ล่าสุด</th>
+<th class="py-3 px-4 font-semibold" scope="col">วันหมดอายุแพ็กเกจ</th>
+<th class="py-3 px-4 font-semibold" scope="col">สถานะแพ็กเกจ</th>
+<th class="py-3 px-4 font-semibold text-right" scope="col">ดำเนินการแก้ไข / ติดต่อ</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 text-body-md font-body-md">
+<!-- Row 1: ข้าวมันไก่เฮียชัย -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-700">
+                      ขช
+                    </div>
+<div>
+<div class="font-semibold text-on-surface text-label-lg font-label-lg">ข้าวมันไก่เฮียชัย (สูตรไหหลำ)</div>
+<div class="text-body-sm font-body-sm text-slate-500 flex items-center gap-1">
+<span>คุณสมชัย รุ่งโรจน์</span>
+<span>•</span>
+<span class="font-mono text-slate-600">081-923-4411</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="text-label-md font-label-md text-slate-700 block">สาขา ลาดพร้าว 101</span>
+<span class="text-label-sm font-label-sm text-slate-400">อาหารจานเดียว / สตรีทฟู้ด</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm font-bold bg-amber-100 text-amber-900 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                    8 วันที่แล้ว
+                  </span>
+<span class="block text-[11px] text-slate-400 mt-0.5">บิลล่าสุด: 22 ก.ย. (฿180)</span>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-data-mono">
+<span class="text-slate-800 font-medium">5 ต.ค. 2569</span>
+<span class="block text-label-sm font-label-sm text-amber-700">เหลืออีก 5 วัน</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2.5 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    Pro รายเดือน
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg text-label-sm font-label-sm font-semibold flex items-center gap-1 transition-all" title="โทรหาหรือเปิด LINE เจ้าของร้าน" type="button">
+<span class="material-symbols-outlined text-xs">call</span>
+<span>โทรสอบถาม</span>
+</button>
+<button class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-outline-variant/60 text-slate-700 rounded-lg text-label-sm font-label-sm font-medium flex items-center gap-1 transition-all" title="เข้าดูประวัติการขายและสาขา" type="button">
+<span class="material-symbols-outlined text-xs">store</span>
+<span>ดูร้าน</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: สเต็กริมทาง นนทบุรี -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-700">
+                      สน
+                    </div>
+<div>
+<div class="font-semibold text-on-surface text-label-lg font-label-lg">สเต็กริมทาง นนทบุรี</div>
+<div class="text-body-sm font-body-sm text-slate-500 flex items-center gap-1">
+<span>คุณกิตติศักดิ์ พานิช</span>
+<span>•</span>
+<span class="font-mono text-slate-600">089-445-9801</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="text-label-md font-label-md text-slate-700 block">สาขา ถนนสนามบินน้ำ</span>
+<span class="text-label-sm font-label-sm text-slate-400">ปิ้งย่าง / สเต็ก</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm font-bold bg-amber-100 text-amber-900 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                    11 วันที่แล้ว
+                  </span>
+<span class="block text-[11px] text-slate-400 mt-0.5">บิลล่าสุด: 19 ก.ย. (฿450)</span>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-data-mono">
+<span class="text-slate-800 font-medium">28 ก.ย. 2569</span>
+<span class="block text-label-sm font-label-sm text-rose-600 font-bold">หมดอายุวันนี้ 23:59</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2.5 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                    Trial (ทดลองใช้)
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg text-label-sm font-label-sm font-semibold flex items-center gap-1 transition-all" title="โทรหาหรือเปิด LINE เจ้าของร้าน" type="button">
+<span class="material-symbols-outlined text-xs">chat</span>
+<span>ทัก LINE เสนอโปร</span>
+</button>
+<button class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-outline-variant/60 text-slate-700 rounded-lg text-label-sm font-label-sm font-medium flex items-center gap-1 transition-all" title="เข้าดูประวัติการขายและสาขา" type="button">
+<span class="material-symbols-outlined text-xs">store</span>
+<span>ดูร้าน</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: ชาไข่มุกบับเบิ้ลป๊อป -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-700">
+                      ชข
+                    </div>
+<div>
+<div class="font-semibold text-on-surface text-label-lg font-label-lg">ชาไข่มุกบับเบิ้ลป๊อป (Bubble Pop Tea)</div>
+<div class="text-body-sm font-body-sm text-slate-500 flex items-center gap-1">
+<span>คุณวิไลพร นภาวัลย์</span>
+<span>•</span>
+<span class="font-mono text-slate-600">092-881-2299</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="text-label-md font-label-md text-slate-700 block">สาขา ตลาดนัดจตุจักร</span>
+<span class="text-label-sm font-label-sm text-slate-400">คาเฟ่ / ชานมไข่มุก</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm font-bold bg-rose-100 text-rose-900 border border-rose-200">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                    14 วันที่แล้ว
+                  </span>
+<span class="block text-[11px] text-slate-400 mt-0.5">บิลล่าสุด: 16 ก.ย. (฿75)</span>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-data-mono">
+<span class="text-slate-800 font-medium">12 ต.ค. 2569</span>
+<span class="block text-label-sm font-label-sm text-slate-500">เหลือ 12 วัน</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2.5 py-1 rounded-full text-label-sm font-label-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    Pro รายเดือน
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg text-label-sm font-label-sm font-semibold flex items-center gap-1 transition-all" title="โทรหาหรือเปิด LINE เจ้าของร้าน" type="button">
+<span class="material-symbols-outlined text-xs">call</span>
+<span>โทรสอบถาม</span>
+</button>
+<button class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-outline-variant/60 text-slate-700 rounded-lg text-label-sm font-label-sm font-medium flex items-center gap-1 transition-all" title="เข้าดูประวัติการขายและสาขา" type="button">
+<span class="material-symbols-outlined text-xs">store</span>
+<span>ดูร้าน</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer Pagination & Summary -->
+<div class="py-3 px-6 bg-[#f8fafc] border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span>แสดง 3 จาก 3 ร้านค้าที่มีความเสี่ยงสูง</span>
+<span class="text-slate-300">•</span>
+<span class="text-emerald-700 font-semibold">อัตรา Retention สะสม 92.8%</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2 py-1 rounded border border-outline-variant/40 text-slate-300 bg-white cursor-not-allowed" disabled="" type="button">
+<span class="material-symbols-outlined text-xs">chevron_left</span>
+</button>
+<span class="px-3 py-1 rounded bg-slate-900 text-white font-mono text-xs font-semibold">1</span>
+<button class="px-2 py-1 rounded border border-outline-variant/40 text-slate-300 bg-white cursor-not-allowed" disabled="" type="button">
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Operational System Status Strip -->
+<footer class="pt-4 pb-8 flex flex-col sm:flex-row items-center justify-between text-body-sm font-body-sm text-slate-400 gap-2 border-t border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="font-semibold text-slate-600">Kin-D POS Platform v2.4.0-prod</span>
+<span>•</span>
+<span>เซิร์ฟเวอร์: Bangkok (BKK-NODE-01)</span>
+<span>•</span>
+<span class="text-emerald-600 flex items-center gap-1 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Latency 24ms
+          </span>
+</div>
+<div>
+<span>สำหรับเจ้าของระบบ (Super Admin) • ลิขสิทธิ์เฉพาะแพลตฟอร์ม Kin-D POS</span>
+</div>
+</footer>
+</main>
+</div>
+<!-- Inline Interaction Handler (Solo Admin Micro-Interactions) -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Quick toast alert simulation for button actions
+      const notifyAdmin = (msg) => {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-2xl z-50 text-sm font-medium border border-slate-700 flex items-center gap-2 animate-bounce';
+        toast.innerHTML = `<span class="material-symbols-outlined text-emerald-400 text-base">check_circle</span> <span>${msg}</span>`;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.remove();
+        }, 2800);
+      };
+
+      // Hook click events on action buttons
+      document.querySelectorAll('button').forEach(btn => {
+        if (btn.innerText.includes('รีเฟรช')) {
+          btn.addEventListener('click', () => notifyAdmin('อัปเดตข้อมูลเมตริกและสถิติ 42 ร้านค้าเรียบร้อยแล้ว'));
+        } else if (btn.innerText.includes('โทรสอบถาม')) {
+          btn.addEventListener('click', () => notifyAdmin('เปิดหน้าต่างบันทึกการโทรติดต่อเจ้าของร้าน'));
+        } else if (btn.innerText.includes('ทัก LINE')) {
+          btn.addEventListener('click', () => notifyAdmin('กำลังเตรียมข้อความและเปิด LINE Official Account...'));
+        } else if (btn.innerText.includes('ส่งออกรายชื่อ')) {
+          btn.addEventListener('click', () => notifyAdmin('ส่งออกไฟล์ Churn-Risk-Watchlist.csv สำเร็จ'));
+        }
+      });
+    });
+  </script>
+</body></html>

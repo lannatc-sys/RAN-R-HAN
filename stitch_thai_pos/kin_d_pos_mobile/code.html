@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D POS โต๊ะ 4 (กะเช้า)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Font: IBM Plex Sans Thai -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary": "#0053db",
+            "outline": "#867461",
+            "on-error": "#ffffff",
+            "on-surface-variant": "#534434",
+            "surface-container-highest": "#e3e2e2",
+            "surface-container-high": "#e9e8e7",
+            "primary": "#855300",
+            "inverse-on-surface": "#f2f0f0",
+            "surface-dim": "#dbdad9",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#94aeff",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "surface-container": "#efeded",
+            "inverse-surface": "#303031",
+            "surface-tint": "#855300",
+            "secondary-fixed": "#ffdbce",
+            "tertiary-fixed": "#dbe1ff",
+            "on-secondary-fixed": "#370e00",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#2a1700",
+            "on-primary-fixed-variant": "#653e00",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed": "#00174b",
+            "surface-container-low": "#f5f3f3",
+            "secondary-fixed-dim": "#ffb599",
+            "on-tertiary-container": "#003ba1",
+            "on-error-container": "#93000a",
+            "on-surface": "#1b1c1c",
+            "on-primary-container": "#613b00",
+            "secondary": "#a73a00",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "inverse-primary": "#ffb95f",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "primary-fixed": "#ffddb8",
+            "on-secondary-container": "#571a00",
+            "primary-fixed-dim": "#ffb95f",
+            "surface-bright": "#fbf9f9",
+            "on-background": "#1b1c1c",
+            "on-secondary": "#ffffff",
+            "error": "#ba1a1a",
+            "primary-container": "#f59e0b",
+            "background": "#fbf9f9",
+            "surface": "#fbf9f9",
+            "outline-variant": "#d8c3ad",
+            "secondary-container": "#fd651e",
+            "surface-variant": "#e3e2e2",
+            "on-primary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "grid-base": "4px",
+            "space-8": "32px",
+            "space-5": "20px",
+            "space-4": "16px",
+            "card-p-mobile": "16px",
+            "space-3": "12px",
+            "space-1": "4px",
+            "space-6": "24px",
+            "min-target": "48px",
+            "space-2": "8px"
+          },
+          "fontFamily": {
+            "body-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-sm": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "price-display": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "price-total": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-strong": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""]
+          },
+          "fontSize": {
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "label-lg": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-sm": ["18px", {"lineHeight": "26px", "fontWeight": "600"}],
+            "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "price-total": ["26px", {"lineHeight": "32px", "fontWeight": "700"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "label-md": ["14px", {"lineHeight": "18px", "fontWeight": "600"}],
+            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "body-strong": ["16px", {"lineHeight": "24px", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      font-size: 24px;
+      line-height: 1;
+      display: inline-block;
+      user-select: none;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col justify-between items-center select-none pb-28">
+<!-- Mobile Viewport Wrapper 390px -->
+<div class="w-full max-w-[390px] bg-background min-h-screen flex flex-col relative shadow-sm border-x border-outline-variant">
+<!-- TOP APP BAR (Shared Component JSON Blueprint) -->
+<header class="bg-surface sticky top-0 z-40 shadow-sm border-b border-outline-variant flex justify-between items-center w-full px-space-4 py-space-2 max-w-[390px] mx-auto">
+<div class="flex items-center gap-2">
+<button aria-label="Table" class="min-h-min-target min-w-min-target flex items-center justify-center text-primary active:scale-95 transition-transform duration-150 rounded-xl hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="table_restaurant">table_restaurant</span>
+</button>
+<div>
+<h1 class="text-headline-md font-headline-md text-primary leading-tight">Kin-D POS โต๊ะ 4 (กะเช้า)</h1>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-label-md font-label-md text-on-surface-variant">กำลังเปิดบิล (3 รายการในคิว)</span>
+</div>
+</div>
+</div>
+<button aria-label="Orders History" class="min-h-min-target min-w-min-target flex items-center justify-center text-primary active:scale-95 transition-transform duration-150 rounded-xl hover:bg-surface-container-high relative">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="absolute top-2 right-2 w-2.5 h-2.5 bg-secondary rounded-full"></span>
+</button>
+</header>
+<!-- STATE SWITCHER BAR (Interactive Prototype Controller) -->
+<section class="bg-surface-container-high px-space-4 py-2 flex items-center justify-between border-b border-outline-variant">
+<span class="text-label-md font-label-md text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="tune" style="font-size: 18px;">tune</span> สถานะ:
+      </span>
+<div class="flex items-center gap-1 bg-surface-container-lowest p-1 rounded-xl border border-outline-variant">
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-lg bg-primary-container text-on-primary-container transition-all" id="btn-state-normal" onclick="switchState('normal')">
+          ปกติ
+        </button>
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-lg text-on-surface-variant hover:bg-surface-container transition-all" id="btn-state-loading" onclick="switchState('loading')">
+          โหลด
+        </button>
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-lg text-on-surface-variant hover:bg-surface-container transition-all" id="btn-state-empty" onclick="switchState('empty')">
+          ว่าง
+        </button>
+<button class="px-2.5 py-1 text-label-md font-label-md rounded-lg text-on-surface-variant hover:bg-surface-container transition-all" id="btn-state-error" onclick="switchState('error')">
+          หลุด
+        </button>
+</div>
+</section>
+<!-- SEARCH & FILTER BAR -->
+<section class="p-space-4 pb-2 space-y-3">
+<!-- Search Input (min 48px height) -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline pointer-events-none" data-icon="search">search</span>
+<input class="w-full h-min-target pl-10 pr-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface text-body-md font-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container shadow-sm transition-all" placeholder="ค้นหาเมนู หรือ ใส่หมายเลขโต๊ะ..." type="text"/>
+</div>
+<!-- Categories Track -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 text-body-md">
+<button class="px-4 py-2 rounded-full min-h-min-target bg-primary-container text-on-primary-container font-label-lg whitespace-nowrap shadow-sm active:scale-95 transition-transform flex items-center">
+          ทั้งหมด (24)
+        </button>
+<button class="px-4 py-2 rounded-full min-h-min-target bg-surface-container-lowest border border-outline-variant text-on-surface font-label-lg whitespace-nowrap hover:bg-surface-container-low active:scale-95 transition-transform flex items-center">
+          อาหารจานเดียว
+        </button>
+<button class="px-4 py-2 rounded-full min-h-min-target bg-surface-container-lowest border border-outline-variant text-on-surface font-label-lg whitespace-nowrap hover:bg-surface-container-low active:scale-95 transition-transform flex items-center">
+          ต้ม-แกง
+        </button>
+<button class="px-4 py-2 rounded-full min-h-min-target bg-surface-container-lowest border border-outline-variant text-on-surface font-label-lg whitespace-nowrap hover:bg-surface-container-low active:scale-95 transition-transform flex items-center">
+          เครื่องดื่ม
+        </button>
+<button class="px-4 py-2 rounded-full min-h-min-target bg-surface-container-lowest border border-outline-variant text-on-surface font-label-lg whitespace-nowrap hover:bg-surface-container-low active:scale-95 transition-transform flex items-center">
+          ของทานเล่น
+        </button>
+</div>
+</section>
+<!-- ACTIVE BILL STATUS PREVIEW TICKET -->
+<section class="px-space-4 py-1">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="restaurant">restaurant</span>
+<span class="text-label-md font-label-md text-on-surface">สถานะรายการที่สั่งล่าสุด</span>
+</div>
+<div class="flex items-center gap-1.5">
+<!-- Status Badges according to Brand Guideline -->
+<span class="bg-[#FEF3C7] text-[#B45309] text-[13px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B45309]"></span> รอ (1)
+          </span>
+<span class="bg-[#DBEAFE] text-[#1D4ED8] text-[13px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1D4ED8]"></span> กำลังทำ (1)
+          </span>
+<span class="bg-[#D1FAE5] text-[#047857] text-[13px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#047857]"></span> เสิร์ฟแล้ว (1)
+          </span>
+</div>
+</div>
+</section>
+<!-- DYNAMIC VIEW CONTAINER -->
+<main class="flex-1 px-space-4 py-3">
+<!-- VIEW 1: NORMAL MENU CARDS -->
+<div class="space-y-3" id="view-normal">
+<!-- Card 1: ข้าวกะเพราหมูกรอบไข่ดาว -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm flex flex-col gap-3 relative overflow-hidden transition-all hover:border-outline">
+<div class="flex justify-between items-start gap-2">
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<h2 class="text-body-strong font-body-strong text-on-surface">ข้าวกะเพราหมูกรอบไข่ดาว</h2>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[11px] font-bold px-2 py-0.5 rounded-full">ขายดี</span>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant mt-0.5">ไข่ดาวกรอบไม่สุก, เผ็ดระดับ 2</p>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="bg-[#D1FAE5] text-[#047857] text-label-md font-label-md px-2.5 py-0.5 rounded-full">เสิร์ฟแล้ว</span>
+<span class="text-label-md font-label-md text-outline">สั่งเมื่อ 11:20</span>
+</div>
+</div>
+<span class="text-price-display font-price-display text-primary tabular-nums">฿75</span>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-surface-container">
+<span class="text-label-md font-label-md text-outline">จำนวนสั่งเพิ่ม</span>
+<div class="flex items-center bg-surface-container rounded-xl p-1 gap-2">
+<button aria-label="Decrease quantity" class="w-min-target h-min-target bg-surface-container-lowest text-on-surface rounded-lg flex items-center justify-center font-bold text-headline-sm shadow-sm active:scale-90 transition-transform" onclick="changeQty('qty-1', -1)">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="w-8 text-center text-body-strong font-body-strong tabular-nums text-on-surface" id="qty-1">1</span>
+<button aria-label="Increase quantity" class="w-min-target h-min-target bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center font-bold text-headline-sm shadow-sm active:scale-90 transition-transform" onclick="changeQty('qty-1', 1)">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 2: ต้มยำกุ้งน้ำข้น -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm flex flex-col gap-3 relative transition-all hover:border-outline">
+<div class="flex justify-between items-start gap-2">
+<div class="flex-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">ต้มยำกุ้งน้ำข้น</h2>
+<p class="text-label-md font-label-md text-on-surface-variant mt-0.5">กุ้งแม่น้ำ 4 ตัว, รสแซ่บจัดจ้าน</p>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="bg-[#DBEAFE] text-[#1D4ED8] text-label-md font-label-md px-2.5 py-0.5 rounded-full">กำลังทำ</span>
+<span class="text-label-md font-label-md text-outline">ครัวกำลังปรุง</span>
+</div>
+</div>
+<span class="text-price-display font-price-display text-primary tabular-nums">฿150</span>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-surface-container">
+<span class="text-label-md font-label-md text-outline">จำนวนสั่งเพิ่ม</span>
+<div class="flex items-center bg-surface-container rounded-xl p-1 gap-2">
+<button aria-label="Decrease quantity" class="w-min-target h-min-target bg-surface-container-lowest text-on-surface rounded-lg flex items-center justify-center font-bold text-headline-sm shadow-sm active:scale-90 transition-transform" onclick="changeQty('qty-2', -1)">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="w-8 text-center text-body-strong font-body-strong tabular-nums text-on-surface" id="qty-2">1</span>
+<button aria-label="Increase quantity" class="w-min-target h-min-target bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center font-bold text-headline-sm shadow-sm active:scale-90 transition-transform" onclick="changeQty('qty-2', 1)">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 3: ชาเย็นโบราณ -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm flex flex-col gap-3 relative transition-all hover:border-outline">
+<div class="flex justify-between items-start gap-2">
+<div class="flex-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">ชาเย็นโบราณ</h2>
+<p class="text-label-md font-label-md text-on-surface-variant mt-0.5">หวานน้อย 50%, น้ำแข็งบดแก้วใหญ่</p>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="bg-[#FEF3C7] text-[#B45309] text-label-md font-label-md px-2.5 py-0.5 rounded-full">รอ</span>
+<span class="text-label-md font-label-md text-outline">บาร์เครื่องดื่ม</span>
+</div>
+</div>
+<span class="text-price-display font-price-display text-primary tabular-nums">฿35</span>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-surface-container">
+<span class="text-label-md font-label-md text-outline">จำนวนสั่งเพิ่ม</span>
+<div class="flex items-center bg-surface-container rounded-xl p-1 gap-2">
+<button aria-label="Decrease quantity" class="w-min-target h-min-target bg-surface-container-lowest text-on-surface rounded-lg flex items-center justify-center font-bold text-headline-sm shadow-sm active:scale-90 transition-transform" onclick="changeQty('qty-3', -1)">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="w-8 text-center text-body-strong font-body-strong tabular-nums text-on-surface" id="qty-3">1</span>
+<button aria-label="Increase quantity" class="w-min-target h-min-target bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center font-bold text-headline-sm shadow-sm active:scale-90 transition-transform" onclick="changeQty('qty-3', 1)">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 4: ไก่ทอดเกลือ -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm flex flex-col gap-3 relative transition-all hover:border-outline">
+<div class="flex justify-between items-start gap-2">
+<div class="flex-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">ไก่ทอดเกลือ</h2>
+<p class="text-label-md font-label-md text-on-surface-variant mt-0.5">ปีกไก่ทอดกรอบเสิร์ฟพร้อมน้ำจิ้มแจ่ว</p>
+</div>
+<span class="text-price-display font-price-display text-primary tabular-nums">฿90</span>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-surface-container">
+<span class="text-label-md font-label-md text-outline">ยังไม่ได้สั่ง</span>
+<button class="h-min-target px-4 bg-surface-container-lowest border-2 border-primary-container text-on-surface rounded-xl font-label-lg flex items-center gap-1.5 active:scale-95 transition-transform hover:bg-primary-container/10" onclick="changeQty('qty-4', 1)">
+<span class="material-symbols-outlined" data-icon="add">add</span> สั่งจานนี้
+            </button>
+</div>
+</article>
+<!-- Card 5: ลาบหมูคั่ว -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm flex flex-col gap-3 relative transition-all hover:border-outline">
+<div class="flex justify-between items-start gap-2">
+<div class="flex-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">ลาบหมูคั่ว</h2>
+<p class="text-label-md font-label-md text-on-surface-variant mt-0.5">ลาบเหนือมะแขว่นหอม รสเข้มข้น</p>
+</div>
+<span class="text-price-display font-price-display text-primary tabular-nums">฿85</span>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-surface-container">
+<span class="text-label-md font-label-md text-outline">ยังไม่ได้สั่ง</span>
+<button class="h-min-target px-4 bg-surface-container-lowest border-2 border-primary-container text-on-surface rounded-xl font-label-lg flex items-center gap-1.5 active:scale-95 transition-transform hover:bg-primary-container/10" onclick="changeQty('qty-5', 1)">
+<span class="material-symbols-outlined" data-icon="add">add</span> สั่งจานนี้
+            </button>
+</div>
+</article>
+</div>
+<!-- VIEW 2: LOADING SKELETON STATE -->
+<div class="space-y-3 hidden" id="view-loading">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm animate-pulse space-y-4">
+<div class="flex justify-between">
+<div class="space-y-2 w-3/4">
+<div class="h-5 bg-surface-container-highest rounded-lg w-2/3"></div>
+<div class="h-4 bg-surface-container-high rounded-md w-1/2"></div>
+</div>
+<div class="h-6 bg-surface-container-highest rounded-lg w-14"></div>
+</div>
+<div class="flex justify-between items-center pt-3 border-t border-surface-container">
+<div class="h-4 bg-surface-container-high rounded-md w-20"></div>
+<div class="h-12 bg-surface-container-highest rounded-xl w-32"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm animate-pulse space-y-4">
+<div class="flex justify-between">
+<div class="space-y-2 w-3/4">
+<div class="h-5 bg-surface-container-highest rounded-lg w-3/4"></div>
+<div class="h-4 bg-surface-container-high rounded-md w-2/5"></div>
+</div>
+<div class="h-6 bg-surface-container-highest rounded-lg w-14"></div>
+</div>
+<div class="flex justify-between items-center pt-3 border-t border-surface-container">
+<div class="h-4 bg-surface-container-high rounded-md w-20"></div>
+<div class="h-12 bg-surface-container-highest rounded-xl w-32"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-4 shadow-sm animate-pulse space-y-4">
+<div class="flex justify-between">
+<div class="space-y-2 w-3/4">
+<div class="h-5 bg-surface-container-highest rounded-lg w-1/2"></div>
+<div class="h-4 bg-surface-container-high rounded-md w-1/3"></div>
+</div>
+<div class="h-6 bg-surface-container-highest rounded-lg w-14"></div>
+</div>
+<div class="flex justify-between items-center pt-3 border-t border-surface-container">
+<div class="h-4 bg-surface-container-high rounded-md w-20"></div>
+<div class="h-12 bg-surface-container-highest rounded-xl w-32"></div>
+</div>
+</div>
+</div>
+<!-- VIEW 3: EMPTY STATE -->
+<div class="hidden flex-col items-center justify-center py-12 px-4 text-center" id="view-empty">
+<div class="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center text-outline mb-4">
+<span class="material-symbols-outlined" data-icon="lunch_dining" style="font-size: 40px;">lunch_dining</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">ยังไม่มีรายการอาหารในหมวดนี้</h3>
+<p class="text-label-md font-label-md text-on-surface-variant max-w-[260px] mt-1 mb-6">
+          เลือกหมวดหมู่อื่น หรือแตะปุ่มด้านล่างเพื่อเพิ่มเมนูพิเศษสำหรับโต๊ะ 4
+        </p>
+<button class="h-min-target px-6 bg-primary-container text-on-primary-container font-label-lg rounded-xl shadow-sm active:scale-95 transition-transform flex items-center gap-2" onclick="switchState('normal')">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span> ดูเมนูทั้งหมด
+        </button>
+</div>
+<!-- VIEW 4: ERROR STATE -->
+<div class="hidden flex-col items-center justify-center py-12 px-4 text-center" id="view-error">
+<div class="w-20 h-20 rounded-full bg-error-container text-error flex items-center justify-center mb-4">
+<span class="material-symbols-outlined" data-icon="wifi_off" style="font-size: 40px;">wifi_off</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-error">สัญญาณเชื่อมต่อเครื่องพิมพ์หลุด</h3>
+<p class="text-label-md font-label-md text-on-surface-variant max-w-[280px] mt-1 mb-6">
+          ไม่สามารถซิงค์สถานะกับระบบหน้าครัวกลางได้ กรุณาตรวจสอบเราเตอร์ Wi-Fi หรือกดลองใหม่อีกครั้ง
+        </p>
+<div class="flex flex-col w-full gap-2.5">
+<button class="h-min-target w-full bg-primary-container text-on-primary-container font-label-lg rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2" onclick="switchState('normal')">
+<span class="material-symbols-outlined" data-icon="sync">sync</span> เชื่อมต่อใหม่อีกครั้ง
+          </button>
+<button class="h-min-target w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-label-lg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2" onclick="alert('กำลังโทรหาช่างเทคนิค')">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span> ติดต่อฝ่ายดูแลระบบ
+          </button>
+</div>
+</div>
+</main>
+<!-- ORDER SUMMARY BAR (Cart Bottom Bar: Sticky Mobile) -->
+<aside class="fixed bottom-[58px] left-0 right-0 max-w-[390px] mx-auto bg-surface-container-lowest border-t border-outline-variant px-space-4 py-space-3 shadow-md z-30 flex items-center justify-between gap-3">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-label-md font-label-md text-on-surface-variant" id="cart-item-count">3 รายการในบิล</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-body-md font-body-md text-outline">รวม</span>
+<span class="text-price-total font-price-total text-secondary tabular-nums" id="cart-total-price">฿260</span>
+</div>
+</div>
+<!-- Action Button 48px height, amber-500 (#F59E0B) -->
+<button class="h-min-target px-5 bg-primary-container hover:brightness-95 text-on-primary-container font-label-lg rounded-xl shadow-sm active:scale-95 transition-transform flex items-center gap-2 flex-1 justify-center" onclick="submitOrder()">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+<span>ส่งรายการเข้าครัว</span>
+</button>
+</aside>
+<!-- BOTTOM NAVBAR (Shared Component JSON Blueprint) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-2 py-space-1 max-w-[390px] mx-auto border-t border-outline-variant bg-surface-container-lowest shadow-sm">
+<!-- Destination 1: สั่งอาหาร (Active) -->
+<a aria-current="page" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-space-3 py-space-1 min-h-min-target min-w-min-target active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="text-label-md font-label-md">สั่งอาหาร</span>
+</a>
+<!-- Destination 2: รายการบิล -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-space-3 py-space-1 min-h-min-target min-w-min-target hover:bg-surface-container active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="receipt">receipt</span>
+<span class="text-label-md font-label-md">รายการบิล</span>
+</a>
+<!-- Destination 3: สถานะโต๊ะ -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-space-3 py-space-1 min-h-min-target min-w-min-target hover:bg-surface-container active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="text-label-md font-label-md">สถานะโต๊ะ</span>
+</a>
+<!-- Destination 4: ตั้งค่ากะ -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-space-3 py-space-1 min-h-min-target min-w-min-target hover:bg-surface-container active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="text-label-md font-label-md">ตั้งค่ากะ</span>
+</a>
+</nav>
+</div>
+<!-- Interactive JavaScript Logic -->
+<script>
+    function switchState(state) {
+      // Hide all states
+      document.getElementById('view-normal').classList.add('hidden');
+      document.getElementById('view-loading').classList.add('hidden');
+      document.getElementById('view-empty').classList.add('hidden');
+      document.getElementById('view-error').classList.add('hidden');
+
+      // Reset state button styles
+      const states = ['normal', 'loading', 'empty', 'error'];
+      states.forEach(s => {
+        const btn = document.getElementById(`btn-state-${s}`);
+        if (btn) {
+          btn.className = 'px-2.5 py-1 text-label-md font-label-md rounded-lg text-on-surface-variant hover:bg-surface-container transition-all';
+        }
+      });
+
+      // Highlight active button
+      const activeBtn = document.getElementById(`btn-state-${state}`);
+      if (activeBtn) {
+        activeBtn.className = 'px-2.5 py-1 text-label-md font-label-md rounded-lg bg-primary-container text-on-primary-container transition-all';
+      }
+
+      // Show selected state view
+      const targetView = document.getElementById(`view-${state}`);
+      if (targetView) {
+        targetView.classList.remove('hidden');
+        if(state === 'empty' || state === 'error') {
+          targetView.classList.add('flex');
+        }
+      }
+    }
+
+    function changeQty(elementId, change) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      let currentVal = parseInt(el.textContent, 10);
+      currentVal += change;
+      if (currentVal < 0) currentVal = 0;
+      el.textContent = currentVal;
+
+      // Recalculate Mock Total
+      recalculateCart();
+    }
+
+    function recalculateCart() {
+      const q1 = parseInt(document.getElementById('qty-1')?.textContent || 0, 10);
+      const q2 = parseInt(document.getElementById('qty-2')?.textContent || 0, 10);
+      const q3 = parseInt(document.getElementById('qty-3')?.textContent || 0, 10);
+      
+      const totalCount = q1 + q2 + q3;
+      const totalCost = (q1 * 75) + (q2 * 150) + (q3 * 35);
+
+      const countDisplay = document.getElementById('cart-item-count');
+      const totalDisplay = document.getElementById('cart-total-price');
+
+      if (countDisplay) countDisplay.textContent = `${totalCount} รายการในบิล`;
+      if (totalDisplay) totalDisplay.textContent = `฿${totalCost.toLocaleString()}`;
+    }
+
+    function submitOrder() {
+      alert('ส่งรายการอาหารเข้าครัวพิมพ์ใบออเดอร์เรียบร้อยแล้ว');
+    }
+  </script>
+</body></html>

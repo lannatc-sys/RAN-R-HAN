@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D Platform - บันทึกกิจกรรมระบบและการตรวจสอบ (Audit Logs &amp; Security Diff)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: IBM Plex Sans & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error-container": "#93000a",
+          "on-primary-fixed": "#131b2e",
+          "on-secondary-container": "#684000",
+          "tertiary-fixed": "#6ffbbe",
+          "error": "#ba1a1a",
+          "primary-fixed": "#dae2fd",
+          "on-secondary-fixed-variant": "#653e00",
+          "background": "#f8f9ff",
+          "primary-container": "#131b2e",
+          "outline": "#76777d",
+          "primary": "#000000",
+          "on-secondary": "#ffffff",
+          "surface-container-highest": "#d3e4fe",
+          "secondary-container": "#fea619",
+          "tertiary-fixed-dim": "#4edea3",
+          "inverse-surface": "#213145",
+          "secondary-fixed": "#ffddb8",
+          "on-primary": "#ffffff",
+          "error-container": "#ffdad6",
+          "on-surface": "#0b1c30",
+          "on-tertiary-fixed-variant": "#005236",
+          "on-background": "#0b1c30",
+          "primary-fixed-dim": "#bec6e0",
+          "on-error": "#ffffff",
+          "tertiary": "#000000",
+          "surface-container": "#e5eeff",
+          "surface-variant": "#d3e4fe",
+          "surface-container-high": "#dce9ff",
+          "on-surface-variant": "#45464d",
+          "outline-variant": "#c6c6cd",
+          "surface-tint": "#565e74",
+          "on-tertiary": "#ffffff",
+          "surface-container-low": "#eff4ff",
+          "inverse-on-surface": "#eaf1ff",
+          "secondary-fixed-dim": "#ffb95f",
+          "on-tertiary-fixed": "#002113",
+          "on-tertiary-container": "#009668",
+          "on-primary-fixed-variant": "#3f465c",
+          "surface-container-lowest": "#ffffff",
+          "tertiary-container": "#002113",
+          "on-primary-container": "#7c839b",
+          "surface": "#f8f9ff",
+          "inverse-primary": "#bec6e0",
+          "on-secondary-fixed": "#2a1700",
+          "secondary": "#855300",
+          "surface-bright": "#f8f9ff",
+          "surface-dim": "#cbdbf5"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "topbar-height": "4rem",
+          "margin-mobile": "1rem",
+          "gutter-xl": "2rem",
+          "margin-desktop": "2rem",
+          "sidebar-width-expanded": "16.25rem",
+          "gutter-sm": "0.5rem",
+          "gutter-md": "1rem",
+          "sidebar-width-collapsed": "4.5rem",
+          "gutter-lg": "1.5rem",
+          "gutter-xs": "0.25rem"
+        },
+        "fontFamily": {
+          "label-md": ["IBM Plex Sans"],
+          "body-sm": ["Inter"],
+          "headline-xl-mobile": ["IBM Plex Sans"],
+          "body-lg": ["Inter"],
+          "body-md": ["Inter"],
+          "headline-sm": ["IBM Plex Sans"],
+          "headline-xl": ["IBM Plex Sans"],
+          "label-sm": ["IBM Plex Sans"],
+          "headline-lg": ["IBM Plex Sans"],
+          "data-mono": ["JetBrains Mono", "IBM Plex Sans", "monospace"],
+          "label-lg": ["IBM Plex Sans"],
+          "headline-md": ["IBM Plex Sans"]
+        },
+        "fontSize": {
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+          "headline-xl-mobile": ["26px", {"lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}],
+          "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+          "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "data-mono": ["13px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+          "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+          "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+        }
+      }
+    }
+  };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .code-diff-view {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-x-hidden min-h-screen selection:bg-secondary-container/30">
+<!-- ================= SIDEBAR (SideNavBar Shared Component) ================= -->
+<aside class="fixed top-0 left-0 h-screen w-sidebar-width-expanded z-40 bg-primary-container border-r border-outline-variant/20 flex flex-col justify-between p-4">
+<div>
+<!-- Brand & Subtext -->
+<div class="flex items-center gap-3 px-2 py-3 mb-5 border-b border-outline-variant/15">
+<div class="w-9 h-9 rounded-lg bg-secondary-container flex items-center justify-center text-primary-container font-bold text-headline-sm shadow-sm flex-shrink-0">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-headline-md font-headline-md font-bold text-on-primary tracking-tight truncate">Kin-D Platform</span>
+<span class="text-label-md font-label-md text-on-primary-container">Super Admin</span>
+</div>
+</div>
+<!-- Navigation Tabs: 7 items from JSON (Active tab: บันทึกระบบ) -->
+<nav class="space-y-1">
+<!-- ภาพรวม -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-label-md font-label-md">ภาพรวม</span>
+</a>
+<!-- ร้านค้า -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+<span class="text-label-md font-label-md">ร้านค้า</span>
+</a>
+<!-- บิล -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="text-label-md font-label-md">บิล</span>
+</a>
+<!-- แจ้งปัญหา -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+<span class="text-label-md font-label-md">แจ้งปัญหา</span>
+</a>
+<!-- ประกาศ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+<span class="text-label-md font-label-md">ประกาศ</span>
+</a>
+<!-- วิเคราะห์ -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="text-label-md font-label-md">วิเคราะห์</span>
+</a>
+<!-- บันทึกระบบ (ACTIVE) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container/20 text-on-primary font-semibold border-l-4 border-secondary-container transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px] text-secondary-container" style="font-variation-settings: 'FILL' 1;">terminal</span>
+<span class="text-label-md font-label-md">บันทึกระบบ</span>
+<span class="ml-auto w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer (from JSON) -->
+<div class="pt-4 border-t border-outline-variant/15 space-y-1.5">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container-high/10 text-on-primary">
+<span class="material-symbols-outlined text-[20px] text-secondary-fixed">shield_person</span>
+<div class="flex flex-col truncate">
+<span class="text-label-md font-label-md font-semibold truncate">Super Admin (Owner)</span>
+<span class="text-[10px] text-on-primary-container">root@kin-d.pos</span>
+</div>
+</div>
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-on-primary-container hover:text-error hover:bg-error-container/20 text-label-md font-label-md transition-colors">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span>ออกจากระบบ</span>
+</button>
+</div>
+</aside>
+<!-- ================= MAIN WRAPPER (Offset for fixed rail) ================= -->
+<div class="pl-sidebar-width-expanded min-h-screen flex flex-col">
+<!-- ================= TOP NAV BAR (TopNavBar Shared Component) ================= -->
+<header class="sticky top-0 right-0 z-30 h-topbar-height bg-surface-container-lowest border-b border-outline-variant/40 shadow-sm flex items-center justify-between px-gutter-lg">
+<!-- Search on Left & Product Context -->
+<div class="flex items-center gap-6 flex-1 max-w-2xl">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full h-[38px] pl-9 pr-4 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-body-md font-body-md text-on-surface placeholder:text-outline focus:border-on-surface focus:ring-2 focus:ring-secondary-container/30 transition-all outline-none" placeholder="ค้นหาไอพี, ผู้ใช้, Event ID (evt_...), หรือคำอธิบาย..." type="text"/>
+</div>
+<!-- Telemetry Status Link (from JSON navigation_links) -->
+<div class="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-label-md font-label-md">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+<span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+<span>ทุกระบบปกติ 99.9%</span>
+</div>
+</div>
+<!-- Right Trailing Controls -->
+<div class="flex items-center gap-3">
+<!-- Live Audit Sync Tag -->
+<div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low text-on-surface-variant border border-outline-variant/30 text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-secondary">lock</span>
+<span>SHA-256 Ledger Active</span>
+</div>
+<!-- Trailing Icon Actions (from JSON: notifications, help, settings) -->
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors relative" title="การแจ้งเตือน">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="ความช่วยเหลือ">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="ตั้งค่าระบบ">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<div class="h-6 w-px bg-outline-variant/40 mx-1"></div>
+<!-- Trailing Primary Action (from JSON: จัดการระบบ) -->
+<button class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-primary text-on-primary text-label-md font-label-md font-semibold hover:bg-inverse-surface active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[17px]">build</span>
+<span>จัดการระบบ</span>
+</button>
+<!-- Profile Avatar -->
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-md ring-2 ring-outline-variant/40 ml-1">
+          SA
+        </div>
+</div>
+</header>
+<!-- ================= PAGE CONTENT CANVAS ================= -->
+<main class="flex-1 p-6 md:p-8 space-y-6 max-w-[1720px] w-full mx-auto">
+<!-- 1. Header & Quick Summary (Corporate Precision) -->
+<section class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-outline-variant/40">
+<div>
+<div class="flex items-center gap-2 text-label-md font-label-md text-outline mb-1">
+<span>การจัดการความปลอดภัย</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface font-semibold">บันทึกกิจกรรมและตรวจสอบระบบ</span>
+</div>
+<h1 class="text-headline-xl font-headline-xl text-on-surface font-bold tracking-tight">
+            บันทึกกิจกรรมและการตรวจสอบระบบ (Audit &amp; Activity Logs)
+          </h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1 flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300">
+<span class="material-symbols-outlined text-[14px]">enhanced_encryption</span>
+              บันทึกความปลอดภัยเข้ารหัส SHA-256 ไม่สามารถแก้ไขได้
+            </span>
+<span>• ติดตามทุกการแทรกแซงและพฤติกรรมระดับ Super Admin, Merchant Owner และ POS Client</span>
+</p>
+</div>
+<!-- Quick Summary KPI Badges (Bento Strip) -->
+<div class="flex items-center gap-3 flex-wrap">
+<!-- Total Events -->
+<div class="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-4 py-2.5 shadow-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[20px]">format_list_bulleted</span>
+</div>
+<div>
+<span class="text-label-sm font-label-sm text-outline uppercase block">กิจกรรมทั้งหมดวันนี้</span>
+<span class="text-headline-md font-headline-md text-on-surface font-bold">1,482</span>
+</div>
+</div>
+<!-- Sensitive Events (Critical KPI) -->
+<div class="flex items-center gap-3 bg-rose-50/80 border border-rose-200 rounded-lg px-4 py-2.5 shadow-sm">
+<div class="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center text-rose-700">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+</div>
+<div>
+<span class="text-label-sm font-label-sm text-rose-700 uppercase block font-semibold">กิจกรรมอ่อนไหว / เสี่ยงสูง</span>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md text-rose-700 font-bold">14</span>
+<span class="text-label-sm font-label-sm text-rose-600 bg-rose-200/60 px-1.5 py-0.2 rounded font-medium">ตรวจตราเข้มงวด</span>
+</div>
+</div>
+</div>
+<!-- Export Actions -->
+<div class="flex items-center gap-2">
+<button class="h-[42px] flex items-center gap-2 px-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-on-surface text-label-md font-label-md font-semibold hover:bg-surface-container-low transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>ส่งออก JSON</span>
+</button>
+<button class="h-[42px] flex items-center gap-2 px-4 rounded-lg bg-primary text-on-primary text-label-md font-label-md font-semibold hover:bg-inverse-surface active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+<span>ส่งออก CSV Logs</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 2. Advanced Log Filters Bar -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4 shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+<!-- Filter 1: Store Dropdown -->
+<div class="lg:col-span-3 space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">storefront</span>
+<span>กรองตามร้านค้า (Store)</span>
+</label>
+<div class="relative">
+<select class="w-full h-[38px] pl-3 pr-8 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-body-md font-body-md text-on-surface focus:border-on-surface focus:ring-2 focus:ring-secondary-container/30 transition-all appearance-none cursor-pointer">
+<option value="all">ทุกสาขาและร้านค้า (All Stores)</option>
+<option value="kd-0012">ครัวรสเลิศ - สาขาสยาม (#KD-0012)</option>
+<option value="kd-0044">ส้มตำป้าสมศรี - อารีย์ (#KD-0044)</option>
+<option value="kd-0108">คาเฟ่ ดิมินู - ทองหล่อ (#KD-0108)</option>
+<option value="kd-0219">หมูกระทะพรีเมียม - เจริญกรุง (#KD-0219)</option>
+<option value="sys">ระบบส่วนกลาง Kin-D Core System</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Filter 2: Actor Type -->
+<div class="lg:col-span-2 space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">person</span>
+<span>ผู้กระทำ (Actor)</span>
+</label>
+<div class="relative">
+<select class="w-full h-[38px] pl-3 pr-8 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-body-md font-body-md text-on-surface focus:border-on-surface focus:ring-2 focus:ring-secondary-container/30 transition-all appearance-none cursor-pointer">
+<option value="all">ทั้งหมด (All Actors)</option>
+<option value="admin">[ADMIN] Super Admin</option>
+<option value="owner">[OWNER] เจ้าของร้าน</option>
+<option value="staff">[STAFF] พนักงานแคชเชียร์</option>
+<option value="system">[SYSTEM] รันอัตโนมัติ</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Filter 3: Action Category -->
+<div class="lg:col-span-3 space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">category</span>
+<span>ประเภทการกระทำ (Action Category)</span>
+</label>
+<div class="relative">
+<select class="w-full h-[38px] pl-3 pr-8 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-body-md font-body-md text-on-surface focus:border-on-surface focus:ring-2 focus:ring-secondary-container/30 transition-all appearance-none cursor-pointer font-medium">
+<option value="all">ทั้งหมด (All Action Categories)</option>
+<option class="text-rose-600 font-semibold" value="sensitive">⚠️ เฉพาะรายการอ่อนไหว (Sensitive Only)</option>
+<option value="impersonate">เข้าดูแทนร้าน (Impersonate / Ghost Login)</option>
+<option value="void">ยกเลิกบิล (Void Receipt)</option>
+<option value="price">แก้ราคา / ส่วนลด (Price Override)</option>
+<option value="menu">แก้ไขเมนู (Menu Edit)</option>
+<option value="login">เข้าสู่ระบบ (Login / Session)</option>
+<option value="billing">จัดการบิลแพ็กเกจ (Billing Admin)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Filter 4: Timestamp Range -->
+<div class="lg:col-span-3 space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+<span>ช่วงวันที่และเวลา (Timestamp)</span>
+</label>
+<div class="flex items-center gap-1">
+<div class="relative flex-1">
+<input class="w-full h-[38px] pl-3 pr-8 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-body-md font-body-md text-on-surface cursor-pointer focus:border-on-surface" readonly="" type="text" value="วันนี้ (12 ต.ค. 2569)"/>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[16px]">event</span>
+</div>
+<button class="h-[38px] px-2.5 rounded-lg border border-outline-variant/60 hover:bg-surface-container-low text-on-surface-variant text-label-sm font-label-sm">
+                24 ชม.
+              </button>
+</div>
+</div>
+<!-- Filter 5: Reset / Apply -->
+<div class="lg:col-span-1 flex gap-1">
+<button class="w-full h-[38px] flex items-center justify-center rounded-lg bg-surface-container-high/40 hover:bg-surface-container-high text-on-surface-variant transition-colors" title="ล้างตัวกรอง">
+<span class="material-symbols-outlined text-[20px]">filter_alt_off</span>
+</button>
+</div>
+</div>
+<!-- Filter Pills Bar -->
+<div class="flex items-center gap-2 mt-3 pt-3 border-t border-outline-variant/20 text-body-sm font-body-sm text-outline flex-wrap">
+<span class="text-label-sm font-label-sm font-semibold text-on-surface-variant">ตัวกรองปัจจุบัน:</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed text-label-sm font-label-sm border border-secondary-container/40">
+<span>ผู้กระทำ: ทั้งหมด</span>
+<button class="hover:text-error ml-0.5">×</button>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface text-label-sm font-label-sm border border-outline-variant/30">
+<span>สถานะ: เข้ารหัส SHA-256 Validated</span>
+</span>
+<span class="ml-auto text-label-sm font-label-sm text-outline">
+            พบข้อมูล <strong class="text-on-surface font-semibold">1,482</strong> รายการ (เรียงจากล่าสุด)
+          </span>
+</div>
+</section>
+<!-- 3. Monospace Data Table & Sensitive Rows Highlight -->
+<section class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg shadow-sm overflow-hidden flex flex-col">
+<!-- Table Control Toolbar -->
+<div class="px-4 py-3 bg-surface-container-lowest border-b border-outline-variant/30 flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<span class="text-label-md font-label-md text-on-surface font-semibold">Live Audit Stream</span>
+<span class="text-body-sm font-body-sm text-outline">| Socket: wss://audit.kin-d.internal/v1</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant">ระดับความเข้มงวด:</span>
+<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[11px] font-bold tracking-wider uppercase border border-rose-300">
+              AUDIT STRICT LEVEL 4
+            </span>
+<button class="p-1 rounded hover:bg-surface-container-low text-on-surface-variant transition-colors" title="รีเฟรช">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 border-b border-outline-variant/40 text-[11px] font-semibold text-slate-600 uppercase tracking-wider select-none">
+<th class="py-3 px-4 w-44">เวลา (Timestamp)</th>
+<th class="py-3 px-4 w-52">ร้านค้า (Store &amp; ID)</th>
+<th class="py-3 px-4 w-48">ผู้กระทำ (Actor)</th>
+<th class="py-3 px-4 w-36">การกระทำ (Action)</th>
+<th class="py-3 px-4 min-w-[320px]">รายละเอียดสรุป (Description)</th>
+<th class="py-3 px-4 w-44 font-data-mono">Client IP &amp; อุปกรณ์</th>
+<th class="py-3 px-3 w-28 text-center">ดู Diff / ลึก</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/25 text-body-sm font-body-sm">
+<!-- ROW 1: [SENSITIVE] Impersonate / Ghost Login (High Risk Red Tint) -->
+<tr class="bg-rose-50/75 border-l-4 border-rose-500 hover:bg-rose-100/60 transition-colors group cursor-pointer" onclick="openDiffDrawer('evt_8f93a02d', 'IMPERSONATE', 'Super Admin (tanawat.s)', 'ครัวรสเลิศ (#KD-0012)')">
+<td class="py-3.5 px-4 font-data-mono text-slate-800 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-rose-600">security_update_warning</span>
+<span>12 ต.ค. 69 14:38:12</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-slate-900 leading-tight">ครัวรสเลิศ</div>
+<div class="font-data-mono text-[11px] text-slate-500">#KD-0012 • สาขาสยาม</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wide uppercase font-data-mono shadow-xs">
+                      ADMIN SA
+                    </span>
+<span class="font-medium text-slate-900 truncate">tanawat.s (คุณธนวัฒน์)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-100 border border-rose-300 text-rose-800 text-label-sm font-label-sm font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                    IMPERSONATE
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="text-slate-900 font-medium leading-snug">แอดมินเข้าดูระบบแทนร้านค้า (Ghost Session Takeover)</div>
+<div class="text-rose-700 text-[11px] font-data-mono mt-0.5 flex items-center gap-1">
+<span>เหตุผล: "ช่วยเหลือแก้ไขระบบเครื่องพิมพ์เทอร์มัลบิลหน้าร้านขัดข้อง"</span>
+</div>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-[12px] text-slate-700 whitespace-nowrap">
+<div>124.122.45.10</div>
+<div class="text-[11px] text-slate-500">macOS 14.5 (Chrome)</div>
+</td>
+<td class="py-3.5 px-3 text-center">
+<button class="p-1.5 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-500 hover:text-white transition-all shadow-2xs group-hover:scale-105" title="เปิดดู JSON Diff">
+<span class="material-symbols-outlined text-[18px]">difference</span>
+</button>
+</td>
+</tr>
+<!-- ROW 2: [SENSITIVE] Void Receipt (High Risk Red Tint) -->
+<tr class="bg-rose-50/70 border-l-4 border-rose-500 hover:bg-rose-100/60 transition-colors group cursor-pointer" onclick="openDiffDrawer('evt_7c11f92e', 'VOID_RECEIPT', 'สมศรี มีทรัพย์ (Owner)', 'ส้มตำป้าสมศรี (#KD-0044)')">
+<td class="py-3.5 px-4 font-data-mono text-slate-800 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-rose-600">remove_shopping_cart</span>
+<span>12 ต.ค. 69 14:35:48</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-slate-900 leading-tight">ส้มตำป้าสมศรี</div>
+<div class="font-data-mono text-[11px] text-slate-500">#KD-0044 • อารีย์</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-amber-700 text-white font-bold text-[10px] tracking-wide uppercase font-data-mono">
+                      OWNER
+                    </span>
+<span class="font-medium text-slate-900 truncate">สมศรี มีทรัพย์</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-100 border border-rose-300 text-rose-800 text-label-sm font-label-sm font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                    VOID_RECEIPT
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="text-slate-900 font-medium leading-snug">ยกเลิกบิลสำเร็จรูป <span class="font-data-mono font-semibold text-slate-800">#A0042</span> (ยอด ฿890.00)</div>
+<div class="text-slate-600 text-[11px] font-data-mono mt-0.5">เหตุผล: "ลูกค้าขอยกเลิกและเปลี่ยนโต๊ะไปโซนห้องแอร์"</div>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-[12px] text-slate-700 whitespace-nowrap">
+<div>171.96.12.8</div>
+<div class="text-[11px] text-slate-500">iPad Pro 11" (POS-App)</div>
+</td>
+<td class="py-3.5 px-3 text-center">
+<button class="p-1.5 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-500 hover:text-white transition-all shadow-2xs group-hover:scale-105" title="เปิดดู JSON Diff">
+<span class="material-symbols-outlined text-[18px]">difference</span>
+</button>
+</td>
+</tr>
+<!-- ROW 3: [SENSITIVE] Price Change Override (High Risk Red Tint) -->
+<tr class="bg-rose-50/70 border-l-4 border-rose-500 hover:bg-rose-100/60 transition-colors group cursor-pointer" onclick="openDiffDrawer('evt_9a44b10f', 'PRICE_CHANGE', 'มนัส ค้าเจริญ (Staff)', 'ครัวรสเลิศ (#KD-0012)')">
+<td class="py-3.5 px-4 font-data-mono text-slate-800 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-rose-600">price_change</span>
+<span>12 ต.ค. 69 14:31:05</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-slate-900 leading-tight">ครัวรสเลิศ</div>
+<div class="font-data-mono text-[11px] text-slate-500">#KD-0012 • สาขาสยาม</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-slate-700 text-white font-bold text-[10px] tracking-wide uppercase font-data-mono">
+                      STAFF
+                    </span>
+<span class="font-medium text-slate-900 truncate">มนัส ค้าเจริญ (แคชเชียร์ 01)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-label-sm font-label-sm font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                    PRICE_CHANGE
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="text-slate-900 font-medium leading-snug">แก้ไขราคาขายเมนู "ข้าวกะเพราหมูกรอบพิเศษ"</div>
+<div class="text-slate-700 text-[11px] font-data-mono mt-0.5">
+                    ปรับราคา: <span class="line-through text-rose-600 font-semibold">฿65.00</span> ➔ <span class="text-emerald-700 font-bold">฿75.00</span> (บันทึกเข้าระบบ POS ทันที)
+                  </div>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-[12px] text-slate-700 whitespace-nowrap">
+<div>124.122.45.10</div>
+<div class="text-[11px] text-slate-500">Sunmi T2 Mini Terminal</div>
+</td>
+<td class="py-3.5 px-3 text-center">
+<button class="p-1.5 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-500 hover:text-white transition-all shadow-2xs group-hover:scale-105" title="เปิดดู JSON Diff">
+<span class="material-symbols-outlined text-[18px]">difference</span>
+</button>
+</td>
+</tr>
+<!-- ROW 4: Standard Action - Menu Edit (Standard Flat) -->
+<tr class="hover:bg-slate-50/80 transition-colors group cursor-pointer" onclick="openDiffDrawer('evt_6e129b02', 'MENU_UPDATE', 'ลลิตา ชื่นใจ (Owner)', 'คาเฟ่ ดิมินู (#KD-0108)')">
+<td class="py-3.5 px-4 font-data-mono text-slate-700 whitespace-nowrap">
+                  12 ต.ค. 69 14:26:19
+                </td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-slate-900 leading-tight">คาเฟ่ ดิมินู</div>
+<div class="font-data-mono text-[11px] text-slate-500">#KD-0108 • ทองหล่อ</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-amber-700 text-white font-bold text-[10px] tracking-wide uppercase font-data-mono">
+                      OWNER
+                    </span>
+<span class="font-medium text-slate-900 truncate">ลลิตา ชื่นใจ</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-800 text-label-sm font-label-sm font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                    MENU_UPDATE
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="text-slate-800 leading-snug">อัปเดตสถานะสต็อกเมนู: "Croissant Almond" เปลี่ยนเป็น หมดชั่วคราว (Out of Stock)</div>
+<div class="text-slate-500 text-[11px] font-data-mono mt-0.5">หมวดหมู่: Bakery &amp; Desserts</div>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-[12px] text-slate-700 whitespace-nowrap">
+<div>110.168.90.21</div>
+<div class="text-[11px] text-slate-500">iPhone 15 Pro (Safari)</div>
+</td>
+<td class="py-3.5 px-3 text-center">
+<button class="p-1.5 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-slate-800 hover:text-white transition-all shadow-2xs">
+<span class="material-symbols-outlined text-[18px]">data_object</span>
+</button>
+</td>
+</tr>
+<!-- ROW 5: Standard Action - Admin Billing Plan Extended (Elevated Audit) -->
+<tr class="hover:bg-slate-50/80 transition-colors group cursor-pointer" onclick="openDiffDrawer('evt_3d5511aa', 'BILLING_ADMIN', 'Super Admin (tanawat.s)', 'หมูกระทะพรีเมียม (#KD-0219)')">
+<td class="py-3.5 px-4 font-data-mono text-slate-700 whitespace-nowrap">
+                  12 ต.ค. 69 14:15:33
+                </td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-slate-900 leading-tight">หมูกระทะพรีเมียม</div>
+<div class="font-data-mono text-[11px] text-slate-500">#KD-0219 • เจริญกรุง</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] tracking-wide uppercase font-data-mono">
+                      ADMIN SA
+                    </span>
+<span class="font-medium text-slate-900 truncate">tanawat.s</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-800 text-label-sm font-label-sm font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                    BILLING_ADMIN
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="text-slate-800 leading-snug">ขยายวันหมดอายุแพ็กเกจ Enterprise POS เพิ่ม 30 วัน (Special SLA Extension)</div>
+<div class="text-slate-500 text-[11px] font-data-mono mt-0.5">อนุมัติโดย: Internal Request #TKT-88912</div>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-[12px] text-slate-700 whitespace-nowrap">
+<div>124.122.45.10</div>
+<div class="text-[11px] text-slate-500">Kin-D HQ Internal VPN</div>
+</td>
+<td class="py-3.5 px-3 text-center">
+<button class="p-1.5 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-slate-800 hover:text-white transition-all shadow-2xs">
+<span class="material-symbols-outlined text-[18px]">data_object</span>
+</button>
+</td>
+</tr>
+<!-- ROW 6: Standard Action - User Login Session -->
+<tr class="hover:bg-slate-50/80 transition-colors group">
+<td class="py-3.5 px-4 font-data-mono text-slate-700 whitespace-nowrap">
+                  12 ต.ค. 69 14:02:11
+                </td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-slate-900 leading-tight">ส้มตำป้าสมศรี</div>
+<div class="font-data-mono text-[11px] text-slate-500">#KD-0044 • อารีย์</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-slate-700 text-white font-bold text-[10px] tracking-wide uppercase font-data-mono">
+                      STAFF
+                    </span>
+<span class="font-medium text-slate-900 truncate">กิตติพงษ์ ยิ้มแย้ม</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-800 text-label-sm font-label-sm font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    LOGIN
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="text-slate-800 leading-snug">เข้าสู่ระบบสำเร็จผ่าน PIN 6 หลักบนเครื่อง POS Terminal ประจำเคาน์เตอร์ 2</div>
+<div class="text-slate-500 text-[11px] font-data-mono mt-0.5">Session ID: sess_90fbc281a</div>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-[12px] text-slate-700 whitespace-nowrap">
+<div>171.96.12.8</div>
+<div class="text-[11px] text-slate-500">Android POS (Sunmi D2s)</div>
+</td>
+<td class="py-3.5 px-3 text-center">
+<button class="p-1.5 rounded-md bg-white border border-slate-200 text-slate-400 hover:text-slate-700 transition-all shadow-2xs">
+<span class="material-symbols-outlined text-[18px]">info</span>
+</button>
+</td>
+</tr>
+<!-- ROW 7: Standard Action - Cash Drawer Opened -->
+<tr class="hover:bg-slate-50/80 transition-colors group">
+<td class="py-3.5 px-4 font-data-mono text-slate-700 whitespace-nowrap">
+                  12 ต.ค. 69 13:58:40
+                </td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-slate-900 leading-tight">ครัวรสเลิศ</div>
+<div class="font-data-mono text-[11px] text-slate-500">#KD-0012 • สาขาสยาม</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-slate-700 text-white font-bold text-[10px] tracking-wide uppercase font-data-mono">
+                      STAFF
+                    </span>
+<span class="font-medium text-slate-900 truncate">มนัส ค้าเจริญ</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-300 text-slate-800 text-label-sm font-label-sm font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    DRAWER_OPEN
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="text-slate-800 leading-snug">เปิดลิ้นชักเก็บเงินสดด้วยคำสั่ง Manual Open (ตรวจนับเงินทอนรอบบ่าย)</div>
+<div class="text-slate-500 text-[11px] font-data-mono mt-0.5">ยอดเงินสดในลิ้นชักเริ่มต้น: ฿3,000.00</div>
+</td>
+<td class="py-3.5 px-4 font-data-mono text-[12px] text-slate-700 whitespace-nowrap">
+<div>124.122.45.10</div>
+<div class="text-[11px] text-slate-500">Sunmi T2 Mini Terminal</div>
+</td>
+<td class="py-3.5 px-3 text-center">
+<button class="p-1.5 rounded-md bg-white border border-slate-200 text-slate-400 hover:text-slate-700 transition-all shadow-2xs">
+<span class="material-symbols-outlined text-[18px]">info</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- 6. Infinite Scroll Status Footer -->
+<div class="px-6 py-4 bg-slate-50/90 border-t border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-2.5 text-body-sm font-body-sm text-slate-600">
+<span class="material-symbols-outlined text-[18px] text-secondary animate-spin">progress_activity</span>
+<span class="font-medium">กำลังโหลดรายการเพิ่มเติมอัตโนมัติเมื่อเลื่อนลง (Infinite Scroll Mode)...</span>
+</div>
+<div class="flex items-center gap-4 text-label-sm font-label-sm text-slate-500">
+<span>แสดงผล <strong class="text-slate-900 font-semibold">50</strong> จาก <strong class="text-slate-900 font-semibold">1,482</strong> รายการ</span>
+<div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+<div class="w-[18%] h-full bg-secondary-container"></div>
+</div>
+<button class="text-secondary hover:underline font-semibold flex items-center gap-1">
+<span>โหลดทันที 100 รายการ</span>
+<span class="material-symbols-outlined text-[14px]">south</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- ================= 5. SLIDE-OVER SHEET: JSON BEFORE/AFTER DIFF (DRAWER) ================= -->
+<!-- Backdrop scrim -->
+<div class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden transition-opacity duration-200" id="diffDrawerBackdrop" onclick="closeDiffDrawer()"></div>
+<!-- Drawer Canvas (Width: 540px) -->
+<div class="fixed top-0 right-0 h-full w-full max-w-[560px] bg-surface-container-lowest z-50 shadow-2xl border-l border-outline-variant/40 flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out" id="diffDrawer">
+<!-- Drawer Header -->
+<div class="px-6 py-4 border-b border-outline-variant/40 bg-slate-900 text-white flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">difference</span>
+</div>
+<div>
+<h2 class="text-headline-sm font-headline-sm font-bold text-white">รายละเอียดการตรวจสอบ (Audit Inspector)</h2>
+<span class="text-data-mono text-[11px] text-slate-400 font-mono" id="drawerEventId">Event ID: evt_8f93a02d</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors" onclick="closeDiffDrawer()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Body -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+<!-- Metadata Context Box -->
+<div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2.5 text-body-sm font-body-sm">
+<div class="text-label-sm font-label-sm uppercase font-bold text-slate-500 tracking-wider">บริบทของเหตุการณ์ (Incident Context)</div>
+<div class="grid grid-cols-2 gap-3 pt-1">
+<div>
+<span class="text-slate-500 text-[11px] block">ผู้กระทำ (Actor):</span>
+<span class="font-semibold text-slate-900 font-data-mono" id="drawerActor">Super Admin (tanawat.s)</span>
+</div>
+<div>
+<span class="text-slate-500 text-[11px] block">ร้านค้าปลายทาง:</span>
+<span class="font-semibold text-slate-900" id="drawerStore">ครัวรสเลิศ (#KD-0012)</span>
+</div>
+<div>
+<span class="text-slate-500 text-[11px] block">ประเภทการกระทำ:</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300" id="drawerActionType">
+              IMPERSONATE
+            </span>
+</div>
+<div>
+<span class="text-slate-500 text-[11px] block">ที่อยู่ไอพี &amp; ตำแหน่ง:</span>
+<span class="font-data-mono text-[12px] text-slate-800">124.122.45.10 (Bangkok, TH)</span>
+</div>
+</div>
+<div class="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
+<span>SHA-256 Checksum: <code class="font-mono text-slate-700 font-semibold">9e4c8f...21a0</code></span>
+<span class="text-emerald-700 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+            Ledger Signature Verified
+          </span>
+</div>
+</div>
+<!-- Visual JSON Diff Viewer (Git Diff Style) -->
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md font-semibold text-slate-900 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-secondary">compare_arrows</span>
+<span>การเปรียบเทียบสถานะข้อมูล (State Diff Comparison)</span>
+</span>
+<span class="text-[11px] font-data-mono text-slate-500">format: JSON RFC 6902</span>
+</div>
+<!-- Git Diff Frame -->
+<div class="border border-slate-300 rounded-lg overflow-hidden font-data-mono text-[12px] bg-slate-950 text-slate-200 shadow-inner">
+<!-- Diff Toolbar -->
+<div class="bg-slate-900 px-3 py-1.5 border-b border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Previous State (-)</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Current State (+)</span>
+</div>
+<span class="font-mono text-[10px] text-slate-500">line diff: 8 changes</span>
+</div>
+<!-- Code Diff Body -->
+<div class="p-3 code-diff-view space-y-0.5 overflow-x-auto">
+<div class="text-slate-500">{</div>
+<div class="text-slate-400 pl-4">"entity_id": "prod_krapao_crispy_01",</div>
+<div class="text-slate-400 pl-4">"store_id": "KD-0012",</div>
+<!-- Red Subtractions -->
+<div class="bg-rose-950/80 text-rose-300 px-2 py-0.5 -mx-3 border-l-2 border-rose-500 flex items-center gap-2">
+<span class="select-none text-rose-400 w-3">-</span>
+<span>"unit_price": 65.00,</span>
+</div>
+<div class="bg-rose-950/80 text-rose-300 px-2 py-0.5 -mx-3 border-l-2 border-rose-500 flex items-center gap-2">
+<span class="select-none text-rose-400 w-3">-</span>
+<span>"status": "COMPLETED",</span>
+</div>
+<div class="bg-rose-950/80 text-rose-300 px-2 py-0.5 -mx-3 border-l-2 border-rose-500 flex items-center gap-2">
+<span class="select-none text-rose-400 w-3">-</span>
+<span>"is_locked_by_admin": false,</span>
+</div>
+<!-- Green Additions -->
+<div class="bg-emerald-950/80 text-emerald-300 px-2 py-0.5 -mx-3 border-l-2 border-emerald-400 flex items-center gap-2">
+<span class="select-none text-emerald-400 w-3">+</span>
+<span>"unit_price": 75.00,</span>
+</div>
+<div class="bg-emerald-950/80 text-emerald-300 px-2 py-0.5 -mx-3 border-l-2 border-emerald-400 flex items-center gap-2">
+<span class="select-none text-emerald-400 w-3">+</span>
+<span>"status": "VOIDED",</span>
+</div>
+<div class="bg-emerald-950/80 text-emerald-300 px-2 py-0.5 -mx-3 border-l-2 border-emerald-400 flex items-center gap-2">
+<span class="select-none text-emerald-400 w-3">+</span>
+<span>"is_locked_by_admin": true,</span>
+</div>
+<div class="bg-emerald-950/80 text-emerald-300 px-2 py-0.5 -mx-3 border-l-2 border-emerald-400 flex items-center gap-2">
+<span class="select-none text-emerald-400 w-3">+</span>
+<span>"void_reason": "ลูกค้าขอเปลี่ยนเป็นกลับบ้าน / คีย์เมนูผิด",</span>
+</div>
+<div class="bg-emerald-950/80 text-emerald-300 px-2 py-0.5 -mx-3 border-l-2 border-emerald-400 flex items-center gap-2">
+<span class="select-none text-emerald-400 w-3">+</span>
+<span>"override_authorized_by": "tanawat.s@kin-d.internal"</span>
+</div>
+<div class="text-slate-400 pl-4">"timestamp": 1728722292,</div>
+<div class="text-slate-400 pl-4">"sync_state": "COMMITTED"</div>
+<div class="text-slate-500">}</div>
+</div>
+</div>
+</div>
+<!-- Security Advisory Note -->
+<div class="p-3.5 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-[20px] text-amber-700 flex-shrink-0 mt-0.5">policy</span>
+<div class="text-body-sm font-body-sm text-amber-900 leading-relaxed">
+<strong>ประกาศนโยบายความปลอดภัย:</strong> การดำเนินการประเภท Ghost Session หรือ Price Override จะถูกจัดเก็บถาวรใน Immutable Append-Only Ledger พร้อมสำเนาแจ้งเตือนอัตโนมัติไปยัง Security Ops Team
+        </div>
+</div>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="px-6 py-4 bg-slate-50 border-t border-outline-variant/30 flex items-center justify-between gap-3">
+<button class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-outline-variant/60 text-slate-800 text-label-md font-label-md font-semibold hover:bg-slate-100 transition-colors shadow-xs" onclick="copyDiffJson()">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+<span id="copyBtnText">คัดลอก JSON Raw Data</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-label-md font-label-md font-semibold transition-colors shadow-sm" onclick="closeDiffDrawer()">
+          ปิดหน้าต่าง
+        </button>
+</div>
+</div>
+</div>
+<!-- Inline Interaction Logic -->
+<script>
+    function openDiffDrawer(eventId, action, actor, store) {
+      document.getElementById('drawerEventId').innerText = 'Event ID: ' + eventId;
+      document.getElementById('drawerActor').innerText = actor;
+      document.getElementById('drawerStore').innerText = store;
+      document.getElementById('drawerActionType').innerText = action;
+      
+      const backdrop = document.getElementById('diffDrawerBackdrop');
+      const drawer = document.getElementById('diffDrawer');
+      
+      backdrop.classList.remove('hidden');
+      setTimeout(() => {
+        backdrop.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+      }, 10);
+    }
+
+    function closeDiffDrawer() {
+      const backdrop = document.getElementById('diffDrawerBackdrop');
+      const drawer = document.getElementById('diffDrawer');
+      
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.remove('opacity-100');
+      setTimeout(() => {
+        backdrop.classList.add('hidden');
+      }, 300);
+    }
+
+    function copyDiffJson() {
+      const sample = JSON.stringify({
+        "event_id": "evt_8f93a02d",
+        "actor": "tanawat.s (Super Admin)",
+        "action": "IMPERSONATE",
+        "diff": {
+          "before": { "unit_price": 65.00, "status": "COMPLETED" },
+          "after": { "unit_price": 75.00, "status": "VOIDED", "void_reason": "ลูกค้าขอเปลี่ยนเป็นกลับบ้าน" }
+        }
+      }, null, 2);
+
+      navigator.clipboard.writeText(sample).then(() => {
+        const btn = document.getElementById('copyBtnText');
+        const orig = btn.innerText;
+        btn.innerText = 'คัดลอกสำเร็จ!';
+        setTimeout(() => {
+          btn.innerText = orig;
+        }, 1800);
+      });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeDiffDrawer();
+      }
+    });
+  </script>
+</body></html>

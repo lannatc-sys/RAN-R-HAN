@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ตั้งค่าร้าน (Store Settings) - ครัวรสเลิศ POS</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-container": "#fd651e",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "on-primary-container": "#613b00",
+            "surface-dim": "#dbdad9",
+            "on-secondary": "#ffffff",
+            "tertiary": "#0053db",
+            "surface-container": "#efeded",
+            "inverse-on-surface": "#f2f0f0",
+            "surface-container-low": "#f5f3f3",
+            "error": "#ba1a1a",
+            "background": "#fbf9f9",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "inverse-primary": "#ffb95f",
+            "on-primary-fixed": "#2a1700",
+            "tertiary-container": "#94aeff",
+            "inverse-surface": "#303031",
+            "surface": "#fbf9f9",
+            "on-tertiary": "#ffffff",
+            "surface-bright": "#fbf9f9",
+            "on-primary": "#ffffff",
+            "surface-variant": "#e3e2e2",
+            "primary": "#855300",
+            "surface-tint": "#855300",
+            "on-tertiary-container": "#003ba1",
+            "outline-variant": "#d8c3ad",
+            "primary-container": "#f59e0b",
+            "on-surface-variant": "#534434",
+            "on-background": "#1b1c1c",
+            "outline": "#867461",
+            "on-surface": "#1b1c1c",
+            "surface-container-high": "#e9e8e7",
+            "on-error": "#ffffff",
+            "on-secondary-container": "#571a00",
+            "on-primary-fixed-variant": "#653e00",
+            "primary-fixed": "#ffddb8",
+            "on-secondary-fixed": "#370e00",
+            "secondary-fixed-dim": "#ffb599",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "secondary": "#a73a00",
+            "on-tertiary-fixed": "#00174b",
+            "tertiary-fixed": "#dbe1ff",
+            "secondary-fixed": "#ffdbce",
+            "surface-container-highest": "#e3e2e2",
+            "primary-fixed-dim": "#ffb95f",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+            "surface-container-lowest": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-1": "4px",
+            "space-6": "24px",
+            "grid-base": "4px",
+            "space-4": "16px",
+            "space-3": "12px",
+            "space-5": "20px",
+            "card-p-mobile": "16px",
+            "min-target": "48px",
+            "space-8": "32px",
+            "space-2": "8px"
+          },
+          "fontFamily": {
+            "price-total": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-display": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-strong": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-sm": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-md": ["\"IBM Plex Sans Thai\", sans-serif"]
+          },
+          "fontSize": {
+            "price-total": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Tab Transitions */
+    .tab-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .tab-content.active {
+      display: block;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- ==================== SIDE NAVBAR (Desktop Shell Anchor) ==================== -->
+<aside class="fixed top-0 left-0 h-screen w-64 z-40 p-4 bg-surface-container-lowest border-r border-outline-variant shadow-sm flex flex-col justify-between">
+<!-- Brand & Store Info -->
+<div>
+<div class="flex items-center gap-3 px-2 py-2 mb-6">
+<div class="w-11 h-11 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary font-bold shadow-sm">
+<span class="material-symbols-outlined text-3xl" data-icon="restaurant" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<div class="flex flex-col">
+<h1 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight">ครัวรสเลิศ POS</h1>
+<span class="font-label-md text-label-md text-on-surface-variant">สาขา สยามสแควร์</span>
+</div>
+</div>
+<!-- Quick Action CTA -->
+<button class="w-full mb-6 py-2.5 px-4 bg-surface-container-low hover:bg-surface-container transition-colors rounded-xl border border-outline-variant flex items-center justify-center gap-2 font-label-md text-label-md text-on-surface active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="add_circle">add_circle</span>
+<span>เปิดโต๊ะใหม่</span>
+</button>
+<!-- Main Navigation Tabs -->
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>แดชบอร์ด</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="soup_kitchen">soup_kitchen</span>
+<span>ออเดอร์ &amp; ครัว</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="table_restaurant">table_restaurant</span>
+<span>โต๊ะ &amp; บิล</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span>เมนูอาหาร</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>รายงานยอดขาย</span>
+</a>
+</nav>
+</div>
+<!-- Footer Nav Items (With Active State on ตั้งค่าระบบ) -->
+<div class="pt-4 border-t border-outline-variant space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md shadow-sm active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-bold">ตั้งค่าระบบ</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-error hover:bg-error-container/30 transition-colors font-label-md text-label-md active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>ออกจากระบบ</span>
+</a>
+</div>
+</aside>
+<!-- ==================== MAIN WRAPPER (Offset for Sidebar) ==================== -->
+<div class="ml-64 flex flex-col min-h-screen pb-28">
+<!-- TopNavBar (Fixed / Sticky Header) -->
+<header class="sticky top-0 z-30 flex items-center justify-between px-8 py-3.5 w-full bg-surface-container-lowest border-b border-outline-variant shadow-sm">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
+<span class="text-on-surface-variant">การตั้งค่าระบบ</span>
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+<span class="font-bold text-on-surface">ข้อมูลร้านและการทำงาน</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+<span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+          สาขา สยามสแควร์ (เปิดบริการ)
+        </span>
+</div>
+<!-- Trailing Action Cluster & User Profile -->
+<div class="flex items-center gap-4">
+<!-- Notification & Bills Actions -->
+<div class="flex items-center gap-1">
+<button aria-label="แจ้งเตือน" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors relative active:scale-95" type="button">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-secondary-container rounded-full"></span>
+</button>
+<button aria-label="ประวัติบิล" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</button>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant"></div>
+<!-- Manager Profile -->
+<div class="flex items-center gap-3 pl-1">
+<div class="text-right">
+<p class="font-label-md text-label-md font-bold text-on-surface leading-tight">สมชาย ใจดีเลิศ</p>
+<p class="text-xs text-on-surface-variant">เจ้าของร้าน (Admin)</p>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container bg-surface-container ring-2 ring-primary-container/20">
+<img class="w-full h-full object-cover" data-alt="Close up portrait photograph of a friendly Thai male restaurant owner in his late 40s wearing an elegant neat dark apron over an earth tone casual shirt standing proudly in his warmly lit modern Thai restaurant kitchen ambiance with soft bokeh background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBadx7Zv66kO1yrnmrOGgRXQNey5c6DIaoiA3WF4eA6czn7f8s0NZ3Y_zjDPCgefZP_E5E3H1V1wQAej3NXPg57P6QzWeHa9mLI7R3W4klccgTaB74V4oBoJUElwXnJPt_5-Q6Xng13dNnuPD45PykgUQ3QZlToGhxEFEiozcen9KCj2MNoDF_Z-aNs1PSw-pa7TBWhaoB6gGJXgbSqWq1b0fvAxwaTZJncRz8KqjOIEbAar6eTTXhD"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="p-8 max-w-7xl w-full mx-auto space-y-6">
+<!-- Page Header Banner -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+<div>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight flex items-center gap-3">
+<span>ตั้งค่าร้านและระบบ (Store &amp; System Settings)</span>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-container/20 text-primary border border-primary-container/40">Kin-D v2.4</span>
+</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            จัดการข้อมูลร้าน ช่องทางรับเงิน ตรวจสอบสลิปอัตโนมัติ และการเปิด-ปิดระบบสั่งอาหารออนไลน์แบบเรียลไทม์
+          </p>
+</div>
+<!-- Quick Branch Status Indicator -->
+<div class="flex items-center gap-3 bg-surface-container-lowest px-4 py-2.5 rounded-xl border border-outline-variant shadow-sm">
+<div class="flex flex-col text-right">
+<span class="text-xs text-on-surface-variant">สถานะเชื่อมต่อคลาวด์</span>
+<span class="font-label-md text-label-md font-bold text-emerald-700 flex items-center gap-1 justify-end">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ปกติ (99.98%)
+            </span>
+</div>
+</div>
+</div>
+<!-- Layout Grid: Vertical Tabs (Left) + Detailed Panel Canvas (Right) -->
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Left Side: Settings Navigation Tabs -->
+<div class="col-span-12 lg:col-span-3 space-y-2 sticky top-24">
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-2 shadow-sm space-y-1">
+<button class="tab-btn w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all bg-primary-container text-on-primary-container font-label-lg text-label-lg shadow-sm" id="btn-tab-general" onclick="switchTab('tab-general')">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span>ข้อมูลทั่วไปของร้าน</span>
+</div>
+<span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="tab-btn w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all text-on-surface-variant hover:bg-surface-container-low font-label-lg text-label-lg" id="btn-tab-payment" onclick="switchTab('tab-payment')">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span>ช่องทางชำระเงิน &amp; พร้อมเพย์</span>
+</div>
+<span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="tab-btn w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all text-on-surface-variant hover:bg-surface-container-low font-label-lg text-label-lg" id="btn-tab-verification" onclick="switchTab('tab-verification')">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<div class="flex items-center gap-2">
+<span>ตรวจสลิปอัตโนมัติ</span>
+<span class="bg-secondary-container text-on-secondary px-1.5 py-0.5 rounded text-[11px] font-bold tracking-wide">AI</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="tab-btn w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all text-on-surface-variant hover:bg-surface-container-low font-label-lg text-label-lg" id="btn-tab-ordering" onclick="switchTab('tab-ordering')">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span>ระบบสั่งอาหาร &amp; ครัว</span>
+</div>
+<span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- Quick Tip Card -->
+<div class="bg-surface-container-low rounded-2xl border border-outline-variant p-4 text-on-surface-variant space-y-2">
+<div class="flex items-center gap-2 text-primary font-bold font-label-md text-label-md">
+<span class="material-symbols-outlined text-xl" data-icon="lightbulb">lightbulb</span>
+<span>คำแนะนำการใช้งาน</span>
+</div>
+<p class="font-body-md text-body-md text-xs leading-relaxed text-on-surface-variant">
+              การปรับเปลี่ยนเวลาเปิด-ปิดร้าน หรือการตั้งค่าพร้อมเพย์ จะมีผลทันทีต่อหน้าเว็บ QR Menu ของลูกค้าที่กำลังเปิดดูอยู่
+            </p>
+</div>
+</div>
+<!-- Right Side: Tab Contents Canvas -->
+<div class="col-span-12 lg:col-span-9 space-y-6">
+<!-- ================= TAB 1: ข้อมูลร้าน ================= -->
+<section class="tab-content active space-y-6" id="tab-general">
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-6 shadow-sm">
+<div class="border-b border-outline-variant pb-4 mb-6">
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">ข้อมูลพื้นฐานของร้านค้า</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">ข้อมูลนี้จะถูกพิมพ์ลงบนใบเสร็จรับเงิน และหน้าแรกของระบบ QR สั่งอาหาร</p>
+</div>
+<!-- Logo Upload Section -->
+<div class="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-outline-variant">
+<div class="relative group">
+<div class="w-24 h-24 rounded-full overflow-hidden border-2 border-primary-container bg-surface-container-low flex items-center justify-center p-1 shadow-sm">
+<img class="w-full h-full object-cover rounded-full" data-alt="A clean minimalist modern graphic vector logo of a Thai restaurant featuring an amber golden wok spatula and fork spoon inside a circular emblem high resolution warm appetizing design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8UdajrOPZ1kK3Pie9qRJ02W2MxvI5nHfOSzZk5DF_nQeLb3H5aHL23Lw3jX2SJhpf51eS2BoApI4xFmHYMGwwLAvvmkuBliH-8gkoNRmUli86mzOSey-NoCAwnGhHBBa7Mp2nY4lRuTJX3L8UA_kkZUhGGXFmA9ftT7KUSeAqy-vHC0jK_AlXDG5rlYrxj-t7dFFGb3xs9CjaLkIEYOF0c_RI2vtCklp8Yg6CQ-DKd-rJuxq74TCP"/>
+</div>
+<button class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary-container hover:bg-amber-600 text-on-primary-container flex items-center justify-center shadow-md transition-transform active:scale-90 border-2 border-white" title="เปลี่ยนรูปโลโก้" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="photo_camera">photo_camera</span>
+</button>
+</div>
+<div class="text-center sm:text-left space-y-1">
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">โลโก้ประจำร้าน</h4>
+<p class="text-xs text-on-surface-variant">รองรับไฟล์ PNG, JPG ขนาดแนะนำ 500x500 พิกเซล (ไม่เกิน 2MB)</p>
+<div class="flex items-center gap-2 pt-2">
+<button class="px-3.5 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container-low text-xs font-semibold text-on-surface transition-colors" type="button">อัปโหลดรูปใหม่</button>
+<button class="px-3.5 py-1.5 rounded-lg hover:bg-error-container/30 text-xs font-semibold text-error transition-colors" type="button">ลบรูป</button>
+</div>
+</div>
+</div>
+<!-- General Store Form -->
+<form class="space-y-5 pt-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div class="space-y-1.5 md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface font-semibold flex items-center justify-between">
+<span>ชื่อร้านอาหาร <span class="text-error">*</span></span>
+<span class="text-xs text-on-surface-variant font-normal">แสดงบนหัวบิลและหน้าร้าน</span>
+</label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-body-md text-body-md outline-none transition-all" type="text" value="ครัวรสเลิศ Kin-D สาขา สยามสแควร์"/>
+</div>
+<div class="space-y-1.5 md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface font-semibold">
+                      คำโปรยสั้นๆ (Slogan / Header Subtext)
+                    </label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-body-md text-body-md outline-none transition-all" type="text" value="อาหารไทยรสชาติต้นตำรับ วัตถุดิบสดใหม่ทุกวัน ใส่ใจทุกจานเหมือนคนในครอบครัว"/>
+</div>
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold">เบอร์โทรศัพท์ร้าน (หลัก)</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-on-surface-variant text-xl" data-icon="call">call</span>
+<input class="w-full h-12 pl-11 pr-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-body-md text-body-md outline-none transition-all" type="tel" value="02-123-4567"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold">เบอร์มือถือผู้จัดการร้าน</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-on-surface-variant text-xl" data-icon="smartphone">smartphone</span>
+<input class="w-full h-12 pl-11 pr-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-body-md text-body-md outline-none transition-all" type="tel" value="089-999-8888"/>
+</div>
+</div>
+<div class="space-y-1.5 md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface font-semibold">ที่อยู่ร้าน (แสดงท้ายใบเสร็จรับเงิน)</label>
+<textarea class="w-full p-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-body-md text-body-md outline-none transition-all resize-none" rows="3">เลขที่ 123/4 ซอยสยามสแควร์ 3 แขวงปทุมวัน เขตปทุมวัน กรุงเทพมหานคร 10330</textarea>
+</div>
+</div>
+<!-- Business Hours Section -->
+<div class="pt-4 border-t border-outline-variant space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">เวลาเปิด - ปิดทำการประจำวัน</h4>
+<p class="text-xs text-on-surface-variant">ระบบจะแจ้งเตือนลูกค้าอัตโนมัติหากสั่งอาหารนอกเวลาให้บริการ</p>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<span class="text-xs font-semibold text-on-surface-variant">เวลาเปิดร้าน</span>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-on-surface-variant text-xl" data-icon="schedule">schedule</span>
+<input class="w-full h-12 pl-11 pr-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 font-body-strong text-body-strong" type="time" value="10:00"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<span class="text-xs font-semibold text-on-surface-variant">เวลาปิดร้าน</span>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-on-surface-variant text-xl" data-icon="lock_clock">lock_clock</span>
+<input class="w-full h-12 pl-11 pr-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 font-body-strong text-body-strong" type="time" value="22:00"/>
+</div>
+</div>
+</div>
+<!-- Operating Days Toggle -->
+<div class="space-y-2 pt-2">
+<span class="text-xs font-semibold text-on-surface-variant">วันเปิดทำการ</span>
+<div class="flex flex-wrap gap-2">
+<label class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-container bg-primary-container/10 text-on-primary-container font-label-md text-label-md cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span>จันทร์</span>
+</label>
+<label class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-container bg-primary-container/10 text-on-primary-container font-label-md text-label-md cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span>อังคาร</span>
+</label>
+<label class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-container bg-primary-container/10 text-on-primary-container font-label-md text-label-md cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span>พุธ</span>
+</label>
+<label class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-container bg-primary-container/10 text-on-primary-container font-label-md text-label-md cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span>พฤหัสบดี</span>
+</label>
+<label class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-container bg-primary-container/10 text-on-primary-container font-label-md text-label-md cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span>ศุกร์</span>
+</label>
+<label class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-container bg-primary-container/10 text-on-primary-container font-label-md text-label-md cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span>เสาร์</span>
+</label>
+<label class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-container bg-primary-container/10 text-on-primary-container font-label-md text-label-md cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container" type="checkbox"/>
+<span>อาทิตย์</span>
+</label>
+</div>
+</div>
+</div>
+</form>
+</div>
+</section>
+<!-- ================= TAB 2: ช่องทางชำระเงิน & พร้อมเพย์ ================= -->
+<section class="tab-content space-y-6" id="tab-payment">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+<!-- Left Column: Payment Config Form -->
+<div class="xl:col-span-7 bg-surface-container-lowest rounded-2xl border border-outline-variant p-6 shadow-sm space-y-6">
+<div class="border-b border-outline-variant pb-4">
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">การตั้งค่าช่องทางรับเงิน</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">เปิด-ปิดรูปแบบการรับชำระเงินที่ต้องการแสดงในหน้าคิดเงินและ QR ลูกค้า</p>
+</div>
+<!-- Toggles for Payment Types -->
+<div class="space-y-4">
+<!-- Cash Toggle -->
+<div class="flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low/40">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">รับชำระเงินสดหน้าร้าน</h4>
+<p class="text-xs text-on-surface-variant">พนักงานสามารถทอนเงินสดและเปิดลิ้นชักเก็บเงินได้</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+<!-- PromptPay QR Toggle -->
+<div class="flex items-center justify-between p-4 rounded-xl border-2 border-primary-container bg-primary-container/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">รับชำระผ่าน PromptPay QR</h4>
+<p class="text-xs text-on-surface-variant">สร้าง QR Code พร้อมยอดเงินแบบไดนามิกให้สแกนจ่ายได้ทันที</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+</div>
+<!-- PromptPay Details Config -->
+<div class="space-y-4 pt-4 border-t border-outline-variant">
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">ข้อมูลบัญชีพร้อมเพย์สำหรับสร้าง QR Code</h4>
+<!-- Account Type Radio Cards -->
+<div class="space-y-2">
+<span class="text-xs font-semibold text-on-surface-variant">ประเภทบัญชีพร้อมเพย์</span>
+<div class="grid grid-cols-2 gap-3">
+<label class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-primary-container bg-primary-container/10 cursor-pointer">
+<input checked="" class="text-primary-container focus:ring-primary-container" name="pp_type" type="radio"/>
+<div>
+<p class="font-label-md text-label-md font-bold text-on-surface">เบอร์โทรศัพท์มือถือ</p>
+<p class="text-[11px] text-on-surface-variant">(08X-XXX-XXXX)</p>
+</div>
+</label>
+<label class="flex items-center gap-3 p-3.5 rounded-xl border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low cursor-pointer">
+<input class="text-primary-container focus:ring-primary-container" name="pp_type" type="radio"/>
+<div>
+<p class="font-label-md text-label-md font-bold text-on-surface">เลขบัตรประชาชน / นิติบุคคล</p>
+<p class="text-[11px] text-on-surface-variant">(13 หลัก)</p>
+</div>
+</label>
+</div>
+</div>
+<!-- PromptPay Number -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold">หมายเลขพร้อมเพย์ (PromptPay ID)</label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-headline-sm text-headline-sm tracking-wider font-bold" id="input-pp-number" type="text" value="089-123-4567"/>
+</div>
+<!-- Account Holder Name -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold">ชื่อบัญชีธนาคาร / ชื่อร้านที่ปรากฏบนสลิป</label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-body-md text-body-md" id="input-pp-name" type="text" value="ครัวรสเลิศ สยาม (นายสมชาย จ.)"/>
+<p class="text-xs text-on-surface-variant">ระบุให้ตรงกับชื่อบัญชีจริง เพื่อให้ระบบ AI เทียบชื่อผู้รับเงินบนสลิปได้อย่างแม่นยำ</p>
+</div>
+<!-- Bill Note -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold">บันทึกช่วยจำท้ายใบเสร็จรับเงิน</label>
+<input class="w-full h-12 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-body-md text-body-md" type="text" value="ขอบพระคุณที่อุดหนุนครัวรสเลิศ ยินดีให้บริการทุกโอกาส"/>
+</div>
+</div>
+</div>
+<!-- Right Column: Live QR Preview Card -->
+<div class="xl:col-span-5 space-y-4">
+<div class="bg-[#0f2444] text-white rounded-3xl p-6 shadow-md border border-blue-900 flex flex-col items-center text-center relative overflow-hidden">
+<!-- Top Banner Badges -->
+<div class="w-full flex items-center justify-between mb-4">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-primary-container text-on-primary-container">
+<span class="w-1.5 h-1.5 rounded-full bg-orange-950 animate-ping"></span>
+                      Live Preview (อัปเดตสด)
+                    </span>
+<span class="text-xs text-slate-300 font-mono tracking-wider">THAI QR PAYMENT</span>
+</div>
+<!-- QR Brand Graphic -->
+<div class="w-full py-2 bg-[#193b6e] rounded-xl mb-4 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-white text-2xl" data-icon="qr_code_2">qr_code_2</span>
+<span class="font-bold tracking-wider text-sm">PromptPay พร้อมเพย์</span>
+</div>
+<!-- QR Code Representation -->
+<div class="bg-white p-4 rounded-2xl shadow-inner my-2">
+<div class="w-40 h-40 bg-white rounded-lg border border-slate-200 flex flex-col items-center justify-center p-2 relative">
+<!-- Stylized QR Grid Graphic -->
+<div class="w-full h-full border-2 border-dashed border-slate-800 rounded flex flex-col justify-between p-2">
+<div class="flex justify-between">
+<div class="w-8 h-8 bg-slate-900 rounded-sm"></div>
+<div class="w-8 h-8 bg-slate-900 rounded-sm"></div>
+</div>
+<div class="flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-800 text-3xl" data-icon="restaurant">restaurant</span>
+</div>
+<div class="flex justify-between">
+<div class="w-8 h-8 bg-slate-900 rounded-sm"></div>
+<div class="w-6 h-6 border-2 border-slate-900 rounded-sm"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Account Details in Preview -->
+<div class="mt-4 space-y-1 w-full">
+<p class="text-xs text-slate-400">สแกนเพื่อจ่ายเงินเข้าบัญชี</p>
+<p class="font-headline-sm text-headline-sm font-bold text-white tracking-wide">ครัวรสเลิศ สยาม (นายสมชาย จ.)</p>
+<p class="font-mono text-sm text-amber-400 font-semibold mt-1">PromptPay: 089-123-4567</p>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-800 w-full flex items-center justify-between text-xs text-slate-400">
+<span>มาตรฐาน EMVCo Thai QR</span>
+<span>Kin-D Smart Dynamic QR</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-4 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="print">print</span>
+<div>
+<h5 class="font-label-md text-label-md font-bold text-on-surface">พิมพ์ป้าย QR วางตั้งโต๊ะ</h5>
+<p class="text-xs text-on-surface-variant">ดาวน์โหลดไฟล์ PDF ขนาด A5 สำหรับพิมพ์วางหน้าร้าน</p>
+</div>
+</div>
+<button class="px-3.5 py-2 bg-surface-container-low hover:bg-surface-container text-on-surface rounded-xl text-xs font-semibold border border-outline-variant transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-base" data-icon="download">download</span>
+                    ดาวน์โหลด PDF
+                  </button>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= TAB 3: ตรวจสลิปอัตโนมัติ (Slip Verification) ================= -->
+<section class="tab-content space-y-6" id="tab-verification">
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-6 shadow-sm space-y-6">
+<div class="border-b border-outline-variant pb-4">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">ระบบตรวจสลิปและสลิปปลอมอัตโนมัติ (Slip Verification)</h3>
+<span class="bg-secondary-container text-on-secondary px-2 py-0.5 rounded text-xs font-bold">AI Powered</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">เชื่อมต่อระบบตรวจสลิปผ่านธนาคารโดยตรง ป้องกันสลิปซ้ำ สลิปตัดต่อ และยอดเงินไม่ตรง</p>
+</div>
+<!-- Soft Blue Alert Banner -->
+<div class="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-start gap-3">
+<span class="material-symbols-outlined text-blue-700 text-2xl flex-shrink-0 mt-0.5" data-icon="info">info</span>
+<div class="text-sm space-y-1">
+<p class="font-semibold">หลักการทำงานของการตรวจสลิปอัตโนมัติ</p>
+<p class="text-blue-800 text-xs leading-relaxed">
+                    ระบบจะตรวจสลิปให้ทันทีเมื่อลูกค้าแนบรูปภาพสลิปผ่านทางหน้า QR Menu หากระบบตรวจไม่ผ่านเนื่องจากสัญญาณเครือข่ายขัดข้อง พนักงานยังสามารถกดยืนยันออเดอร์ด้วยตนเองได้ที่หน้าจอโต๊ะ &amp; บิล
+                  </p>
+</div>
+</div>
+<!-- API Configuration Form -->
+<div class="space-y-4 pt-2">
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold flex items-center justify-between">
+<span>API Secret Key (EasySlip / OpenSlip Provider)</span>
+<a class="text-xs text-primary font-semibold hover:underline flex items-center gap-1" href="#">
+<span>ขอรับ API Key ฟรี</span>
+<span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span>
+</a>
+</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-on-surface-variant text-xl" data-icon="key">key</span>
+<input class="w-full h-12 pl-11 pr-24 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/30 text-on-surface font-mono text-sm outline-none" id="api-key-input" type="password" value="sk_live_998492048572019482930219482019"/>
+<button class="absolute right-3 top-2.5 px-2 py-1 text-on-surface-variant hover:text-on-surface text-xs flex items-center gap-1 rounded hover:bg-surface-container-low transition-colors" onclick="togglePasswordVisibility()" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="visibility" id="api-key-icon">visibility</span>
+<span id="api-key-text">ดูรหัส</span>
+</button>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-3 pt-1">
+<button class="h-11 px-5 rounded-xl border border-outline-variant hover:bg-surface-container-low text-on-surface font-label-md text-label-md transition-colors flex items-center gap-2 active:scale-95" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="network_check">network_check</span>
+<span>ทดสอบการเชื่อมต่อ API</span>
+</button>
+<!-- Connection Status Pill -->
+<div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+<span>เชื่อมต่อ API สำเร็จ (Latency: 142ms)</span>
+</div>
+<span class="text-xs text-on-surface-variant">โควตาคงเหลือเดือนนี้: 4,850 / 5,000 ครั้ง</span>
+</div>
+</div>
+<!-- Automated Rules -->
+<div class="pt-6 border-t border-outline-variant space-y-4">
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">เงื่อนไขการส่งออเดอร์เข้าครัว</h4>
+<div class="p-4 rounded-xl border border-outline-variant bg-surface-container-low/30 space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<h5 class="font-label-md text-label-md font-bold text-on-surface">อนุมัติและส่งออเดอร์เข้าครัวอัตโนมัติเมื่อตรวจสลิปผ่าน</h5>
+<p class="text-xs text-on-surface-variant mt-0.5">ช่วยลดขั้นตอนพนักงานเดินไปเช็คที่โต๊ะ ใบสั่งจะพิมพ์ออกที่ห้องครัวทันทีที่เงินเข้าบัญชี</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+</div>
+<div class="p-4 rounded-xl border border-outline-variant bg-surface-container-low/30 space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<h5 class="font-label-md text-label-md font-bold text-on-surface">แจ้งเตือนเสียงพิเศษเมื่อพบสลิปผิดปกติ (สลิปซ้ำ หรือยอดเงินไม่ตรง)</h5>
+<p class="text-xs text-on-surface-variant mt-0.5">ส่งสัญญาณเสียงเตือนที่แคชเชียร์ทันทีเพื่อเข้าตรวจสอบความถูกต้อง</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= TAB 4: ระบบสั่งอาหาร & ครัว ================= -->
+<section class="tab-content space-y-6" id="tab-ordering">
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-6 shadow-sm space-y-6">
+<div class="border-b border-outline-variant pb-4">
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">การทำงานของระบบสั่งอาหาร &amp; ในครัว</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">ควบคุมพฤติกรรมการสั่งของลูกค้าและขั้นตอนการทำงานของพนักงานในร้าน</p>
+</div>
+<!-- Functional Toggle List -->
+<div class="space-y-4">
+<!-- 1. Customer Self-Order Toggle -->
+<div class="flex items-start justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low/30 hover:border-primary-container transition-colors">
+<div class="flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="qr_code">qr_code</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">อนุญาตให้ลูกค้าสั่งอาหารเองผ่าน QR Code ที่โต๊ะ</h4>
+<p class="text-xs text-on-surface-variant mt-0.5">ลูกค้าสามารถใช้สมาร์ตโฟนสแกนเพื่อเลือกเมนูและกดส่งรายการได้ด้วยตนเอง</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-4">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+<!-- 2. Staff Confirmation Required -->
+<div class="flex items-start justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low/30 hover:border-primary-container transition-colors">
+<div class="flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">ต้องให้พนักงานกดยืนยันออเดอร์ก่อนส่งเข้าห้องครัว</h4>
+<p class="text-xs text-on-surface-variant mt-0.5">แนะนำให้เปิดไว้เพื่อป้องกันกรณีลูกค้าสั่งเล่น หรือสั่งซ้ำซ้อนโดยไม่ได้ตั้งใจ</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-4">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+<!-- 3. Show Menu Images -->
+<div class="flex items-start justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low/30 hover:border-primary-container transition-colors">
+<div class="flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">แสดงรูปภาพเมนูอาหารในหน้า QR สแกนสั่งของลูกค้า</h4>
+<p class="text-xs text-on-surface-variant mt-0.5">ช่วยเพิ่มยอดขายด้วยภาพอาหารน่ารับประทาน (หากปิดจะแสดงเฉพาะชื่อและราคา เหมาะกับเน็ตช้า)</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-4">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+<!-- 4. Show Out of Stock Items -->
+<div class="flex items-start justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low/30 hover:border-primary-container transition-colors">
+<div class="flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="event_busy">event_busy</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">แสดงเมนูที่วัตถุดิบหมด (พร้อมป้ายกำกับ "หมดชั่วคราว")</h4>
+<p class="text-xs text-on-surface-variant mt-0.5">หากปิดสวิตช์นี้ เมนูที่วัตถุดิบหมดจะถูกซ่อนออกจากหน้าสั่งทันทีโดยไม่ให้ลูกค้าเห็น</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-4">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+<!-- 5. POS Counter Notification Sound -->
+<div class="flex items-start justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low/30 hover:border-primary-container transition-colors">
+<div class="flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined" data-icon="volume_up">volume_up</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">เปิดเสียงกระดิ่งเตือนเมื่อมีออเดอร์ใหม่ดังที่หน้าเคาน์เตอร์</h4>
+<p class="text-xs text-on-surface-variant mt-0.5">ส่งเสียงแจ้งเตือนอัตโนมัติผ่านลำโพงของเครื่อง POS เพื่อให้พนักงานเตรียมรับรายการ</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-4">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+<!-- ==================== STICKY BOTTOM SAVE BAR ==================== -->
+<aside class="fixed bottom-0 left-64 right-0 z-30 bg-surface-container-lowest/95 backdrop-blur-md border-t border-outline-variant px-8 py-3.5 shadow-lg flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-primary-container animate-pulse"></span>
+<div>
+<p class="font-label-md text-label-md font-bold text-on-surface">มีการเปลี่ยนแปลงการตั้งค่าที่ยังไม่ได้บันทึก</p>
+<p class="text-xs text-on-surface-variant">การเปลี่ยนแปลงจะมีผลต่อระบบของพนักงานและลูกค้าทันทีหลังกดยืนยัน</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="h-12 px-6 rounded-xl border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-lg text-label-lg transition-colors active:scale-95" onclick="handleReset()" type="button">
+        ยกเลิก / คืนค่าเดิม
+      </button>
+<button class="h-12 px-8 rounded-xl bg-primary-container hover:bg-amber-600 text-on-primary-container font-label-lg text-label-lg font-bold shadow-sm transition-all flex items-center gap-2 active:scale-95" onclick="handleSave()" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="save">save</span>
+<span>บันทึกการตั้งค่าทั้งหมด</span>
+</button>
+</div>
+</aside>
+<!-- ==================== FEEDBACK TOAST NOTIFICATION ==================== -->
+<div class="fixed top-6 right-6 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 pointer-events-none" id="save-toast">
+<div class="flex items-center gap-3 bg-neutral-900 text-white px-5 py-3.5 rounded-2xl shadow-xl border border-neutral-700">
+<span class="material-symbols-outlined text-emerald-400 text-2xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="font-label-md text-label-md font-bold">บันทึกการตั้งค่าร้านเรียบร้อยแล้ว</p>
+<p class="text-xs text-neutral-400">ระบบอัปเดตข้อมูลไปยังแคชเชียร์และ QR Menu ทุกโต๊ะแล้ว</p>
+</div>
+</div>
+</div>
+<!-- Interactive JavaScript -->
+<script>
+    // Tab Switching Logic
+    function switchTab(tabId) {
+      // Hide all contents
+      document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.remove('active');
+      });
+
+      // Show selected tab content
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.add('active');
+      }
+
+      // Reset button styles
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = 'tab-btn w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all text-on-surface-variant hover:bg-surface-container-low font-label-lg text-label-lg';
+      });
+
+      // Highlight active button
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.className = 'tab-btn w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all bg-primary-container text-on-primary-container font-label-lg text-label-lg shadow-sm';
+      }
+    }
+
+    // Toggle API Key Masking
+    function togglePasswordVisibility() {
+      const input = document.getElementById('api-key-input');
+      const icon = document.getElementById('api-key-icon');
+      const text = document.getElementById('api-key-text');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+        text.textContent = 'ซ่อนรหัส';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+        text.textContent = 'ดูรหัส';
+      }
+    }
+
+    // Save Feedback Toast
+    function handleSave() {
+      const toast = document.getElementById('save-toast');
+      toast.classList.remove('translate-y-[-150%]', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-[-150%]', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+
+    function handleReset() {
+      if (confirm('คุณต้องการยกเลิกการเปลี่ยนแปลงทั้งหมด และคืนค่าเดิมใช่หรือไม่?')) {
+        location.reload();
+      }
+    }
+  </script>
+</body></html>

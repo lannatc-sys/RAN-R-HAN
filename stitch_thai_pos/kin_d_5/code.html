@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Kin-D POS - ติดตามสถานะออเดอร์</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed": "#2a1700",
+            "tertiary-container": "#94aeff",
+            "error-container": "#ffdad6",
+            "on-secondary": "#ffffff",
+            "inverse-primary": "#ffb95f",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "primary-container": "#f59e0b",
+            "secondary": "#a73a00",
+            "surface-tint": "#855300",
+            "primary-fixed": "#ffddb8",
+            "on-background": "#1b1c1c",
+            "surface-container-lowest": "#ffffff",
+            "surface-bright": "#fbf9f9",
+            "on-primary-container": "#613b00",
+            "on-tertiary": "#ffffff",
+            "secondary-fixed-dim": "#ffb599",
+            "on-primary-fixed-variant": "#653e00",
+            "on-surface": "#1b1c1c",
+            "secondary-container": "#fd651e",
+            "tertiary": "#0053db",
+            "surface-container": "#efeded",
+            "on-secondary-fixed": "#370e00",
+            "primary": "#855300",
+            "on-error-container": "#93000a",
+            "surface-container-high": "#e9e8e7",
+            "inverse-surface": "#303031",
+            "background": "#fbf9f9",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "on-tertiary-fixed": "#00174b",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "primary-fixed-dim": "#ffb95f",
+            "on-error": "#ffffff",
+            "on-surface-variant": "#534434",
+            "surface": "#fbf9f9",
+            "outline-variant": "#d8c3ad",
+            "surface-variant": "#e3e2e2",
+            "on-secondary-container": "#571a00",
+            "inverse-on-surface": "#f2f0f0",
+            "error": "#ba1a1a",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f5f3f3",
+            "secondary-fixed": "#ffdbce",
+            "tertiary-fixed": "#dbe1ff",
+            "surface-dim": "#dbdad9",
+            "outline": "#867461",
+            "surface-container-highest": "#e3e2e2",
+            "on-tertiary-container": "#003ba1"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-8": "32px",
+            "space-1": "4px",
+            "min-target": "48px",
+            "card-p-mobile": "16px",
+            "space-6": "24px",
+            "space-2": "8px",
+            "grid-base": "4px",
+            "space-3": "12px",
+            "space-4": "16px",
+            "space-5": "20px"
+          },
+          "fontFamily": {
+            "body-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-strong": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-total": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-sm": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-display": ["\"IBM Plex Sans Thai\", sans-serif"]
+          },
+          "fontSize": {
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "body-strong": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "label-md": ["14px", {"lineHeight": "18px", "fontWeight": "600"}],
+            "label-lg": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "price-total": ["26px", {"lineHeight": "32px", "fontWeight": "700"}],
+            "headline-sm": ["18px", {"lineHeight": "26px", "fontWeight": "600"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.08); opacity: 0.5; }
+    }
+    .animate-pulse-subtle {
+      animation: pulse-subtle 2s infinite ease-in-out;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary-fixed">
+<!-- Mobile Viewport 390px Container -->
+<main class="w-full max-w-[390px] min-h-screen bg-surface flex flex-col pb-36 relative border-x border-outline-variant/30">
+<!-- Prototype State Switcher (Interactive Demo) -->
+<section class="bg-surface-container-high px-space-3 py-space-2 border-b border-outline-variant flex items-center justify-between text-xs text-on-surface-variant sticky top-0 z-30">
+<span class="flex items-center gap-1 font-semibold text-primary">
+<span class="material-symbols-outlined text-[16px]">tune</span> โหมดจำลอง:
+      </span>
+<div class="flex gap-1 bg-surface-container-lowest p-0.5 rounded-lg border border-outline-variant/50">
+<button class="px-2 py-1 rounded text-xs font-semibold bg-primary-container text-on-primary-container transition-all" id="btn-state-prep" onclick="switchState('prep')">
+          1. กำลังปรุง
+        </button>
+<button class="px-2 py-1 rounded text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all" id="btn-state-served" onclick="switchState('served')">
+          2. เสิร์ฟครบ
+        </button>
+<button class="px-2 py-1 rounded text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all" id="btn-state-paid" onclick="switchState('paid')">
+          3. จ่ายเงินแล้ว
+        </button>
+</div>
+</section>
+<!-- Top App Bar / Header -->
+<header class="bg-surface px-space-4 py-space-3 border-b border-outline-variant/40 flex items-center justify-between shadow-sm sticky top-[41px] z-20">
+<div class="flex items-center gap- space-3">
+<!-- Table Badge -->
+<div class="bg-primary-container text-on-primary-container px-space-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[20px] text-on-primary-container">table_restaurant</span>
+<span class="font-headline-sm text-headline-sm font-bold leading-none">โต๊ะ 5</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md leading-tight text-on-surface">ติดตามออเดอร์</h1>
+<div class="flex items-center gap-1.5 text-on-surface-variant text-label-md font-label-md">
+<span class="font-mono font-medium text-primary">#A0042</span>
+<span>•</span>
+<span>12:38 น.</span>
+</div>
+</div>
+</div>
+<!-- Assistance Action Button -->
+<button class="h-min-target min-w-min-target flex flex-col items-center justify-center rounded-xl border border-outline-variant/70 bg-surface-container-lowest active:scale-95 transition-transform hover:bg-surface-container p-1 shadow-sm text-on-surface" onclick="callStaffAlert()">
+<span class="material-symbols-outlined text-[22px] text-primary">notifications_active</span>
+<span class="text-[11px] font-semibold text-primary mt-0.5">เรียกพนักงาน</span>
+</button>
+</header>
+<!-- Content Scrollable Body -->
+<div class="px-space-4 pt-space-4 space-y-space-4 flex-1">
+<!-- Horizontal Order Timeline Stepper -->
+<section aria-label="สถานะความคืบหน้าออเดอร์" class="bg-surface-container-lowest p-space-4 rounded-2xl border border-outline-variant/60 shadow-sm">
+<div class="flex items-center justify-between relative px-2">
+<!-- Stepper Connecting Lines (Background) -->
+<div class="absolute left-7 right-7 top-4 -translate-y-1/2 h-[3px] bg-surface-container -z-0">
+<!-- Dynamic Filled Progress Bar (e.g., 38% for Step 2) -->
+<div class="h-full bg-emerald-600 transition-all duration-500 w-[36%]" id="stepper-progress"></div>
+</div>
+<!-- Step 1: รับออเดอร์ (Completed) -->
+<div class="flex flex-col items-center z-10 text-center flex-1">
+<div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm border-2 border-surface-container-lowest" id="step-node-1">
+<span class="material-symbols-outlined text-[18px] font-bold">check</span>
+</div>
+<span class="mt-2 text-xs font-semibold text-emerald-800" id="step-text-1">รับออเดอร์</span>
+</div>
+<!-- Step 2: กำลังทำ (Current Active / Pulse) -->
+<div class="flex flex-col items-center z-10 text-center flex-1">
+<div class="relative flex items-center justify-center" id="step-node-2">
+<span class="absolute w-10 h-10 rounded-full bg-primary-container/40 animate-pulse-subtle"></span>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm z-10 border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px]">skillet</span>
+</div>
+</div>
+<span class="mt-2 text-xs font-bold text-on-surface" id="step-text-2">กำลังทำ</span>
+</div>
+<!-- Step 3: เสิร์ฟแล้ว (Pending) -->
+<div class="flex flex-col items-center z-10 text-center flex-1">
+<div class="w-8 h-8 rounded-full bg-surface-container text-outline flex items-center justify-center shadow-sm border-2 border-surface-container-lowest" id="step-node-3">
+<span class="material-symbols-outlined text-[18px]">room_service</span>
+</div>
+<span class="mt-2 text-xs font-medium text-on-surface-variant" id="step-text-3">เสิร์ฟแล้ว</span>
+</div>
+<!-- Step 4: ชำระเงิน (Pending) -->
+<div class="flex flex-col items-center z-10 text-center flex-1">
+<div class="w-8 h-8 rounded-full bg-surface-container text-outline flex items-center justify-center shadow-sm border-2 border-surface-container-lowest" id="step-node-4">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+</div>
+<span class="mt-2 text-xs font-medium text-on-surface-variant" id="step-text-4">ชำระเงิน</span>
+</div>
+</div>
+</section>
+<!-- Estimated Wait Time Card -->
+<section class="bg-primary-fixed/20 border border-primary-container/60 p-space-4 rounded-2xl flex items-center gap-space-3 shadow-sm" id="wait-time-card">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[28px]">schedule</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold uppercase tracking-wider text-primary">สถานะครัวปัจจุบัน</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+</div>
+<p class="font-headline-sm text-headline-sm font-bold text-on-surface mt-0.5" id="wait-time-headline">
+            รออาหารอีกประมาณ <span class="text-secondary font-extrabold text-[20px]">8-12 นาที</span>
+</p>
+<p class="text-xs text-on-surface-variant mt-0.5">เชฟกำลังปรุงสดใหม่อย่างพิถีพิถันตามคิว</p>
+</div>
+</section>
+<!-- Food Order Items Status List -->
+<section aria-label="รายการอาหาร" class="space-y-space-3">
+<div class="flex items-center justify-between pt-1">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-2">
+<span>รายการอาหารที่สั่ง</span>
+<span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">3 รายการ</span>
+</h2>
+<span class="text-xs text-on-surface-variant">โต๊ะ 5</span>
+</div>
+<!-- Order Item 1: ข้าวกะเพราหมูกรอบ (กำลังทำ) -->
+<article class="bg-surface-container-lowest p-space-4 rounded-2xl border border-outline-variant/60 shadow-sm flex gap-space-3 items-start relative overflow-hidden">
+<!-- Left Decorative Status Accent Strip -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+<img class="w-16 h-16 rounded-xl object-cover border border-outline-variant/40 flex-shrink-0" data-alt="Close up shot of crisp golden Thai crispy pork belly stir-fried with fragrant holy basil, fresh red bird's eye chilies, and garlic served over steaming jasmine rice in a modern minimalist ceramic plate under bright natural culinary restaurant lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgur-IFY-v2qk6u6AdcETTA74_csB-Dqoutg5BOgvuI4A6ttBe4-0mUMGTN17SvoTu5Kwb42tfTALmsoIo2cYxZa6qmBXqRl3FbIkWWq8zN9A0Q_B2UB9bjvXsts7HxJ_hJ74yIJ0pk_lImcKRjIUWpwluwwXiOS-Ikn7JAV-lrTM7X0WG-wvaU3LU79SgimiG7yl20i0SLosEOhQVRl0355Eif4dExExVF_maUbexP86tGCSj-Za0"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">ข้าวกะเพราหมูกรอบ</h3>
+<span class="font-bold text-headline-sm tabular-nums text-on-surface flex-shrink-0">฿105</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">add_circle</span>
+              ไข่ดาวกรอบ, เผ็ดกลาง
+            </p>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-xs text-on-surface-variant font-medium">จำนวน: 1 จาน</span>
+<!-- Status Badge: กำลังทำ (Blue) -->
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200" id="badge-item-1">
+<span class="material-symbols-outlined text-[14px]">skillet</span>
+                กำลังทำ
+              </span>
+</div>
+</div>
+</article>
+<!-- Order Item 2: ต้มยำกุ้งแม่น้ำน้ำข้น (รอทำ) -->
+<article class="bg-surface-container-lowest p-space-4 rounded-2xl border border-outline-variant/60 shadow-sm flex gap-space-3 items-start relative overflow-hidden">
+<!-- Left Decorative Status Accent Strip -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>
+<img class="w-16 h-16 rounded-xl object-cover border border-outline-variant/40 flex-shrink-0" data-alt="Traditional Thai Tom Yum Kung soup in a modern bowl featuring fresh river prawns with creamy spiced broth, garnished with cilantro, lemongrass, and aromatic kaffir lime leaves under clean restaurant ambient lighting with warm natural tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCet_5l2syTo5Is4i4iARlARLBztgOo6wNMdORL8qd3ILSoxRYbVeCQsW2PsTUFmhMVZueg0mrXA7NpAUpbI58al3NiIgYZVinBZhbuOnPt6n_k0NCnRart2xDYb5gArXCGii6rskJv3M55Ms2Olkq3tSwO_cEq6osiaOeW_xXshVpapuNaCQ0naUrDAJUjUMmoYTvj-itvJVSJ60S3j7O9IEs0EJil3T8hInD3TvxHas3YNmV_74xW"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">ต้มยำกุ้งแม่น้ำน้ำข้น</h3>
+<span class="font-bold text-headline-sm tabular-nums text-on-surface flex-shrink-0">฿150</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">add_circle</span>
+              กุ้งแม่น้ำ 2 ตัว, เผ็ดปกติ
+            </p>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-xs text-on-surface-variant font-medium">จำนวน: 1 ชาม</span>
+<!-- Status Badge: รอทำ (Amber) -->
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200" id="badge-item-2">
+<span class="material-symbols-outlined text-[14px]">hourglass_top</span>
+                รอทำ
+              </span>
+</div>
+</div>
+</article>
+<!-- Order Item 3: ชาไทยเย็นโบราณ (เสิร์ฟแล้ว) -->
+<article class="bg-surface-container-lowest p-space-4 rounded-2xl border border-outline-variant/60 shadow-sm flex gap-space-3 items-start relative overflow-hidden">
+<!-- Left Decorative Status Accent Strip -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-600"></div>
+<img class="w-16 h-16 rounded-xl object-cover border border-outline-variant/40 flex-shrink-0" data-alt="Authentic Thai iced milk tea with rich vibrant orange hue layered over crushed ice and topped with evaporated milk foam in a clear glass on a clean wooden tabletop under bright morning sun." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6_DeAXmZSfJSG8VmlsL4e-TFL36gExj5va25_RUXgEmuw9E6algVbISa9QlqThzYxWNjRIuiQNS8P4HOB3FPqR98AYZcXvMZwJ0XiuykO0BY3QfV7zXtSXioG3kUIi0c-P8Ifq7vUjAwDKcZchU3d-1dmb-VUm_SvE9hEpDqfBR_s7lyUo2FIANoxqdVvzJCNOjjoCfjvz-L84GlBbWCID_YWs81SgfLZGi3kvHnU5czycmEfkYLq"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">ชาไทยเย็นโบราณ</h3>
+<span class="font-bold text-headline-sm tabular-nums text-on-surface flex-shrink-0">฿35</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">add_circle</span>
+              หวานน้อย 50%, น้ำแข็งปกติ
+            </p>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-xs text-on-surface-variant font-medium">จำนวน: 1 แก้ว</span>
+<!-- Status Badge: เสิร์ฟแล้ว (Emerald) -->
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                เสิร์ฟแล้ว
+              </span>
+</div>
+</div>
+</article>
+</section>
+<!-- Order Bill Summary Accordion Card -->
+<section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 shadow-sm overflow-hidden">
+<button aria-expanded="false" class="w-full p-space-4 flex items-center justify-between text-left hover:bg-surface-container-low transition-colors" id="bill-accordion-btn" onclick="toggleBillDetails()">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">receipt_long</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">สรุปยอดรวม (3 รายการ)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-price-display text-price-display font-bold tabular-nums text-secondary">฿290</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200" id="bill-chevron">expand_more</span>
+</div>
+</button>
+<!-- Expandable Bill Breakdown Panel -->
+<div class="hidden px-space-4 pb-space-4 pt-1 border-t border-outline-variant/40 space-y-2 text-xs bg-surface-container-low/40" id="bill-details">
+<div class="flex justify-between text-on-surface-variant">
+<span>ค่าอาหารและเครื่องดื่มรวม</span>
+<span class="tabular-nums font-medium">฿271.03</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>ภาษีมูลค่าเพิ่ม (VAT 7% รวมแล้ว)</span>
+<span class="tabular-nums font-medium">฿18.97</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>ค่าบริการ (Service Charge)</span>
+<span class="tabular-nums font-medium">฿0.00</span>
+</div>
+<div class="pt-2 border-t border-outline-variant/50 flex justify-between font-bold text-sm text-on-surface">
+<span>ยอดชำระสุทธิ</span>
+<span class="text-base text-secondary tabular-nums">฿290.00</span>
+</div>
+</div>
+</section>
+<!-- Help / Kitchen Notice Note -->
+<div class="p-space-3 rounded-xl bg-surface-container border border-outline-variant/40 flex items-start gap-2.5 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">info</span>
+<span>หากต้องการแก้ไขรายการ สั่งเพิ่ม หรือสอบถามเรื่องแพ้อาหาร สามารถกดปุ่ม <strong>"เรียกพนักงาน"</strong> ได้ตลอดเวลา</span>
+</div>
+</div>
+<!-- Sticky Bottom Action Area -->
+<footer class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest border-t border-outline-variant/60 shadow-lg">
+<div class="w-full max-w-[390px] mx-auto p-space-4 space-y-space-2 bg-surface-container-lowest">
+<div class="grid grid-cols-2 gap-space-3">
+<!-- Button: สั่งอาหารเพิ่ม (Outline Button) -->
+<button class="h-min-target rounded-xl border-2 border-outline text-on-surface font-body-strong text-body-strong flex items-center justify-center gap-1.5 active:scale-95 transition-all hover:bg-surface-container-high" onclick="orderMoreAlert()">
+<span class="material-symbols-outlined text-[20px] text-primary">add</span>
+<span>สั่งอาหารเพิ่ม</span>
+</button>
+<!-- Button: เรียกพนักงาน (Secondary Outline Button) -->
+<button class="h-min-target rounded-xl border-2 border-primary-container bg-primary-fixed/20 text-on-primary-container font-body-strong text-body-strong flex items-center justify-center gap-1.5 active:scale-95 transition-all hover:bg-primary-fixed/40" onclick="callStaffAlert()">
+<span class="material-symbols-outlined text-[20px] text-primary">room_service</span>
+<span>เรียกเช็คบิล</span>
+</button>
+</div>
+<!-- Primary Action Button: ชำระเงิน / ขอใบแจ้งหนี้ -->
+<button class="w-full h-[52px] rounded-xl bg-secondary hover:bg-secondary/90 text-white font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all" id="btn-primary-action" onclick="handlePrimaryAction()">
+<span class="material-symbols-outlined text-[22px]">receipt_long</span>
+<span id="primary-action-text">แจ้งชำระเงินที่โต๊ะ (฿290)</span>
+</button>
+<!-- Live Sync Status Indicator -->
+<div class="flex items-center justify-center gap-2 pt-1 text-[12px] text-on-surface-variant font-medium">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span>อัปเดตอัตโนมัติ (Live Update)</span>
+<span>•</span>
+<span id="live-time-str">12:44:08 น.</span>
+</div>
+</div>
+</footer>
+<!-- Bottom Notification Toast (Micro-interaction) -->
+<aside class="fixed top-16 left-1/2 -translate-x-1/2 max-w-[340px] w-full bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-xl shadow-xl z-50 flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none -translate-y-2" id="toast">
+<span class="material-symbols-outlined text-primary-container" id="toast-icon">info</span>
+<span class="text-xs font-medium flex-1" id="toast-msg">พนักงานกำลังเดินทางมาที่โต๊ะ 5 ครับ</span>
+</aside>
+</main>
+<script>
+    // State Switching Simulation logic
+    let currentState = 'prep';
+
+    function switchState(state) {
+      currentState = state;
+      const btnPrep = document.getElementById('btn-state-prep');
+      const btnServed = document.getElementById('btn-state-served');
+      const btnPaid = document.getElementById('btn-state-paid');
+
+      // Reset button pills
+      [btnPrep, btnServed, btnPaid].forEach(b => {
+        b.className = "px-2 py-1 rounded text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all";
+      });
+
+      const progressBar = document.getElementById('stepper-progress');
+      const stepNode2 = document.getElementById('step-node-2');
+      const stepNode3 = document.getElementById('step-node-3');
+      const stepNode4 = document.getElementById('step-node-4');
+      const stepText2 = document.getElementById('step-text-2');
+      const stepText3 = document.getElementById('step-text-3');
+      const stepText4 = document.getElementById('step-text-4');
+
+      const waitCard = document.getElementById('wait-time-card');
+      const waitHeadline = document.getElementById('wait-time-headline');
+      const badgeItem1 = document.getElementById('badge-item-1');
+      const badgeItem2 = document.getElementById('badge-item-2');
+      const primaryBtn = document.getElementById('btn-primary-action');
+      const primaryBtnText = document.getElementById('primary-action-text');
+
+      if (state === 'prep') {
+        btnPrep.className = "px-2 py-1 rounded text-xs font-semibold bg-primary-container text-on-primary-container transition-all";
+        progressBar.style.width = "36%";
+        
+        // Step 2 Active
+        stepNode2.className = "relative flex items-center justify-center";
+        stepNode2.innerHTML = '<span class="absolute w-10 h-10 rounded-full bg-primary-container/40 animate-pulse-subtle"></span><div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm z-10 border-2 border-surface-container-lowest"><span class="material-symbols-outlined text-[18px]">skillet</span></div>';
+        stepText2.className = "mt-2 text-xs font-bold text-on-surface";
+
+        // Step 3 Inactive
+        stepNode3.className = "w-8 h-8 rounded-full bg-surface-container text-outline flex items-center justify-center shadow-sm border-2 border-surface-container-lowest";
+        stepNode3.innerHTML = '<span class="material-symbols-outlined text-[18px]">room_service</span>';
+        stepText3.className = "mt-2 text-xs font-medium text-on-surface-variant";
+
+        // Step 4 Inactive
+        stepNode4.className = "w-8 h-8 rounded-full bg-surface-container text-outline flex items-center justify-center shadow-sm border-2 border-surface-container-lowest";
+        stepNode4.innerHTML = '<span class="material-symbols-outlined text-[18px]">payments</span>';
+        stepText4.className = "mt-2 text-xs font-medium text-on-surface-variant";
+
+        // Wait card show
+        waitCard.classList.remove('hidden');
+        waitHeadline.innerHTML = 'รออาหารอีกประมาณ <span class="text-secondary font-extrabold text-[20px]">8-12 นาที</span>';
+
+        // Item Badges
+        badgeItem1.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200";
+        badgeItem1.innerHTML = '<span class="material-symbols-outlined text-[14px]">skillet</span>กำลังทำ';
+        badgeItem2.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200";
+        badgeItem2.innerHTML = '<span class="material-symbols-outlined text-[14px]">hourglass_top</span>รอทำ';
+
+        primaryBtn.className = "w-full h-[52px] rounded-xl bg-secondary hover:bg-secondary/90 text-white font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all";
+        primaryBtnText.innerText = "แจ้งชำระเงินที่โต๊ะ (฿290)";
+        showToast("ปรับเป็นมุมมอง: กำลังปรุงอาหาร", "skillet");
+
+      } else if (state === 'served') {
+        btnServed.className = "px-2 py-1 rounded text-xs font-semibold bg-primary-container text-on-primary-container transition-all";
+        progressBar.style.width = "72%";
+
+        // Step 2 Done
+        stepNode2.className = "w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm border-2 border-surface-container-lowest";
+        stepNode2.innerHTML = '<span class="material-symbols-outlined text-[18px] font-bold">check</span>';
+        stepText2.className = "mt-2 text-xs font-semibold text-emerald-800";
+
+        // Step 3 Active (Served)
+        stepNode3.className = "relative flex items-center justify-center";
+        stepNode3.innerHTML = '<span class="absolute w-10 h-10 rounded-full bg-emerald-500/30 animate-pulse-subtle"></span><div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm z-10 border-2 border-surface-container-lowest"><span class="material-symbols-outlined text-[18px]">room_service</span></div>';
+        stepText3.className = "mt-2 text-xs font-bold text-emerald-800";
+
+        // Step 4 Inactive
+        stepNode4.className = "w-8 h-8 rounded-full bg-surface-container text-outline flex items-center justify-center shadow-sm border-2 border-surface-container-lowest";
+        stepNode4.innerHTML = '<span class="material-symbols-outlined text-[18px]">payments</span>';
+        stepText4.className = "mt-2 text-xs font-medium text-on-surface-variant";
+
+        // Wait card transformed to ready notice
+        waitCard.classList.remove('hidden');
+        waitHeadline.innerHTML = '<span class="text-emerald-700 font-extrabold text-[18px]">เสิร์ฟครบทุกเมนูแล้ว ทานให้อร่อยครับ!</span>';
+
+        // Item Badges all Served
+        badgeItem1.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200";
+        badgeItem1.innerHTML = '<span class="material-symbols-outlined text-[14px]">check_circle</span>เสิร์ฟแล้ว';
+        badgeItem2.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200";
+        badgeItem2.innerHTML = '<span class="material-symbols-outlined text-[14px]">check_circle</span>เสิร์ฟแล้ว';
+
+        primaryBtn.className = "w-full h-[52px] rounded-xl bg-primary-container text-on-primary-container font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all";
+        primaryBtnText.innerText = "กดเพื่อเรียกเช็คบิลทันที (฿290)";
+        showToast("อาหารเสิร์ฟครบทุกรายการแล้วครับ", "room_service");
+
+      } else if (state === 'paid') {
+        btnPaid.className = "px-2 py-1 rounded text-xs font-semibold bg-primary-container text-on-primary-container transition-all";
+        progressBar.style.width = "100%";
+
+        // All steps done
+        [stepNode2, stepNode3, stepNode4].forEach(node => {
+          node.className = "w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm border-2 border-surface-container-lowest";
+          node.innerHTML = '<span class="material-symbols-outlined text-[18px] font-bold">check</span>';
+        });
+        stepText2.className = "mt-2 text-xs font-semibold text-emerald-800";
+        stepText3.className = "mt-2 text-xs font-semibold text-emerald-800";
+        stepText4.className = "mt-2 text-xs font-bold text-emerald-800";
+
+        // Wait card transformed to Thank you
+        waitCard.classList.remove('hidden');
+        waitHeadline.innerHTML = '<span class="text-emerald-700 font-extrabold text-[18px]">ชำระเงินเรียบร้อย ขอบคุณที่ใช้บริการครับ</span>';
+
+        primaryBtn.className = "w-full h-[52px] rounded-xl bg-surface-container-high text-on-surface-variant font-headline-sm text-headline-sm font-medium flex items-center justify-center gap-2 cursor-default";
+        primaryBtnText.innerText = "บิลนี้ชำระเงินเรียบร้อยแล้ว";
+        showToast("ขอบคุณที่อุดหนุน Kin-D POS โอกาสหน้าเชิญใหม่ครับ", "verified");
+      }
+    }
+
+    // Toggle Bill Breakdown
+    function toggleBillDetails() {
+      const details = document.getElementById('bill-details');
+      const chevron = document.getElementById('bill-chevron');
+      const btn = document.getElementById('bill-accordion-btn');
+      
+      const isHidden = details.classList.contains('hidden');
+      if (isHidden) {
+        details.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+        btn.setAttribute('aria-expanded', 'true');
+      } else {
+        details.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    // Toast Notification helper
+    let toastTimeout;
+    function showToast(message, icon = 'info') {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-msg');
+      const iconEl = document.getElementById('toast-icon');
+
+      msgEl.innerText = message;
+      iconEl.innerText = icon;
+
+      clearTimeout(toastTimeout);
+      toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3000);
+    }
+
+    function callStaffAlert() {
+      showToast("ส่งสัญญาณเรียกพนักงานมาที่โต๊ะ 5 แล้วครับ", "notifications_active");
+    }
+
+    function orderMoreAlert() {
+      showToast("กำลังเปิดเมนูสั่งอาหารเพิ่มเติม...", "restaurant_menu");
+    }
+
+    function handlePrimaryAction() {
+      if (currentState === 'paid') {
+        showToast("รายการนี้ปิดบิลเรียบร้อยแล้วครับ", "receipt");
+        return;
+      }
+      showToast("แจ้งพนักงานให้นำบิลมาเช็คที่โต๊ะ 5 เรียบร้อยครับ", "payments");
+      // Advance to paid state in simulation
+      setTimeout(() => {
+        switchState('paid');
+      }, 1500);
+    }
+
+    // Live clock update
+    function updateLiveClock() {
+      const el = document.getElementById('live-time-str');
+      if (!el) return;
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      el.innerText = `${h}:${m}:${s} น.`;
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+  </script>
+</body></html>

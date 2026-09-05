@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D POS | ตะกร้าสินค้า โต๊ะ 5</title>
+<!-- Google Fonts: IBM Plex Sans Thai -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Verbatim Tailwind Theme Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-container": "#fd651e",
+            "error-container": "#ffdad6",
+            "on-surface-variant": "#534434",
+            "outline": "#867461",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#653e00",
+            "on-primary": "#ffffff",
+            "surface-container-highest": "#e3e2e2",
+            "inverse-on-surface": "#f2f0f0",
+            "primary-container": "#f59e0b",
+            "primary": "#855300",
+            "background": "#fbf9f9",
+            "error": "#ba1a1a",
+            "surface-tint": "#855300",
+            "on-secondary-fixed": "#370e00",
+            "surface-container-high": "#e9e8e7",
+            "tertiary-fixed": "#dbe1ff",
+            "secondary": "#a73a00",
+            "tertiary-container": "#94aeff",
+            "primary-fixed-dim": "#ffb95f",
+            "on-error": "#ffffff",
+            "on-surface": "#1b1c1c",
+            "tertiary": "#0053db",
+            "secondary-fixed": "#ffdbce",
+            "inverse-surface": "#303031",
+            "on-primary-fixed": "#2a1700",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "on-tertiary-fixed": "#00174b",
+            "primary-fixed": "#ffddb8",
+            "secondary-fixed-dim": "#ffb599",
+            "on-error-container": "#93000a",
+            "inverse-primary": "#ffb95f",
+            "on-tertiary-container": "#003ba1",
+            "surface-bright": "#fbf9f9",
+            "surface-container-low": "#f5f3f3",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#efeded",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "surface": "#fbf9f9",
+            "on-secondary": "#ffffff",
+            "surface-variant": "#e3e2e2",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "on-secondary-container": "#571a00",
+            "outline-variant": "#d8c3ad",
+            "on-primary-container": "#613b00",
+            "surface-dim": "#dbdad9",
+            "on-background": "#1b1c1c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "min-target": "48px",
+            "space-1": "4px",
+            "space-2": "8px",
+            "space-3": "12px",
+            "space-4": "16px",
+            "space-5": "20px",
+            "space-6": "24px",
+            "space-8": "32px",
+            "card-p-mobile": "16px",
+            "grid-base": "4px"
+          },
+          "fontFamily": {
+            "body-strong": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "price-total": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-sm": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "price-display": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""]
+          },
+          "fontSize": {
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "price-total": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-low text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary-container selection:text-on-primary-container">
+<!-- Viewport Container strictly conforming to 390px mobile format with smooth backdrop -->
+<div class="w-full max-w-[390px] min-h-screen bg-surface-bright flex flex-col relative shadow-sm overflow-x-hidden border-x border-outline-variant/30">
+<!-- State Switcher Bar (Interactive Simulation Helper) -->
+<div class="sticky top-0 z-50 bg-inverse-surface text-inverse-on-surface px-space-3 py-space-1 flex items-center justify-between text-[11px] font-medium border-b border-inverse-surface/40">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed">tune</span>
+<span>สลับมุมมอง:</span>
+</div>
+<div class="flex gap-1.5">
+<button class="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-semibold transition-all" id="btn-state-filled" onclick="switchState('filled')">
+          ปกติ (3 รายการ)
+        </button>
+<button class="px-2 py-0.5 rounded bg-surface-container-high/40 text-surface-variant hover:text-white transition-all" id="btn-state-empty" onclick="switchState('empty')">
+          ตะกร้าว่าง
+        </button>
+<button class="px-2 py-0.5 rounded bg-surface-container-high/40 text-surface-variant hover:text-white transition-all" id="btn-state-success" onclick="openSuccessModal()">
+          สั่งสำเร็จ
+        </button>
+</div>
+</div>
+<!-- Sticky Header (Top App Bar strictly following Design System) -->
+<header class="sticky top-[27px] z-40 bg-surface-container-lowest/95 backdrop-blur-md shadow-sm border-b border-outline-variant/30 px-space-4 py-space-2 flex items-center justify-between min-h-min-target">
+<div class="flex items-center gap-space-3">
+<button aria-label="กลับหน้าเมนู" class="min-w-min-target min-h-min-target flex items-center justify-center rounded-xl text-on-surface hover:bg-surface-container active:scale-95 transition-transform duration-150 -ml-space-2" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight leading-none">
+            ตะกร้าของคุณ
+          </h1>
+<span class="text-[12px] text-on-surface-variant font-normal mt-0.5">Kin-D QR Ordering</span>
+</div>
+</div>
+<!-- Badge โต๊ะ 5 and Clear Cart action -->
+<div class="flex items-center gap-space-2">
+<div class="flex items-center gap-1 bg-primary-fixed text-on-primary-fixed-variant px-space-3 py-1 rounded-full font-label-md text-label-md border border-primary-container/40">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">table_restaurant</span>
+<span>โต๊ะ 5</span>
+</div>
+<button aria-label="ล้างตะกร้า" class="w-9 h-9 flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-error-container/40 active:scale-95 transition-all duration-150" onclick="confirmClearCart()" title="ล้างตะกร้า" type="button">
+<span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+</button>
+</div>
+</header>
+<!-- CONTENT STATE 1: FILLED CART (DEFAULT) -->
+<main class="flex-1 px-space-4 pt-space-4 pb-36 space-y-space-4" id="cart-filled-view">
+<!-- Table Service Info Card -->
+<div class="bg-surface-container-low rounded-2xl p-space-3 flex items-center justify-between border border-outline-variant/30 text-on-surface-variant">
+<div class="flex items-center gap-space-2">
+<span class="material-symbols-outlined text-primary text-[20px]">restaurant_menu</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">ออเดอร์โต๊ะ 5 (รอบที่ 1)</span>
+</div>
+<span class="text-[13px] text-on-surface-variant tabular-nums">12:38 น.</span>
+</div>
+<!-- Cart Item List Header -->
+<div class="flex items-center justify-between pt-space-1">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">รายการอาหารที่เลือก</h2>
+<span class="bg-primary-container text-on-primary-container text-[12px] font-bold px-2 py-0.5 rounded-full" id="items-badge-count">3</span>
+</div>
+<button class="text-secondary font-label-md text-label-md flex items-center gap-1 hover:underline active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>เพิ่มอาหาร</span>
+</button>
+</div>
+<!-- CART ITEMS LIST CONTAINER -->
+<div class="space-y-space-3" id="cart-items-container">
+<!-- Item 1: ข้าวกะเพราหมูกรอบ -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-4 border border-outline-variant/40 shadow-sm relative overflow-hidden transition-all duration-200">
+<div class="flex gap-space-3">
+<!-- Food Thumbnail (64x64) -->
+<div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-outline-variant/30 bg-surface-container">
+<img alt="ข้าวกะเพราหมูกรอบ" class="w-full h-full object-cover" data-alt="A mouthwatering, close-up photograph of authentic Thai Crispy Pork Basil Stir-Fry served over warm fragrant Jasmine rice, topped with a golden crispy fried egg with a rich runny yolk. Bright high-key natural lunchtime lighting highlights the glossy glaze, chopped bird's eye chilies, and crispy basil leaves in a warm modern restaurant ambiance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9Z9X-cWdm89g7id3BqMA4CP9nVanWuCU87bd_t-0AQR-CLr1uJlm6M0yB7FSPIdSccngs0zK09DHZsA09ceYChN40UDtdeVjaWOTXgD-Gwe4kr87ds0yVFdPAssHh9voyQNhimGmwHsGWFkazEX2uAAOnznuYdhE-FmxZ0nsaQYHc_XSq7p1RisknXj9FUxew3uJlorJaajA6w7erI0vsNSNt27QY1GDfONqmU92vDpZThZl8RRCi"/>
+</div>
+<!-- Detail & Modifiers -->
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-2">
+<h3 class="font-body-strong text-body-strong text-on-surface truncate">ข้าวกะเพราหมูกรอบ</h3>
+<span class="font-body-strong text-body-strong text-secondary tabular-nums shrink-0">฿105</span>
+</div>
+<p class="text-[13px] text-on-surface-variant font-normal leading-relaxed mt-1">
+                เผ็ดกลาง • ไข่ดาวกรอบ (+฿10) • พิเศษหมูกรอบ (+฿20)
+              </p>
+<div class="flex items-center gap-1 mt-1 text-[12px] text-on-surface-variant/80 italic">
+<span class="material-symbols-outlined text-[14px]">edit_note</span>
+<span class="truncate">หมายเหตุ: ผัดแห้งๆ ไม่ใส่น้ำตาล</span>
+</div>
+</div>
+</div>
+<!-- Divider & Action Stepper Footer -->
+<div class="mt-space-3 pt-space-2 border-t border-outline-variant/20 flex items-center justify-between">
+<button class="text-error flex items-center gap-1 font-label-md text-[13px] px-2 py-1 rounded-lg hover:bg-error-container/30 active:scale-95 transition-all" onclick="removeItem(this, 105)" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+<span>ลบ</span>
+</button>
+<!-- Quantity Stepper adhering to 48px tap target ergonomics -->
+<div class="flex items-center bg-surface-container-low rounded-full p-1 border border-outline-variant/40">
+<button aria-label="ลดจำนวน" class="w-8 h-8 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center shadow-sm active:scale-90 hover:bg-surface-container transition-all" onclick="updateQty(this, -1, 105)" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="w-8 text-center font-body-strong text-body-strong text-on-surface tabular-nums item-qty">1</span>
+<button aria-label="เพิ่มจำนวน" class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm active:scale-90 hover:opacity-90 transition-all" onclick="updateQty(this, 1, 105)" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Item 2: ต้มยำกุ้งแม่น้ำน้ำข้น -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-4 border border-outline-variant/40 shadow-sm relative overflow-hidden transition-all duration-200">
+<div class="flex gap-space-3">
+<!-- Food Thumbnail (64x64) -->
+<div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-outline-variant/30 bg-surface-container">
+<img alt="ต้มยำกุ้งแม่น้ำน้ำข้น" class="w-full h-full object-cover" data-alt="A vivid, appetizing shot of authentic Thai Tom Yum River Prawn Soup with thick creamy aromatic broth in a traditional white ceramic bowl. Fresh river prawns, lemongrass stalks, kaffir lime leaves, and wild mushrooms are accented by drops of red chili oil, captured under bright warm restaurant lighting with clean minimal styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl9zDqZqLUR14eupJMGjkJHGjMzKo0FA4wDMMe7tRq5OVqUlc17lCQ6PZXmxbswxYhj8iO_lA5-JCh2XeYjQNFiAav-RmkFICZEujeHAmdjIngKMXQbb6q2YKu8leUFmzws9JB2Y2pB5JjbFUse5nRyAWC0C64yF5YSRJj-MADNW-vSeFpPJu-twtBUOHRoEZ9KKlYw8XQuYogscssGnRI9bQL9dhatMn3eKgZzHQM9XsDIPEyIsjp"/>
+</div>
+<!-- Detail & Modifiers -->
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-2">
+<h3 class="font-body-strong text-body-strong text-on-surface truncate">ต้มยำกุ้งแม่น้ำน้ำข้น</h3>
+<span class="font-body-strong text-body-strong text-secondary tabular-nums shrink-0">฿150</span>
+</div>
+<p class="text-[13px] text-on-surface-variant font-normal leading-relaxed mt-1">
+                เผ็ดปกติ • กุ้งแม่น้ำ 2 ตัว • เพิ่มเห็ดฟาง
+              </p>
+<div class="flex items-center gap-1 mt-1 text-[12px] text-on-surface-variant/80 italic">
+<span class="material-symbols-outlined text-[14px]">edit_note</span>
+<span class="truncate">หมายเหตุ: น้ำข้นใส่นมสด แยกพริกคั่ว</span>
+</div>
+</div>
+</div>
+<!-- Divider & Action Stepper Footer -->
+<div class="mt-space-3 pt-space-2 border-t border-outline-variant/20 flex items-center justify-between">
+<button class="text-error flex items-center gap-1 font-label-md text-[13px] px-2 py-1 rounded-lg hover:bg-error-container/30 active:scale-95 transition-all" onclick="removeItem(this, 150)" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+<span>ลบ</span>
+</button>
+<div class="flex items-center bg-surface-container-low rounded-full p-1 border border-outline-variant/40">
+<button aria-label="ลดจำนวน" class="w-8 h-8 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center shadow-sm active:scale-90 hover:bg-surface-container transition-all" onclick="updateQty(this, -1, 150)" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="w-8 text-center font-body-strong text-body-strong text-on-surface tabular-nums item-qty">1</span>
+<button aria-label="เพิ่มจำนวน" class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm active:scale-90 hover:opacity-90 transition-all" onclick="updateQty(this, 1, 150)" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Item 3: ชาไทยเย็นโบราณ -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-4 border border-outline-variant/40 shadow-sm relative overflow-hidden transition-all duration-200">
+<div class="flex gap-space-3">
+<!-- Food Thumbnail (64x64) -->
+<div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-outline-variant/30 bg-surface-container">
+<img alt="ชาไทยเย็นโบราณ" class="w-full h-full object-cover" data-alt="An inviting, refreshing glass of authentic iced Thai Milk Tea with crushed pebble ice and rich condensed milk gradient layering inside a tall clear glass. Soft condensation droplets dot the exterior, photographed against a neutral warm cafe background with natural diffuse sunlight emphasizing the vibrant orange hue." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGOtdEoVAZ9ghXkk8u6diKcOqv0v5ccJVwAY-cASQuvTCPpbcTDjXyB22PZbnizxF3jZxIVnRDdghTnew_VtNN_AX5xLrww_S2k5bnQQW7B4iDMCFvCy_eW_xxrRhAmXWXkMT2R-Q1jqERY-SFSDOCgOYfGwm_FikAUS45WyTdMQdQ87dHC4wXqhRlFvq2h40daa96HFc9Ah9seXLCkmzB4dAlA_OTvMsI6tvacGW0bp6J2Hrl52nO"/>
+</div>
+<!-- Detail & Modifiers -->
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-2">
+<h3 class="font-body-strong text-body-strong text-on-surface truncate">ชาไทยเย็นโบราณ</h3>
+<span class="font-body-strong text-body-strong text-secondary tabular-nums shrink-0">฿35</span>
+</div>
+<p class="text-[13px] text-on-surface-variant font-normal leading-relaxed mt-1">
+                หวานน้อย 50% • นมสดแท้ • น้ำแข็งบด
+              </p>
+<div class="flex items-center gap-1 mt-1 text-[12px] text-on-surface-variant/80 italic">
+<span class="material-symbols-outlined text-[14px]">edit_note</span>
+<span class="truncate">หมายเหตุ: ขอหลอดกระดาษรักษ์โลก</span>
+</div>
+</div>
+</div>
+<!-- Divider & Action Stepper Footer -->
+<div class="mt-space-3 pt-space-2 border-t border-outline-variant/20 flex items-center justify-between">
+<button class="text-error flex items-center gap-1 font-label-md text-[13px] px-2 py-1 rounded-lg hover:bg-error-container/30 active:scale-95 transition-all" onclick="removeItem(this, 35)" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+<span>ลบ</span>
+</button>
+<div class="flex items-center bg-surface-container-low rounded-full p-1 border border-outline-variant/40">
+<button aria-label="ลดจำนวน" class="w-8 h-8 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center shadow-sm active:scale-90 hover:bg-surface-container transition-all" onclick="updateQty(this, -1, 35)" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="w-8 text-center font-body-strong text-body-strong text-on-surface tabular-nums item-qty">1</span>
+<button aria-label="เพิ่มจำนวน" class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm active:scale-90 hover:opacity-90 transition-all" onclick="updateQty(this, 1, 35)" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<!-- Add More Items CTA Button -->
+<a class="w-full min-h-min-target bg-surface-container-lowest border-2 border-dashed border-outline-variant/60 hover:border-primary-container rounded-2xl p-space-3 flex items-center justify-center gap-2 text-primary font-body-strong text-body-strong hover:bg-primary-container/10 active:scale-[0.99] transition-all" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[22px]">add</span>
+<span>สั่งอาหารเพิ่ม</span>
+</a>
+<!-- Order Summary Card -->
+<section aria-label="สรุปยอดสั่งซื้อ" class="bg-surface-container-lowest rounded-2xl p-space-4 border border-outline-variant/40 shadow-sm space-y-space-3">
+<h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+<span>สรุปคำสั่งซื้อ</span>
+</h3>
+<div class="space-y-space-2 text-body-md text-body-md text-on-surface-variant">
+<div class="flex justify-between items-center">
+<span>ราคารวมอาหาร (<span id="summary-items-count">3</span> รายการ)</span>
+<span class="tabular-nums font-medium text-on-surface" id="summary-subtotal">฿290</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1">
+<span>ส่วนลดโปรโมชั่นร้าน</span>
+<span class="text-[11px] bg-secondary-fixed text-on-secondary-fixed-variant px-1.5 py-0.5 rounded font-semibold">WELCOME</span>
+</span>
+<span class="tabular-nums text-secondary font-medium">-฿0</span>
+</div>
+<div class="flex justify-between items-center text-[13px] text-on-surface-variant/80">
+<span>ภาษีมูลค่าเพิ่ม (VAT 7%) และค่าบริการ</span>
+<span>รวมในราคาแล้ว</span>
+</div>
+</div>
+<!-- Dashed Divider -->
+<div class="border-t border-dashed border-outline-variant/50 pt-space-3">
+<div class="flex justify-between items-baseline">
+<div>
+<span class="font-body-strong text-body-strong text-on-surface">ยอดสุทธิรวม</span>
+<p class="text-[12px] text-on-surface-variant font-normal">ชำระเงินเมื่อรับประทานเสร็จที่แคชเชียร์</p>
+</div>
+<span class="font-price-total text-price-total text-secondary tabular-nums" id="summary-total">฿290</span>
+</div>
+</div>
+</section>
+<!-- Dietary / Kitchen Note Accordion -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-3 border border-outline-variant/40 flex items-center justify-between text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-colors">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[20px]">notifications_active</span>
+<span class="font-body-md text-[14px]">มีคำขอพิเศษเพิ่มเติมถึงครัวกินดี?</span>
+</div>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</main>
+<!-- CONTENT STATE 2: EMPTY STATE (HIDDEN BY DEFAULT) -->
+<main class="hidden flex-1 px-space-4 pt-16 pb-20 flex flex-col items-center justify-center text-center" id="cart-empty-view">
+<div class="w-24 h-24 rounded-full bg-primary-fixed/50 flex items-center justify-center mb-space-4 text-primary">
+<span class="material-symbols-outlined text-[48px]">remove_shopping_cart</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">ยังไม่ได้เลือกอาหารเลย</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-[260px] leading-relaxed">
+        เลือกเมนูอร่อยๆ แล้วกลับมาส่งออเดอร์ให้ครัวทำร้อนๆ ที่นี่นะ
+      </p>
+<button class="mt-space-6 w-full max-w-[280px] h-min-target bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-xl flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-95 transition-all" onclick="switchState('filled')">
+<span class="material-symbols-outlined text-[20px]">restaurant</span>
+<span>ไปดูเมนูอาหาร</span>
+</button>
+<div class="mt-8 p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-[12px] text-on-surface-variant">
+        💡 โต๊ะ 5 สั่งอาหารได้ไม่จำกัดรอบ ครัวพร้อมปรุงสดใหม่จานต่อจาน
+      </div>
+</main>
+<!-- FIXED BOTTOM ACTION BAR (Strictly follows Order Summary Bottom Bar guidance) -->
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-surface-container-lowest border-t border-outline-variant/40 shadow-sm p-space-4 z-40" id="bottom-action-bar">
+<button class="w-full h-14 bg-primary-container hover:bg-primary-container/90 text-on-primary-container rounded-xl font-body-strong text-body-strong flex items-center justify-between px-space-4 shadow-sm active:scale-[0.98] transition-all min-h-min-target" onclick="openSuccessModal()" type="button">
+<div class="flex items-center gap-space-2">
+<span class="material-symbols-outlined text-[24px]">send</span>
+<span class="text-[17px] font-bold">ยืนยันการสั่ง</span>
+<span class="text-[14px] opacity-90">(<span id="btn-count">3</span> รายการ)</span>
+</div>
+<div class="flex items-center gap-1 font-headline-sm text-headline-sm tabular-nums">
+<span id="btn-total">฿290</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</div>
+</button>
+<p class="text-center text-[11px] text-on-surface-variant mt-1.5 font-normal">
+        กดแล้วรายการจะถูกส่งตรงเข้าจอครัวทันที
+      </p>
+</div>
+<!-- MODAL STATE 3: SUCCESS OVERLAY (Backdrop Blur + Animated Card) -->
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-space-4" id="success-overlay">
+<div class="w-full max-w-[340px] bg-surface-container-lowest rounded-2xl p-space-6 border border-outline-variant/40 shadow-lg text-center transform scale-95 transition-all duration-200 flex flex-col items-center">
+<!-- Animated Green Checkmark Icon -->
+<div class="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-space-4 ring-8 ring-emerald-50">
+<span class="material-symbols-outlined text-[44px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface">ส่งออเดอร์ให้ครัวแล้ว! 🎉</h3>
+<div class="mt-2 inline-flex items-center gap-1 bg-primary-fixed text-on-primary-fixed-variant px-3 py-1 rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">table_restaurant</span>
+<span>เสิร์ฟที่โต๊ะ 5</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-3 leading-relaxed">
+          ครัวกินดีได้รับรายการของคุณแล้ว กำลังตั้งกระทะปรุงอาหารจานร้อนพร้อมเสิร์ฟถึงโต๊ะ
+        </p>
+<!-- Status Summary Capsule -->
+<div class="w-full bg-surface-container-low rounded-xl p-space-3 my-space-4 border border-outline-variant/30 flex justify-between items-center text-[14px]">
+<span class="text-on-surface-variant">สถานะปัจจุบัน:</span>
+<span class="inline-flex items-center gap-1 bg-[#FEF3C7] text-[#B45309] font-semibold px-2.5 py-0.5 rounded-full text-[13px]">
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+<span>รอครัวรับทำ</span>
+</span>
+</div>
+<!-- Modal Action Buttons -->
+<div class="w-full space-y-space-2">
+<button class="w-full h-12 bg-primary-container text-on-primary-container rounded-xl font-body-strong text-body-strong flex items-center justify-center gap-2 shadow-sm hover:opacity-95 active:scale-95 transition-all min-h-min-target" onclick="closeSuccessModal(true)" type="button">
+<span class="material-symbols-outlined text-[20px]">receipt</span>
+<span>ดูสถานะออเดอร์ของโต๊ะ</span>
+</button>
+<button class="w-full h-12 bg-surface-container-lowest border border-outline-variant/60 text-on-surface rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-1 hover:bg-surface-container-low active:scale-95 transition-all min-h-min-target" onclick="closeSuccessModal(false)" type="button">
+<span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+<span>สั่งอาหารเพิ่มอีก</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Inline Vanilla JavaScript for State Toggles and Realistic POS Micro-Interactions -->
+<script>
+    // State management
+    let cartItems = [
+      { id: 1, name: "ข้าวกะเพราหมูกรอบ", price: 105, qty: 1 },
+      { id: 2, name: "ต้มยำกุ้งแม่น้ำน้ำข้น", price: 150, qty: 1 },
+      { id: 3, name: "ชาไทยเย็นโบราณ", price: 35, qty: 1 }
+    ];
+
+    function calculateTotals() {
+      const totalQty = cartItems.reduce((sum, item) => sum + item.qty, 0);
+      const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      // Update UI elements
+      const badgeCount = document.getElementById('items-badge-count');
+      const summaryCount = document.getElementById('summary-items-count');
+      const summarySubtotal = document.getElementById('summary-subtotal');
+      const summaryTotal = document.getElementById('summary-total');
+      const btnCount = document.getElementById('btn-count');
+      const btnTotal = document.getElementById('btn-total');
+
+      if (badgeCount) badgeCount.textContent = totalQty;
+      if (summaryCount) summaryCount.textContent = totalQty;
+      if (summarySubtotal) summarySubtotal.textContent = '฿' + subtotal;
+      if (summaryTotal) summaryTotal.textContent = '฿' + subtotal;
+      if (btnCount) btnCount.textContent = totalQty;
+      if (btnTotal) btnTotal.textContent = '฿' + subtotal;
+
+      if (totalQty === 0) {
+        switchState('empty');
+      }
+    }
+
+    function updateQty(btn, delta, price) {
+      const stepper = btn.closest('.flex');
+      const qtySpan = stepper.querySelector('.item-qty');
+      let current = parseInt(qtySpan.textContent) || 1;
+      
+      current += delta;
+      if (current < 1) {
+        const article = btn.closest('article');
+        removeItem(article, price);
+        return;
+      }
+
+      qtySpan.textContent = current;
+      
+      // Update data model
+      if (cartItems.length > 0) {
+        cartItems[0].qty = current; // prototype update
+      }
+      calculateTotals();
+    }
+
+    function removeItem(element, price) {
+      const card = element.closest('article');
+      if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+          card.remove();
+          if (cartItems.length > 0) {
+            cartItems.pop();
+          }
+          calculateTotals();
+        }, 180);
+      }
+    }
+
+    function confirmClearCart() {
+      if (confirm("คุณต้องการล้างรายการอาหารทั้งหมดในตะกร้าใช่หรือไม่?")) {
+        cartItems = [];
+        switchState('empty');
+      }
+    }
+
+    function switchState(state) {
+      const filledView = document.getElementById('cart-filled-view');
+      const emptyView = document.getElementById('cart-empty-view');
+      const bottomBar = document.getElementById('bottom-action-bar');
+      const btnFilled = document.getElementById('btn-state-filled');
+      const btnEmpty = document.getElementById('btn-state-empty');
+
+      if (state === 'filled') {
+        filledView.classList.remove('hidden');
+        emptyView.classList.add('hidden');
+        bottomBar.classList.remove('hidden');
+
+        btnFilled.className = "px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-semibold transition-all";
+        btnEmpty.className = "px-2 py-0.5 rounded bg-surface-container-high/40 text-surface-variant hover:text-white transition-all";
+
+        // replenish mock items if needed
+        if (cartItems.length === 0) {
+          cartItems = [
+            { id: 1, name: "ข้าวกะเพราหมูกรอบ", price: 105, qty: 1 },
+            { id: 2, name: "ต้มยำกุ้งแม่น้ำน้ำข้น", price: 150, qty: 1 },
+            { id: 3, name: "ชาไทยเย็นโบราณ", price: 35, qty: 1 }
+          ];
+          calculateTotals();
+        }
+      } else if (state === 'empty') {
+        filledView.classList.add('hidden');
+        emptyView.classList.remove('hidden');
+        bottomBar.classList.add('hidden');
+
+        btnEmpty.className = "px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-semibold transition-all";
+        btnFilled.className = "px-2 py-0.5 rounded bg-surface-container-high/40 text-surface-variant hover:text-white transition-all";
+      }
+    }
+
+    function openSuccessModal() {
+      const modal = document.getElementById('success-overlay');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSuccessModal(toStatus) {
+      const modal = document.getElementById('success-overlay');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if (toStatus) {
+        alert("กำลังพาท่านไปยังหน้ารายการบิลและสถานะอาหารของโต๊ะ 5");
+      }
+    }
+  </script>
+</body></html>

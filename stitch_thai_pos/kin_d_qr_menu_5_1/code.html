@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Kin-D POS | QR Menu สั่งอาหาร</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: IBM Plex Sans Thai -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#dbe1ff",
+            "on-primary-fixed": "#2a1700",
+            "surface-variant": "#e3e2e2",
+            "primary-fixed": "#ffddb8",
+            "inverse-primary": "#ffb95f",
+            "surface-dim": "#dbdad9",
+            "on-tertiary-container": "#003ba1",
+            "on-primary": "#ffffff",
+            "tertiary": "#0053db",
+            "inverse-on-surface": "#f2f0f0",
+            "on-secondary-fixed": "#370e00",
+            "on-error-container": "#93000a",
+            "surface-container-low": "#f5f3f3",
+            "surface-container-highest": "#e3e2e2",
+            "secondary": "#a73a00",
+            "tertiary-container": "#94aeff",
+            "outline-variant": "#d8c3ad",
+            "primary": "#855300",
+            "on-secondary-container": "#571a00",
+            "surface-container-high": "#e9e8e7",
+            "on-secondary": "#ffffff",
+            "on-primary-container": "#613b00",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#534434",
+            "surface-tint": "#855300",
+            "on-surface": "#1b1c1c",
+            "background": "#fbf9f9",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "surface-container": "#efeded",
+            "secondary-fixed": "#ffdbce",
+            "secondary-fixed-dim": "#ffb599",
+            "error": "#ba1a1a",
+            "outline": "#867461",
+            "on-tertiary": "#ffffff",
+            "error-container": "#ffdad6",
+            "secondary-container": "#fd651e",
+            "on-error": "#ffffff",
+            "inverse-surface": "#303031",
+            "surface-bright": "#fbf9f9",
+            "surface": "#fbf9f9",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "on-tertiary-fixed": "#00174b",
+            "primary-container": "#f59e0b",
+            "on-primary-fixed-variant": "#653e00",
+            "on-background": "#1b1c1c",
+            "primary-fixed-dim": "#ffb95f"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-3": "12px",
+            "space-5": "20px",
+            "space-6": "24px",
+            "space-4": "16px",
+            "space-1": "4px",
+            "space-2": "8px",
+            "grid-base": "4px",
+            "card-p-mobile": "16px",
+            "space-8": "32px",
+            "min-target": "48px"
+          },
+          "fontFamily": {
+            "body-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "body-strong": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-lg": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "headline-sm": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-display": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "label-md": ["\"IBM Plex Sans Thai\", sans-serif"],
+            "price-total": ["\"IBM Plex Sans Thai\", sans-serif"]
+          },
+          "fontSize": {
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-lg": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "price-total": ["26px", { "lineHeight": "32px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .animate-shimmer {
+      background: linear-gradient(90deg, #f0eeee 25%, #e2e0df 50%, #f0eeee 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.6s infinite;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col justify-start items-center antialiased selection:bg-primary-container selection:text-on-primary-container pb-28">
+<!-- Main Viewport Wrap: Mobile Handheld Shell (max 390px default, scaled smoothly) -->
+<div class="w-full max-w-[390px] bg-surface min-h-screen flex flex-col relative shadow-sm">
+<!-- Interactive Prototype View Switcher (Top Utility Bar for Testing States) -->
+<div class="bg-surface-container-highest px-space-3 py-space-2 border-b border-outline-variant flex items-center justify-between z-50">
+<div class="flex items-center gap-space-1">
+<span class="material-symbols-outlined text-primary text-label-md" data-icon="tune">tune</span>
+<span class="font-label-md text-label-md text-on-surface-variant">โหมดหน้าจอ:</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+<button class="px-2 py-1 rounded font-label-md text-[11px] bg-primary text-on-primary font-bold transition-all shadow-sm" id="btn-normal" onclick="switchState('normal')">ปกติ</button>
+<button class="px-2 py-1 rounded font-label-md text-[11px] bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" id="btn-skeleton" onclick="switchState('skeleton')">Skeleton</button>
+<button class="px-2 py-1 rounded font-label-md text-[11px] bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" id="btn-empty" onclick="switchState('empty')">ว่างเปล่า</button>
+<button class="px-2 py-1 rounded font-label-md text-[11px] bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" id="btn-error" onclick="switchState('error')">QR ผิดพลาด</button>
+</div>
+</div>
+<!-- 1. STICKY TOP APP BAR (Shared Components JSON Anchor Compliant) -->
+<header class="sticky top-0 z-40 bg-surface border-b border-outline-variant shadow-sm w-full">
+<div class="flex justify-between items-center w-full px-space-4 py-space-2 min-h-[58px]">
+<!-- Brand & Table Info -->
+<div class="flex items-center gap-space-2">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined font-bold text-[24px]" data-icon="restaurant">restaurant</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-1">
+<span class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight leading-none">ครัวกินดี</span>
+<span class="text-[12px] text-on-surface-variant font-label-md tracking-normal">(Kin-D)</span>
+</div>
+<span class="font-label-md text-[12px] text-on-surface-variant leading-tight mt-0.5">กะเที่ยง • สั่งอาหารผ่านมือถือ</span>
+</div>
+</div>
+<!-- Table Identifier Badge -->
+<div class="flex items-center gap-1.5 bg-primary-container text-on-primary-container px-space-3 py-1.5 rounded-full border border-primary-container shadow-sm min-h-min-target">
+<span class="material-symbols-outlined text-[20px]" data-icon="table_restaurant" style="font-variation-settings: 'FILL' 1;">table_restaurant</span>
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight">โต๊ะ 5</span>
+</div>
+</div>
+<!-- Quick Search Bar inside sticky header -->
+<div class="px-space-4 pb-space-2">
+<div class="relative w-full flex items-center">
+<span class="material-symbols-outlined absolute left-space-3 text-outline text-[20px] pointer-events-none" data-icon="search">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-10 pr- space-4 py-2.5 text-on-surface font-body-md text-label-lg placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary-container text-sm" placeholder="ค้นหาชื่ออาหาร เช่น ข้าวผัด, ต้มยำ..." type="text"/>
+</div>
+</div>
+<!-- 2. Sticky Category Pill Track (Horizontal Scrollable) -->
+<nav class="flex items-center gap-space-2 px-space-4 pb-space-2 overflow-x-auto no-scrollbar border-t border-surface-container">
+<button class="shrink-0 flex items-center gap-1 px-space-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md shadow-sm active:scale-95 transition-transform duration-150 min-h-min-target">
+<span class="material-symbols-outlined text-[18px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>แนะนำ</span>
+</button>
+<button class="shrink-0 px-space-4 py-2 rounded-full bg-surface-container-lowest text-on-surface border border-outline-variant font-label-md text-label-md hover:bg-surface-container-high active:scale-95 transition-transform duration-150 min-h-min-target">
+          ข้าว/จานเดียว
+        </button>
+<button class="shrink-0 px-space-4 py-2 rounded-full bg-surface-container-lowest text-on-surface border border-outline-variant font-label-md text-label-md hover:bg-surface-container-high active:scale-95 transition-transform duration-150 min-h-min-target">
+          เส้น/ก๋วยเตี๋ยว
+        </button>
+<button class="shrink-0 px-space-4 py-2 rounded-full bg-surface-container-lowest text-on-surface border border-outline-variant font-label-md text-label-md hover:bg-surface-container-high active:scale-95 transition-transform duration-150 min-h-min-target">
+          ของทอด/ทานเล่น
+        </button>
+<button class="shrink-0 px-space-4 py-2 rounded-full bg-surface-container-lowest text-on-surface border border-outline-variant font-label-md text-label-md hover:bg-surface-container-high active:scale-95 transition-transform duration-150 min-h-min-target">
+          ต้ม/แกง
+        </button>
+<button class="shrink-0 px-space-4 py-2 rounded-full bg-surface-container-lowest text-on-surface border border-outline-variant font-label-md text-label-md hover:bg-surface-container-high active:scale-95 transition-transform duration-150 min-h-min-target">
+          เครื่องดื่ม/ของหวาน
+        </button>
+</nav>
+</header>
+<!-- CONTENT WRAPPER -->
+<main class="flex-1 w-full relative">
+<!-- ========================================== -->
+<!-- VIEW STATE 1: NORMAL MENU (Default) -->
+<!-- ========================================== -->
+<section class="block w-full" id="state-normal">
+<!-- Category Banner / Section Header -->
+<div class="px-space-4 pt-space-4 pb-space-1 flex items-center justify-between">
+<div class="flex items-center gap-space-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container inline-block"></span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold">เมนูแนะนำยอดนิยม</h2>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">6 รายการ</span>
+</div>
+<!-- 4. Grid Menu Items (2 Columns for Ergonomic Fast Tapping) -->
+<div class="grid grid-cols-2 gap-space-3 p-space-4">
+<!-- Item Card 1: กะเพราหมูกรอบ -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col justify-between relative group hover:border-primary-container transition-all">
+<div class="w-full">
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden relative bg-surface-container mb-space-2">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Close-up appetizing shot of authentic Thai crispy pork belly stir-fried with holy basil, red birds-eye chilies, and served with a golden crispy-edged fried egg over steaming jasmine rice. High-key natural warm lighting, vibrant kitchen ambiance, clean ceramic plate, professional commercial food styling with amber and golden hues." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTQh4RMEfsrqNiyTy03PTSk6yMDuQWacU3VjNXsNWyjQPCJ1asYOU3D7X7Y8NEoNJF2uY2Ghjou2MuEcGOwBfey1Py6tmDQwZbzFXaLwE015-WPZOmnXfWZ5kKlZs_fuE8kOpCeP1xst6E7GAZZjUz-r2OS_g1UFpuOa_cAhxVvVGPrslgvrzxfb89vo8M-RXNpqyZJZGqz_IwG1Zj_h2nMVl-7CVTLAWoG2VhC1R0_qgSav1NkD4A"/>
+<span class="absolute top-2 left-2 bg-secondary-container text-on-secondary font-label-md text-[11px] px-2 py-0.5 rounded-full shadow-sm font-bold">
+                  ขายดี
+                </span>
+</div>
+<h3 class="font-body-strong text-body-strong text-on-surface font-bold line-clamp-2 leading-tight min-h-[38px]">
+                ข้าวกะเพราหมูกรอบไข่ดาว
+              </h3>
+<p class="font-body-md text-[13px] text-on-surface-variant line-clamp-1 mt-0.5">
+                หมูกรอบคัดพิเศษ ใบกะเพราแท้
+              </p>
+</div>
+<div class="flex items-end justify-between mt-space-3 pt-space-1 border-t border-surface-container">
+<div class="flex flex-col">
+<span class="text-[11px] font-label-md text-on-surface-variant">ราคา</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold tabular-nums">฿75</span>
+</div>
+<button aria-label="เพิ่มลงตะกร้า" class="w-11 h-11 rounded-xl bg-primary-container text-on-primary-container hover:bg-secondary-container hover:text-on-secondary active:scale-90 transition-all flex items-center justify-center shadow-sm min-h-min-target min-w-min-target" onclick="addItem('ข้าวกะเพราหมูกรอบไข่ดาว', 75)">
+<span class="material-symbols-outlined text-[24px]" data-icon="add">add</span>
+</button>
+</div>
+</article>
+<!-- Item Card 2: ต้มยำกุ้งแม่น้ำ -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col justify-between relative group hover:border-primary-container transition-all">
+<div class="w-full">
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden relative bg-surface-container mb-space-2">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Vibrant traditional Thai Tom Yum Goong soup served in an authentic white porcelain bowl, featuring large river prawns, galangal, lemongrass, kaffir lime leaves, and floating chili oil drops. Warm high-contrast restaurant lighting, rich orange broth tones, garnished with fresh cilantro, appetizing fine dining Thai street food presentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARX2XQbq236ea1QVxbz8Ue_Pw0rIAoY5Pgpx87C0zJN0-RCf4dTPUw86n-BGrj6VlWBAjHJTIYvro94tTQJvGiFKsBpUVil5ZoWsUE9poAQ-nc2MscPydtarhRZLz7eKqqFn_NG_labzLDNVbBhOeNZ18mh13eYBRj617Pm4rsOTqRueO7p0ZG-LDv9ibTRuN1VWf2XvJa9C2pScOmleDDbkYRv0m8ezioIolErg-7pURW3UIvWZIl"/>
+</div>
+<h3 class="font-body-strong text-body-strong text-on-surface font-bold line-clamp-2 leading-tight min-h-[38px]">
+                ต้มยำกุ้งแม่น้ำน้ำข้น
+              </h3>
+<p class="font-body-md text-[13px] text-on-surface-variant line-clamp-1 mt-0.5">
+                กุ้งแม่น้ำ 2 ตัว มันกุ้งฉ่ำ
+              </p>
+</div>
+<div class="flex items-end justify-between mt-space-3 pt-space-1 border-t border-surface-container">
+<div class="flex flex-col">
+<span class="text-[11px] font-label-md text-on-surface-variant">ราคา</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold tabular-nums">฿150</span>
+</div>
+<button aria-label="เพิ่มลงตะกร้า" class="w-11 h-11 rounded-xl bg-primary-container text-on-primary-container hover:bg-secondary-container hover:text-on-secondary active:scale-90 transition-all flex items-center justify-center shadow-sm min-h-min-target min-w-min-target" onclick="addItem('ต้มยำกุ้งแม่น้ำน้ำข้น', 150)">
+<span class="material-symbols-outlined text-[24px]" data-icon="add">add</span>
+</button>
+</div>
+</article>
+<!-- Item Card 3: ไก่ทอดเกลือสมุนไพร -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col justify-between relative group hover:border-primary-container transition-all">
+<div class="w-full">
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden relative bg-surface-container mb-space-2">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Golden brown deep-fried Thai style salt and lemongrass marinated crispy chicken wings piled neatly on a woven bamboo plate with fried garlic flakes and dipping sweet chili sauce on the side. Bright warm studio lighting, razor sharp food details, appetizing golden textures reflecting modern Thai restaurant aesthetics." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEIpV-2DgvPfrQb90YZr3iepEjBjdtKRo1yQf7W8JmXfZFoI42gyFjxvkCnjCZ7Jo8G1acI68H20mgDRsme6HOZPgEEnplxCmPPfk19KbuFvAmXzB0g1R6dw8ROBtrjQ4OD0UF7MRUgsXas0lhjWtb3VgnUYSGf8W71_OOaN95t1tTO4QmpT7NbEe4CjuvS53ATd-4NOJRrl9p5sfr07U6alagxQGiYx9eLL8h4BEzDU5uCZOrcanl"/>
+</div>
+<h3 class="font-body-strong text-body-strong text-on-surface font-bold line-clamp-2 leading-tight min-h-[38px]">
+                ไก่ทอดเกลือสมุนไพร
+              </h3>
+<p class="font-body-md text-[13px] text-on-surface-variant line-clamp-1 mt-0.5">
+                กรอบนอกนุ่มใน สมุนไพรหอม
+              </p>
+</div>
+<div class="flex items-end justify-between mt-space-3 pt-space-1 border-t border-surface-container">
+<div class="flex flex-col">
+<span class="text-[11px] font-label-md text-on-surface-variant">ราคา</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold tabular-nums">฿90</span>
+</div>
+<button aria-label="เพิ่มลงตะกร้า" class="w-11 h-11 rounded-xl bg-primary-container text-on-primary-container hover:bg-secondary-container hover:text-on-secondary active:scale-90 transition-all flex items-center justify-center shadow-sm min-h-min-target min-w-min-target" onclick="addItem('ไก่ทอดเกลือสมุนไพร', 90)">
+<span class="material-symbols-outlined text-[24px]" data-icon="add">add</span>
+</button>
+</div>
+</article>
+<!-- Item Card 4: ผัดไทยกุ้งสดห่อไข่ -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col justify-between relative group hover:border-primary-container transition-all">
+<div class="w-full">
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden relative bg-surface-container mb-space-2">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Authentic Pad Thai noodles delicately wrapped inside a thin golden egg crepe lattice, topped with succulent prawns, crushed roasted peanuts, fresh bean sprouts, and sliced lime wedge on modern earthenware pottery. Balanced warm daylight, vibrant orange tamarind sauce glazes, meticulous gastronomic Thai culinary styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDW5ay2YwydP_4Eh-iHOb4xTqiEqy1K7pBn89YkFsn_2V7cQAVO3Zno97RI6FwKGTtaNDjHeVFuiGicfYr5sw-SdQCIZjVxaQ99jlm2ux8TeL9F-frhBzwasUd2-WCYnhvIkPYgG3ibQ8TljRvwwPd2bxk971LXIew1_86y6RpbrUES8X2Py4puAi3pZqs2tbM-Spz7V6VGkwST2187YMucrNRKDDR71FN52-xW1eM9izOUVu4huLrq"/>
+</div>
+<h3 class="font-body-strong text-body-strong text-on-surface font-bold line-clamp-2 leading-tight min-h-[38px]">
+                ผัดไทยกุ้งสดห่อไข่
+              </h3>
+<p class="font-body-md text-[13px] text-on-surface-variant line-clamp-1 mt-0.5">
+                ซอสมะขามเข้มข้นสูตรโบราณ
+              </p>
+</div>
+<div class="flex items-end justify-between mt-space-3 pt-space-1 border-t border-surface-container">
+<div class="flex flex-col">
+<span class="text-[11px] font-label-md text-on-surface-variant">ราคา</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold tabular-nums">฿85</span>
+</div>
+<button aria-label="เพิ่มลงตะกร้า" class="w-11 h-11 rounded-xl bg-primary-container text-on-primary-container hover:bg-secondary-container hover:text-on-secondary active:scale-90 transition-all flex items-center justify-center shadow-sm min-h-min-target min-w-min-target" onclick="addItem('ผัดไทยกุ้งสดห่อไข่', 85)">
+<span class="material-symbols-outlined text-[24px]" data-icon="add">add</span>
+</button>
+</div>
+</article>
+<!-- Item Card 5: หมูกรอบคั่วพริกเกลือ (SOLD OUT ITEM) -->
+<article class="bg-surface-container border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col justify-between relative opacity-80">
+<div class="w-full">
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden relative bg-surface-dim mb-space-2">
+<img class="w-full h-full object-cover grayscale opacity-50" data-alt="Wok-tossed crunchy pork belly cubes with fried garlic, diced red and green bird eye chilies, spring onion rings on a rustic dark plate. Moody studio food photography with warm contrast, slight motion steam blur, highly textured roasted edges." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYqf-Dreh2IqM9Ktjnin8YXrh8kFM3CFLiFcR1yWdkVB3y1sb4DlcCzQsktDpExhR4Xor2RtXH-jEmLIHmS6qLiF9i3gv8BPoaV6GtEjcGxtwg_CZaV5SqimeKSt5xr0LtqHjD3ODV5w9sXR7ONqPwPKck0QQzrHhaLS0EHE2H9Zhuob9thY0easuBb06PNQCkgrfYDYuxVQqpWJbdSOeKaHOJmLQ9PyRA-Eq0GlUqLuonrkTMUTj4"/>
+<!-- Centered Sold Out Overlay -->
+<div class="absolute inset-0 flex items-center justify-center bg-inverse-surface/75 backdrop-blur-[1px]">
+<span class="px-space-3 py-1 bg-surface-container-lowest/90 text-error font-headline-sm text-[13px] font-bold rounded-lg border border-error shadow-sm tracking-wide">
+                    หมดวันนี้
+                  </span>
+</div>
+</div>
+<h3 class="font-body-strong text-body-strong text-outline font-bold line-clamp-2 leading-tight min-h-[38px]">
+                หมูกรอบคั่วพริกเกลือ
+              </h3>
+<p class="font-body-md text-[13px] text-outline line-clamp-1 mt-0.5">
+                พริกขี้หนูสวน กระเทียมเจียว
+              </p>
+</div>
+<div class="flex items-end justify-between mt-space-3 pt-space-1 border-t border-surface-container-high">
+<div class="flex flex-col">
+<span class="text-[11px] font-label-md text-outline">ราคา</span>
+<span class="font-headline-sm text-headline-sm text-outline font-bold tabular-nums">฿95</span>
+</div>
+<button aria-label="สินค้าหมด" class="w-11 h-11 rounded-xl bg-surface-container-high text-outline cursor-not-allowed flex items-center justify-center min-h-min-target min-w-min-target" disabled="">
+<span class="material-symbols-outlined text-[20px]" data-icon="block">block</span>
+</button>
+</div>
+</article>
+<!-- Item Card 6: ชาไทยเย็นโบราณ -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col justify-between relative group hover:border-primary-container transition-all">
+<div class="w-full">
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden relative bg-surface-container mb-space-2">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Tall clear glass filled with crushed ice and rich gradient layered traditional Thai iced tea topped with creamy evaporated milk drizzle. Condensation water beads on the glass surface, warm sunlight backdrop in a cozy wooden cafe ambiance, vibrant saturated orange and silky white dairy contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgBbr3FiQBMh8nVUglyacz8alok6PzrhWDP5o1oEWwSSTgpjABIGxv_O_NivLcY1IUXQgpIl0mbaiiL624YBzbq93HvcDsGV38gZuj5vSEnZNDRqiecSf-qfL3j6Ft-lQKyz7B7j4rwapVOazTXGrfspXEsoeVe3czRBAkvDHOyrGM_BUnHv-KrBzcnkt7tdxsPAB46WSsf2SwhNdlsxEZaDYZTkGReqeNmpoaMTuoUI1umrPPD1eT"/>
+<span class="absolute top-2 left-2 bg-primary-container text-on-primary-container font-label-md text-[11px] px-2 py-0.5 rounded-full shadow-sm font-bold">
+                  สูตรเด็ด
+                </span>
+</div>
+<h3 class="font-body-strong text-body-strong text-on-surface font-bold line-clamp-2 leading-tight min-h-[38px]">
+                ชาไทยเย็นโบราณ
+              </h3>
+<p class="font-body-md text-[13px] text-on-surface-variant line-clamp-1 mt-0.5">
+                ใบชาแท้ หอมมัน เข้มข้น
+              </p>
+</div>
+<div class="flex items-end justify-between mt-space-3 pt-space-1 border-t border-surface-container">
+<div class="flex flex-col">
+<span class="text-[11px] font-label-md text-on-surface-variant">ราคา</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold tabular-nums">฿35</span>
+</div>
+<button aria-label="เพิ่มลงตะกร้า" class="w-11 h-11 rounded-xl bg-primary-container text-on-primary-container hover:bg-secondary-container hover:text-on-secondary active:scale-90 transition-all flex items-center justify-center shadow-sm min-h-min-target min-w-min-target" onclick="addItem('ชาไทยเย็นโบราณ', 35)">
+<span class="material-symbols-outlined text-[24px]" data-icon="add">add</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- VIEW STATE 2: SKELETON LOADING STATE -->
+<!-- ========================================== -->
+<section class="hidden w-full" id="state-skeleton">
+<div class="px-space-4 pt-space-4 pb-space-2 flex justify-between items-center">
+<div class="h-6 w-36 rounded-md animate-shimmer"></div>
+<div class="h-4 w-12 rounded-md animate-shimmer"></div>
+</div>
+<div class="grid grid-cols-2 gap-space-3 p-space-4">
+<!-- 6 Skeleton Cards -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] rounded-xl animate-shimmer"></div>
+<div class="h-4 w-4/5 rounded animate-shimmer mt-1"></div>
+<div class="h-3 w-1/2 rounded animate-shimmer"></div>
+<div class="flex justify-between items-center mt-3 pt-2 border-t border-surface-container">
+<div class="h-6 w-12 rounded animate-shimmer"></div>
+<div class="w-10 h-10 rounded-xl animate-shimmer"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] rounded-xl animate-shimmer"></div>
+<div class="h-4 w-4/5 rounded animate-shimmer mt-1"></div>
+<div class="h-3 w-1/2 rounded animate-shimmer"></div>
+<div class="flex justify-between items-center mt-3 pt-2 border-t border-surface-container">
+<div class="h-6 w-12 rounded animate-shimmer"></div>
+<div class="w-10 h-10 rounded-xl animate-shimmer"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] rounded-xl animate-shimmer"></div>
+<div class="h-4 w-4/5 rounded animate-shimmer mt-1"></div>
+<div class="h-3 w-1/2 rounded animate-shimmer"></div>
+<div class="flex justify-between items-center mt-3 pt-2 border-t border-surface-container">
+<div class="h-6 w-12 rounded animate-shimmer"></div>
+<div class="w-10 h-10 rounded-xl animate-shimmer"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] rounded-xl animate-shimmer"></div>
+<div class="h-4 w-4/5 rounded animate-shimmer mt-1"></div>
+<div class="h-3 w-1/2 rounded animate-shimmer"></div>
+<div class="flex justify-between items-center mt-3 pt-2 border-t border-surface-container">
+<div class="h-6 w-12 rounded animate-shimmer"></div>
+<div class="w-10 h-10 rounded-xl animate-shimmer"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] rounded-xl animate-shimmer"></div>
+<div class="h-4 w-4/5 rounded animate-shimmer mt-1"></div>
+<div class="h-3 w-1/2 rounded animate-shimmer"></div>
+<div class="flex justify-between items-center mt-3 pt-2 border-t border-surface-container">
+<div class="h-6 w-12 rounded animate-shimmer"></div>
+<div class="w-10 h-10 rounded-xl animate-shimmer"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-space-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] rounded-xl animate-shimmer"></div>
+<div class="h-4 w-4/5 rounded animate-shimmer mt-1"></div>
+<div class="h-3 w-1/2 rounded animate-shimmer"></div>
+<div class="flex justify-between items-center mt-3 pt-2 border-t border-surface-container">
+<div class="h-6 w-12 rounded animate-shimmer"></div>
+<div class="w-10 h-10 rounded-xl animate-shimmer"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================== -->
+<!-- VIEW STATE 3: EMPTY STATE -->
+<!-- ========================================== -->
+<section class="hidden w-full px-space-6 py-16 flex flex-col items-center justify-center text-center" id="state-empty">
+<div class="w-20 h-20 rounded-full bg-surface-container-high text-outline flex items-center justify-center mb-space-4">
+<span class="material-symbols-outlined text-[44px]" data-icon="restaurant">restaurant</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold mb-1">
+          ยังไม่มีเมนูในหมวดหมู่นี้
+        </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[260px] mb-space-6">
+          พ่อครัวกำลังเตรียมอัปเดตเมนูใหม่ ลองเลือกหมวดอาหารแนะนำด้านบนได้เลยครับ
+        </p>
+<button class="px-space-6 py-3 rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-bold shadow-sm active:scale-95 transition-transform min-h-min-target flex items-center gap-2" onclick="switchState('normal')">
+<span class="material-symbols-outlined text-[20px]" data-icon="arrow_back">arrow_back</span>
+<span>กลับไปหน้าเมนูหลัก</span>
+</button>
+</section>
+<!-- ========================================== -->
+<!-- VIEW STATE 4: ERROR / EXPIRED QR STATE -->
+<!-- ========================================== -->
+<section class="hidden w-full px-space-6 py-12 flex flex-col items-center justify-center text-center" id="state-error">
+<div class="w-24 h-24 rounded-3xl bg-error-container text-error flex items-center justify-center mb-space-5 shadow-sm border border-error/20">
+<span class="material-symbols-outlined text-[52px]" data-icon="qr_code_scanner">qr_code_scanner</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-space-3 py-1 rounded-full bg-error-container text-on-error-container font-label-md text-label-md mb-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="warning">warning</span>
+<span>รหัส QR หมดอายุหรือไม่ถูกต้อง</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface font-bold mb-2">
+          ไม่สามารถโหลดรายการโต๊ะ 5 ได้
+        </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[300px] mb-space-6 leading-relaxed">
+          เซสชันการสั่งอาหารของโต๊ะนี้สิ้นสุดลงแล้ว หรือเช็คบิลเสร็จสิ้น กรุณาแจ้งพนักงานประจำร้านเพื่อขอเปิดโต๊ะและรับ QR Code สดใหม่
+        </p>
+<div class="w-full flex flex-col gap-space-3">
+<button class="w-full h-min-target rounded-xl bg-secondary-container text-on-secondary font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[24px]" data-icon="notifications_active">notifications_active</span>
+<span>กดกริ่งเรียกพนักงานที่โต๊ะ</span>
+</button>
+<button class="w-full h-min-target rounded-xl bg-surface-container-lowest border border-outline-variant text-on-surface font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 hover:bg-surface-container transition-all" onclick="switchState('normal')">
+<span class="material-symbols-outlined text-[20px]" data-icon="refresh">refresh</span>
+<span>ลองรีเฟรชหน้าจอใหม่อีกครั้ง</span>
+</button>
+</div>
+</section>
+</main>
+<!-- 5. FLOATING BOTTOM BAR: CART SUMMARY (Sticky above device bottom) -->
+<aside class="fixed bottom-0 left-0 right-0 max-w-[390px] mx-auto p-space-4 z-50 pointer-events-none transition-all duration-300" id="floating-cart">
+<div class="pointer-events-auto bg-gradient-to-r from-secondary-container to-primary-container text-on-secondary rounded-2xl p-space-4 shadow-lg flex items-center justify-between cursor-pointer border border-on-secondary/20 active:scale-[0.98] transition-transform duration-150 min-h-[56px]" onclick="openCartDrawer()">
+<!-- Left: Cart Icon & Item Count -->
+<div class="flex items-center gap-space-3">
+<div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-on-secondary/20 text-on-secondary">
+<span class="material-symbols-outlined text-[24px]" data-icon="shopping_bag" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+<span class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-on-secondary text-secondary-container font-headline-sm text-[12px] flex items-center justify-center font-extrabold shadow-sm" id="cart-badge-count">
+              3
+            </span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-headline-sm text-headline-sm font-bold leading-tight">ดูตะกร้าสั่งอาหาร</span>
+<span class="font-label-md text-[12px] text-on-secondary/90 leading-tight" id="cart-item-label">3 รายการในรายการ</span>
+</div>
+</div>
+<!-- Right: Total Price & Chevron -->
+<div class="flex items-center gap-2">
+<div class="flex flex-col text-right">
+<span class="text-[10px] font-label-md uppercase tracking-wider text-on-secondary/80">ยอดรวม</span>
+<span class="font-headline-lg text-headline-lg font-extrabold tabular-nums leading-tight" id="cart-total-price">฿285</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-on-secondary/20 flex items-center justify-center ml-1">
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- SLIDE-UP CART BOTTOM SHEET (MODAL PREVIEW) -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] hidden opacity-0 transition-opacity duration-200 flex flex-col justify-end" id="cart-modal">
+<div class="bg-surface-container-lowest rounded-t-3xl border-t border-outline-variant max-w-[390px] w-full mx-auto p-space-5 shadow-2xl flex flex-col max-h-[707px]">
+<!-- Sheet Handle -->
+<div class="w-12 h-1 bg-outline-variant rounded-full mx-auto mb-space-4"></div>
+<!-- Sheet Header -->
+<div class="flex items-center justify-between pb-space-3 border-b border-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[24px]" data-icon="table_restaurant" style="font-variation-settings: 'FILL' 1;">table_restaurant</span>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">สรุปรายการโต๊ะ 5</h3>
+</div>
+<button class="w-9 h-9 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center" onclick="closeCartDrawer()">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- Order Items List -->
+<div class="overflow-y-auto py-space-3 space-y-3 no-scrollbar">
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-body-strong text-on-surface text-sm">ข้าวกะเพราหมูกรอบไข่ดาว</span>
+<span class="font-label-md text-xs text-on-surface-variant">เผ็ดมาก, ไข่ดาวกรอบ</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-secondary text-sm font-bold tabular-nums">฿75</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-xs font-bold">1x</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-body-strong text-on-surface text-sm">ต้มยำกุ้งแม่น้ำน้ำข้น</span>
+<span class="font-label-md text-xs text-on-surface-variant">ไม่ใส่เห็ด</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-secondary text-sm font-bold tabular-nums">฿150</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-xs font-bold">1x</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-body-strong text-on-surface text-sm">ชาไทยเย็นโบราณ</span>
+<span class="font-label-md text-xs text-on-surface-variant">หวานน้อย 50%</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-secondary text-sm font-bold tabular-nums">฿35</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-xs font-bold">1x</span>
+</div>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="pt-space-4 border-t border-surface-container flex flex-col gap-2">
+<div class="flex justify-between items-center px-1 mb-1">
+<span class="font-body-md text-on-surface-variant">รวมทั้งสิ้น (3 รายการ):</span>
+<span class="font-price-total text-headline-lg text-secondary font-bold tabular-nums">฿285</span>
+</div>
+<button class="w-full h-[52px] rounded-xl bg-secondary-container hover:bg-secondary text-on-secondary font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all" onclick="confirmOrder()">
+<span class="material-symbols-outlined text-[22px]" data-icon="send">send</span>
+<span>ยืนยันส่งออเดอร์เข้าครัว</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Micro-interactions & State Management Vanilla Script -->
+<script>
+    let currentCartCount = 3;
+    let currentCartTotal = 285;
+
+    function switchState(stateName) {
+      const states = ['normal', 'skeleton', 'empty', 'error'];
+      states.forEach(s => {
+        const el = document.getElementById('state-' + s);
+        const btn = document.getElementById('btn-' + s);
+        if (el) el.classList.add('hidden');
+        if (btn) {
+          btn.className = 'px-2 py-1 rounded font-label-md text-[11px] bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
+        }
+      });
+
+      const activeSection = document.getElementById('state-' + stateName);
+      const activeBtn = document.getElementById('btn-' + stateName);
+      const cartBar = document.getElementById('floating-cart');
+
+      if (activeSection) activeSection.classList.remove('hidden');
+      if (activeBtn) {
+        activeBtn.className = 'px-2 py-1 rounded font-label-md text-[11px] bg-primary text-on-primary font-bold shadow-sm transition-all';
+      }
+
+      // Hide Cart Bar on Error or Empty state for logical UX
+      if (cartBar) {
+        if (stateName === 'error' || stateName === 'skeleton') {
+          cartBar.classList.add('translate-y-28', 'opacity-0');
+        } else {
+          cartBar.classList.remove('translate-y-28', 'opacity-0');
+        }
+      }
+    }
+
+    function addItem(itemName, itemPrice) {
+      currentCartCount += 1;
+      currentCartTotal += itemPrice;
+
+      const badge = document.getElementById('cart-badge-count');
+      const label = document.getElementById('cart-item-label');
+      const total = document.getElementById('cart-total-price');
+
+      if (badge) badge.innerText = currentCartCount;
+      if (label) label.innerText = currentCartCount + ' รายการในรายการ';
+      if (total) total.innerText = '฿' + currentCartTotal;
+
+      // Pulse feedback effect on floating cart
+      const cart = document.getElementById('floating-cart');
+      if (cart) {
+        cart.classList.add('scale-105');
+        setTimeout(() => cart.classList.remove('scale-105'), 180);
+      }
+    }
+
+    function openCartDrawer() {
+      const modal = document.getElementById('cart-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+      }
+    }
+
+    function closeCartDrawer() {
+      const modal = document.getElementById('cart-modal');
+      if (modal) {
+        modal.classList.add('opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+      }
+    }
+
+    function confirmOrder() {
+      alert('ส่งออเดอร์โต๊ะ 5 เข้าครัวเรียบร้อยแล้ว! พ่อครัวกำลังจัดเตรียมอาหารให้ครับ');
+      closeCartDrawer();
+    }
+  </script>
+</body></html>

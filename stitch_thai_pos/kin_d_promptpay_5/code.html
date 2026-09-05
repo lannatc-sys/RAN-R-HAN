@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+
+<html class="light" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D POS - ชำระเงิน โต๊ะ 5</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-background": "#1b1c1c",
+            "on-error-container": "#93000a",
+            "on-secondary": "#ffffff",
+            "on-surface-variant": "#534434",
+            "inverse-primary": "#ffb95f",
+            "background": "#fbf9f9",
+            "error": "#ba1a1a",
+            "inverse-on-surface": "#f2f0f0",
+            "secondary-container": "#fd651e",
+            "secondary": "#a73a00",
+            "primary-fixed": "#ffddb8",
+            "surface": "#fbf9f9",
+            "on-primary-container": "#613b00",
+            "surface-variant": "#e3e2e2",
+            "on-primary-fixed-variant": "#653e00",
+            "primary-container": "#f59e0b",
+            "on-tertiary-container": "#003ba1",
+            "tertiary-fixed-dim": "#b4c5ff",
+            "outline-variant": "#d8c3ad",
+            "on-tertiary-fixed": "#00174b",
+            "surface-container-lowest": "#ffffff",
+            "surface-container": "#efeded",
+            "inverse-surface": "#303031",
+            "secondary-fixed-dim": "#ffb599",
+            "surface-container-high": "#e9e8e7",
+            "primary": "#855300",
+            "secondary-fixed": "#ffdbce",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "tertiary-fixed": "#dbe1ff",
+            "on-secondary-fixed": "#370e00",
+            "outline": "#867461",
+            "surface-container-highest": "#e3e2e2",
+            "surface-tint": "#855300",
+            "error-container": "#ffdad6",
+            "on-secondary-fixed-variant": "#7f2b00",
+            "on-tertiary-fixed-variant": "#003ea8",
+            "primary-fixed-dim": "#ffb95f",
+            "surface-dim": "#dbdad9",
+            "on-primary-fixed": "#2a1700",
+            "on-surface": "#1b1c1c",
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#94aeff",
+            "surface-bright": "#fbf9f9",
+            "surface-container-low": "#f5f3f3",
+            "tertiary": "#0053db",
+            "on-secondary-container": "#571a00"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-5": "20px",
+            "space-4": "16px",
+            "min-target": "48px",
+            "space-2": "8px",
+            "space-6": "24px",
+            "space-1": "4px",
+            "grid-base": "4px",
+            "space-3": "12px",
+            "card-p-mobile": "16px",
+            "space-8": "32px"
+          },
+          "fontFamily": {
+            "body-strong": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "price-display": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "body-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "label-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-sm": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-md": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "headline-lg": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""],
+            "price-total": ["\"IBM Plex Sans Thai, ibmPlexSans, sans-serif\""]
+          },
+          "fontSize": {
+            "body-strong": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "price-display": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "label-md": ["14px", {"lineHeight": "18px", "fontWeight": "600"}],
+            "label-lg": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-sm": ["18px", {"lineHeight": "26px", "fontWeight": "600"}],
+            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "price-total": ["26px", {"lineHeight": "32px", "fontWeight": "700"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex justify-center py-0 sm:py-6 selection:bg-primary-container selection:text-on-primary-container">
+<!-- Mobile Viewport Container (Strict 390px Max) -->
+<main class="w-full max-w-[390px] bg-background min-h-screen flex flex-col relative shadow-md pb-24 overflow-x-hidden border-x border-surface-container">
+<!-- Top State Switcher Bar (Demo interactive switcher) -->
+<section class="bg-surface-container-high px-space-3 py-space-2 border-b border-surface-container-highest">
+<div class="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar text-xs">
+<span class="text-on-surface-variant font-label-md text-label-md flex items-center gap-1 shrink-0">
+<span class="material-symbols-outlined text-[16px]">tune</span> โหมด:
+        </span>
+<button class="px-space-2 py-1 rounded bg-primary-container text-on-primary-container font-label-md text-xs whitespace-nowrap shadow-sm" id="btn-state-ready" onclick="setState('ready')">
+          1. พร้อมจ่าย
+        </button>
+<button class="px-space-2 py-1 rounded bg-surface-container-lowest text-on-surface-variant font-label-md text-xs whitespace-nowrap" id="btn-state-cash" onclick="setState('cash')">
+          2. เงินสด
+        </button>
+<button class="px-space-2 py-1 rounded bg-surface-container-lowest text-on-surface-variant font-label-md text-xs whitespace-nowrap" id="btn-state-verifying" onclick="setState('verifying')">
+          3. ตรวจสลิป
+        </button>
+<button class="px-space-2 py-1 rounded bg-surface-container-lowest text-on-surface-variant font-label-md text-xs whitespace-nowrap" id="btn-state-success" onclick="setState('success')">
+          4. จ่ายสำเร็จ
+        </button>
+<button class="px-space-2 py-1 rounded bg-surface-container-lowest text-on-surface-variant font-label-md text-xs whitespace-nowrap" id="btn-state-manual" onclick="setState('manual')">
+          5. รอตรวจ
+        </button>
+</div>
+</section>
+<!-- Top Navigation Header (Linear Task: Back & Table Identifiers) -->
+<header class="w-full px-space-4 py-space-3 bg-surface-container-lowest shadow-sm flex items-center justify-between sticky top-0 z-30">
+<div class="flex items-center gap-space-2">
+<button aria-label="ย้อนกลับ" class="min-w-min-target min-h-min-target flex items-center justify-center rounded-xl active:scale-95 transition-transform hover:bg-surface-container" type="button">
+<span class="material-symbols-outlined text-primary text-2xl font-bold">arrow_back_ios_new</span>
+</button>
+<div>
+<h1 class="font-headline-md text-headline-md text-on-background tracking-tight">ชำระเงิน</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">บิลอาหาร #A0042</p>
+</div>
+</div>
+<div class="flex items-center gap-space-2">
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">table_restaurant</span>
+          โต๊ะ 5
+        </span>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<div class="p-space-4 space-y-space-4 flex-1">
+<!-- Section 1: Summary Amount Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-4 border border-surface-container shadow-sm">
+<div class="text-center pb-space-2">
+<span class="text-on-surface-variant font-label-md text-label-md">ยอดชำระสุทธิ</span>
+<div class="text-primary-container font-price-total text-[40px] leading-tight my-space-1 tabular-nums font-bold tracking-tight">
+            ฿290
+          </div>
+<span class="inline-flex items-center gap-1 text-xs text-on-surface-variant bg-surface-container px-space-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-xs text-primary">verified</span> ราคารวม VAT 7% เรียบร้อยแล้ว
+          </span>
+</div>
+<!-- Accordion Order Details -->
+<div class="mt-space-3 pt-space-3 border-t border-surface-container">
+<button class="w-full flex items-center justify-between text-on-surface hover:text-primary transition-colors min-h-[40px] px-1" onclick="toggleOrderSummary()" type="button">
+<span class="font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]">receipt_long</span>
+              ดูรายการอาหาร (3 อย่าง)
+            </span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200" id="accordion-icon">expand_more</span>
+</button>
+<div class="space-y-space-2 pt-space-2 hidden" id="order-details-drawer">
+<div class="flex justify-between items-start text-sm py-1 border-b border-surface-container border-dashed">
+<div>
+<p class="font-body-strong text-on-surface text-sm">1. ข้าวกะเพราหมูกรอบ</p>
+<p class="text-xs text-on-surface-variant">ไข่ดาวกรอบ, เผ็ดมาก (x1)</p>
+</div>
+<span class="font-label-md text-on-surface tabular-nums">฿105</span>
+</div>
+<div class="flex justify-between items-start text-sm py-1 border-b border-surface-container border-dashed">
+<div>
+<p class="font-body-strong text-on-surface text-sm">2. ต้มยำกุ้งแม่น้ำน้ำข้น</p>
+<p class="text-xs text-on-surface-variant">หม้อไฟขนาดกลาง (x1)</p>
+</div>
+<span class="font-label-md text-on-surface tabular-nums">฿150</span>
+</div>
+<div class="flex justify-between items-start text-sm py-1 border-b border-surface-container border-dashed">
+<div>
+<p class="font-body-strong text-on-surface text-sm">3. ชาไทยเย็นโบราณ</p>
+<p class="text-xs text-on-surface-variant">หวานน้อย 50% (x1)</p>
+</div>
+<span class="font-label-md text-on-surface tabular-nums">฿35</span>
+</div>
+<div class="flex justify-between items-center pt-2 font-label-md text-sm text-on-surface">
+<span>ราคารวมสุทธิ</span>
+<span class="text-primary font-bold text-base tabular-nums">฿290.00</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Payment Method Select (2-Column Grid) -->
+<section class="space-y-space-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-xl">payments</span>
+          เลือกวิธีชำระเงิน
+        </h2>
+<div class="grid grid-cols-2 gap-space-3">
+<!-- Option 1: PromptPay (Active Default) -->
+<button class="relative flex flex-col items-center justify-center p-space-3 min-h-min-target rounded-2xl border-2 border-primary-container bg-primary-fixed/30 text-on-primary-container transition-all shadow-sm active:scale-95 text-center" id="method-promptpay" onclick="selectMethod('promptpay')" type="button">
+<span class="absolute top-2 right-2 material-symbols-outlined text-primary-container text-xl" id="check-promptpay" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="material-symbols-outlined text-primary text-3xl mb-1">qr_code_2</span>
+<span class="font-body-strong text-sm">สแกนพร้อมเพย์</span>
+<span class="text-xs text-on-surface-variant mt-0.5">PromptPay QR</span>
+</button>
+<!-- Option 2: Cash -->
+<button class="relative flex flex-col items-center justify-center p-space-3 min-h-min-target rounded-2xl border border-surface-container-highest bg-surface-container-lowest text-on-surface transition-all shadow-sm active:scale-95 text-center" id="method-cash" onclick="selectMethod('cash')" type="button">
+<span class="absolute top-2 right-2 material-symbols-outlined text-outline-variant text-xl hidden" id="check-cash">check_circle</span>
+<span class="material-symbols-outlined text-on-surface-variant text-3xl mb-1">payments</span>
+<span class="font-body-strong text-sm">จ่ายเงินสด</span>
+<span class="text-xs text-on-surface-variant mt-0.5">พนักงานรับที่โต๊ะ</span>
+</button>
+</div>
+</section>
+<!-- Panel A: PromptPay Flow Content -->
+<div class="space-y-space-4" id="panel-promptpay">
+<!-- QR Code Display Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-4 border border-surface-container shadow-sm text-center">
+<div class="flex items-center justify-center gap-2 mb-space-3">
+<div class="w-8 h-8 rounded-lg bg-[#003d6d] flex items-center justify-center text-white font-bold text-xs">
+              PP
+            </div>
+<div class="text-left">
+<h3 class="font-headline-sm text-sm text-on-surface font-semibold">สแกน QR เพื่อโอนเงิน</h3>
+<p class="text-xs text-on-surface-variant">พร้อมเพย์ PromptPay</p>
+</div>
+</div>
+<!-- Crisp High-Contrast QR Code Visual -->
+<div class="inline-block p-3 rounded-2xl bg-white border-2 border-surface-container-highest shadow-inner mx-auto mb-space-3">
+<svg class="w-48 h-48 mx-auto" fill="none" viewbox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="white" height="200" rx="8" width="200"></rect>
+<!-- Outer Markers -->
+<rect fill="#1b1c1c" height="48" rx="6" width="48" x="16" y="16"></rect>
+<rect fill="white" height="32" rx="3" width="32" x="24" y="24"></rect>
+<rect fill="#1b1c1c" height="16" width="16" x="32" y="32"></rect>
+<rect fill="#1b1c1c" height="48" rx="6" width="48" x="136" y="16"></rect>
+<rect fill="white" height="32" rx="3" width="32" x="144" y="24"></rect>
+<rect fill="#1b1c1c" height="16" width="16" x="152" y="32"></rect>
+<rect fill="#1b1c1c" height="48" rx="6" width="48" x="16" y="136"></rect>
+<rect fill="white" height="32" rx="3" width="32" x="24" y="144"></rect>
+<rect fill="#1b1c1c" height="16" width="16" x="32" y="152"></rect>
+<!-- QR Pixel Grid Simulation -->
+<path d="M72 16h16v16H72zm32 0h16v16h-16zm-32 32h16v16H72zm32 0h16v16h-16zm-32 32h16v16H72zm32 0h16v16h-16zm48 0h16v16h-16zm-96 16h16v16H56zm32 0h16v16H88zm32 0h16v16h-16zm32 0h16v16h-16zm-80 32h16v16H72zm32 0h16v16h-16zm32 0h16v16h-16zm-48 16h16v16H88zm32 0h16v16h-16zm32 0h16v16h-16zm-64 16h16v16H72zm32 0h16v16h-16zm48 0h16v16h-16z" fill="#1b1c1c"></path>
+<!-- Center Emblem -->
+<circle cx="100" cy="100" fill="#f59e0b" r="16" stroke="white" stroke-width="3"></circle>
+<path d="M96 95h8v10h-8z" fill="#613b00"></path>
+<circle cx="100" cy="98" fill="white" r="2"></circle>
+</svg>
+</div>
+<!-- Account Details -->
+<div class="bg-surface-container-low rounded-xl p-space-3 text-left space-y-1 text-sm border border-surface-container">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant text-xs">ชื่อบัญชี:</span>
+<span class="font-body-strong text-on-surface">ร้าน ครัวกินดี (Kin-D)</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant text-xs">หมายเลขพร้อมเพย์:</span>
+<span class="font-body-strong tracking-wide text-primary font-mono text-sm">089-xxx-4567</span>
+</div>
+<div class="flex justify-between items-center pt-1 border-t border-surface-container">
+<span class="text-on-surface-variant text-xs">ยอดที่ต้องชำระ:</span>
+<span class="font-headline-sm text-primary font-bold tabular-nums">฿290.00</span>
+</div>
+</div>
+<!-- Save QR Button -->
+<button class="w-full mt-space-3 min-h-[44px] rounded-xl border border-surface-container-highest bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-sm" type="button">
+<span class="material-symbols-outlined text-primary text-xl">download</span>
+            บันทึกรูป QR Code
+          </button>
+</section>
+<!-- Slip Upload Zone -->
+<section class="space-y-space-2">
+<div class="flex justify-between items-center">
+<label class="font-headline-sm text-sm text-on-surface font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-lg">receipt</span>
+              หลักฐานการโอนเงิน (สลิป)
+            </label>
+<span class="text-xs text-error font-medium">* จำเป็นต้องแนบ</span>
+</div>
+<!-- Upload Drop Box -->
+<div class="border-2 border-dashed border-primary-container bg-primary-fixed/20 hover:bg-primary-fixed/30 rounded-2xl p-space-4 text-center cursor-pointer transition-colors active:scale-[0.99] group" id="slip-upload-box">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mx-auto mb-2 shadow-sm group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-2xl">add_a_photo</span>
+</div>
+<p class="font-body-strong text-on-background text-sm">ถ่ายรูปสลิป หรือเลือกจากคลังภาพ</p>
+<p class="text-xs text-on-surface-variant mt-1">รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB</p>
+<input accept="image/*" class="hidden" id="slip-file-input" onchange="handleFileSelected(event)" type="file"/>
+</div>
+<!-- Slip Preview Card (Visible initially for preview/prototype demonstration) -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-3 border border-surface-container shadow-sm flex items-center justify-between gap-3" id="slip-preview-card">
+<div class="flex items-center gap-3">
+<div class="w-12 h-14 bg-surface-container-high rounded-lg overflow-hidden flex items-center justify-center border border-surface-container-highest shrink-0 relative">
+<span class="material-symbols-outlined text-primary text-2xl">image</span>
+<span class="absolute bottom-0 inset-x-0 bg-primary-container text-[8px] text-center text-on-primary-container font-bold">SLIP</span>
+</div>
+<div class="text-left overflow-hidden">
+<div class="flex items-center gap-1">
+<span class="font-body-strong text-sm text-on-surface truncate max-w-[130px]" id="slip-name">slip_20240510.jpg</span>
+<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-medium">฿290</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">วันนี้, 12:44 น. • ตรวจสอบแล้ว</p>
+</div>
+</div>
+<button class="min-h-[40px] px-3 rounded-lg border border-surface-container-highest hover:bg-surface-container text-on-surface font-label-md text-xs active:scale-95 shrink-0" onclick="triggerFileInput()" type="button">
+              เปลี่ยนสลิป
+            </button>
+</div>
+</section>
+</div>
+<!-- Panel B: Cash Flow Content (Hidden by default) -->
+<div class="space-y-space-4 hidden" id="panel-cash">
+<section class="bg-surface-container-lowest rounded-2xl p-space-6 border border-surface-container shadow-sm text-center">
+<div class="w-20 h-20 bg-primary-fixed/40 rounded-full flex items-center justify-center mx-auto mb-space-3 text-primary">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">room_service</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">กรุณาเรียกพนักงานเพื่อชำระเงินสด</h3>
+<p class="text-sm text-on-surface-variant mt-space-2 leading-relaxed">
+            พนักงานจะมาเก็บเงินสดที่ <span class="font-semibold text-on-surface">โต๊ะ 5</span> พร้อมพิมพ์ใบเสร็จรับเงินให้ท่านที่โต๊ะ
+          </p>
+<div class="my-space-4 p-space-3 bg-surface-container-low rounded-xl border border-surface-container flex items-center justify-between">
+<span class="text-sm text-on-surface-variant font-label-md">ยอดที่ต้องเตรียม:</span>
+<span class="font-headline-lg text-primary-container font-bold tabular-nums">฿290.00</span>
+</div>
+<button class="w-full min-h-min-target bg-primary-container hover:bg-amber-600 text-on-primary-container font-body-strong rounded-xl flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform text-base" onclick="callStaffCash()" type="button">
+<span class="material-symbols-outlined text-2xl">notifications_active</span>
+            กดเรียกพนักงานมารับเงินสด
+          </button>
+</section>
+<div class="p-space-4 bg-amber-50/60 rounded-2xl border border-primary-container/30 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-xl shrink-0 mt-0.5">info</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+            ทางร้านรองรับเงินสดทุกประเภท และสามารถออกใบกำกับภาษีเต็มรูปแบบได้ โปรดแจ้งพนักงานเมื่อต้องการใบกำกับภาษี
+          </p>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Checkout Bar (Mobile Priority) -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest border-t border-surface-container p-space-4 shadow-lg max-w-[390px] mx-auto" id="bottom-action-bar">
+<button class="w-full min-h-[52px] bg-primary-container hover:bg-amber-600 text-on-primary-container font-body-strong text-lg rounded-xl flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all" id="btn-submit-payment" onclick="submitSlipPayment()" type="button">
+<span class="material-symbols-outlined text-2xl font-bold">send</span>
+        ส่งสลิปเพื่อยืนยัน (฿290)
+      </button>
+</div>
+<!-- MODAL OVERLAYS (Controlled via State Switcher or Flow) -->
+<!-- State 3: Verifying Modal -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-space-4 hidden transition-opacity" id="modal-verifying">
+<div class="w-full max-w-[360px] bg-surface-container-lowest rounded-2xl p-space-6 border border-surface-container shadow-xl text-center animate-bounce-short">
+<div class="w-16 h-16 rounded-full bg-primary-fixed/40 text-primary flex items-center justify-center mx-auto mb-space-4 animate-spin">
+<span class="material-symbols-outlined text-3xl">progress_activity</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">กำลังตรวจสอบสลิป...</h3>
+<p class="text-sm text-on-surface-variant mt-2 mb-space-4 leading-relaxed">
+          ระบบ AI กำลังอ่านข้อมูลและตรวจสอบยอดโอน ฿290 สักครู่ครับ
+        </p>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden mb-space-3">
+<div class="bg-primary-container h-full w-2/3 animate-pulse"></div>
+</div>
+<button class="text-xs text-on-surface-variant hover:text-on-surface py-2" onclick="closeModals()">
+          ปิดหน้าต่างชั่วคราว
+        </button>
+</div>
+</div>
+<!-- State 4: Success Modal -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-space-4 hidden transition-opacity" id="modal-success">
+<div class="w-full max-w-[360px] bg-surface-container-lowest rounded-2xl p-space-6 border border-surface-container shadow-xl text-center">
+<div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-space-3">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">ชำระเงินเรียบร้อย ขอบคุณครับ!</h3>
+<p class="text-xs text-on-surface-variant mt-1">ขอบคุณที่มาอุดหนุนร้าน ครัวกินดี</p>
+<div class="my-space-4 p-space-3 bg-surface-container-low rounded-xl border border-surface-container text-left text-xs space-y-1.5">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">โต๊ะที่นั่ง:</span>
+<span class="font-body-strong text-on-surface">โต๊ะ 5</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">เลขที่บิล:</span>
+<span class="font-body-strong text-on-surface font-mono">#A0042</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">ยอดชำระ:</span>
+<span class="font-bold text-emerald-700 text-sm tabular-nums">฿290.00 (สำเร็จ)</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">เวลาทำรายการ:</span>
+<span class="text-on-surface">วันนี้, 12:45 น.</span>
+</div>
+</div>
+<div class="space-y-space-2">
+<button class="w-full min-h-min-target bg-primary-container text-on-primary-container font-body-strong rounded-xl active:scale-95 shadow-sm text-sm" onclick="closeModals()">
+            เสร็จสิ้น / กลับสู่หน้าหลัก
+          </button>
+<button class="w-full min-h-[44px] border border-surface-container-highest bg-surface-container-lowest text-on-surface font-label-md rounded-xl active:scale-95 text-xs flex items-center justify-center gap-1" onclick="alert('ดาวน์โหลด e-Receipt แล้ว');">
+<span class="material-symbols-outlined text-base">receipt</span>
+            ดูใบเสร็จอิเล็กทรอนิกส์ (e-Receipt)
+          </button>
+</div>
+</div>
+</div>
+<!-- State 5: Manual Warning / Confirmation Modal -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-space-4 hidden transition-opacity" id="modal-manual">
+<div class="w-full max-w-[360px] bg-surface-container-lowest rounded-2xl p-space-6 border border-surface-container shadow-xl text-center">
+<div class="w-16 h-16 rounded-full bg-amber-100 text-primary-container flex items-center justify-center mx-auto mb-space-3">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">hourglass_top</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">รอพนักงานยืนยัน สักครู่นะครับ</h3>
+<p class="text-sm text-on-surface-variant mt-2 mb-space-4 leading-relaxed">
+          ระบบส่งข้อมูลสลิปให้แคชเชียร์ตรวจสอบเรียบร้อยแล้ว พนักงานกำลังมาดูแลท่านที่โต๊ะครับ
+        </p>
+<div class="p-space-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-left mb-space-4 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-xl shrink-0">info</span>
+<span>ท่านสามารถนั่งพักผ่อนได้ พนักงานจะนำใบเสร็จตัวจริงมาส่งที่โต๊ะ 5</span>
+</div>
+<div class="space-y-space-2">
+<button class="w-full min-h-min-target bg-primary-container text-on-primary-container font-body-strong rounded-xl active:scale-95 shadow-sm text-sm flex items-center justify-center gap-1.5" onclick="alert('ส่งสัญญาณเรียกพนักงานซ้ำแล้ว'); closeModals();">
+<span class="material-symbols-outlined text-lg">notifications</span>
+            เรียกพนักงานซ้ำ
+          </button>
+<button class="w-full min-h-[44px] border border-surface-container-highest bg-surface-container-lowest text-on-surface font-label-md rounded-xl active:scale-95 text-xs" onclick="closeModals()">
+            รับทราบและปิดหน้าต่าง
+          </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Interactive Client-side Script -->
+<script>
+    let currentMethod = 'promptpay';
+
+    function toggleOrderSummary() {
+      const drawer = document.getElementById('order-details-drawer');
+      const icon = document.getElementById('accordion-icon');
+      if (drawer.classList.contains('hidden')) {
+        drawer.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        drawer.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function selectMethod(method) {
+      currentMethod = method;
+      const btnPromptpay = document.getElementById('method-promptpay');
+      const btnCash = document.getElementById('method-cash');
+      const checkPromptpay = document.getElementById('check-promptpay');
+      const checkCash = document.getElementById('check-cash');
+      const panelPromptpay = document.getElementById('panel-promptpay');
+      const panelCash = document.getElementById('panel-cash');
+      const bottomBar = document.getElementById('bottom-action-bar');
+
+      if (method === 'promptpay') {
+        // Style Promptpay Active
+        btnPromptpay.className = 'relative flex flex-col items-center justify-center p-space-3 min-h-min-target rounded-2xl border-2 border-primary-container bg-primary-fixed/30 text-on-primary-container transition-all shadow-sm active:scale-95 text-center';
+        checkPromptpay.classList.remove('hidden');
+
+        // Style Cash Inactive
+        btnCash.className = 'relative flex flex-col items-center justify-center p-space-3 min-h-min-target rounded-2xl border border-surface-container-highest bg-surface-container-lowest text-on-surface transition-all shadow-sm active:scale-95 text-center';
+        checkCash.classList.add('hidden');
+
+        panelPromptpay.classList.remove('hidden');
+        panelCash.classList.add('hidden');
+        bottomBar.classList.remove('hidden');
+      } else {
+        // Style Cash Active
+        btnCash.className = 'relative flex flex-col items-center justify-center p-space-3 min-h-min-target rounded-2xl border-2 border-primary-container bg-primary-fixed/30 text-on-primary-container transition-all shadow-sm active:scale-95 text-center';
+        checkCash.classList.remove('hidden');
+
+        // Style Promptpay Inactive
+        btnPromptpay.className = 'relative flex flex-col items-center justify-center p-space-3 min-h-min-target rounded-2xl border border-surface-container-highest bg-surface-container-lowest text-on-surface transition-all shadow-sm active:scale-95 text-center';
+        checkPromptpay.classList.add('hidden');
+
+        panelCash.classList.remove('hidden');
+        panelPromptpay.classList.add('hidden');
+        bottomBar.classList.add('hidden'); // In cash mode, primary trigger is inside panel
+      }
+    }
+
+    function triggerFileInput() {
+      document.getElementById('slip-file-input').click();
+    }
+
+    // Attach click to upload box
+    document.getElementById('slip-upload-box').addEventListener('click', triggerFileInput);
+
+    function handleFileSelected(e) {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        document.getElementById('slip-name').innerText = file.name;
+        document.getElementById('slip-preview-card').classList.remove('hidden');
+      }
+    }
+
+    function submitSlipPayment() {
+      setState('verifying');
+      // Auto advance to success after 2 seconds for pleasant flow
+      setTimeout(() => {
+        setState('success');
+      }, 2200);
+    }
+
+    function callStaffCash() {
+      alert('แจ้งพนักงานให้มารับเงินสดที่โต๊ะ 5 เรียบร้อยแล้วครับ');
+      setState('manual');
+    }
+
+    function closeModals() {
+      document.getElementById('modal-verifying').classList.add('hidden');
+      document.getElementById('modal-success').classList.add('hidden');
+      document.getElementById('modal-manual').classList.add('hidden');
+    }
+
+    function setState(state) {
+      closeModals();
+      // Update top state switcher pill button styles
+      const states = ['ready', 'cash', 'verifying', 'success', 'manual'];
+      states.forEach(s => {
+        const el = document.getElementById(`btn-state-${s}`);
+        if (s === state) {
+          el.className = 'px-space-2 py-1 rounded bg-primary-container text-on-primary-container font-label-md text-xs whitespace-nowrap shadow-sm';
+        } else {
+          el.className = 'px-space-2 py-1 rounded bg-surface-container-lowest text-on-surface-variant font-label-md text-xs whitespace-nowrap';
+        }
+      });
+
+      if (state === 'ready') {
+        selectMethod('promptpay');
+      } else if (state === 'cash') {
+        selectMethod('cash');
+      } else if (state === 'verifying') {
+        selectMethod('promptpay');
+        document.getElementById('modal-verifying').classList.remove('hidden');
+      } else if (state === 'success') {
+        selectMethod('promptpay');
+        document.getElementById('modal-success').classList.remove('hidden');
+      } else if (state === 'manual') {
+        selectMethod('cash');
+        document.getElementById('modal-manual').classList.remove('hidden');
+      }
+    }
+  </script>
+</body></html>

@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D Platform - จัดการบิลและการต่ออายุ (Super Admin)</title>
+<!-- Google Fonts: Inter & IBM Plex Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration verbatim from Design System -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed-dim": "#ffb95f",
+            "tertiary-fixed-dim": "#4edea3",
+            "on-primary-container": "#7c839b",
+            "secondary": "#855300",
+            "surface-bright": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "surface-dim": "#cbdbf5",
+            "tertiary-fixed": "#6ffbbe",
+            "on-secondary-fixed": "#2a1700",
+            "on-primary-fixed": "#131b2e",
+            "inverse-primary": "#bec6e0",
+            "tertiary": "#000000",
+            "primary-container": "#131b2e",
+            "surface-variant": "#d3e4fe",
+            "on-error": "#ffffff",
+            "surface-container-low": "#eff4ff",
+            "surface-tint": "#565e74",
+            "on-surface-variant": "#45464d",
+            "surface-container-highest": "#d3e4fe",
+            "primary-fixed-dim": "#bec6e0",
+            "surface-container": "#e5eeff",
+            "error-container": "#ffdad6",
+            "on-primary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "secondary-container": "#fea619",
+            "surface": "#f8f9ff",
+            "secondary-fixed": "#ffddb8",
+            "outline": "#76777d",
+            "on-surface": "#0b1c30",
+            "on-secondary": "#ffffff",
+            "on-tertiary-fixed-variant": "#005236",
+            "primary": "#000000",
+            "background": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "inverse-surface": "#213145",
+            "on-error-container": "#93000a",
+            "on-secondary-container": "#684000",
+            "on-tertiary-container": "#009668",
+            "on-secondary-fixed-variant": "#653e00",
+            "error": "#ba1a1a",
+            "outline-variant": "#c6c6cd",
+            "on-primary-fixed-variant": "#3f465c",
+            "tertiary-container": "#002113",
+            "on-tertiary-fixed": "#002113",
+            "primary-fixed": "#dae2fd",
+            "surface-container-lowest": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "sidebar-width-collapsed": "4.5rem",
+            "gutter-xs": "0.25rem",
+            "gutter-lg": "1.5rem",
+            "gutter-xl": "2rem",
+            "topbar-height": "4rem",
+            "margin-mobile": "1rem",
+            "gutter-md": "1rem",
+            "gutter-sm": "0.5rem",
+            "margin-desktop": "2rem",
+            "sidebar-width-expanded": "16.25rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["IBM Plex Sans"],
+            "body-sm": ["Inter"],
+            "label-lg": ["IBM Plex Sans"],
+            "label-md": ["IBM Plex Sans"],
+            "body-md": ["Inter"],
+            "headline-sm": ["IBM Plex Sans"],
+            "headline-md": ["IBM Plex Sans"],
+            "headline-xl": ["IBM Plex Sans"],
+            "headline-xl-mobile": ["IBM Plex Sans"],
+            "body-lg": ["Inter"],
+            "data-mono": ["IBM Plex Sans"],
+            "label-sm": ["IBM Plex Sans"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Smooth card transition when approved/dismissed */
+    .card-dismiss {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      transform: scale(0.96) translateY(-10px);
+      max-height: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
+      overflow: hidden;
+      border: none !important;
+    }
+  </style>
+</head>
+<body class="h-full font-body-md text-on-surface bg-background flex flex-col antialiased">
+<!-- ========================================================================= -->
+<!-- 1. LEFT SIDEBAR (SideNavBar: Shared Component JSON Blueprint)             -->
+<!-- ========================================================================= -->
+<aside class="fixed top-0 left-0 h-screen w-sidebar-width-expanded z-40 bg-primary-container border-r border-outline-variant/20 flex flex-col justify-between p-4 select-none">
+<!-- Top Brand & Organization -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 px-2 py-1.5">
+<div class="w-9 h-9 rounded-lg bg-secondary-container flex items-center justify-center text-primary-container font-headline-md font-bold shadow-sm">
+<span class="material-symbols-outlined text-primary-container fill-1" data-icon="point_of_sale">point_of_sale</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-sm font-headline-sm font-bold text-on-primary tracking-tight">Kin-D Platform</span>
+<span class="text-label-sm font-label-sm text-on-primary-container tracking-wider">Super Admin</span>
+</div>
+</div>
+<!-- Main Navigation Links -->
+<nav class="space-y-1">
+<!-- ภาพรวม (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#overview">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">ภาพรวม</span>
+</a>
+<!-- ร้านค้า (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#stores">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="text-label-md font-label-md">ร้านค้า</span>
+</a>
+<!-- บิล (ACTIVE TAB: Exact match with Shared Components & Request) -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-secondary-container/20 text-on-primary font-semibold border-l-4 border-secondary-container transition-all duration-200 active:scale-[0.99]" href="#billing">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary-container" data-icon="receipt_long">receipt_long</span>
+<span class="text-label-md font-label-md">บิล</span>
+</div>
+<!-- Real-time pending notification badge -->
+<span class="bg-secondary-container text-primary-container text-label-sm font-label-sm px-2 py-0.5 rounded-full font-bold">3</span>
+</a>
+<!-- แจ้งปัญหา (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#tickets">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+<span class="text-label-md font-label-md">แจ้งปัญหา</span>
+</a>
+<!-- ประกาศ (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#announcements">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+<span class="text-label-md font-label-md">ประกาศ</span>
+</a>
+<!-- วิเคราะห์ (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#analytics">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-label-md font-label-md">วิเคราะห์</span>
+</a>
+<!-- บันทึกระบบ (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-200 active:scale-[0.99]" href="#logs">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="text-label-md font-label-md">บันทึกระบบ</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer -->
+<div class="border-t border-outline-variant/10 pt-4 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-container-high/5 text-on-primary">
+<span class="material-symbols-outlined text-secondary-container" data-icon="shield_person">shield_person</span>
+<div class="flex flex-col truncate">
+<span class="text-label-sm font-label-sm truncate">Super Admin (Owner)</span>
+<span class="text-body-sm font-body-sm text-on-primary-container truncate">owner@kin-d.pos</span>
+</div>
+</div>
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 text-label-md font-label-md transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>ออกจากระบบ</span>
+</button>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- 2. MAIN LAYOUT CANVAS (Sticky Header + Responsive Content)                -->
+<!-- ========================================================================= -->
+<div class="ml-sidebar-width-expanded min-h-screen flex flex-col bg-background">
+<!-- TopNavBar (Shared Component JSON Blueprint) -->
+<header class="sticky top-0 right-0 z-30 h-topbar-height bg-surface-container-lowest border-b border-outline-variant/40 shadow-sm flex items-center justify-between px-gutter-lg">
+<!-- Search Input on Left -->
+<div class="flex items-center gap-4 w-full max-w-md">
+<div class="relative w-full">
+<span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</span>
+<input class="w-full h-9.5 pl-10 pr-4 bg-surface-container-low border border-outline-variant/50 rounded-lg text-body-sm font-body-sm focus:bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-secondary-container/30 transition-all outline-none" placeholder="ค้นหาเลขที่บิล, ชื่อร้าน, สาขา, เบอร์โทร..." type="text"/>
+</div>
+</div>
+<!-- Trailing Status & Navigation -->
+<div class="flex items-center gap-5">
+<!-- Status Indicator Pill -->
+<div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-label-sm font-label-sm text-emerald-800 font-semibold">ทุกระบบปกติ 99.9%</span>
+</div>
+<!-- Notification & Quick Action Icons -->
+<div class="flex items-center gap-1 border-x border-outline-variant/30 px-3">
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Notifications">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Help">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" title="Settings">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<!-- Trailing Primary Action -->
+<button class="flex items-center gap-2 bg-primary-container text-on-primary px-3.5 py-2 rounded-lg text-label-md font-label-md hover:bg-surface-tint active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span>จัดการระบบ</span>
+</button>
+</div>
+</header>
+<!-- Main Content Container -->
+<main class="flex-1 p-gutter-lg space-y-6">
+<!-- Breadcrumbs & Page Title -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-outline-variant/30">
+<div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+<span>Kin-D Super Admin</span>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<span class="text-secondary font-semibold">การเงินและการต่ออายุ</span>
+</div>
+<h1 class="text-headline-xl font-headline-xl text-on-surface mt-1">จัดการบิลและการต่ออายุ (Billing &amp; Subscription)</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-label-md font-label-md hover:bg-surface-container-low transition-colors text-on-surface" onclick="window.print()">
+<span class="material-symbols-outlined" data-icon="file_download">file_download</span>
+<span>ส่งออกรายงาน (CSV)</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 bg-secondary-container text-primary-container font-label-md font-semibold rounded-lg hover:bg-secondary-fixed-dim transition-all shadow-sm">
+<span class="material-symbols-outlined fill-1" data-icon="add_circle">add_circle</span>
+<span>ออกบิลใหม่ด้วยตนเอง</span>
+</button>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- 3. TOP SUMMARY METRIC CARDS (4 Cards)                                -->
+<!-- ===================================================================== -->
+<section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Metric Card 1: รายได้เดือนนี้ -->
+<div class="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/40 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant">รายได้เดือนนี้ (ตุลาคม 2569)</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-headline-xl font-headline-xl font-bold text-on-surface">฿24,780</div>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="inline-flex items-center text-label-sm font-label-sm text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span> +18.4%
+              </span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">เทียบกับเดือนก่อน (MoM)</span>
+</div>
+</div>
+</div>
+<!-- Metric Card 2: รอตรวจสลิป (Warning/Amber Highlight) -->
+<div class="bg-amber-50/50 p-5 rounded-lg border-2 border-amber-300 shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 transform translate-x-2 -translate-y-2 w-16 h-16 bg-amber-200/40 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-amber-950 font-semibold">รอตรวจสลิปยืนยัน</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-amber-200 text-amber-900 border border-amber-300 font-bold uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span>
+              ต้องจัดการด่วน
+            </span>
+</div>
+<div class="mt-3">
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl font-bold text-amber-950" id="metric-pending-count">3</span>
+<span class="text-headline-sm font-headline-sm text-amber-900">รายการ</span>
+</div>
+<p class="text-body-sm font-body-sm text-amber-800 mt-1">แจ้งโอนล่าสุดเมื่อ 10 นาทีที่แล้ว</p>
+</div>
+</div>
+<!-- Metric Card 3: ค้างชำระ (Critical/Rose Warning) -->
+<div class="bg-rose-50/40 p-5 rounded-lg border border-rose-200 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-rose-950">ค้างชำระค่าบริการ</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-rose-100 text-rose-800 border border-rose-200 font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              เกินกำหนด
+            </span>
+</div>
+<div class="mt-3">
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl font-bold text-rose-950">1</span>
+<span class="text-headline-sm font-headline-sm text-rose-800">ร้านค้า</span>
+</div>
+<p class="text-body-sm font-body-sm text-rose-700 mt-1">ค้างชำระเกินกำหนด 3 วัน (ระบบจำกัดฟีเจอร์)</p>
+</div>
+</div>
+<!-- Metric Card 4: ต่ออายุอัตโนมัติ -->
+<div class="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/40 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant">ต่ออายุอัตโนมัติเดือนนี้</span>
+<div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="autorenew">autorenew</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="flex items-baseline gap-2">
+<span class="text-headline-xl font-headline-xl font-bold text-on-surface">28</span>
+<span class="text-headline-sm font-headline-sm text-on-surface-variant">ร้านค้า</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="inline-flex items-center text-label-sm font-label-sm text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold">
+<span class="material-symbols-outlined text-xs" data-icon="check">check</span> สำเร็จ 100%
+              </span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">ตัดบัตร/พร้อมเพย์อัตโนมัติ</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================================================================== -->
+<!-- 4. STATUS TABS & SECONDARY FILTERS                                   -->
+<!-- ===================================================================== -->
+<div class="bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/40 shadow-sm space-y-4">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Status Tabs -->
+<div class="flex flex-wrap items-center gap-2 border-b lg:border-b-0 pb-3 lg:pb-0 border-outline-variant/30">
+<!-- Active Tab: รอตรวจสอบ -->
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-container text-on-primary text-label-md font-label-md shadow-sm transition-all" id="tab-pending-btn" onclick="switchView('pending')">
+<span class="material-symbols-outlined text-secondary-container" data-icon="pending_actions">pending_actions</span>
+<span>รอตรวจสอบ</span>
+<span class="bg-secondary-container text-primary-container font-bold px-2 py-0.5 rounded-full text-label-sm" id="tab-badge-pending">3</span>
+</button>
+<!-- Inactive Tab: ชำระแล้ว -->
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low text-label-md font-label-md transition-all" id="tab-paid-btn" onclick="switchView('paid')">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+<span>ชำระแล้ว</span>
+<span class="bg-surface-container text-on-surface-variant font-medium px-2 py-0.5 rounded-full text-label-sm">38</span>
+</button>
+<!-- Inactive Tab: ค้างชำระ -->
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low text-label-md font-label-md transition-all" id="tab-overdue-btn" onclick="switchView('paid')">
+<span class="material-symbols-outlined text-rose-500" data-icon="error">error</span>
+<span>ค้างชำระ</span>
+<span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full text-label-sm">1</span>
+</button>
+<!-- Inactive Tab: ทั้งหมด -->
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low text-label-md font-label-md transition-all" id="tab-all-btn" onclick="switchView('paid')">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span>ทั้งหมด</span>
+<span class="bg-surface-container text-on-surface-variant font-medium px-2 py-0.5 rounded-full text-label-sm">42</span>
+</button>
+</div>
+<!-- Secondary Filters Row -->
+<div class="flex flex-wrap items-center gap-3">
+<!-- Filter: Package Type -->
+<div class="flex items-center gap-1.5">
+<label class="text-label-sm font-label-sm text-on-surface-variant">แพ็กเกจ:</label>
+<select class="h-9 px-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface focus:ring-1 focus:ring-primary-container outline-none">
+<option value="all">ทั้งหมด ทุกแพ็กเกจ</option>
+<option value="pro-monthly">Pro รายเดือน (฿590)</option>
+<option value="pro-semi">Pro ราย 6 เดือน (฿2,990)</option>
+<option value="pro-yearly">Pro รายปี (฿5,490)</option>
+</select>
+</div>
+<!-- Filter: Date Range -->
+<div class="flex items-center gap-1.5">
+<label class="text-label-sm font-label-sm text-on-surface-variant">ช่วงเวลา:</label>
+<div class="relative">
+<input class="h-9 pl-8 pr-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface focus:ring-1 focus:ring-primary-container cursor-pointer" readonly="" type="text" value="1 ต.ค. 2569 - 31 ต.ค. 2569"/>
+<span class="material-symbols-outlined absolute left-2 top-2 text-outline text-sm" data-icon="calendar_today">calendar_today</span>
+</div>
+</div>
+<button class="h-9 px-3 bg-surface-container-low border border-outline-variant text-on-surface hover:bg-surface-container rounded-lg text-label-md font-label-md flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+<span>ล้างตัวกรอง</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- 5. TAB CONTENT 1: SLIP VERIFICATION VIEW (Cards Layout)             -->
+<!-- ===================================================================== -->
+<section class="space-y-4" id="pending-section">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">สลิปรอการตรวจสอบและต่ออายุอัตโนมัติ</h2>
+<span class="text-body-sm font-body-sm text-on-surface-variant">คลิกที่รูปเพื่อขยายตรวจสอบความคมชัดและ QR พร้อมเพย์</span>
+</div>
+<button class="text-label-md font-label-md text-emerald-800 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors" onclick="approveAllPending()">
+<span class="material-symbols-outlined" data-icon="done_all">done_all</span>
+<span>อนุมัติรายการที่ยอดตรงทั้งหมด (2)</span>
+</button>
+</div>
+<!-- Pending Slip Card 1 (Matched) -->
+<article class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm hover:shadow transition-all duration-300 p-4 sm:p-5" id="slip-card-1">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+<!-- Column 1: Slip Thumbnail with Lightbox trigger (Left) -->
+<div class="md:col-span-3 flex items-center gap-4">
+<div class="relative group w-28 sm:w-32 h-36 rounded-lg bg-surface-container overflow-hidden cursor-pointer border border-outline-variant/60 flex-shrink-0 shadow-inner" onclick="openLightbox('ร้านลุงหนวด กะเพราถาด สาขาอารีย์', '฿590.00', 'ธนาคารกสิกรไทย (KBANK)', '004-8-12948-2', '14:32:18 น.', true)">
+<!-- Slip Preview Placeholder Image with detailed prompt -->
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="A realistic high-resolution banking mobile transfer slip from a Thai bank showing a payment of 590 Baht with transfer confirmation timestamp and digital QR security seal, displayed on a clean neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANIdkMwwcvsujQg5O_xB9oNKbUrGRVEjDlOnYA1h5WLDnlAwRuRHe4XBBjaIevFrs09TKh8cTBf9YsqtTIHanuWklI5dt75vWModIOc0T0kqfQk2HYDmmIDY2BFWvup1jyoySfEqchG0UVd4p53410CZ_402NsJEkEUn2NhZPsWApLOpeSIRkRKig348dna21_WY9qiZY8m7nxfi-P0O2s3xpX1y_AMuj6ni1si4_gDTBL5I36HgwJ"/>
+<div class="absolute inset-0 bg-primary-container/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="zoom_in">zoom_in</span>
+<span class="text-label-sm font-label-sm mt-1">คลิกเพื่อซูม</span>
+</div>
+<div class="absolute top-1.5 left-1.5 bg-primary-container/80 backdrop-blur-xs text-on-primary text-[10px] font-mono px-1.5 py-0.5 rounded">
+                  KBANK
+                </div>
+</div>
+<div class="md:hidden flex-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">ร้านลุงหนวด กะเพราถาด สาขาอารีย์</h3>
+<span class="inline-block px-2 py-0.5 mt-1 rounded bg-secondary-fixed/40 text-on-secondary-fixed text-label-sm font-label-sm">Pro รายเดือน ฿590</span>
+</div>
+</div>
+<!-- Column 2: Invoice & AI OCR Diagnostic Info (Center) -->
+<div class="md:col-span-6 space-y-2">
+<div class="hidden md:flex items-center gap-2">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">ร้านลุงหนวด กะเพราถาด สาขาอารีย์</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed text-label-sm font-label-sm font-semibold">
+                  Pro รายเดือน ฿590
+                </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="text-outline">รอบบิล:</span>
+<span class="font-medium text-on-surface">1 ต.ค. 2569 – 31 ต.ค. 2569</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">เวลาที่แจ้งโอน:</span>
+<span class="font-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                    10 นาทีที่แล้ว (14:32 น.)
+                  </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">ยอดในระบบ:</span>
+<span class="font-headline-sm font-bold text-on-surface text-base">฿590.00</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">เลขที่บิล:</span>
+<span class="font-mono text-xs text-on-surface">INV-202610-0941</span>
+</div>
+</div>
+<!-- AI OCR Automated Telemetry Strip -->
+<div class="mt-2 p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="document_scanner">document_scanner</span>
+<span class="text-label-sm font-label-sm text-on-surface">AI OCR อ่านได้:</span>
+<span class="font-mono font-bold text-emerald-800 text-body-md">฿590.00</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">(ธ.กสิกรไทย #1294)</span>
+</div>
+<span class="text-label-sm font-label-sm text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
+                  ความแม่นยำ 99.4%
+                </span>
+</div>
+</div>
+<!-- Column 3: Verification Status & Actions (Right) -->
+<div class="md:col-span-3 flex flex-col items-end justify-center gap-3 md:border-l md:border-outline-variant/30 md:pl-5">
+<!-- Matched Badge -->
+<div class="w-full flex md:justify-end">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-300 font-semibold">
+<span class="material-symbols-outlined text-emerald-600 text-base" data-icon="check_circle">check_circle</span>
+<span>ยอดตรง (Matched)</span>
+</span>
+</div>
+<!-- Action Buttons -->
+<div class="w-full flex items-center justify-end gap-2 pt-1">
+<button class="flex-1 md:flex-none px-3.5 py-2 rounded-lg border border-rose-300 text-rose-800 hover:bg-rose-50 text-label-md font-label-md transition-colors flex items-center justify-center gap-1" onclick="rejectSlip('slip-card-1', 'ร้านลุงหนวด กะเพราถาด')">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+<span>ปฏิเสธ</span>
+</button>
+<button class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-on-primary text-label-md font-label-md shadow transition-all flex items-center justify-center gap-1.5 active:scale-95" onclick="approveSlip('slip-card-1', 'ร้านลุงหนวด กะเพราถาด สาขาอารีย์', '30 ต.ค. 2569')">
+<span class="material-symbols-outlined text-sm fill-1" data-icon="check">check</span>
+<span>อนุมัติ + ต่ออายุ</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Pending Slip Card 2 (Matched - 6-Month Package) -->
+<article class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm hover:shadow transition-all duration-300 p-4 sm:p-5" id="slip-card-2">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+<!-- Column 1: Slip Thumbnail with Lightbox trigger (Left) -->
+<div class="md:col-span-3 flex items-center gap-4">
+<div class="relative group w-28 sm:w-32 h-36 rounded-lg bg-surface-container overflow-hidden cursor-pointer border border-outline-variant/60 flex-shrink-0 shadow-inner" onclick="openLightbox('The Urban Cafe สาขาทองหล่อ', '฿2,990.00', 'ธนาคารไทยพาณิชย์ (SCB)', '408-2-90184-1', '13:58:02 น.', true)">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="A clean payment transfer slip screenshot from a mobile banking application showing a transaction of 2990 Baht for a merchant subscription with sharp typography and standard Thai transaction reference." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkyrT-QNxPDFG7NXVsBuqNRidAircuMqnvCZ7cW0B4HMP9WLAmBsDo5ba1-DWo7-K4VtzCzSkO6yqWtt8vlmameMgW-SdkARz1ElisUKdKoXi_pDkQaChuxPUql-57YAlYKJwmRW3l4tWz8SNYAf1WZX4TbsCKFKvT47BWdwak2XZ8586-CQx91hcW2jodPQW-dS0G35WHWlg1Xf1KJ4hPIO4KwHMb38328lLHrOSaPfolzmjFNc6r"/>
+<div class="absolute inset-0 bg-primary-container/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="zoom_in">zoom_in</span>
+<span class="text-label-sm font-label-sm mt-1">คลิกเพื่อซูม</span>
+</div>
+<div class="absolute top-1.5 left-1.5 bg-primary-container/80 backdrop-blur-xs text-on-primary text-[10px] font-mono px-1.5 py-0.5 rounded">
+                  SCB
+                </div>
+</div>
+<div class="md:hidden flex-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">The Urban Cafe สาขาทองหล่อ</h3>
+<span class="inline-block px-2 py-0.5 mt-1 rounded bg-secondary-container/30 text-on-secondary-container text-label-sm font-label-sm">Pro ราย 6 เดือน ฿2,990</span>
+</div>
+</div>
+<!-- Column 2: Invoice & AI OCR Diagnostic Info (Center) -->
+<div class="md:col-span-6 space-y-2">
+<div class="hidden md:flex items-center gap-2">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">The Urban Cafe สาขาทองหล่อ</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container text-label-sm font-label-sm font-semibold">
+                  Pro ราย 6 เดือน ฿2,990
+                </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="text-outline">รอบบิล:</span>
+<span class="font-medium text-on-surface">1 ต.ค. 2569 – 31 มี.ค. 2570</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">เวลาที่แจ้งโอน:</span>
+<span class="font-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                    45 นาทีที่แล้ว (13:58 น.)
+                  </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">ยอดในระบบ:</span>
+<span class="font-headline-sm font-bold text-on-surface text-base">฿2,990.00</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">เลขที่บิล:</span>
+<span class="font-mono text-xs text-on-surface">INV-202610-0938</span>
+</div>
+</div>
+<!-- AI OCR Automated Telemetry Strip -->
+<div class="mt-2 p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="document_scanner">document_scanner</span>
+<span class="text-label-sm font-label-sm text-on-surface">AI OCR อ่านได้:</span>
+<span class="font-mono font-bold text-emerald-800 text-body-md">฿2,990.00</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">(ธ.ไทยพาณิชย์ #9018)</span>
+</div>
+<span class="text-label-sm font-label-sm text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
+                  ความแม่นยำ 98.9%
+                </span>
+</div>
+</div>
+<!-- Column 3: Verification Status & Actions (Right) -->
+<div class="md:col-span-3 flex flex-col items-end justify-center gap-3 md:border-l md:border-outline-variant/30 md:pl-5">
+<!-- Matched Badge -->
+<div class="w-full flex md:justify-end">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-300 font-semibold">
+<span class="material-symbols-outlined text-emerald-600 text-base" data-icon="check_circle">check_circle</span>
+<span>ยอดตรง (Matched)</span>
+</span>
+</div>
+<!-- Action Buttons -->
+<div class="w-full flex items-center justify-end gap-2 pt-1">
+<button class="flex-1 md:flex-none px-3.5 py-2 rounded-lg border border-rose-300 text-rose-800 hover:bg-rose-50 text-label-md font-label-md transition-colors flex items-center justify-center gap-1" onclick="rejectSlip('slip-card-2', 'The Urban Cafe')">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+<span>ปฏิเสธ</span>
+</button>
+<button class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-on-primary text-label-md font-label-md shadow transition-all flex items-center justify-center gap-1.5 active:scale-95" onclick="approveSlip('slip-card-2', 'The Urban Cafe สาขาทองหล่อ', '31 มี.ค. 2570')">
+<span class="material-symbols-outlined text-sm fill-1" data-icon="check">check</span>
+<span>อนุมัติ + ต่ออายุ</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Pending Slip Card 3 (MISMATCH WARNING) -->
+<article class="bg-rose-50/20 rounded-lg border-2 border-rose-300 shadow-sm hover:shadow transition-all duration-300 p-4 sm:p-5" id="slip-card-3">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+<!-- Column 1: Slip Thumbnail with Lightbox trigger (Left) -->
+<div class="md:col-span-3 flex items-center gap-4">
+<div class="relative group w-28 sm:w-32 h-36 rounded-lg bg-surface-container overflow-hidden cursor-pointer border border-rose-400 flex-shrink-0 shadow-inner" onclick="openLightbox('ร้านส้มตำป้าสมศรี สาขา 1', '฿500.00 (ผิดพลาด)', 'ธนาคารกรุงไทย (KTB)', '012-3-88219-5', '12:15:40 น.', false)">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="A smartphone screen displaying a Thai bank payment receipt slip with an incorrect amount transferred, clear modern corporate banking styling on light grey." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABlXAfHGXfG3v0UgCAWScCWGPsQYKPuKtPZ56M0rfJoB5jLrKZge5UhjchtOcfTkV3IVYX2TCvgeRb83Idb7FE_eU3pOK0kiztq43WlasGt-8vA1per4bGCagWQwLYu06AOYh5d_8jXzzC6B8mOrJDzXrd8id6xgbjcda2JW9scnX6aXVBzmyuNtwxH9KC32Sv5p6ExY1yQ7wS3lYluuMxxGcqy7Xwn1NoEcD_vbukms5TXV1IKpy5"/>
+<div class="absolute inset-0 bg-rose-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="zoom_in">zoom_in</span>
+<span class="text-label-sm font-label-sm mt-1">คลิกตรวจสอบ</span>
+</div>
+<div class="absolute top-1.5 left-1.5 bg-rose-700 text-on-primary text-[10px] font-mono px-1.5 py-0.5 rounded">
+                  KTB
+                </div>
+</div>
+<div class="md:hidden flex-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">ร้านส้มตำป้าสมศรี สาขา 1</h3>
+<span class="inline-block px-2 py-0.5 mt-1 rounded bg-secondary-fixed/40 text-on-secondary-fixed text-label-sm font-label-sm">Pro รายเดือน ฿590</span>
+</div>
+</div>
+<!-- Column 2: Invoice & AI OCR Diagnostic Info (Center) -->
+<div class="md:col-span-6 space-y-2">
+<div class="hidden md:flex items-center gap-2">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">ร้านส้มตำป้าสมศรี สาขา 1</h3>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed text-label-sm font-label-sm font-semibold">
+                  Pro รายเดือน ฿590
+                </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="text-outline">รอบบิล:</span>
+<span class="font-medium text-on-surface">1 ต.ค. 2569 – 31 ต.ค. 2569</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">เวลาที่แจ้งโอน:</span>
+<span class="font-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                    2 ชั่วโมงที่แล้ว (12:15 น.)
+                  </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">ยอดในระบบที่ต้องชำระ:</span>
+<span class="font-headline-sm font-bold text-rose-700 text-base">฿590.00</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline">เลขที่บิล:</span>
+<span class="font-mono text-xs text-on-surface">INV-202610-0925</span>
+</div>
+</div>
+<!-- AI OCR Automated Telemetry Strip (ALERT MISMATCH) -->
+<div class="mt-2 p-2.5 rounded-lg bg-rose-50 border border-rose-200 flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-rose-700" data-icon="warning">warning</span>
+<span class="text-label-sm font-label-sm text-rose-950 font-semibold">AI OCR ตรวจพบยอดไม่ตรง:</span>
+<span class="font-mono font-bold text-rose-700 text-body-md line-through">฿500.00</span>
+<span class="text-body-sm font-body-sm text-rose-800">(ขาด ฿90.00)</span>
+</div>
+<span class="text-label-sm font-label-sm text-rose-800 bg-rose-100 px-2 py-0.5 rounded font-bold">
+                  ต้องการการตรวจสอบด้วยตนเอง
+                </span>
+</div>
+</div>
+<!-- Column 3: Verification Status & Actions (Right) -->
+<div class="md:col-span-3 flex flex-col items-end justify-center gap-3 md:border-l md:border-rose-200 md:pl-5">
+<!-- Mismatch Badge -->
+<div class="w-full flex md:justify-end">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-label-sm bg-rose-100 text-rose-800 border border-rose-300 font-semibold">
+<span class="material-symbols-outlined text-rose-600 text-base" data-icon="cancel">cancel</span>
+<span>ยอดไม่ตรง (Mismatch)</span>
+</span>
+</div>
+<!-- Action Buttons -->
+<div class="w-full flex items-center justify-end gap-2 pt-1">
+<button class="flex-1 md:flex-none px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-on-primary text-label-md font-label-md transition-colors flex items-center justify-center gap-1 shadow" onclick="rejectSlip('slip-card-3', 'ร้านส้มตำป้าสมศรี')">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+<span>ปฏิเสธสลิป</span>
+</button>
+<button class="flex-1 md:flex-none px-3.5 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low text-label-md font-label-md transition-all flex items-center justify-center gap-1" onclick="approveSlip('slip-card-3', 'ร้านส้มตำป้าสมศรี สาขา 1 (บังคับอนุมัติ)', '30 ต.ค. 2569')" title="อนุมัติโดยใช้อำนาจ Super Admin">
+<span class="material-symbols-outlined text-sm" data-icon="offline_bolt">offline_bolt</span>
+<span>บังคับอนุมัติ</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+</section>
+<!-- ===================================================================== -->
+<!-- 6. TAB CONTENT 2: TABLE VIEW (ชำระแล้ว / ทั้งหมด)                    -->
+<!-- ===================================================================== -->
+<section class="hidden space-y-4" id="paid-section">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">ประวัติการชำระเงินและบิลที่ต่ออายุแล้ว</h2>
+<span class="text-body-sm font-body-sm text-on-surface-variant">แสดงข้อมูล 10 รายการล่าสุดจาก 38 รายการที่ดำเนินการสำเร็จ</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-body-sm font-body-sm text-on-surface-variant">จัดเรียงตาม: ล่าสุด</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant/50 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">
+<th class="py-3 px-4">วันที่ทำรายการ</th>
+<th class="py-3 px-4">รหัสบิล (Invoice)</th>
+<th class="py-3 px-4">ร้านค้า / สาขา</th>
+<th class="py-3 px-4">แพ็กเกจ</th>
+<th class="py-3 px-4 text-right">ยอดชำระ</th>
+<th class="py-3 px-4">วิธีจ่ายเงิน</th>
+<th class="py-3 px-4 text-center">สถานะ</th>
+<th class="py-3 px-4 text-center">จัดการ</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-body-sm font-body-sm">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4 font-mono text-on-surface-variant">01 ต.ค. 2569 11:20</td>
+<td class="py-3.5 px-4 font-mono font-medium text-on-surface">INV-202610-0891</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-on-surface">ชาบูพุงกาง บุฟเฟต์</div>
+<div class="text-xs text-on-surface-variant">สาขาเซ็นทรัลลาดพร้าว</div>
+</td>
+<td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-label-sm">Pro รายปี</span></td>
+<td class="py-3.5 px-4 text-right font-headline-sm font-bold text-on-surface">฿5,490.00</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-primary-container text-base" data-icon="credit_card">credit_card</span>
+                      ตัดบัตรเครดิต
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                      สำเร็จ
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="px-2.5 py-1 rounded bg-surface-container-low hover:bg-surface-container border border-outline-variant text-label-sm font-label-sm text-on-surface inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="receipt">receipt</span>
+                      ใบเสร็จ
+                    </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4 font-mono text-on-surface-variant">01 ต.ค. 2569 10:45</td>
+<td class="py-3.5 px-4 font-mono font-medium text-on-surface">INV-202610-0889</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-on-surface">บ้านกาแฟริมคลอง</div>
+<div class="text-xs text-on-surface-variant">สาขาพระราม 9</div>
+</td>
+<td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-label-sm">Pro รายเดือน</span></td>
+<td class="py-3.5 px-4 text-right font-headline-sm font-bold text-on-surface">฿590.00</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-secondary text-base" data-icon="qr_code_2">qr_code_2</span>
+                      PromptPay QR
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                      สำเร็จ
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="px-2.5 py-1 rounded bg-surface-container-low hover:bg-surface-container border border-outline-variant text-label-sm font-label-sm text-on-surface inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="receipt">receipt</span>
+                      ใบเสร็จ
+                    </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4 font-mono text-on-surface-variant">01 ต.ค. 2569 09:12</td>
+<td class="py-3.5 px-4 font-mono font-medium text-on-surface">INV-202610-0874</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-on-surface">ข้าวมันไก่เฮียเจริญ</div>
+<div class="text-xs text-on-surface-variant">สาขาเยาวราช</div>
+</td>
+<td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-label-sm">Pro รายเดือน</span></td>
+<td class="py-3.5 px-4 text-right font-headline-sm font-bold text-on-surface">฿590.00</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-secondary text-base" data-icon="qr_code_2">qr_code_2</span>
+                      PromptPay QR
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                      สำเร็จ
+                    </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="px-2.5 py-1 rounded bg-surface-container-low hover:bg-surface-container border border-outline-variant text-label-sm font-label-sm text-on-surface inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="receipt">receipt</span>
+                      ใบเสร็จ
+                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-surface-container-lowest border-t border-outline-variant/30 flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>แสดง 1-3 จาก 38 รายการ</span>
+<div class="flex items-center gap-1">
+<button class="px-3 py-1 rounded border border-outline-variant text-label-sm font-label-sm hover:bg-surface-container-low disabled:opacity-50" disabled="">ก่อนหน้า</button>
+<button class="px-3 py-1 rounded bg-primary-container text-on-primary text-label-sm font-label-sm font-bold">1</button>
+<button class="px-3 py-1 rounded border border-outline-variant text-label-sm font-label-sm hover:bg-surface-container-low">2</button>
+<button class="px-3 py-1 rounded border border-outline-variant text-label-sm font-label-sm hover:bg-surface-container-low">ถัดไป</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- ========================================================================= -->
+<!-- 7. LIGHTBOX MODAL (Slip Detailed Full Inspection)                        -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 z-50 bg-primary-container/70 backdrop-blur-sm hidden items-center justify-center p-4" id="lightbox-modal">
+<div class="bg-surface-container-lowest w-full max-w-4xl rounded-xl border border-outline-variant shadow-2xl overflow-hidden flex flex-col max-h-[921px]">
+<!-- Modal Header -->
+<div class="px-6 py-4 border-b border-outline-variant/40 flex items-center justify-between bg-surface-container-low">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary-container">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+</div>
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface" id="modal-store-name">ร้านค้า</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">ตรวจสอบความถูกต้องของสลิปหลักฐานการโอนเงิน</p>
+</div>
+</div>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" onclick="closeLightbox()">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body (Two columns: Image Viewer & Comparison Panel) -->
+<div class="grid grid-cols-1 md:grid-cols-12 flex-1 overflow-y-auto">
+<!-- Image Viewer with Zoom Controls -->
+<div class="md:col-span-7 bg-surface-container-highest/40 p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-outline-variant/30 relative">
+<!-- Zoom Controls Floating Toolbar -->
+<div class="absolute top-4 right-4 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-lg shadow-sm flex items-center p-1 gap-1 z-10">
+<button class="p-1 hover:bg-surface-container-low rounded text-on-surface" onclick="zoomSlip(1.2)" title="ซูมเข้า">
+<span class="material-symbols-outlined text-sm" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="p-1 hover:bg-surface-container-low rounded text-on-surface" onclick="zoomSlip(0.8)" title="ซูมออก">
+<span class="material-symbols-outlined text-sm" data-icon="zoom_out">zoom_out</span>
+</button>
+<button class="p-1 hover:bg-surface-container-low rounded text-on-surface" onclick="resetZoom()" title="ขนาดปกติ">
+<span class="material-symbols-outlined text-sm" data-icon="restart_alt">restart_alt</span>
+</button>
+</div>
+<!-- Slip Image Canvas with transform -->
+<div class="w-64 max-w-full rounded-lg shadow-md border border-outline-variant overflow-hidden bg-white">
+<img class="w-full object-contain transition-transform duration-200" data-alt="Clear high resolution closeup of an official Thai mobile banking transaction slip receipt showing sender receiver details and transaction code." id="modal-slip-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtuc2llEc2ewaA5HT8O0I0w-EY-CAwtv4lCikHzKHfhAB7EI4VBLYGklRvU7GyBzPUjIMLLJ572lPf9u4npMmn4a6GK2gr1Pd8HzchicoUF85oh3DVzLIXcHlDM8Bl22irCtCxdxPo0K-kPC2gyKorhTZjCPx6UsBaOd06CqRTwN_yISTgZScVcK_9QFh0Lx5veEuyJYXM0d3ftGYoNvJi7cpV0rjLXO-jpIuULZcp620HGw3xjii5" style="transform: scale(1);"/>
+</div>
+<span class="text-label-sm font-label-sm text-outline mt-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="info">info</span>
+            คลิกปุ่มซูมเพื่อดูเลขบัญชีและเวลาโอน
+          </span>
+</div>
+<!-- Telemetry Comparison Details -->
+<div class="md:col-span-5 p-6 flex flex-col justify-between space-y-4">
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md text-on-surface-variant">สถานะการเทียบเคียง</span>
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-emerald-50 text-emerald-800 border border-emerald-300" id="modal-status-badge">
+                ยอดตรง
+              </span>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40 space-y-3">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant">ยอดเงินในสลิป:</span>
+<span class="font-headline-sm font-bold text-on-surface" id="modal-slip-amount">฿590.00</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm border-t border-outline-variant/30 pt-2">
+<span class="text-on-surface-variant">ยอดที่ต้องชำระ:</span>
+<span class="font-headline-sm font-bold text-on-surface">฿590.00</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm border-t border-outline-variant/30 pt-2">
+<span class="text-on-surface-variant">ธนาคาร:</span>
+<span class="font-medium text-on-surface" id="modal-bank-name">ธนาคารกสิกรไทย</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm border-t border-outline-variant/30 pt-2">
+<span class="text-on-surface-variant">เลขที่อ้างอิง:</span>
+<span class="font-mono text-xs text-on-surface font-semibold" id="modal-ref-no">004-8-12948-2</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm border-t border-outline-variant/30 pt-2">
+<span class="text-on-surface-variant">เวลาทำรายการ:</span>
+<span class="font-mono text-xs text-on-surface" id="modal-timestamp">14:32:18 น.</span>
+</div>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant bg-surface-bright p-3 rounded-lg border border-outline-variant/30">
+<p>ระบบตรวจสอบผ่าน API OpenSlipVerify พบรหัสความปลอดภัยถูกต้อง และไม่มีการใช้สลิปซ้ำในระบบ</p>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-4 border-t border-outline-variant/30">
+<button class="flex-1 py-2 px-3 border border-outline-variant rounded-lg text-label-md font-label-md text-on-surface hover:bg-surface-container-low transition-colors" onclick="closeLightbox()">
+              ปิดหน้าต่าง
+            </button>
+<button class="flex-1 py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-on-primary rounded-lg text-label-md font-label-md shadow transition-all flex items-center justify-center gap-1" onclick="confirmApproveFromModal()">
+<span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+<span>ยืนยันอนุมัติ</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- 8. TOAST NOTIFICATION STACK                                               -->
+<!-- ========================================================================= -->
+<div class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none" id="toast-container"></div>
+<!-- ========================================================================= -->
+<!-- 9. JAVASCRIPT LOGIC FOR INTERACTIVITY                                    -->
+<!-- ========================================================================= -->
+<script>
+    let currentScale = 1;
+    let pendingCount = 3;
+
+    // View Switching logic (Pending Cards vs Table History)
+    function switchView(tab) {
+      const pendingSection = document.getElementById('pending-section');
+      const paidSection = document.getElementById('paid-section');
+      const pendingBtn = document.getElementById('tab-pending-btn');
+      const paidBtn = document.getElementById('tab-paid-btn');
+      const overdueBtn = document.getElementById('tab-overdue-btn');
+      const allBtn = document.getElementById('tab-all-btn');
+
+      // Reset all buttons to inactive styling
+      [pendingBtn, paidBtn, overdueBtn, allBtn].forEach(btn => {
+        btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low text-label-md font-label-md transition-all";
+      });
+
+      if (tab === 'pending') {
+        pendingSection.classList.remove('hidden');
+        paidSection.classList.add('hidden');
+        pendingBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-container text-on-primary text-label-md font-label-md shadow-sm transition-all";
+      } else {
+        pendingSection.classList.add('hidden');
+        paidSection.classList.remove('hidden');
+        paidBtn.className = "flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-container text-on-primary text-label-md font-label-md shadow-sm transition-all";
+      }
+    }
+
+    // Approve action with smooth dismissal & toast
+    function approveSlip(cardId, storeName, expiryDate) {
+      const card = document.getElementById(cardId);
+      if (card) {
+        card.classList.add('card-dismiss');
+        setTimeout(() => {
+          card.remove();
+          decrementPending();
+        }, 400);
+
+        showToast(`ต่ออายุ "${storeName}" ถึง ${expiryDate} เรียบร้อยแล้ว`, 'success');
+      }
+    }
+
+    // Reject action
+    function rejectSlip(cardId, storeName) {
+      if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธสลิปของ "${storeName}" ?`)) {
+        const card = document.getElementById(cardId);
+        if (card) {
+          card.classList.add('card-dismiss');
+          setTimeout(() => {
+            card.remove();
+            decrementPending();
+          }, 400);
+
+          showToast(`ปฏิเสธสลิปและแจ้งเตือนไปยัง ${storeName} แล้ว`, 'error');
+        }
+      }
+    }
+
+    // Approve All Valid Slips
+    function approveAllPending() {
+      approveSlip('slip-card-1', 'ร้านลุงหนวด กะเพราถาด สาขาอารีย์', '30 ต.ค. 2569');
+      setTimeout(() => {
+        approveSlip('slip-card-2', 'The Urban Cafe สาขาทองหล่อ', '31 มี.ค. 2570');
+      }, 150);
+    }
+
+    function decrementPending() {
+      pendingCount = Math.max(0, pendingCount - 1);
+      document.getElementById('metric-pending-count').innerText = pendingCount;
+      document.getElementById('tab-badge-pending').innerText = pendingCount;
+    }
+
+    // Lightbox Modal Controls
+    function openLightbox(store, amount, bank, ref, time, isMatched) {
+      document.getElementById('modal-store-name').innerText = store;
+      document.getElementById('modal-slip-amount').innerText = amount;
+      document.getElementById('modal-bank-name').innerText = bank;
+      document.getElementById('modal-ref-no').innerText = ref;
+      document.getElementById('modal-timestamp').innerText = time;
+
+      const badge = document.getElementById('modal-status-badge');
+      if (isMatched) {
+        badge.className = "px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-emerald-50 text-emerald-800 border border-emerald-300";
+        badge.innerText = "ยอดตรง (Matched)";
+      } else {
+        badge.className = "px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-rose-100 text-rose-800 border border-rose-300";
+        badge.innerText = "ยอดไม่ตรง (Mismatch)";
+      }
+
+      resetZoom();
+      const modal = document.getElementById('lightbox-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function zoomSlip(factor) {
+      currentScale = Math.min(2.5, Math.max(0.6, currentScale * factor));
+      document.getElementById('modal-slip-img').style.transform = `scale(${currentScale})`;
+    }
+
+    function resetZoom() {
+      currentScale = 1;
+      document.getElementById('modal-slip-img').style.transform = 'scale(1)';
+    }
+
+    function confirmApproveFromModal() {
+      closeLightbox();
+      approveSlip('slip-card-1', 'ร้านลุงหนวด กะเพราถาด สาขาอารีย์', '30 ต.ค. 2569');
+    }
+
+    // Toast Notification Creator
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const isSuccess = type === 'success';
+      const bgColor = isSuccess ? 'bg-primary-container' : 'bg-rose-900';
+      const icon = isSuccess ? 'check_circle' : 'error';
+      const iconColor = isSuccess ? 'text-emerald-400' : 'text-rose-300';
+
+      toast.className = `${bgColor} text-on-primary px-4 py-3 rounded-lg shadow-xl border border-outline-variant/30 flex items-center gap-3 transition-all transform duration-300 translate-y-4 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `
+        <span class="material-symbols-outlined ${iconColor}">${icon}</span>
+        <span class="text-body-md font-body-md font-medium">${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      // Trigger entrance
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+      });
+
+      // Auto dismiss
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+  </script>
+</body></html>

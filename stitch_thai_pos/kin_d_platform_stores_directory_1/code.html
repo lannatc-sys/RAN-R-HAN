@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background" lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kin-D Super Admin - จัดการร้านค้าทั้งหมด (All Stores)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter & IBM Plex Sans Thai / Latin -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "inverse-primary": "#bec6e0",
+          "surface-variant": "#d3e4fe",
+          "on-secondary-fixed": "#2a1700",
+          "surface-container-highest": "#d3e4fe",
+          "error": "#ba1a1a",
+          "surface-tint": "#565e74",
+          "surface": "#f8f9ff",
+          "on-surface-variant": "#45464d",
+          "secondary-container": "#fea619",
+          "on-primary-container": "#7c839b",
+          "on-primary": "#ffffff",
+          "secondary": "#855300",
+          "outline-variant": "#c6c6cd",
+          "on-primary-fixed": "#131b2e",
+          "secondary-fixed": "#ffddb8",
+          "inverse-surface": "#213145",
+          "primary-fixed": "#dae2fd",
+          "inverse-on-surface": "#eaf1ff",
+          "tertiary-container": "#002113",
+          "primary": "#000000",
+          "surface-container-high": "#dce9ff",
+          "on-tertiary-fixed": "#002113",
+          "on-surface": "#0b1c30",
+          "on-background": "#0b1c30",
+          "tertiary-fixed": "#6ffbbe",
+          "on-tertiary-fixed-variant": "#005236",
+          "on-primary-fixed-variant": "#3f465c",
+          "surface-bright": "#f8f9ff",
+          "primary-fixed-dim": "#bec6e0",
+          "on-error": "#ffffff",
+          "tertiary-fixed-dim": "#4edea3",
+          "outline": "#76777d",
+          "surface-container-low": "#eff4ff",
+          "on-secondary": "#ffffff",
+          "on-tertiary-container": "#009668",
+          "on-secondary-container": "#684000",
+          "surface-container": "#e5eeff",
+          "tertiary": "#000000",
+          "on-tertiary": "#ffffff",
+          "error-container": "#ffdad6",
+          "surface-dim": "#cbdbf5",
+          "background": "#f8f9ff",
+          "surface-container-lowest": "#ffffff",
+          "secondary-fixed-dim": "#ffb95f",
+          "primary-container": "#131b2e",
+          "on-secondary-fixed-variant": "#653e00",
+          "on-error-container": "#93000a"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "sidebar-width-expanded": "16.25rem",
+          "margin-desktop": "2rem",
+          "sidebar-width-collapsed": "4.5rem",
+          "gutter-xl": "2rem",
+          "gutter-xs": "0.25rem",
+          "gutter-md": "1rem",
+          "gutter-sm": "0.5rem",
+          "topbar-height": "4rem",
+          "gutter-lg": "1.5rem",
+          "margin-mobile": "1rem"
+        },
+        "fontFamily": {
+          "body-md": ["Inter", "IBM Plex Sans Thai", "sans-serif"],
+          "data-mono": ["IBM Plex Sans", "IBM Plex Sans Thai", "monospace"],
+          "label-sm": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"],
+          "label-md": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"],
+          "headline-sm": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"],
+          "headline-md": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"],
+          "label-lg": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"],
+          "body-sm": ["Inter", "IBM Plex Sans Thai", "sans-serif"],
+          "body-lg": ["Inter", "IBM Plex Sans Thai", "sans-serif"],
+          "headline-xl-mobile": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"],
+          "headline-lg": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"],
+          "headline-xl": ["IBM Plex Sans", "IBM Plex Sans Thai", "sans-serif"]
+        },
+        "fontSize": {
+          "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+          "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+          "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+          "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+          "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+          "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+          "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+          "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+          "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+          "headline-xl-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+          "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+          "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+        }
+      }
+    }
+  }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="h-full bg-background text-on-surface antialiased font-body-md overflow-x-hidden flex">
+<!-- ==================== SIDE NAVIGATION BAR (SHARED COMPONENT) ==================== -->
+<aside class="fixed top-0 left-0 h-screen w-sidebar-width-expanded z-40 bg-primary-container text-on-primary border-r border-outline-variant/20 hidden md:flex flex-col justify-between p-4">
+<!-- Header Logo -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 px-2 pt-1">
+<div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center text-primary font-headline-md font-bold shadow-sm">
+<span class="material-symbols-outlined text-on-secondary-fixed text-[24px]">point_of_sale</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-primary tracking-tight">Kin-D Platform</h1>
+<p class="text-label-sm font-label-sm text-on-primary-container">Super Admin</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="space-y-1">
+<!-- ภาพรวม (Overview) - Inactive -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150 text-label-lg font-label-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span>ภาพรวม</span>
+</a>
+<!-- ร้านค้า (Stores Directory) - ACTIVE (MANDATORY EXACT MATCH) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container/20 text-on-primary font-semibold border-l-4 border-secondary-container transition-all duration-200 active:scale-[0.99] text-label-lg font-label-lg shadow-sm" href="#">
+<span class="material-symbols-outlined fill-icon text-secondary-container text-[20px]">storefront</span>
+<span>ร้านค้า</span>
+<span class="ml-auto bg-secondary-container text-on-secondary-fixed text-[11px] font-bold px-2 py-0.5 rounded-full font-label-sm">42</span>
+</a>
+<!-- บิล - Inactive -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150 text-label-lg font-label-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span>บิล</span>
+</a>
+<!-- แจ้งปัญหา - Inactive -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150 text-label-lg font-label-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+<span>แจ้งปัญหา</span>
+<span class="ml-auto bg-error text-on-error text-[10px] font-bold px-1.5 py-0.2 rounded-full">2</span>
+</a>
+<!-- ประกาศ - Inactive -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150 text-label-lg font-label-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+<span>ประกาศ</span>
+</a>
+<!-- วิเคราะห์ - Inactive -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150 text-label-lg font-label-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span>วิเคราะห์</span>
+</a>
+<!-- บันทึกระบบ - Inactive -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-surface-container-high/10 font-normal transition-all duration-150 text-label-lg font-label-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span>บันทึกระบบ</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer -->
+<div class="pt-4 border-t border-outline-variant/10 space-y-1">
+<div class="px-3 py-2 rounded-lg bg-surface-container-high/5 flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container/20 border border-secondary-container/40 flex items-center justify-center text-secondary-container">
+<span class="material-symbols-outlined text-[18px]">shield_person</span>
+</div>
+<div class="overflow-hidden">
+<p class="text-label-sm font-label-sm text-on-primary font-medium truncate">Super Admin (Owner)</p>
+<p class="text-[10px] text-on-primary-container truncate">root@kindpos.internal</p>
+</div>
+</div>
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-on-primary-container hover:text-on-error hover:bg-error/10 font-normal transition-colors text-label-md font-label-md">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>ออกจากระบบ</span>
+</button>
+</div>
+</aside>
+<!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+<div class="flex-1 md:pl-sidebar-width-expanded flex flex-col min-h-screen">
+<!-- ==================== TOP NAVIGATION BAR (SHARED COMPONENT) ==================== -->
+<header class="sticky top-0 z-30 h-topbar-height bg-surface-container-lowest border-b border-outline-variant/40 shadow-sm flex items-center justify-between px-4 md:px-gutter-lg">
+<!-- Breadcrumb and Left Search Context -->
+<div class="flex items-center gap-3">
+<!-- Mobile Sidebar Hamburger Toggle -->
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg">
+<span class="material-symbols-outlined text-[24px]">menu</span>
+</button>
+<nav class="flex items-center gap-2 text-label-md font-label-md">
+<span class="text-on-surface-variant font-normal">แพลตฟอร์ม</span>
+<span class="material-symbols-outlined text-outline-variant text-[14px]">chevron_right</span>
+<span class="text-on-surface font-semibold">จัดการร้านค้า</span>
+</nav>
+</div>
+<!-- Right Utility Cluster -->
+<div class="flex items-center gap-3 md:gap-5">
+<!-- Global Health Status Pill -->
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-label-sm font-label-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>ทุกระบบปกติ 99.9%</span>
+</div>
+<!-- Quick Action Notification Icons -->
+<div class="flex items-center gap-1">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors relative" title="การแจ้งเตือน">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors hidden sm:inline-flex" title="ช่วยเหลือ">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors" title="การตั้งค่า">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+<div class="h-6 w-px bg-outline-variant/40 hidden sm:block"></div>
+<!-- System Manage Primary Action -->
+<button class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary text-label-md font-label-md font-semibold hover:bg-primary-container transition-colors shadow-sm active:scale-95">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>จัดการระบบ</span>
+</button>
+<!-- Profile Avatar -->
+<div class="flex items-center gap-2 pl-1">
+<img class="w-8 h-8 rounded-full border border-outline-variant/60 object-cover" data-alt="Corporate headshot of an Asian male executive wearing navy blue smart formal clothing with soft ambient background lighting, captured in a crisp studio portrait style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv1FexGdr922n0HOuVf8I2wDJrxgehhulAtN0Yq8PD4qp86f4vXbrHC6owuSJP9gvaKe0oHBLygpgeWeKqCuTonJuTxvIHnirryvv8CY1hOLdaYQp5ue95R-foh-ZBe-bxFWzmBokYZaXGhOrBEfYsYbWzYqWFJk74CkzReL1Z9Mx_rJk4uushfTYJSjCdySpXJgVpDcz7Jmm_lvGba2EoNWd_sOEzxu4ac0RbqSb61YRbloSjXZIY"/>
+</div>
+</div>
+</header>
+<!-- ==================== PAGE CONTENT BODY ==================== -->
+<main class="flex-1 p-4 md:p-gutter-lg space-y-6 pb-28">
+<!-- 1. PAGE HEADER SECTION -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2.5 flex-wrap">
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">ร้านค้าทั้งหมด (All Stores)</h1>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm font-bold bg-surface-container-high/40 text-on-surface">
+              42 ร้านค้า
+            </span>
+</div>
+<!-- Real-time Status Micro Bar -->
+<div class="flex items-center gap-2 mt-1.5 text-body-sm font-body-sm text-on-surface-variant flex-wrap">
+<span class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>ใช้งานอยู่ <strong>38</strong> ร้าน</span>
+</span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1 text-amber-700 font-medium">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span>ใกล้หมดอายุ <strong>5</strong> ร้าน</span>
+</span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-slate-400"></span>
+<span>ระงับ <strong>1</strong> ร้าน</span>
+</span>
+</div>
+</div>
+<!-- Header Actions -->
+<div class="flex items-center gap-2.5 self-start md:self-auto">
+<!-- Export Data Button -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-on-surface hover:bg-surface-container-low text-label-md font-label-md font-medium shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">file_download</span>
+<span>Export ข้อมูล</span>
+</button>
+<!-- Add New Store Primary Button -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary-container text-label-md font-label-md font-semibold shadow-sm transition-all duration-150 active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add_business</span>
+<span>เพิ่มร้านค้าใหม่</span>
+</button>
+</div>
+</div>
+<!-- 2. FILTERS & SEARCH CONTROL PANEL -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/40 p-4 shadow-sm space-y-3.5">
+<!-- Top Row: Full Search Bar -->
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">search</span>
+<input class="w-full h-10 pl-11 pr-24 rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface text-body-md font-body-md placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-secondary-container/40 transition-all outline-none" placeholder="ค้นหาด่วนตามชื่อร้าน, สาขา, เบอร์โทรเจ้าของร้าน, หรืออีเมล..." type="text" value=""/>
+<div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] text-outline font-data-mono bg-surface-container-low px-1.5 py-0.5 rounded border border-outline-variant/40">
+<span>⌘</span><span>K</span>
+</div>
+</div>
+<!-- Bottom Row: Multi-Dropdown Filters & Clear Button -->
+<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-2.5 pt-1">
+<!-- Status Filter -->
+<div class="space-y-1">
+<label class="text-[11px] font-label-sm font-semibold text-on-surface-variant">สถานะร้านค้า</label>
+<div class="relative">
+<select class="w-full h-9 pl-2.5 pr-8 rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-secondary-container/40 appearance-none cursor-pointer">
+<option selected="">ทั้งหมด (All)</option>
+<option>กำลังใช้งาน (Active)</option>
+<option>ใกล้หมดอายุ (&lt;7 วัน)</option>
+<option>หมดอายุแล้ว (Expired)</option>
+<option>ถูกระงับ (Suspended)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Package Filter -->
+<div class="space-y-1">
+<label class="text-[11px] font-label-sm font-semibold text-on-surface-variant">แพ็กเกจ (Subscription)</label>
+<div class="relative">
+<select class="w-full h-9 pl-2.5 pr-8 rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-secondary-container/40 appearance-none cursor-pointer">
+<option selected="">ทั้งหมดทุกแพ็กเกจ</option>
+<option>Pro รายเดือน (฿590)</option>
+<option>Pro ราย 6 เดือน (฿2,990)</option>
+<option>Pro รายปี (฿5,490)</option>
+<option>ทดลองใช้ฟรี (Free Trial)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Registration Source Filter -->
+<div class="space-y-1">
+<label class="text-[11px] font-label-sm font-semibold text-on-surface-variant">ช่องทางสมัคร</label>
+<div class="relative">
+<select class="w-full h-9 pl-2.5 pr-8 rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-secondary-container/40 appearance-none cursor-pointer">
+<option selected="">ทุกช่องทาง</option>
+<option>แนะนำต่อ (Referral)</option>
+<option>Google Search</option>
+<option>Facebook Ads</option>
+<option>TikTok Ads</option>
+<option>ติดต่อโดยตรง (Direct Sale)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Sort Order Filter -->
+<div class="space-y-1">
+<label class="text-[11px] font-label-sm font-semibold text-on-surface-variant">เรียงตาม</label>
+<div class="relative">
+<select class="w-full h-9 pl-2.5 pr-8 rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface text-label-md font-label-md focus:border-primary focus:ring-1 focus:ring-secondary-container/40 appearance-none cursor-pointer">
+<option selected="">สมัครล่าสุด (Newest)</option>
+<option>ยอดขายสูงสุด 30 วัน</option>
+<option>วันหมดอายุใกล้สุด</option>
+<option>ออเดอร์มากที่สุด</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Clear Filters Button -->
+<div class="col-span-2 sm:col-span-2 md:col-span-1 flex items-end">
+<button class="w-full h-9 flex items-center justify-center gap-1.5 px-3 rounded-lg border border-dashed border-outline-variant text-on-surface-variant hover:text-error hover:border-error hover:bg-error-container/20 text-label-md font-label-md font-medium transition-colors">
+<span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+<span>ล้างตัวกรอง</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 3. MAIN DATA TABLE (Sticky Header Enterprise Rigor) -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm overflow-hidden">
+<!-- Desktop Table View -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/60 border-b border-outline-variant/40 text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider select-none">
+<th class="py-3.5 pl-4 pr-2 w-10">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container cursor-pointer" type="checkbox"/>
+</th>
+<th class="py-3.5 px-3 min-w-[240px]">ร้านค้า / สาขา &amp; รหัส</th>
+<th class="py-3.5 px-3 min-w-[200px]">เจ้าของร้าน &amp; การติดต่อ</th>
+<th class="py-3.5 px-3 min-w-[140px]">แพ็กเกจ</th>
+<th class="py-3.5 px-3 min-w-[170px]">วันหมดอายุ</th>
+<th class="py-3.5 px-3 text-right min-w-[120px]">ออเดอร์ 30 วัน</th>
+<th class="py-3.5 px-3 text-right min-w-[130px]">ยอดขาย 30 วัน</th>
+<th class="py-3.5 px-3 text-center min-w-[110px]">สถานะ</th>
+<th class="py-3.5 pr-4 pl-2 text-right w-12">จัดการ</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-body-sm font-body-sm">
+<!-- ROW 1: Selected, Impersonate Dropdown Simulated Open -->
+<tr class="bg-secondary-container/5 hover:bg-secondary-container/10 transition-colors">
+<td class="py-3 pl-4 pr-2">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white" data-alt="Authentic Thai food brand logo emblem displaying a bowl of papaya salad on clean warm wooden table background in minimalist modern commercial graphic style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4-miIOOf-qe_szbK3-4zuDI0CfcxOt1nIjGXD-otO8o6W6dBB5HCklTVrMFBOKpIdV05fm9opzV89jDRmoO3Y5fnpTtnOfi8ztV8uAypXbT67_wLQCfG2MnLgp7xJ2EHHr01bkRv2TJwOHeCC1C4iioN62b9apSp-S1NPcSkYiNSv5MTjHJjXyw2riGkbxs_waB-_WMUzO2435oj5n9Y_lkp-wnPvGVAb-aaqMlNyLAdCwXgirPbM"/>
+<div>
+<a class="font-headline-sm text-[14px] font-semibold text-on-surface hover:text-secondary hover:underline flex items-center gap-1.5" href="#">
+<span>ร้านป้าสมศรี ส้มตำแซ่บ</span>
+<span class="material-symbols-outlined text-outline text-[14px]">open_in_new</span>
+</a>
+<p class="text-[12px] text-on-surface-variant">สาขา 1 (อารีย์สัมพันธ์) • <span class="font-data-mono font-medium text-on-surface">#KD-0104</span></p>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<p class="font-medium text-on-surface text-[13px]">สมศรี สุขเกษม</p>
+<p class="text-[12px] text-on-surface-variant font-data-mono">081-452-9889</p>
+<p class="text-[11px] text-outline truncate">somsri.somtum@gmail.com</p>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-label-sm font-bold bg-surface-container-high/60 text-on-surface border border-outline-variant/40">
+                    Pro ราย 6 เดือน
+                  </span>
+</td>
+<td class="py-3 px-3">
+<!-- Critical Warning: < 7 days -->
+<div class="flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+<span class="material-symbols-outlined text-[16px] text-amber-600">notification_important</span>
+<span class="font-semibold text-[12px]">เหลือ 3 วัน (24 ต.ค. 67)</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="font-data-mono font-semibold text-on-surface text-[13px]">1,420 ออเดอร์</div>
+<div class="flex items-center justify-end text-[11px] text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+14.2%</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<p class="font-data-mono font-bold text-on-surface text-[14px]">฿148,200</p>
+<p class="text-[11px] text-on-surface-variant">เฉลี่ย ฿104/บิล</p>
+</td>
+<td class="py-3 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-bold bg-amber-50 text-amber-800 border border-amber-300">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    ใกล้หมดอายุ
+                  </span>
+</td>
+<!-- Context Action Menu Column (Simulated ACTIVE Flyout Dropdown) -->
+<td class="py-3 pr-4 pl-2 text-right relative">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors bg-surface-container">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+<!-- 4. CONTEXT ACTION MENU FLYOUT (Explicitly Rendered for Row 1) -->
+<div class="absolute right-4 top-12 z-50 w-60 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xl py-1.5 text-left divide-y divide-outline-variant/30">
+<div class="py-1">
+<a class="flex items-center gap-2.5 px-3.5 py-2 text-body-sm font-body-sm text-on-surface hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">storefront</span>
+<span>ดูรายละเอียดร้านค้า</span>
+</a>
+<a class="flex items-center gap-2.5 px-3.5 py-2 text-body-sm font-body-sm font-medium text-secondary hover:bg-secondary-container/10 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-secondary">login</span>
+<span>เข้าดูแทนร้าน (Impersonate)</span>
+</a>
+</div>
+<div class="py-1">
+<a class="flex items-center gap-2.5 px-3.5 py-2 text-body-sm font-body-sm text-on-surface hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">autorenew</span>
+<span>ต่ออายุแพ็กเกจ</span>
+</a>
+<a class="flex items-center gap-2.5 px-3.5 py-2 text-body-sm font-body-sm text-on-surface hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">send</span>
+<span>ส่งข้อความ / ประกาศหาร้าน</span>
+</a>
+</div>
+<div class="py-1">
+<a class="flex items-center gap-2.5 px-3.5 py-2 text-body-sm font-body-sm text-error hover:bg-error-container/30 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined text-[18px]">block</span>
+<span>ระงับการใช้งานชั่วคราว</span>
+</a>
+</div>
+</div>
+</td>
+</tr>
+<!-- ROW 2: Selected, Active Store -->
+<tr class="bg-secondary-container/5 hover:bg-secondary-container/10 transition-colors">
+<td class="py-3 pl-4 pr-2">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white" data-alt="Modern specialty coffee brand minimalist logo emblem in dark roast tones with steam motif, crisp vector typography in corporate identity framing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvQ-Xjze85-nRjMikm1ebzC04X2iYLSU1Zk5BknltSQZY6HxI0wAnLdhiq-9p8XPlx2m1hl-wWv_hPwgYb7xVm0e875-l4Y50TFR6CZe55Zdd6ZPduSQ1C5Svt30EtlNhh85pXxaT-KT2t654mcx-olfgyddeTSbEZKQLzyF8IC8aE_aTlzwBCCpxqokPgvU2i-4bLrQTVv5KkjiAO0i6GOleBVVNfRZemeG1AqhJ_JxFhs-QQdAHW"/>
+<div>
+<a class="font-headline-sm text-[14px] font-semibold text-on-surface hover:text-secondary hover:underline flex items-center gap-1.5" href="#">
+<span>The Urban Cafe</span>
+<span class="material-symbols-outlined text-outline text-[14px]">open_in_new</span>
+</a>
+<p class="text-[12px] text-on-surface-variant">สาขา 1 (ทองหล่อ ซอย 11) • <span class="font-data-mono font-medium text-on-surface">#KD-0089</span></p>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<p class="font-medium text-on-surface text-[13px]">ธนากร วัฒนพานิช</p>
+<p class="text-[12px] text-on-surface-variant font-data-mono">089-224-1100</p>
+<p class="text-[11px] text-outline truncate">thanakorn.urban@cafe.co</p>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-label-sm font-bold bg-surface-container-high/60 text-on-surface border border-outline-variant/40">
+                    Pro รายปี
+                  </span>
+</td>
+<td class="py-3 px-3">
+<div class="text-[13px] text-on-surface font-data-mono">15 ม.ค. 2568</div>
+<div class="text-[11px] text-on-surface-variant">เหลือ 85 วัน</div>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="font-data-mono font-semibold text-on-surface text-[13px]">3,240 ออเดอร์</div>
+<div class="flex items-center justify-end text-[11px] text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+8.7%</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<p class="font-data-mono font-bold text-on-surface text-[14px]">฿421,800</p>
+<p class="text-[11px] text-on-surface-variant">เฉลี่ย ฿130/บิล</p>
+</td>
+<td class="py-3 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    ใช้งานปกติ
+                  </span>
+</td>
+<td class="py-3 pr-4 pl-2 text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- ROW 3: Selected, Active Store -->
+<tr class="bg-secondary-container/5 hover:bg-secondary-container/10 transition-colors">
+<td class="py-3 pl-4 pr-2">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white" data-alt="Traditional Thai casual dining restaurant logo badge featuring a royal brass wok silhouette on crisp clean studio ivory background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAECe0uH9JCtyY1xLn3f5gLYJakQhJCBBsGHb6iGVIXaHglyIBzRMykEy56U8AIx4Wo8pHowQ_IXpQQtVKMZeJNQy345CFVewzqotyD6rsYICd7z02exHhtDZG4YExN_iK0d8twEMv8UjBzDeKyAuA6lNmYPoO8iNMnDDXvMb2tdYQQdTBauM_djpE_OIRWvZ8dcZy8Oxctkv75XiJN7rDEY7jbxqJ9kw48mPUknusLD3HS6ZGrCNei"/>
+<div>
+<a class="font-headline-sm text-[14px] font-semibold text-on-surface hover:text-secondary hover:underline flex items-center gap-1.5" href="#">
+<span>ครัวรสเลิศ สยามสแควร์</span>
+<span class="material-symbols-outlined text-outline text-[14px]">open_in_new</span>
+</a>
+<p class="text-[12px] text-on-surface-variant">สาขา Flagship • <span class="font-data-mono font-medium text-on-surface">#KD-0012</span></p>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<p class="font-medium text-on-surface text-[13px]">พรพรรณ เตชะสกุล</p>
+<p class="text-[12px] text-on-surface-variant font-data-mono">082-991-4432</p>
+<p class="text-[11px] text-outline truncate">krua.rotlerd@gmail.com</p>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-label-sm font-bold bg-surface-container-high/60 text-on-surface border border-outline-variant/40">
+                    Pro รายเดือน
+                  </span>
+</td>
+<td class="py-3 px-3">
+<div class="text-[13px] text-on-surface font-data-mono">12 พ.ย. 2567</div>
+<div class="text-[11px] text-on-surface-variant">เหลือ 21 วัน</div>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="font-data-mono font-semibold text-on-surface text-[13px]">2,150 ออเดอร์</div>
+<div class="flex items-center justify-end text-[11px] text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+3.5%</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<p class="font-data-mono font-bold text-on-surface text-[14px]">฿285,400</p>
+<p class="text-[11px] text-on-surface-variant">เฉลี่ย ฿132/บิล</p>
+</td>
+<td class="py-3 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    ใช้งานปกติ
+                  </span>
+</td>
+<td class="py-3 pr-4 pl-2 text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- ROW 4: Free Trial Store -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3 pl-4 pr-2">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white" data-alt="Boba milk tea and dessert shop pastel corporate brand logo in minimal contemporary styling on soft ivory background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKn3j4ugd_u85VwH_Owh0UFsobwuNvYSyghoWzpVWD_WQzJV4sKGTjvCdHEmRCvF5ivVB6uHiquUSH-m6CI3VeJTBzxt5YgRqK7qMVPHO8YEpfQziTZEoXBYdxkYv4dMvUa_xWSNxDkOQU-xBywiXzEgERT28hjTzxmiWJBxEmU5SC18bzVO-_F2ROgE2JAUNXOhVOpTcP7sGElRVc-qbD4vcpsl6lXDMHCpJwFauhj55tc-ZeiIKy"/>
+<div>
+<a class="font-headline-sm text-[14px] font-semibold text-on-surface hover:text-secondary hover:underline flex items-center gap-1.5" href="#">
+<span>Chubby Boba Bar</span>
+<span class="material-symbols-outlined text-outline text-[14px]">open_in_new</span>
+</a>
+<p class="text-[12px] text-on-surface-variant">สาขา เซ็นทรัลลาดพร้าว • <span class="font-data-mono font-medium text-on-surface">#KD-0128</span></p>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<p class="font-medium text-on-surface text-[13px]">วิริยา กิจเจริญวงศ์</p>
+<p class="text-[12px] text-on-surface-variant font-data-mono">086-554-9912</p>
+<p class="text-[11px] text-outline truncate">wiriya.boba@gmail.com</p>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-label-sm font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    ทดลองใช้ (Free Trial)
+                  </span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1 text-amber-700 font-semibold text-[12px]">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+<span>เหลือ 5 วัน (26 ต.ค. 67)</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="font-data-mono font-semibold text-on-surface text-[13px]">640 ออเดอร์</div>
+<div class="flex items-center justify-end text-[11px] text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+22.0%</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<p class="font-data-mono font-bold text-on-surface text-[14px]">฿51,200</p>
+<p class="text-[11px] text-on-surface-variant">เฉลี่ย ฿80/บิล</p>
+</td>
+<td class="py-3 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-bold bg-amber-50 text-amber-800 border border-amber-300">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    ใกล้หมดอายุ
+                  </span>
+</td>
+<td class="py-3 pr-4 pl-2 text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- ROW 5: Suspended Store -->
+<tr class="hover:bg-surface-container-low/40 transition-colors bg-surface-container-low/20">
+<td class="py-3 pl-4 pr-2">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-3 opacity-75">
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white grayscale" data-alt="Japanese izakaya restaurant circular crest logo graphic with charcoal grill motif in deep sumi ink black on light textured parchment background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr5YYcmLuMbf-P6v-XKFQ29HYKKKqPCClB3ErFRhH0WZxMJY5m4pN1sGRzG8NqHCMIsMeVP2GAcZi_zH3I5frI1kQCl76DNyads41QBUDB7bLzqwKNIvMnElOwEFcI2u8txPrF7YlsO-PSH20yTNxgaZNa3y2S_rcPcZEGL4SD0kwZQvun56jubz2G2km8mMzPXsV7k04kAlpWAZCcOtSB1zlPMSBcEQuH8tXjaRRs70OOXwXd5TZv"/>
+<div>
+<a class="font-headline-sm text-[14px] font-semibold text-on-surface hover:underline flex items-center gap-1.5" href="#">
+<span>โทราโนสุเกะ อิซากายะ</span>
+<span class="material-symbols-outlined text-outline text-[14px]">open_in_new</span>
+</a>
+<p class="text-[12px] text-on-surface-variant">สาขา พระราม 9 • <span class="font-data-mono font-medium text-on-surface">#KD-0044</span></p>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 opacity-75">
+<p class="font-medium text-on-surface text-[13px]">เกริกชัย แสนคำ</p>
+<p class="text-[12px] text-on-surface-variant font-data-mono">080-123-9999</p>
+<p class="text-[11px] text-outline truncate">krerk.izakaya@bkk.th</p>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-label-sm font-bold bg-surface-container-high/40 text-on-surface-variant border border-outline-variant/40">
+                    Pro ราย 6 เดือน
+                  </span>
+</td>
+<td class="py-3 px-3">
+<div class="text-[13px] text-error font-data-mono font-medium">ระงับเมื่อ 1 ต.ค. 67</div>
+<div class="text-[11px] text-error truncate">ค้างชำระค่าบริการเกิน 30 วัน</div>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="font-data-mono font-semibold text-outline text-[13px]">0 ออเดอร์</div>
+<div class="text-[11px] text-outline font-data-mono">-100%</div>
+</td>
+<td class="py-3 px-3 text-right">
+<p class="font-data-mono font-bold text-outline text-[14px]">฿0</p>
+<p class="text-[11px] text-outline">-</p>
+</td>
+<td class="py-3 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-bold bg-slate-100 text-slate-700 border border-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    ถูกระงับ
+                  </span>
+</td>
+<td class="py-3 pr-4 pl-2 text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- ROW 6: Regular Active Store -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3 pl-4 pr-2">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white" data-alt="Artisanal sourdough bakery shop emblem logo in warm golden wheat colors on light clean modern backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDItZnuKTfHv0e2bfEn3Cdei3KQRAvfA-gM_52z0Py4_Kny3R3pjKCFd45C4VaTu39Ynonoy7N4xz_tMNIARTlgBHUwfPLRYnlgDtsgk4_Sf73Mzl1dRdIAa4q3ZsE--Dx1HMHzMHaKBp-X2fT2ahyR2z4FzvyrTItfLq5argvnZqceA051yUz1_j3f5vv6vOcwA0GgJO9Q7lIFb5XpCtlJ5UN5q5oUpoEbSLsrmdkotA0rx-D29sB_"/>
+<div>
+<a class="font-headline-sm text-[14px] font-semibold text-on-surface hover:text-secondary hover:underline flex items-center gap-1.5" href="#">
+<span>Maison de Pain Bakery</span>
+<span class="material-symbols-outlined text-outline text-[14px]">open_in_new</span>
+</a>
+<p class="text-[12px] text-on-surface-variant">สาขา เอ็มควอเทียร์ • <span class="font-data-mono font-medium text-on-surface">#KD-0072</span></p>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<p class="font-medium text-on-surface text-[13px]">ปิยะดา เจริญพรต</p>
+<p class="text-[12px] text-on-surface-variant font-data-mono">085-778-9021</p>
+<p class="text-[11px] text-outline truncate">order@maisonpain.co.th</p>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-label-sm font-bold bg-surface-container-high/60 text-on-surface border border-outline-variant/40">
+                    Pro รายปี
+                  </span>
+</td>
+<td class="py-3 px-3">
+<div class="text-[13px] text-on-surface font-data-mono">30 พ.ย. 2568</div>
+<div class="text-[11px] text-on-surface-variant">เหลือ 404 วัน</div>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="font-data-mono font-semibold text-on-surface text-[13px]">1,890 ออเดอร์</div>
+<div class="flex items-center justify-end text-[11px] text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+5.1%</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<p class="font-data-mono font-bold text-on-surface text-[14px]">฿236,250</p>
+<p class="text-[11px] text-on-surface-variant">เฉลี่ย ฿125/บิล</p>
+</td>
+<td class="py-3 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-label-sm font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    ใช้งานปกติ
+                  </span>
+</td>
+<td class="py-3 pr-4 pl-2 text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Mobile Card View Alternative (Responsive Transformation) -->
+<div class="md:hidden divide-y divide-outline-variant/30 p-2">
+<!-- Mobile Card Item 1 -->
+<div class="p-3 space-y-3 bg-secondary-container/5 rounded-lg border border-secondary-container/30 mb-2">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container" type="checkbox"/>
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white" data-alt="Authentic Thai food brand logo emblem displaying a bowl of papaya salad on clean warm wooden table background in minimalist modern commercial graphic style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmqQEtx7Xzl3i5Txptnx6fFyrqAv7ZhD3SyXOs0k8uUqsOkHfJv9YYup8BDvQbZXoaGkAJvk6B4KWPEiYY4yMy9ULUEIHgG02RLd9dDzUSmvtgrPWeSvGASe1Duv6KFto8PdbGScIPMjJPew4XfiONVznT3QxvGn4mDwDNJctCtiS6nnYU8UOWvCFuVhjSLucmnwuxxFKaioI38WvMoBFPsvkDBkRfpv2rMxr6bffPAxEmrdgqqyiy"/>
+<div>
+<h4 class="font-headline-sm text-[14px] font-bold text-on-surface">ร้านป้าสมศรี ส้มตำแซ่บ</h4>
+<p class="text-[11px] text-on-surface-variant font-data-mono">สาขา 1 (อารีย์สัมพันธ์) • #KD-0104</p>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                ใกล้หมดอายุ
+              </span>
+</div>
+<div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-md border border-outline-variant/30 text-[12px]">
+<div>
+<span class="text-outline text-[11px] block">แพ็กเกจ</span>
+<span class="font-medium text-on-surface">Pro ราย 6 เดือน</span>
+</div>
+<div>
+<span class="text-outline text-[11px] block">วันหมดอายุ</span>
+<span class="font-semibold text-amber-700">เหลือ 3 วัน (24 ต.ค.)</span>
+</div>
+<div>
+<span class="text-outline text-[11px] block">ยอดขาย 30 วัน</span>
+<span class="font-bold font-data-mono text-on-surface">฿148,200</span>
+</div>
+<div>
+<span class="text-outline text-[11px] block">ออเดอร์</span>
+<span class="font-data-mono text-on-surface">1,420 ออเดอร์</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="text-[11px] text-on-surface-variant">เจ้าของ: สมศรี (081-452-9889)</span>
+<button class="px-2.5 py-1 rounded bg-secondary text-on-secondary text-label-sm font-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">login</span>
+<span>เข้าดูแทน</span>
+</button>
+</div>
+</div>
+<!-- Mobile Card Item 2 -->
+<div class="p-3 space-y-3 bg-secondary-container/5 rounded-lg border border-secondary-container/30 mb-2">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-secondary-container" type="checkbox"/>
+<img class="w-10 h-10 rounded-lg object-cover border border-outline-variant/40 bg-white" data-alt="Modern specialty coffee brand minimalist logo emblem in dark roast tones with steam motif, crisp vector typography in corporate identity framing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFselceceEgpMEdenw8VWX3eW905D35zf7S88K9GUeTvwcQ5xzXuNnofCFJR7Tkear7Y7kAwHArvpEVQ-l1HGwnQ-o_09rOmtEyC8WgjTAVUKjmATMNGCzkcrV6MRdY-qfQa9_z3kBqrCWl_uaM0J_9rv7WdpzhOimA5LVyBO9InyGqxGruRWzSZINjMa2GNUTG2igqZHU3xMhEQ-dEaYv52zUnUQJ7gEyNxw-JxxwewhzA0M4Olti"/>
+<div>
+<h4 class="font-headline-sm text-[14px] font-bold text-on-surface">The Urban Cafe</h4>
+<p class="text-[11px] text-on-surface-variant font-data-mono">สาขา 1 (ทองหล่อ ซอย 11) • #KD-0089</p>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                ใช้งานปกติ
+              </span>
+</div>
+<div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-md border border-outline-variant/30 text-[12px]">
+<div>
+<span class="text-outline text-[11px] block">แพ็กเกจ</span>
+<span class="font-medium text-on-surface">Pro รายปี</span>
+</div>
+<div>
+<span class="text-outline text-[11px] block">วันหมดอายุ</span>
+<span class="text-on-surface">15 ม.ค. 2568</span>
+</div>
+<div>
+<span class="text-outline text-[11px] block">ยอดขาย 30 วัน</span>
+<span class="font-bold font-data-mono text-on-surface">฿421,800</span>
+</div>
+<div>
+<span class="text-outline text-[11px] block">ออเดอร์</span>
+<span class="font-data-mono text-on-surface">3,240 ออเดอร์</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="text-[11px] text-on-surface-variant">เจ้าของ: ธนากร (089-224-1100)</span>
+<button class="px-2.5 py-1 rounded bg-secondary text-on-secondary text-label-sm font-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">login</span>
+<span>เข้าดูแทน</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 6. PAGINATION FOOTER -->
+<div class="px-4 py-3.5 bg-surface-container-lowest border-t border-outline-variant/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-body-sm font-body-sm text-on-surface-variant">
+<!-- Rows per page selector & Total count -->
+<div class="flex items-center gap-3">
+<span>แสดง <strong>1 - 10</strong> จาก <strong>42</strong> ร้านค้า</span>
+<div class="flex items-center gap-1.5 pl-2 border-l border-outline-variant/40">
+<span class="text-[12px]">แสดงแถว:</span>
+<select class="h-8 rounded border border-outline-variant/60 bg-surface-container-lowest text-[12px] font-label-md py-0 pl-2 pr-6">
+<option selected="">10 แถวต่อหน้า</option>
+<option>25 แถวต่อหน้า</option>
+<option>50 แถวต่อหน้า</option>
+</select>
+</div>
+</div>
+<!-- Pagination Page Numbers Buttons -->
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg border border-outline-variant/40 flex items-center justify-center hover:bg-surface-container-low text-on-surface disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary font-bold text-label-md font-label-md flex items-center justify-center shadow-xs">
+              1
+            </button>
+<button class="w-8 h-8 rounded-lg border border-outline-variant/40 hover:bg-surface-container-low text-on-surface font-medium text-label-md font-label-md flex items-center justify-center">
+              2
+            </button>
+<button class="w-8 h-8 rounded-lg border border-outline-variant/40 hover:bg-surface-container-low text-on-surface font-medium text-label-md font-label-md flex items-center justify-center">
+              3
+            </button>
+<button class="w-8 h-8 rounded-lg border border-outline-variant/40 hover:bg-surface-container-low text-on-surface font-medium text-label-md font-label-md flex items-center justify-center">
+              4
+            </button>
+<button class="w-8 h-8 rounded-lg border border-outline-variant/40 hover:bg-surface-container-low text-on-surface font-medium text-label-md font-label-md flex items-center justify-center">
+              5
+            </button>
+<button class="w-8 h-8 rounded-lg border border-outline-variant/40 flex items-center justify-center hover:bg-surface-container-low text-on-surface">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- ==================== 5. FLOATING BATCH ACTION BAR (STICKY BOTTOM OVERLAY) ==================== -->
+<div class="fixed bottom-4 left-4 right-4 md:left-[17.5rem] md:right-8 z-40">
+<div class="bg-primary-container text-on-primary rounded-xl p-3 md:p-3.5 shadow-2xl border border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+<!-- Left: Selected Count Summary & Store Badges -->
+<div class="flex items-center gap-3 flex-wrap">
+<div class="flex items-center gap-2 bg-secondary-container text-on-secondary-fixed px-3 py-1 rounded-lg font-bold text-label-md font-label-md shadow-xs">
+<span class="material-symbols-outlined text-[18px]">check_box</span>
+<span>เลือก 3 ร้านค้าแล้ว</span>
+</div>
+<div class="hidden lg:flex items-center gap-1.5 text-body-sm font-body-sm text-on-primary-container">
+<span class="bg-surface-container-high/10 text-on-primary px-2 py-0.5 rounded text-[12px] border border-white/10 truncate max-w-[150px]">ร้านป้าสมศรี ส้มตำแซ่บ</span>
+<span class="bg-surface-container-high/10 text-on-primary px-2 py-0.5 rounded text-[12px] border border-white/10 truncate max-w-[140px]">ครัวรสเลิศ สยาม...</span>
+<span class="bg-surface-container-high/10 text-on-primary px-2 py-0.5 rounded text-[12px] border border-white/10 truncate max-w-[130px]">The Urban Cafe</span>
+</div>
+</div>
+<!-- Right: Batch Operations Button Cluster -->
+<div class="flex items-center gap-2 flex-wrap justify-end w-full sm:w-auto">
+<!-- Direct Broadcast Notice -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-high/15 hover:bg-surface-container-high/25 text-on-primary text-label-md font-label-md transition-colors border border-white/10">
+<span class="material-symbols-outlined text-[16px]">campaign</span>
+<span>ส่งประกาศ / ข้อความ</span>
+</button>
+<!-- Bulk Extend Subscription -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary-container text-on-secondary-fixed hover:bg-secondary-fixed-dim text-label-md font-label-md font-semibold transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[16px]">history_edu</span>
+<span>ต่ออายุพร้อมกัน</span>
+</button>
+<!-- Bulk Suspend -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-error/80 hover:bg-error text-on-error text-label-md font-label-md font-medium transition-colors">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>ระงับการใช้งาน</span>
+</button>
+<!-- Cancel Selection Cross -->
+<button class="p-1.5 rounded-lg text-on-primary-container hover:text-on-primary hover:bg-white/10 transition-colors ml-1" title="ยกเลิกการเลือก">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>
