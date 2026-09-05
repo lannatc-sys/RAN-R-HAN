@@ -4,6 +4,14 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { encryptApiKey } from '@/lib/crypto';
 import { revalidatePath } from 'next/cache';
 
+function safeRevalidate(path: string) {
+  try {
+    revalidatePath(path);
+  } catch {
+    // Ignore when called outside HTTP request lifecycle
+  }
+}
+
 export async function updateShopSettingsAction(data: {
   shop_id: string;
   name: string;
@@ -30,8 +38,66 @@ export async function updateShopSettingsAction(data: {
     return { success: false, error: error.message };
   }
 
-  revalidatePath('/admin/settings');
+  safeRevalidate('/admin/settings');
   return { success: true };
+}
+
+/**
+ * อนุญาตให้ทีมงาน Support / Superadmin เข้าถึงข้อมูลยอดขายชั่วคราว (24 หรือ 48 ชั่วโมง)
+ */
+export async function grantSupportAccessAction(
+  shopId: string,
+  hours: 24 | 48 = 24
+): Promise<{ success: boolean; expiresAt?: string; error?: string }> {
+  try {
+    const admin = createAdminClient();
+    const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+
+    const { error } = await admin
+      .from('shops')
+      .update({
+        support_access_expires_at: expiresAt,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', shopId);
+
+    if (error) throw error;
+
+    safeRevalidate('/admin/settings');
+    safeRevalidate('/admin/orders');
+    return { success: true, expiresAt };
+  } catch (err: any) {
+    console.error('grantSupportAccessAction error:', err);
+    return { success: false, error: err.message || 'Failed to grant support access' };
+  }
+}
+
+/**
+ * ยกเลิกสิทธิ์การเข้าถึงข้อมูลยอดขายของทีมงานทันที
+ */
+export async function revokeSupportAccessAction(
+  shopId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const admin = createAdminClient();
+
+    const { error } = await admin
+      .from('shops')
+      .update({
+        support_access_expires_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', shopId);
+
+    if (error) throw error;
+
+    safeRevalidate('/admin/settings');
+    safeRevalidate('/admin/orders');
+    return { success: true };
+  } catch (err: any) {
+    console.error('revokeSupportAccessAction error:', err);
+    return { success: false, error: err.message || 'Failed to revoke support access' };
+  }
 }
 
 /**

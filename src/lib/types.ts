@@ -27,6 +27,7 @@ export interface Shop {
   has_printer: boolean;
   device_mode: 'single_device' | 'multi_device';
   kds_pin: string;
+  support_access_expires_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -154,6 +155,4 @@ export interface PlatformStats {
   suspendedStores: number;
   totalOrders: number;
   todayOrders: number;
-  totalRevenue: number;
-  todayRevenue: number;
 }

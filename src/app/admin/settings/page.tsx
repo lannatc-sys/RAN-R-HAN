@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { cookies } from 'next/headers';
 import { SettingsClient } from './SettingsClient';
 import { Shop } from '@/lib/types';
 import { redirect } from 'next/navigation';
@@ -10,8 +11,13 @@ export default async function AdminSettingsPage() {
 
   const admin = createAdminClient();
 
-  let shopId: string | null = null;
-  if (user) {
+  const cookieStore = await cookies();
+  const impersonatedShopId = cookieStore.get('impersonated_shop_id')?.value;
+
+  let shopId: string | null = impersonatedShopId || null;
+  const isImpersonated = !!impersonatedShopId;
+
+  if (!shopId && user) {
     const { data: userProfile } = await admin
       .from('users')
       .select('shop_id')
@@ -30,6 +36,12 @@ export default async function AdminSettingsPage() {
   }
 
   const { data: shop } = await admin.from('shops').select('*').eq('id', shopId).single();
+
+  const hasSupportConsent = Boolean(
+    shop?.support_access_expires_at &&
+    new Date(shop.support_access_expires_at) > new Date()
+  );
+  const isPrivacyMode = isImpersonated && !hasSupportConsent;
 
   // ตรวจสอบว่าร้านนี้มีการตั้งค่า API key ไว้แล้วหรือไม่ (ไม่ดึง api_key_encrypted ออกมา)
   const { data: creds } = await admin
@@ -62,6 +74,7 @@ export default async function AdminSettingsPage() {
       slipProvider={creds?.slip_check_provider || 'slipok'}
       todaySales={todaySales}
       todayOrderCount={todayOrderCount}
+      isPrivacyMode={isPrivacyMode}
     />
   );
 }

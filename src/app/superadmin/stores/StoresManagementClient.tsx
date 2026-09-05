@@ -27,7 +27,6 @@ import {
 
 interface StoreItem extends Shop {
   order_count?: number;
-  revenue?: number;
 }
 
 interface StoresManagementClientProps {
@@ -158,7 +157,6 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                 <th className="py-3.5 px-4">เบอร์โทร</th>
                 <th className="py-3.5 px-4">แพ็กเกจ</th>
                 <th className="py-3.5 px-4">ออเดอร์สะสม</th>
-                <th className="py-3.5 px-4">ยอดขาย (GMV)</th>
                 <th className="py-3.5 px-4">สถานะ</th>
                 <th className="py-3.5 px-4 text-right">การจัดการ</th>
               </tr>
@@ -166,7 +164,7 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
             <tbody className="divide-y divide-slate-100">
               {filteredStores.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 text-xs">
+                  <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
                     ไม่พบร้านอาหารที่ตรงกับเงื่อนไขการค้นหา
                   </td>
                 </tr>
@@ -227,11 +225,6 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                       {/* Orders */}
                       <td className="py-3.5 px-4 text-slate-700 font-medium">
                         {shop.order_count || 0} บิล
-                      </td>
-
-                      {/* Revenue */}
-                      <td className="py-3.5 px-4 font-black text-slate-900">
-                        {Number(shop.revenue || 0).toLocaleString('th-TH')} ฿
                       </td>
 
                       {/* Status */}

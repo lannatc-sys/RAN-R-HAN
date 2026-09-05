@@ -7,6 +7,8 @@ import {
   updateShopSettingsAction,
   saveSlipCredentialsAction,
   updateKdsPinAction,
+  grantSupportAccessAction,
+  revokeSupportAccessAction,
 } from '@/app/actions/settings';
 import { PinModal } from '@/components/admin/PinModal';
 import {
@@ -22,6 +24,8 @@ import {
   Shield,
   Eye,
   EyeOff,
+  Headphones,
+  Clock,
 } from 'lucide-react';
 
 interface SettingsClientProps {
@@ -30,6 +34,7 @@ interface SettingsClientProps {
   slipProvider: string;
   todaySales?: number;
   todayOrderCount?: number;
+  isPrivacyMode?: boolean;
 }
 
 export function SettingsClient({
@@ -38,6 +43,7 @@ export function SettingsClient({
   slipProvider,
   todaySales = 0,
   todayOrderCount = 0,
+  isPrivacyMode = false,
 }: SettingsClientProps) {
   const router = useRouter();
 
@@ -81,6 +87,57 @@ export function SettingsClient({
   const [pinSuccess, setPinSuccess] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
   const [showPinCode, setShowPinCode] = useState(false);
+
+  // Consent-based Support Access State
+  const [supportExpiresAt, setSupportExpiresAt] = useState<string | null | undefined>(
+    shop.support_access_expires_at
+  );
+  const [isUpdatingSupport, setIsUpdatingSupport] = useState(false);
+  const [supportSuccessMsg, setSupportSuccessMsg] = useState<string | null>(null);
+  const [supportErrorMsg, setSupportErrorMsg] = useState<string | null>(null);
+
+  const isSupportActive = Boolean(
+    supportExpiresAt && new Date(supportExpiresAt) > new Date()
+  );
+  const remainingHours = isSupportActive
+    ? Math.max(
+        1,
+        Math.ceil(
+          (new Date(supportExpiresAt!).getTime() - Date.now()) / (1000 * 60 * 60)
+        )
+      )
+    : 0;
+
+  const handleGrantAccess = async (hours: 24 | 48) => {
+    setIsUpdatingSupport(true);
+    setSupportSuccessMsg(null);
+    setSupportErrorMsg(null);
+    const res = await grantSupportAccessAction(shop.id, hours);
+    setIsUpdatingSupport(false);
+    if (res.success && res.expiresAt) {
+      setSupportExpiresAt(res.expiresAt);
+      setSupportSuccessMsg(`อนุญาตให้ทีมงานเข้าถึงข้อมูลชั่วคราว ${hours} ชั่วโมงเรียบร้อยแล้ว`);
+      setTimeout(() => setSupportSuccessMsg(null), 4000);
+    } else {
+      setSupportErrorMsg(res.error || 'ไม่สามารถเปิดสิทธิ์ได้');
+    }
+  };
+
+  const handleRevokeAccess = async () => {
+    if (!window.confirm('คุณต้องการยกเลิกสิทธิ์การเข้าถึงข้อมูลยอดขายของทีมงานทันทีใช่หรือไม่?')) return;
+    setIsUpdatingSupport(true);
+    setSupportSuccessMsg(null);
+    setSupportErrorMsg(null);
+    const res = await revokeSupportAccessAction(shop.id);
+    setIsUpdatingSupport(false);
+    if (res.success) {
+      setSupportExpiresAt(null);
+      setSupportSuccessMsg('ยกเลิกสิทธิ์การเข้าถึงของทีมงานเรียบร้อยแล้ว (ยอดขายถูกเซ็นเซอร์ทันที)');
+      setTimeout(() => setSupportSuccessMsg(null), 4000);
+    } else {
+      setSupportErrorMsg(res.error || 'ไม่สามารถยกเลิกสิทธิ์ได้');
+    }
+  };
 
   const handleLock = () => {
     sessionStorage.removeItem(`kds_pin_unlocked_${shop.id}`);
@@ -224,11 +281,21 @@ export function SettingsClient({
           </span>
         </div>
 
+        {isPrivacyMode && (
+          <div className="p-2.5 bg-black/25 rounded-xl text-amber-200 text-xs flex items-center gap-2">
+            <Lock className="w-3.5 h-3.5 shrink-0" />
+            <span>
+              โหมดความเป็นส่วนตัว Superadmin: ข้อมูลทางการเงินถูกเซ็นเซอร์เป็น *** ฿ เนื่องจากร้านค้ายังไม่ได้เปิดความยินยอม Support Access
+            </span>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
           <div className="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl">
             <div className="text-[11px] text-amber-100 font-medium">ยอดขายรวม</div>
             <div className="text-xl sm:text-2xl font-black mt-1">
-              {todaySales.toLocaleString('th-TH')} <span className="text-xs font-normal">฿</span>
+              {isPrivacyMode ? '***' : todaySales.toLocaleString('th-TH')}{' '}
+              <span className="text-xs font-normal">฿</span>
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl">
@@ -240,7 +307,11 @@ export function SettingsClient({
           <div className="bg-white/10 backdrop-blur-xs p-3.5 rounded-2xl col-span-2 sm:col-span-1">
             <div className="text-[11px] text-amber-100 font-medium">ยอดเฉลี่ยต่อบิล</div>
             <div className="text-xl sm:text-2xl font-black mt-1">
-              {todayOrderCount > 0 ? Math.round(todaySales / todayOrderCount).toLocaleString('th-TH') : 0}{' '}
+              {isPrivacyMode
+                ? '***'
+                : todayOrderCount > 0
+                ? Math.round(todaySales / todayOrderCount).toLocaleString('th-TH')
+                : 0}{' '}
               <span className="text-xs font-normal">฿</span>
             </div>
           </div>
@@ -437,6 +508,113 @@ export function SettingsClient({
               </button>
             </div>
           </form>
+        )}
+      </div>
+
+      {/* Consent-based Support Access Card */}
+      <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+            <Headphones className="w-5 h-5 text-amber-600" />
+            <span>สิทธิ์การเข้าถึงเพื่อตรวจสอบปัญหา (Consent-based Support Access)</span>
+          </div>
+          <span
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${
+              isSupportActive
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-stone-100 text-stone-600 border border-stone-200'
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isSupportActive ? 'bg-emerald-500 animate-pulse' : 'bg-stone-400'
+              }`}
+            ></span>
+            {isSupportActive ? 'อนุญาตแล้ว' : 'ปิดอยู่ (เป็นส่วนตัว)'}
+          </span>
+        </div>
+
+        <p className="text-xs text-stone-500 leading-relaxed">
+          หากร้านต้องการให้ทีมงาน Superadmin ช่วยตรวจสอบปัญหาทางบัญชีหรือออเดอร์ ร้านสามารถกด{' '}
+          <strong className="text-stone-700">"อนุญาตให้ทีมงานเข้าถึงข้อมูลยอดขาย"</strong> ได้ชั่วคราว
+          โดยระบบจะเพิกถอนสิทธิ์อัตโนมัติเมื่อครบกำหนด 24 หรือ 48 ชั่วโมง
+          เพื่อปกป้องข้อมูลทางการเงินและความเป็นส่วนตัวของร้านค้าคุณ
+        </p>
+
+        {supportSuccessMsg && (
+          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{supportSuccessMsg}</span>
+          </div>
+        )}
+
+        {supportErrorMsg && (
+          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{supportErrorMsg}</span>
+          </div>
+        )}
+
+        {isSupportActive ? (
+          <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-emerald-600" />
+                <span>สิทธิ์กำลังเปิดใช้งานอยู่ (หมดอายุในอีก ~{remainingHours} ชั่วโมง)</span>
+              </div>
+              <div className="text-[11px] text-emerald-700 font-mono">
+                หมดอายุวันที่:{' '}
+                {new Date(supportExpiresAt!).toLocaleString('th-TH', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={isUpdatingSupport}
+              onClick={handleRevokeAccess}
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {isUpdatingSupport ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Lock className="w-3.5 h-3.5" />
+              )}
+              <span>ยกเลิกสิทธิ์ทันที</span>
+            </button>
+          </div>
+        ) : (
+          <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <button
+              type="button"
+              disabled={isUpdatingSupport}
+              onClick={() => handleGrantAccess(24)}
+              className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {isUpdatingSupport ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Clock className="w-3.5 h-3.5" />
+              )}
+              <span>อนุญาต 24 ชั่วโมง</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={isUpdatingSupport}
+              onClick={() => handleGrantAccess(48)}
+              className="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {isUpdatingSupport ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Clock className="w-3.5 h-3.5" />
+              )}
+              <span>อนุญาต 48 ชั่วโมง</span>
+            </button>
+          </div>
         )}
       </div>
 

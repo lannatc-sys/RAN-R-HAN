@@ -68,13 +68,42 @@ export default async function AdminLayout({
     }
   }
 
+  const hasSupportConsent = Boolean(
+    currentShop.support_access_expires_at &&
+    new Date(currentShop.support_access_expires_at) > new Date()
+  );
+  const remainingHours = hasSupportConsent
+    ? Math.max(
+        1,
+        Math.ceil(
+          (new Date(currentShop.support_access_expires_at!).getTime() - Date.now()) /
+            (1000 * 60 * 60)
+        )
+      )
+    : 0;
+
   return (
     <div className="min-h-screen bg-stone-100 flex flex-col">
       {isImpersonated && (
-        <div className="bg-amber-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-between shadow-xs sticky top-0 z-50">
+        <div
+          className={`${
+            hasSupportConsent ? 'bg-emerald-700' : 'bg-slate-900'
+          } text-white px-4 py-2.5 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm sticky top-0 z-50`}
+        >
           <div className="flex items-center gap-2">
-            <span className="animate-pulse">⚠️</span>
-            <span>โหมด SUPERADMIN: กำลังเข้าจัดการร้าน "{currentShop.name}"</span>
+            <span>{hasSupportConsent ? '🔓' : '🔒'}</span>
+            <span>
+              โหมด SUPERADMIN: กำลังเข้าจัดการร้าน "{currentShop.name}" —{' '}
+              {hasSupportConsent ? (
+                <span className="text-emerald-200">
+                  ได้รับสิทธิ์เข้าถึงยอดขาย (หมดอายุในอีก ~{remainingHours} ชม.)
+                </span>
+              ) : (
+                <span className="text-amber-300">
+                  โหมดความเป็นส่วนตัว (Privacy Mode): ยอดเงินถูกเซ็นเซอร์เป็น *** ฿ เนื่องจากร้านยังไม่อนุญาต Support Access
+                </span>
+              )}
+            </span>
           </div>
           <form
             action={async () => {
@@ -85,7 +114,7 @@ export default async function AdminLayout({
           >
             <button
               type="submit"
-              className="px-3 py-1 bg-white text-amber-900 rounded-lg text-[11px] font-bold hover:bg-amber-50 cursor-pointer"
+              className="px-3 py-1 bg-white text-slate-900 rounded-lg text-[11px] font-bold hover:bg-slate-100 cursor-pointer shadow-xs"
             >
               กลับสู่ Superadmin ✕
             </button>

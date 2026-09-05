@@ -26,8 +26,6 @@ export default async function SuperadminDashboardPage() {
     suspendedStores: 0,
     totalOrders: 0,
     todayOrders: 0,
-    totalRevenue: 0,
-    todayRevenue: 0,
   };
 
   const recentStores = (storesRes.stores || []).slice(0, 5);
@@ -41,7 +39,7 @@ export default async function SuperadminDashboardPage() {
             ภาพรวมแพลตฟอร์ม Kin-D SaaS
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            ศูนย์กลางการมอนิเตอร์และบริหารร้านอาหารทั้งหมดในระบบ
+            ศูนย์กลางการมอนิเตอร์และบริหารร้านอาหารทั้งหมดในระบบ (Privacy First - ไม่แสดงยอดขายทางการเงิน)
           </p>
         </div>
 
@@ -53,7 +51,7 @@ export default async function SuperadminDashboardPage() {
         </div>
       </div>
 
-      {/* 4 Main Metric Cards */}
+      {/* 4 Main Metric Cards (Privacy First - Non-financial) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Stores */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-3">
@@ -97,21 +95,21 @@ export default async function SuperadminDashboardPage() {
           </div>
         </div>
 
-        {/* Card 3: Platform GMV */}
+        {/* Card 3: Total Cumulative Orders (Privacy First - Replaced GMV) */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">ยอดขายรวมทั้งระบบ (GMV)</span>
+            <span className="text-xs font-semibold text-slate-500">ออเดอร์สะสมทั้งระบบ</span>
             <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4" />
+              <ShoppingBag className="w-4 h-4" />
             </div>
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900">
-              {stats.totalRevenue.toLocaleString('th-TH')}{' '}
-              <span className="text-xs font-normal text-slate-400">฿</span>
+              {stats.totalOrders.toLocaleString('th-TH')}{' '}
+              <span className="text-xs font-normal text-slate-400">บิล</span>
             </div>
-            <div className="text-[11px] text-emerald-600 font-medium mt-1">
-              วันนี้ +{stats.todayRevenue.toLocaleString('th-TH')} ฿
+            <div className="text-[11px] text-blue-600 font-medium mt-1">
+              ภาระโหลดสะสมทั้งหมด
             </div>
           </div>
         </div>
@@ -121,16 +119,16 @@ export default async function SuperadminDashboardPage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">ออเดอร์วันนี้</span>
             <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <ShoppingBag className="w-4 h-4" />
+              <Zap className="w-4 h-4" />
             </div>
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900">
-              {stats.todayOrders}{' '}
+              {stats.todayOrders.toLocaleString('th-TH')}{' '}
               <span className="text-xs font-normal text-slate-400">บิล</span>
             </div>
             <div className="text-[11px] text-slate-400 font-medium mt-1">
-              สะสมทั้งหมด {stats.totalOrders} บิล
+              ความเคลื่อนไหวรอบวัน
             </div>
           </div>
         </div>
@@ -193,8 +191,7 @@ export default async function SuperadminDashboardPage() {
                   <th className="pb-3">ชื่อร้านค้า</th>
                   <th className="pb-3">Slug</th>
                   <th className="pb-3">แพ็กเกจ</th>
-                  <th className="pb-3">ออเดอร์</th>
-                  <th className="pb-3">ยอดขายสะสม</th>
+                  <th className="pb-3">ออเดอร์สะสม</th>
                   <th className="pb-3">สถานะ</th>
                   <th className="pb-3 text-right">การจัดการ</th>
                 </tr>
@@ -215,9 +212,6 @@ export default async function SuperadminDashboardPage() {
                       </span>
                     </td>
                     <td className="py-3 text-slate-600 font-medium">{shop.order_count || 0} บิล</td>
-                    <td className="py-3 font-bold text-slate-900">
-                      {Number(shop.revenue || 0).toLocaleString('th-TH')} ฿
-                    </td>
                     <td className="py-3">
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${

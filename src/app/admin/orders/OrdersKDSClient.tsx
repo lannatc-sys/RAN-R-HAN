@@ -26,9 +26,10 @@ import { PinModal } from '@/components/admin/PinModal';
 interface OrdersKDSClientProps {
   initialOrders: Order[];
   shop: Shop;
+  isPrivacyMode?: boolean;
 }
 
-export function OrdersKDSClient({ initialOrders, shop }: OrdersKDSClientProps) {
+export function OrdersKDSClient({ initialOrders, shop, isPrivacyMode = false }: OrdersKDSClientProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [activeTab, setActiveTab] = useState<'active' | 'served' | 'completed' | 'all'>('active');
   const [loadingOrderId, setLoadingOrderId] = useState<string | null>(null);
@@ -124,6 +125,16 @@ export function OrdersKDSClient({ initialOrders, shop }: OrdersKDSClientProps) {
 
   return (
     <div className="space-y-4">
+      {/* Privacy Mode Notice */}
+      {isPrivacyMode && (
+        <div className="p-3 bg-slate-900 text-amber-300 border border-slate-800 rounded-2xl flex items-center gap-2.5 text-xs font-semibold shadow-xs">
+          <span className="text-base">🔒</span>
+          <span>
+            โหมดความเป็นส่วนตัว Superadmin: ข้อมูลทางการเงินทั้งหมดถูกเซ็นเซอร์เป็น *** ฿ (ร้านค้ายังไม่ได้เปิดความยินยอม Support Access)
+          </span>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 no-scrollbar">
         <div className="flex items-center gap-2">
@@ -318,7 +329,7 @@ export function OrdersKDSClient({ initialOrders, shop }: OrdersKDSClientProps) {
                             </span>
                           </div>
                           <span className="text-stone-400">
-                            {(Number(item.price_snapshot) * item.qty).toLocaleString('th-TH')} ฿
+                            {isPrivacyMode ? '*** ฿' : `${(Number(item.price_snapshot) * item.qty).toLocaleString('th-TH')} ฿`}
                           </span>
                         </div>
 
@@ -362,7 +373,7 @@ export function OrdersKDSClient({ initialOrders, shop }: OrdersKDSClientProps) {
                     </div>
 
                     <div className="font-black text-stone-900 text-sm">
-                      {Number(order.total).toLocaleString('th-TH')} ฿
+                      {isPrivacyMode ? '*** ฿' : `${Number(order.total).toLocaleString('th-TH')} ฿`}
                     </div>
                   </div>
 

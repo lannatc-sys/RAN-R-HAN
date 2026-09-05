@@ -51,7 +51,7 @@ async function runSuperadminTests() {
   }
   console.log('   Total Stores:', statsRes.stats.totalStores);
   console.log('   Active Stores:', statsRes.stats.activeStores);
-  console.log('   Platform GMV:', statsRes.stats.totalRevenue, 'THB');
+  console.log('   Total Orders:', statsRes.stats.totalOrders, 'bills (Privacy First - GMV removed)');
   console.log('   Today Orders:', statsRes.stats.todayOrders, 'bills');
   if (statsRes.stats.totalStores < 1) {
     throw new Error('TEST 1 Failed: Expected at least 1 shop in DB');

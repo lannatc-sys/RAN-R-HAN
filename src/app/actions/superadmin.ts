@@ -104,25 +104,21 @@ export async function getPlatformStatsAction(): Promise<{
     const activeStores = shops?.filter((s) => s.status === 'active').length || 0;
     const suspendedStores = shops?.filter((s) => s.status === 'suspended').length || 0;
 
-    // 2. สถิติออเดอร์และยอดขาย (GMV)
+    // 2. สถิติออเดอร์สะสม (ไม่ก้าวล่วงข้อมูลทางการเงิน / GMV - Privacy First)
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     const { data: orders, error: ordersErr } = await admin
       .from('orders')
-      .select('id, total, status, created_at')
+      .select('id, status, created_at')
       .neq('status', 'cancelled');
 
     if (ordersErr) throw ordersErr;
 
     const totalOrders = orders?.length || 0;
-    const totalRevenue = (orders || []).reduce((sum, o) => sum + Number(o.total || 0), 0);
-
-    const todayOrdersList = (orders || []).filter(
+    const todayOrders = (orders || []).filter(
       (o) => new Date(o.created_at) >= todayStart
-    );
-    const todayOrders = todayOrdersList.length;
-    const todayRevenue = todayOrdersList.reduce((sum, o) => sum + Number(o.total || 0), 0);
+    ).length;
 
     return {
       success: true,
@@ -132,8 +128,6 @@ export async function getPlatformStatsAction(): Promise<{
         suspendedStores,
         totalOrders,
         todayOrders,
-        totalRevenue,
-        todayRevenue,
       },
     };
   } catch (err: any) {
@@ -143,11 +137,11 @@ export async function getPlatformStatsAction(): Promise<{
 }
 
 /**
- * ดึงรายชื่อร้านค้าทั้งหมด พร้อมตัวกรองค้นหาและสถานะ
+ * ดึงรายชื่อร้านค้าทั้งหมด พร้อมตัวกรองค้นหาและสถานะ (ไม่มีข้อมูลยอดขาย GMV เพื่อความเป็นส่วนตัว)
  */
 export async function getAllStoresAction(query?: string, statusFilter?: string): Promise<{
   success: boolean;
-  stores?: (Shop & { order_count?: number; revenue?: number })[];
+  stores?: (Shop & { order_count?: number })[];
   error?: string;
 }> {
   try {
@@ -155,7 +149,7 @@ export async function getAllStoresAction(query?: string, statusFilter?: string):
 
     let dbQuery = admin.from('shops').select(`
       *,
-      orders (id, total, status)
+      orders (id, status)
     `).order('created_at', { ascending: false });
 
     if (query && query.trim()) {
@@ -172,12 +166,10 @@ export async function getAllStoresAction(query?: string, statusFilter?: string):
 
     const stores = (data || []).map((shop: any) => {
       const validOrders = (shop.orders || []).filter((o: any) => o.status !== 'cancelled');
-      const revenue = validOrders.reduce((sum: number, o: any) => sum + Number(o.total || 0), 0);
       const { orders: _, ...shopFields } = shop;
       return {
         ...shopFields,
         order_count: validOrders.length,
-        revenue,
       };
     });
 

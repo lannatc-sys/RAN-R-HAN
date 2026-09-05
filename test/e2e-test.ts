@@ -36,8 +36,13 @@ async function runE2ETests() {
   console.log('🚀 Starting End-to-End Test Suite for Rab-R-HAN (Supabase)');
   console.log('========================================================\n');
 
-  // ดึงร้านค้าและเมนูตัวอย่าง
-  const { data: shop, error: shopErr } = await admin.from('shops').select('*').limit(1).single();
+  // ดึงร้านค้าและเมนูตัวอย่าง (เลือกร้านแรกที่สร้าง ซึ่งมี seed เมนูอาหาร)
+  const { data: shop, error: shopErr } = await admin
+    .from('shops')
+    .select('*')
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .single();
   if (shopErr || !shop) {
     throw new Error(`Failed to fetch test shop: ${shopErr?.message}`);
   }

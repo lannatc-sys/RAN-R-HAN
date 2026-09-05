@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { cookies } from 'next/headers';
 import { OrdersKDSClient } from './OrdersKDSClient';
 import { Order, Shop } from '@/lib/types';
 import { redirect } from 'next/navigation';
@@ -10,9 +11,13 @@ export default async function AdminOrdersPage() {
 
   const admin = createAdminClient();
 
-  let shopId: string | null = null;
+  const cookieStore = await cookies();
+  const impersonatedShopId = cookieStore.get('impersonated_shop_id')?.value;
 
-  if (user) {
+  let shopId: string | null = impersonatedShopId || null;
+  const isImpersonated = !!impersonatedShopId;
+
+  if (!shopId && user) {
     const { data: userProfile } = await admin
       .from('users')
       .select('shop_id')
@@ -33,6 +38,12 @@ export default async function AdminOrdersPage() {
 
   const { data: shop } = await admin.from('shops').select('*').eq('id', shopId).single();
 
+  const hasSupportConsent = Boolean(
+    shop?.support_access_expires_at &&
+    new Date(shop.support_access_expires_at) > new Date()
+  );
+  const isPrivacyMode = isImpersonated && !hasSupportConsent;
+
   const { data: orders } = await admin
     .from('orders')
     .select(`
@@ -48,6 +59,7 @@ export default async function AdminOrdersPage() {
     <OrdersKDSClient
       initialOrders={(orders || []) as Order[]}
       shop={shop as Shop}
+      isPrivacyMode={isPrivacyMode}
     />
   );
 }

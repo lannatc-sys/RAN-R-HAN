@@ -149,9 +149,11 @@
 - [x] Webhook SlipOK: ดักจับ Error รหัส `23505` (Unique Violation ของ `trans_ref`) แทนการเช็ค string ข้อความ เพื่อป้องกันสลิปซ้ำให้รัดกุมที่สุด (`src/app/api/webhooks/slipok/route.ts`)
 - [x] RPC Review: เช็ค RPC `create_pickup_order` และอื่นๆ ให้ชัวร์ว่าบันทึกค่าลง `price_snapshot` และ `name_snapshot` ขาดตัว ห้ามมีบรรทัดไหนอ้างอิงกลับไปหาตาราง `menu_items` อีกหลังบิลถูกสร้างแล้ว (ทดสอบยืนยันใน `test/e2e-test.ts`)
 
-## 7. Testing ที่ต้องทำก่อนถือว่าเสร็จ (End-to-End Tests)
-- [x] Smoke test (PromptPay): สั่งอาหารออนไลน์ -> จำลองยิง Webhook สลิปผ่าน -> เช็คว่าออเดอร์เปลี่ยนสถานะเป็น Confirmed และเด้งเข้าหน้า KDS อัตโนมัติ (`test/e2e-test.ts` TEST 1 ผ่าน 100%)
-- [x] Smoke test (Cash): สั่งอาหารแบบจ่ายเงินสด -> พนักงานกดปุ่ม "รับเงินสดแล้ว" หน้า KDS -> เช็คตาราง `payments` ว่าเปลี่ยนเป็น Verified และบิลจบ (`test/e2e-test.ts` TEST 2 ผ่าน 100%)
-- [x] Smoke test (Price Isolation): สร้างออเดอร์ค้างไว้ -> แอดมินเข้าไปแก้ราคาเมนูให้แพงขึ้น -> กลับมาดูบิลเก่า ราคารวมและราคาต่อจานต้องเท่าเดิมเป๊ะ (`test/e2e-test.ts` TEST 3 ผ่าน 100%)
-- [ ] Device test: ทดสอบ Web Push Notification บนอุปกรณ์จริง ทั้ง Android และ iPhone (บน iPhone ต้องทดสอบหลังกด "เพิ่มลงหน้าจอโฮม" แล้วเท่านั้น)
-- [x] Security test: ลองยิง Webhook จำลองด้วย `trans_ref` ของสลิปเดิมซ้ำ 2 ครั้ง ระบบต้องตีกลับและไม่เปลี่ยนสถานะบิลซ้ำ (`test/e2e-test.ts` TEST 4 ดักจับ 23505 ผ่าน 100%)
+## 11. ระบบ Superadmin และความเป็นส่วนตัวขั้นสูงสุด (Privacy First & Consent-based Support Access)
+- [x] Superadmin Authentication: รองรับ `SUPER_ADMIN_USER` ใน `.env.local` กำหนดสิทธิ์อัตโนมัติ และป้องกันผู้ใช้ทั่วไปเข้าถึง `/superadmin`
+- [x] Superadmin Overview & Stores Management: จัดการร้านค้าทั้งหมด (Active, Suspended, Expired), เปลี่ยน Plan, ปรับแต่ง Slug, สวมรอยเข้าร้าน (Impersonate)
+- [x] Privacy First สำหรับ Superadmin: ตัดการแสดงผลยอดขาย (GMV) และรายได้ของร้านค้าออกจากหน้า Overview และ All Stores Directory อย่างถาวร เหลือเฉพาะ "ออเดอร์สะสม" เพื่อมอนิเตอร์ภาระโหลดระบบโดยไม่ก้าวล่วงข้อมูลทางการเงิน
+- [x] Consent-based Support Access: เพิ่มฟิลด์ `support_access_expires_at` ในตาราง `shops` บน Supabase DB
+- [x] Store Consent Controls: เพิ่มการ์ดจัดการสิทธิ์ในหน้าตั้งค่าร้านค้า (`SettingsClient.tsx`) ให้ร้านกดยินยอมให้ทีมงานเข้าถึงข้อมูลชั่วคราว (24 หรือ 48 ชม.) พร้อมปุ่มยกเลิกสิทธิ์ทันที
+- [x] Superadmin Privacy Mode & Censorship: ตรวจสอบเวลาหมดอายุเมื่อ Superadmin กด Impersonate หากไม่มีสิทธิ์หรือหมดอายุ จะเซ็นเซอร์ยอดเงินทั้งหมดเป็น `*** ฿` ทั้งหน้า KDS และ Settings พร้อมแถบแจ้งเตือน Privacy Mode
+- [x] Verification: ชุดทดสอบครอบคลุมทั้ง `test/privacy-consent-test.ts`, `test/superadmin-test.ts`, `test/e2e-test.ts` และ `test/smoke-test.ts` ผ่าน 100% ครบทุกข้อ
