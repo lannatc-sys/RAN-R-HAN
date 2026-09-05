@@ -21,7 +21,7 @@ export default async function AdminSettingsPage() {
   }
 
   if (!shopId) {
-    const { data: defaultShop } = await admin.from('shops').select('id').limit(1).single();
+    const { data: defaultShop } = await admin.from('shops').select('id').limit(1).maybeSingle();
     shopId = defaultShop?.id || null;
   }
 

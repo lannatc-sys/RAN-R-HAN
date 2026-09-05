@@ -40,7 +40,7 @@ export default async function AdminLayout({
       .select('*')
       .eq('is_active', true)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (defaultShop) {
       currentShop = defaultShop as Shop;
