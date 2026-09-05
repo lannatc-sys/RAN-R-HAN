@@ -242,6 +242,31 @@ export async function updateStorePlanAction(
 }
 
 /**
+ * ลบร้านค้าออกจากระบบอย่างสมบูรณ์ (เฉพาะ Superadmin)
+ */
+export async function deleteStoreAction(
+  shopId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const admin = createAdminClient();
+
+    const { error } = await admin
+      .from('shops')
+      .delete()
+      .eq('id', shopId);
+
+    if (error) throw error;
+
+    safeRevalidate('/superadmin');
+    safeRevalidate('/superadmin/stores');
+    return { success: true };
+  } catch (err: any) {
+    console.error('deleteStoreAction error:', err);
+    return { success: false, error: err.message || 'Failed to delete store' };
+  }
+}
+
+/**
  * สร้างร้านอาหารใหม่จากหน้า Superadmin
  */
 export async function createStoreFromSuperadminAction(data: {

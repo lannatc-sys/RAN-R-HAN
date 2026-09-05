@@ -6,6 +6,7 @@ import {
   updateStoreStatusAction,
   updateStorePlanAction,
   impersonateStoreAction,
+  deleteStoreAction,
 } from '@/app/actions/superadmin';
 import type { Shop, ShopStatus } from '@/lib/types';
 import {
@@ -23,6 +24,7 @@ import {
   Check,
   AlertCircle,
   LogIn,
+  Trash2,
 } from 'lucide-react';
 
 interface StoreItem extends Shop {
@@ -101,6 +103,24 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
       setEditingShop(null);
     } else {
       alert(res.error || 'เกิดข้อผิดพลาดในการบันทึกแพ็กเกจ');
+    }
+  };
+
+  // Delete Store Handler
+  const handleDeleteStore = async (shop: StoreItem) => {
+    const confirmed = window.confirm(
+      `คุณแน่ใจหรือไม่ว่าต้องการลบร้าน "${shop.name}" (${shop.slug}) ออกจากระบบอย่างถาวร?\nข้อมูลเมนู หมวดหมู่ และการตั้งค่าของร้านนี้จะถูกลบทั้งหมดและไม่สามารถกู้คืนได้`
+    );
+    if (!confirmed) return;
+
+    setLoadingShopId(shop.id);
+    const res = await deleteStoreAction(shop.id);
+    setLoadingShopId(null);
+
+    if (res.success) {
+      setStores((prev) => prev.filter((s) => s.id !== shop.id));
+    } else {
+      alert(res.error || 'เกิดข้อผิดพลาดในการลบร้านค้า');
     }
   };
 
@@ -279,6 +299,17 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                             ) : (
                               <CheckCircle2 className="w-4 h-4" />
                             )}
+                          </button>
+
+                          {/* Delete Store */}
+                          <button
+                            type="button"
+                            disabled={isLoading}
+                            onClick={() => handleDeleteStore(shop)}
+                            title="ลบร้านค้านี้ออกจากระบบอย่างถาวร"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>

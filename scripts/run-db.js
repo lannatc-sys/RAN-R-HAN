@@ -51,13 +51,16 @@ async function runDatabaseSetup() {
       console.log('   [SUCCESS] Pickup MVP schema, kds_pin, credentials, and RPC applied.\n');
     }
 
-    // 2. Run seed data (seed.sql)
+    // 2. Run seed data (seed.sql) - Optional via --seed flag
+    const shouldSeed = process.argv.includes('--seed');
     const seedPath = path.join(__dirname, '..', 'seed.sql');
-    if (fs.existsSync(seedPath)) {
+    if (shouldSeed && fs.existsSync(seedPath)) {
       console.log('2. Executing seed.sql (Sample shop, menu, categories)...');
       const seedSql = fs.readFileSync(seedPath, 'utf-8');
       await client.query(seedSql);
       console.log('   [SUCCESS] Seed data applied successfully.\n');
+    } else {
+      console.log('2. Skipping seed data (Clean production schema mode. Use --seed to populate sample data).\n');
     }
 
     // 3. Verify Database Contents
