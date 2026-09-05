@@ -1,13 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Shop, Category, MenuItem } from '@/lib/types';
 import {
   toggleMenuItemAvailabilityAction,
   createMenuItemAction,
   createCategoryAction,
+  updateMenuItemAction,
+  deleteMenuItemAction,
+  uploadMenuImageAction,
 } from '@/app/actions/menu';
-import { Plus, Check, X, Store, Loader2 } from 'lucide-react';
+import {
+  Plus,
+  Check,
+  X,
+  Store,
+  Loader2,
+  Camera,
+  Pencil,
+  Trash2,
+  UploadCloud,
+  ImageIcon,
+  Link2,
+} from 'lucide-react';
 
 interface MenuManagementClientProps {
   shop: Shop;
@@ -22,15 +37,39 @@ export function MenuManagementClient({
 }: MenuManagementClientProps) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(initialMenuItems);
   const [selectedCat, setSelectedCat] = useState<string>('all');
-  const [isAddDishOpen, setIsAddDishOpen] = useState(false);
+
+  // Add Category Modal
   const [isAddCatOpen, setIsAddCatOpen] = useState(false);
   const [newCatName, setNewCatName] = useState('');
+
+  // Add Dish Modal
+  const [isAddDishOpen, setIsAddDishOpen] = useState(false);
   const [newDishName, setNewDishName] = useState('');
   const [newDishPrice, setNewDishPrice] = useState('');
   const [newDishCat, setNewDishCat] = useState<string>('');
   const [newDishDesc, setNewDishDesc] = useState('');
-  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const [newDishImageUrl, setNewDishImageUrl] = useState('');
+  const [isUploadingNewImage, setIsUploadingNewImage] = useState(false);
+  const [showUrlInputNew, setShowUrlInputNew] = useState(false);
 
+  // Edit Dish Modal
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [editDishName, setEditDishName] = useState('');
+  const [editDishPrice, setEditDishPrice] = useState('');
+  const [editDishCat, setEditDishCat] = useState<string>('');
+  const [editDishDesc, setEditDishDesc] = useState('');
+  const [editDishImageUrl, setEditDishImageUrl] = useState('');
+  const [isUploadingEditImage, setIsUploadingEditImage] = useState(false);
+  const [showUrlInputEdit, setShowUrlInputEdit] = useState(false);
+
+  // Loading States
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fileInputNewRef = useRef<HTMLInputElement>(null);
+  const fileInputEditRef = useRef<HTMLInputElement>(null);
+
+  // Handle Toggle Availability
   const handleToggleAvailable = async (item: MenuItem) => {
     setLoadingItemId(item.id);
     const res = await toggleMenuItemAvailabilityAction(item.id, item.is_available);
@@ -42,9 +81,37 @@ export function MenuManagementClient({
     setLoadingItemId(null);
   };
 
+  // Upload Image Handler
+  const handleFileUpload = async (
+    file: File,
+    onSuccess: (url: string) => void,
+    setUploading: (val: boolean) => void
+  ) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('shop_id', shop.id);
+
+      const res = await uploadMenuImageAction(formData);
+      if (res.success && res.url) {
+        onSuccess(res.url);
+      } else {
+        alert(res.error || 'ไม่สามารถอัปโหลดรูปภาพได้');
+      }
+    } catch (e: any) {
+      alert(e.message || 'เกิดข้อผิดพลาดในการอัปโหลด');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Handle Add Dish
   const handleAddDish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDishName || !newDishPrice) return;
+    setIsSubmitting(true);
 
     const res = await createMenuItemAction({
       shop_id: shop.id,
@@ -52,17 +119,91 @@ export function MenuManagementClient({
       name: newDishName,
       price: parseFloat(newDishPrice),
       description: newDishDesc,
+      image_url: newDishImageUrl || undefined,
     });
+
+    setIsSubmitting(false);
 
     if (res.success) {
       setIsAddDishOpen(false);
       setNewDishName('');
       setNewDishPrice('');
       setNewDishDesc('');
+      setNewDishImageUrl('');
+      setShowUrlInputNew(false);
       window.location.reload();
+    } else {
+      alert(res.error || 'ไม่สามารถเพิ่มเมนูได้');
     }
   };
 
+  // Handle Open Edit Modal
+  const handleOpenEdit = (item: MenuItem) => {
+    setEditingItem(item);
+    setEditDishName(item.name);
+    setEditDishPrice(item.price.toString());
+    setEditDishCat(item.category_id || '');
+    setEditDishDesc(item.description || '');
+    setEditDishImageUrl(item.image_url || '');
+    setShowUrlInputEdit(false);
+  };
+
+  // Handle Save Edit Dish
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem || !editDishName || !editDishPrice) return;
+    setIsSubmitting(true);
+
+    const res = await updateMenuItemAction({
+      id: editingItem.id,
+      name: editDishName,
+      price: parseFloat(editDishPrice),
+      category_id: editDishCat || null,
+      description: editDishDesc,
+      image_url: editDishImageUrl || null,
+    });
+
+    setIsSubmitting(false);
+
+    if (res.success) {
+      setMenuItems((prev) =>
+        prev.map((i) =>
+          i.id === editingItem.id
+            ? {
+                ...i,
+                name: editDishName,
+                price: parseFloat(editDishPrice),
+                category_id: editDishCat || null,
+                description: editDishDesc,
+                image_url: editDishImageUrl || null,
+              }
+            : i
+        )
+      );
+      setEditingItem(null);
+    } else {
+      alert(res.error || 'ไม่สามารถแก้ไขเมนูได้');
+    }
+  };
+
+  // Handle Delete Dish
+  const handleDeleteDish = async (itemId: string) => {
+    if (!confirm('คุณต้องการลบรายการอาหารนี้ใช่หรือไม่?')) return;
+    setIsSubmitting(true);
+    const res = await deleteMenuItemAction(itemId);
+    setIsSubmitting(false);
+
+    if (res.success) {
+      setMenuItems((prev) => prev.filter((i) => i.id !== itemId));
+      if (editingItem?.id === itemId) {
+        setEditingItem(null);
+      }
+    } else {
+      alert(res.error || 'ไม่สามารถลบรายการอาหารได้');
+    }
+  };
+
+  // Handle Add Category
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCatName) return;
@@ -72,6 +213,8 @@ export function MenuManagementClient({
       setIsAddCatOpen(false);
       setNewCatName('');
       window.location.reload();
+    } else {
+      alert(res.error || 'ไม่สามารถเพิ่มหมวดหมู่ได้');
     }
   };
 
@@ -86,22 +229,25 @@ export function MenuManagementClient({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-stone-900">จัดการรายการอาหาร</h1>
-          <p className="text-xs text-stone-500">เปิด-ปิดรายการอาหารที่หมดชั่วคราว หรือเพิ่มเมนูใหม่</p>
+          <p className="text-xs text-stone-500">
+            เปิด-ปิดรายการอาหารที่หมดชั่วคราว เพิ่มรูปภาพ หรือแก้ไขข้อมูลเมนู
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setIsAddCatOpen(true)}
-            className="px-4 py-2 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+            className="px-4 py-2.5 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>เพิ่มหมวดหมู่</span>
           </button>
+
           <button
             type="button"
             onClick={() => setIsAddDishOpen(true)}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+            className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>เพิ่มเมนูอาหาร</span>
@@ -115,7 +261,7 @@ export function MenuManagementClient({
           onClick={() => setSelectedCat('all')}
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
             selectedCat === 'all'
-              ? 'bg-amber-600 text-white'
+              ? 'bg-amber-600 text-white shadow-xs'
               : 'bg-white hover:bg-stone-50 text-stone-700 border border-stone-200'
           }`}
         >
@@ -127,7 +273,7 @@ export function MenuManagementClient({
             onClick={() => setSelectedCat(cat.id)}
             className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
               selectedCat === cat.id
-                ? 'bg-amber-600 text-white'
+                ? 'bg-amber-600 text-white shadow-xs'
                 : 'bg-white hover:bg-stone-50 text-stone-700 border border-stone-200'
             }`}
           >
@@ -139,7 +285,10 @@ export function MenuManagementClient({
       {/* Menu Table / Cards */}
       <div className="bg-white rounded-3xl border border-stone-200/80 shadow-xs divide-y divide-stone-100 overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="p-8 text-center text-stone-400 text-xs">ยังไม่มีรายการอาหาร</div>
+          <div className="p-12 text-center text-stone-400 text-xs space-y-2">
+            <ImageIcon className="w-8 h-8 mx-auto text-stone-300" />
+            <div>ยังไม่มีรายการอาหารในหมวดหมู่นี้</div>
+          </div>
         ) : (
           filtered.map((item) => (
             <div
@@ -148,33 +297,67 @@ export function MenuManagementClient({
                 !item.is_available ? 'bg-stone-50/70 opacity-60' : 'hover:bg-amber-50/20'
               }`}
             >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-12 h-12 rounded-xl bg-stone-100 overflow-hidden shrink-0 flex items-center justify-center">
+              {/* Image & Dish Info */}
+              <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                {/* Image Container with Quick Photo Button */}
+                <div className="relative group/img w-16 h-16 rounded-2xl bg-stone-100 overflow-hidden shrink-0 border border-stone-200/70">
                   {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="w-full h-full object-cover group-hover/img:scale-105 transition-transform"
+                    />
                   ) : (
-                    <Store className="w-5 h-5 text-stone-300" />
+                    <div className="w-full h-full flex flex-col items-center justify-center text-stone-300 gap-0.5">
+                      <Store className="w-5 h-5" />
+                      <span className="text-[9px]">ไม่มีรูป</span>
+                    </div>
                   )}
+
+                  {/* Change/Add Photo Overlay Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(item)}
+                    title="เพิ่ม/เปลี่ยนรูปภาพเมนู"
+                    className="absolute inset-0 bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <Camera className="w-5 h-5 drop-shadow-md" />
+                  </button>
                 </div>
 
                 <div className="min-w-0">
-                  <div className="font-bold text-stone-900 text-sm truncate">{item.name}</div>
+                  <div className="font-bold text-stone-900 text-sm truncate flex items-center gap-2">
+                    <span>{item.name}</span>
+                  </div>
                   {item.description && (
-                    <div className="text-xs text-stone-400 truncate">{item.description}</div>
+                    <div className="text-xs text-stone-400 truncate max-w-md">
+                      {item.description}
+                    </div>
                   )}
-                  <div className="text-xs font-extrabold text-amber-700 mt-0.5">
+                  <div className="text-xs font-extrabold text-amber-700 mt-1">
                     {Number(item.price).toLocaleString('th-TH')} ฿
                   </div>
                 </div>
               </div>
 
-              {/* Status Toggle */}
-              <div className="flex items-center gap-2">
+              {/* Actions */}
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Edit Dish Button */}
+                <button
+                  type="button"
+                  onClick={() => handleOpenEdit(item)}
+                  title="แก้ไขเมนูและรูปภาพ"
+                  className="p-2 text-stone-500 hover:text-amber-700 hover:bg-amber-50 rounded-xl transition-colors border border-stone-200"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+
+                {/* Status Toggle Button */}
                 <button
                   type="button"
                   disabled={loadingItemId === item.id}
                   onClick={() => handleToggleAvailable(item)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                     item.is_available
                       ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
                       : 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100'
@@ -187,7 +370,7 @@ export function MenuManagementClient({
                   ) : (
                     <X className="w-3.5 h-3.5" />
                   )}
-                  <span>{item.is_available ? 'มีขาย' : 'หมดชั่วคราว'}</span>
+                  <span>{item.is_available ? 'มีขาย' : 'หมด'}</span>
                 </button>
               </div>
             </div>
@@ -195,9 +378,11 @@ export function MenuManagementClient({
         )}
       </div>
 
-      {/* Modal Add Category */}
+      {/* ====================================================================== */}
+      {/* Modal: เพิ่มหมวดหมู่ใหม่ */}
+      {/* ====================================================================== */}
       {isAddCatOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-150">
           <form
             onSubmit={handleAddCategory}
             className="w-full max-w-sm bg-white p-6 rounded-3xl shadow-2xl space-y-4"
@@ -215,13 +400,13 @@ export function MenuManagementClient({
               <button
                 type="button"
                 onClick={() => setIsAddCatOpen(false)}
-                className="flex-1 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold"
+                className="flex-1 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold hover:bg-stone-50"
               >
                 ยกเลิก
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-bold"
+                className="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold"
               >
                 บันทึก
               </button>
@@ -230,29 +415,146 @@ export function MenuManagementClient({
         </div>
       )}
 
-      {/* Modal Add Dish */}
+      {/* ====================================================================== */}
+      {/* Modal: เพิ่มเมนูอาหารใหม่ (พร้อมปุ่มเพิ่มรูป) */}
+      {/* ====================================================================== */}
       {isAddDishOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto animate-in fade-in duration-150">
           <form
             onSubmit={handleAddDish}
-            className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl space-y-3"
+            className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl space-y-4 my-8"
           >
-            <h3 className="font-bold text-stone-900 text-base">เพิ่มเมนูอาหารใหม่</h3>
+            <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+              <h3 className="font-bold text-stone-900 text-base">เพิ่มเมนูอาหารใหม่</h3>
+              <button
+                type="button"
+                onClick={() => setIsAddDishOpen(false)}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* ส่วนเลือก/อัปโหลดรูปภาพอาหาร */}
             <div>
-              <label className="block text-xs font-semibold text-stone-600 mb-1">ชื่อเมนู</label>
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                รูปภาพอาหาร
+              </label>
+
+              {newDishImageUrl ? (
+                <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 group">
+                  <img
+                    src={newDishImageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputNewRef.current?.click()}
+                      className="px-3 py-1.5 bg-white text-stone-800 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>เปลี่ยนรูป</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewDishImageUrl('')}
+                      className="px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>ลบรูป</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-stone-200 hover:border-amber-400 rounded-2xl p-4 text-center space-y-2 bg-stone-50/60 transition-colors">
+                  <input
+                    type="file"
+                    ref={fileInputNewRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileUpload(file, setNewDishImageUrl, setIsUploadingNewImage);
+                      }
+                    }}
+                  />
+
+                  {isUploadingNewImage ? (
+                    <div className="py-6 flex flex-col items-center justify-center gap-2 text-amber-700 text-xs">
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <span>กำลังอัปโหลดรูปภาพ...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto shadow-xs">
+                        <UploadCloud className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => fileInputNewRef.current?.click()}
+                          className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
+                        >
+                          เลือกรูปภาพจากเครื่อง
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-stone-400">
+                        รองรับ JPG, PNG, WEBP (ขนาดไม่เกิน 5MB)
+                      </p>
+
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowUrlInputNew(!showUrlInputNew)}
+                          className="text-[11px] text-amber-700 hover:underline inline-flex items-center gap-1"
+                        >
+                          <Link2 className="w-3 h-3" />
+                          <span>{showUrlInputNew ? 'ซ่อนการใส่ URL' : 'หรือวางลิงก์ URL รูปภาพ'}</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* URL Input Toggle */}
+              {showUrlInputNew && !newDishImageUrl && (
+                <div className="mt-2">
+                  <input
+                    type="url"
+                    value={newDishImageUrl}
+                    onChange={(e) => setNewDishImageUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* ชื่อเมนู */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1">
+                ชื่อเมนู <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={newDishName}
                 onChange={(e) => setNewDishName(e.target.value)}
                 placeholder="เช่น ข้าวกะเพราหมูกรอบ"
                 required
-                className="w-full px-3 py-2 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            {/* ราคา & หมวดหมู่ */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">ราคา (บาท)</label>
+                <label className="block text-xs font-semibold text-stone-600 mb-1">
+                  ราคา (บาท) <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="number"
                   step="0.5"
@@ -260,16 +562,18 @@ export function MenuManagementClient({
                   onChange={(e) => setNewDishPrice(e.target.value)}
                   placeholder="60"
                   required
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2.5 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1">หมวดหมู่</label>
+                <label className="block text-xs font-semibold text-stone-600 mb-1">
+                  หมวดหมู่
+                </label>
                 <select
                   value={newDishCat}
                   onChange={(e) => setNewDishCat(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                  className="w-full px-3 py-2.5 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
                 >
                   <option value="">-- ไม่ระบุ --</option>
                   {categories.map((c) => (
@@ -281,31 +585,248 @@ export function MenuManagementClient({
               </div>
             </div>
 
+            {/* รายละเอียด */}
             <div>
-              <label className="block text-xs font-semibold text-stone-600 mb-1">รายละเอียด</label>
-              <input
-                type="text"
+              <label className="block text-xs font-semibold text-stone-600 mb-1">
+                คำอธิบาย / รายละเอียด
+              </label>
+              <textarea
+                rows={2}
                 value={newDishDesc}
                 onChange={(e) => setNewDishDesc(e.target.value)}
-                placeholder="คำอธิบายสั้นๆ"
-                className="w-full px-3 py-2 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                placeholder="เช่น หมูกรอบสูตรพิเศษ ผัดใบกะเพราแท้..."
+                className="w-full px-3 py-2 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
               />
             </div>
 
-            <div className="flex gap-2 pt-3">
+            <div className="flex gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setIsAddDishOpen(false)}
-                className="flex-1 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold"
+                className="flex-1 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold hover:bg-stone-50"
               >
                 ยกเลิก
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-bold"
+                disabled={isSubmitting || isUploadingNewImage}
+                className="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
-                บันทึกเมนู
+                {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>บันทึกเมนู</span>
               </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ====================================================================== */}
+      {/* Modal: แก้ไขเมนูอาหาร (เปลี่ยนรูปภาพ / แก้ไขข้อมูล) */}
+      {/* ====================================================================== */}
+      {editingItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto animate-in fade-in duration-150">
+          <form
+            onSubmit={handleSaveEdit}
+            className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl space-y-4 my-8"
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+              <h3 className="font-bold text-stone-900 text-base">แก้ไขรายการอาหาร</h3>
+              <button
+                type="button"
+                onClick={() => setEditingItem(null)}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* ส่วนรูปภาพอาหาร (อัปโหลด/เปลี่ยนรูป) */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                รูปภาพอาหาร
+              </label>
+
+              <input
+                type="file"
+                ref={fileInputEditRef}
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleFileUpload(file, setEditDishImageUrl, setIsUploadingEditImage);
+                  }
+                }}
+              />
+
+              {editDishImageUrl ? (
+                <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 group">
+                  <img
+                    src={editDishImageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputEditRef.current?.click()}
+                      className="px-3 py-1.5 bg-white text-stone-800 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-stone-50"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>เปลี่ยนรูป</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditDishImageUrl('')}
+                      className="px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-red-700"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>ลบรูป</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-stone-200 hover:border-amber-400 rounded-2xl p-4 text-center space-y-2 bg-stone-50/60 transition-colors">
+                  {isUploadingEditImage ? (
+                    <div className="py-6 flex flex-col items-center justify-center gap-2 text-amber-700 text-xs">
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <span>กำลังอัปโหลดรูปภาพ...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto shadow-xs">
+                        <UploadCloud className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => fileInputEditRef.current?.click()}
+                          className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
+                        >
+                          อัปโหลดรูปภาพใหม่
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-stone-400">
+                        รองรับ JPG, PNG, WEBP (ขนาดไม่เกิน 5MB)
+                      </p>
+
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowUrlInputEdit(!showUrlInputEdit)}
+                          className="text-[11px] text-amber-700 hover:underline inline-flex items-center gap-1"
+                        >
+                          <Link2 className="w-3 h-3" />
+                          <span>{showUrlInputEdit ? 'ซ่อนการใส่ URL' : 'หรือวางลิงก์ URL รูปภาพ'}</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {showUrlInputEdit && !editDishImageUrl && (
+                <div className="mt-2">
+                  <input
+                    type="url"
+                    value={editDishImageUrl}
+                    onChange={(e) => setEditDishImageUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* ชื่อเมนู */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1">
+                ชื่อเมนู <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={editDishName}
+                onChange={(e) => setEditDishName(e.target.value)}
+                required
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+
+            {/* ราคา & หมวดหมู่ */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-stone-600 mb-1">
+                  ราคา (บาท) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={editDishPrice}
+                  onChange={(e) => setEditDishPrice(e.target.value)}
+                  required
+                  className="w-full px-3 py-2.5 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-600 mb-1">
+                  หมวดหมู่
+                </label>
+                <select
+                  value={editDishCat}
+                  onChange={(e) => setEditDishCat(e.target.value)}
+                  className="w-full px-3 py-2.5 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                >
+                  <option value="">-- ไม่ระบุ --</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* รายละเอียด */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-600 mb-1">
+                คำอธิบาย / รายละเอียด
+              </label>
+              <textarea
+                rows={2}
+                value={editDishDesc}
+                onChange={(e) => setEditDishDesc(e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={() => handleDeleteDish(editingItem.id)}
+                className="py-2.5 px-3 text-red-600 hover:bg-red-50 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>ลบเมนูนี้</span>
+              </button>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="py-2.5 px-4 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold hover:bg-stone-50"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isUploadingEditImage}
+                  className="py-2.5 px-5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-xs"
+                >
+                  {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>บันทึกการแก้ไข</span>
+                </button>
+              </div>
             </div>
           </form>
         </div>
