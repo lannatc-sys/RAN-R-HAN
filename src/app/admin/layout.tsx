@@ -83,7 +83,7 @@ export default async function AdminLayout({
     : 0;
 
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col">
+    <div className="min-h-screen bg-stone-100 dark:bg-stone-950 text-stone-900 dark:text-stone-100 transition-colors duration-200 flex flex-col">
       {isImpersonated && (
         <div
           className={`${

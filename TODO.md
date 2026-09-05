@@ -180,3 +180,21 @@
 - [x] Frontend (Customer Checkout): เลือกระหว่าง ทานที่ร้าน (บังคับเลขโต๊ะ), รับที่ร้าน (เวลารับ), หรือจัดส่งเอง (ชื่อ/ที่อยู่/GPS) ตามสิทธิ์ที่เปิดใช้งาน
 - [x] Frontend (KDS & Order Tracker): แสดงป้ายโต๊ะสำหรับ Dine-in, ปรับปุ่มและข้อความสถานะ "พร้อมเสิร์ฟที่โต๊ะ" / "เสิร์ฟเรียบร้อย"
 - [x] Superadmin Plans UI: อัปเดตตารางฟีเจอร์ของแพ็กเกจให้สะท้อนสิทธิ์ 3 รูปแบบคำสั่งซื้ออย่างชัดเจน
+
+## 14. รองรับ 2 ภาษา (TH / EN), Mobile-First ทุกขนาดหน้าจอ, และโหมดสว่าง/มืด (Light / Dark Mode)
+- [x] **ระบบ 2 ภาษา (Bilingual TH / EN)**:
+  - สร้าง Translation Dictionary ครอบคลุมทุกฟังก์ชัน: Common, Fulfillment (Dine-in / Takeaway / Delivery), Menu, OptionModal, CartDrawer, Checkout, OrderTracker, KDS, Admin Navbar, Theme (`src/lib/i18n/translations.ts`)
+  - สร้าง `LanguageContext` และ hook `useLanguage()` บันทึกและจดจำค่าภาษาผ่าน `localStorage` (`rab_r_han_lang`) พร้อมปุ่มสลับภาษา TH / EN แบบมินิมอล (`LanguageToggle.tsx`)
+  - รองรับการแปลภาษาอัตโนมัติทั้งชื่อสถานะออเดอร์, ข้อความแจ้งเตือน, รายการตัวเลือก, ป้ายกำกับฟอร์ม, และคำสั่งการทำงาน
+- [x] **การแสดงผลบนหน้าจอมือถือทุกขนาด (Mobile-First Responsiveness)**:
+  - รองรับตั้งแต่หน้าจอขนาดกะทัดรัดพิเศษ 320px–360px (iPhone SE, Foldable outer screens), มือถือมาตรฐาน 375px–430px จนถึงแท็บเล็ตและเดสก์ท็อป
+  - ปรับปรุง Touch Target สำหรับนิ้วมืออย่างน้อย 44px ตามมาตรฐาน WCAG/iOS Human Interface Guidelines
+  - รองรับ iOS Safe Area Insets (`viewport-fit=cover`, `.pb-safe`, `.pt-safe`) ป้องกัน Home Indicator หรือ Notch บดบังปุ่มสำคัญ
+  - Bottom-sheet Drawer สำหรับตระกร้าและหน้าต่างเลือกตัวเลือกเมนู เลื่อนเปิด-ปิดลื่นไหลบนจอมือถือ
+  - ป้องกันปัญหาข้อความล้น (word-break, truncate, responsive grid/flex layout)
+- [x] **โหมดสว่างและโหมดมืด (Light / Dark Theme)**:
+  - ติดตั้ง Tailwind CSS v4 class-based dark mode (`@custom-variant dark (&:where(.dark, .dark *));` ใน `globals.css`)
+  - สร้าง `ThemeContext` และ hook `useTheme()` รองรับ `light`, `dark`, และ `system` preference พร้อม `localStorage` persistence (`rab_r_han_theme`)
+  - ปุ่ม `ThemeToggle` แบบเคลื่อนไหวสลับไอคอนพระอาทิตย์/พระจันทร์
+  - ป้องกันอาการจอกระพริบขาว (Zero-FOUC) ด้วย Inline Script ก่อน Hydrate ใน `src/app/layout.tsx`
+  - คุมโทนสี Dark Mode สไตล์โมเดิร์น สบายตา (`stone-900`, `stone-950`, `stone-800`) พร้อมปรับแต่ง Scrollbar ให้อัตโนมัติ
