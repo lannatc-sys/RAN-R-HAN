@@ -13,33 +13,13 @@ export interface PlanEntitlements {
  * - STANDARD: ทานที่ร้าน (✅) | รับที่ร้าน (✅) | จัดส่งเอง (❌)
  * - PRO / PREMIUM / ENTERPRISE: ทานที่ร้าน (✅) | รับที่ร้าน (✅) | จัดส่งเอง (✅)
  */
-export function getPlanEntitlements(plan: string = 'basic'): PlanEntitlements {
-  const p = (plan || 'basic').toLowerCase().trim();
-
-  if (p === 'pro' || p === 'premium' || p === 'enterprise') {
-    return {
-      canDineIn: true,
-      canTakeaway: true,
-      canDelivery: true,
-      planName: 'Pro / Premium',
-    };
-  }
-
-  if (p === 'standard') {
-    return {
-      canDineIn: true,
-      canTakeaway: true,
-      canDelivery: false,
-      planName: 'Standard',
-    };
-  }
-
-  // Free / Lite / Basic
+export function getPlanEntitlements(plan: string = 'enterprise'): PlanEntitlements {
+  // โหมดทดสอบระบบ: เปิดสิทธิ์ทุกระบบเต็มรูปแบบ (Dine-in, Takeaway, Delivery) สำหรับทุกแพ็กเกจ
   return {
-    canDineIn: false,
+    canDineIn: true,
     canTakeaway: true,
-    canDelivery: false,
-    planName: 'Free / Lite',
+    canDelivery: true,
+    planName: 'Enterprise / Pro (เปิดสิทธิ์ครบทุกระบบทดสอบ)',
   };
 }
 
@@ -54,28 +34,26 @@ export function getActiveFulfillmentModes(shop: {
   allow_delivery?: boolean;
   is_delivery_enabled?: boolean;
 }): OrderType[] {
-  const entitlements = getPlanEntitlements(shop.plan || 'basic');
   const modes: OrderType[] = [];
 
-  // 1. ทานที่ร้าน (Dine-in): ต้องได้สิทธิ์ตาม Plan และร้านเปิดไว้ (default: true)
-  if (entitlements.canDineIn && shop.allow_dine_in !== false) {
+  // 1. ทานที่ร้าน (Dine-in): เปิดใช้งานเสมอ (เว้นแต่ร้านจะตั้งใจปิด)
+  if (shop.allow_dine_in !== false) {
     modes.push('dine_in');
   }
 
-  // 2. รับที่ร้าน (Takeaway / Pick-up): ได้สิทธิ์ทุก Plan และร้านเปิดไว้ (default: true)
-  if (entitlements.canTakeaway && shop.allow_takeaway !== false) {
+  // 2. รับที่ร้าน (Takeaway / Pick-up): เปิดใช้งานเสมอ
+  if (shop.allow_takeaway !== false) {
     modes.push('takeaway');
   }
 
-  // 3. จัดส่งเอง (Delivery): ได้สิทธิ์ถ้า Plan อนุญาต หรือ Superadmin เปิด overrides ผ่าน is_delivery_enabled
-  const deliveryPermitted = entitlements.canDelivery || Boolean(shop.is_delivery_enabled);
-  if (deliveryPermitted && (shop.allow_delivery === true || shop.is_delivery_enabled === true)) {
+  // 3. จัดส่งเอง (Delivery): เปิดใช้งานเสมอ
+  if (shop.allow_delivery !== false) {
     modes.push('delivery');
   }
 
-  // Fallback กรณีร้านไม่ได้เปิดอะไรเลย ให้เปิด Takeaway เป็นค่าเริ่มต้นเสมอ
+  // Fallback กรณีไม่ได้ระบุ ให้เปิดครบทั้ง 3 โหมดสำหรับการทดสอบ
   if (modes.length === 0) {
-    modes.push('takeaway');
+    return ['dine_in', 'takeaway', 'delivery'];
   }
 
   return modes;
