@@ -141,6 +141,7 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
     setErrorMessage(null);
 
     try {
+      const pickupDate = new Date(Date.now() + pickupMinutes * 60 * 1000);
       const result = await createPickupOrderAction({
         shop_id: shop.id,
         customer_phone: phone.trim() || (orderType === 'dine_in' ? '0000000000' : ''),
@@ -150,7 +151,7 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
         delivery_address: orderType === 'delivery' ? deliveryAddress.trim() : null,
         delivery_lat: orderType === 'delivery' ? deliveryLat : null,
         delivery_lng: orderType === 'delivery' ? deliveryLng : null,
-        estimated_pickup_minutes: orderType === 'takeaway' ? pickupMinutes : undefined,
+        pickup_at: orderType === 'takeaway' ? pickupDate.toISOString() : null,
         note: note.trim() || undefined,
         payment_method: paymentMethod,
         items: cart.map((item) => ({
@@ -161,8 +162,8 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
         })),
       });
 
-      if (!result.success) {
-        setErrorMessage(result.error);
+      if (!result.success || !result.data) {
+        setErrorMessage(result.error || (lang === 'th' ? 'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ' : 'Failed to place order'));
         setIsLoading(false);
         return;
       }
@@ -171,7 +172,7 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
       localStorage.removeItem(`cart_${shop.id}`);
 
       // ไปยังหน้าติดตามออเดอร์
-      router.push(`/order/${result.orderId}`);
+      router.push(`/order/${result.data.order_id}`);
     } catch (err: any) {
       setErrorMessage(err?.message || (lang === 'th' ? 'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ กรุณาลองใหม่อีกครั้ง' : 'Failed to place order. Please try again.'));
       setIsLoading(false);
