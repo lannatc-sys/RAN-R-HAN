@@ -19,6 +19,25 @@
     background-color: #0c0a09;
     color: #f5f5f4;
   }
+
+  /* Form controls color inheritance and placeholder contrast */
+  input, select, textarea {
+    color: #1c1917;
+  }
+
+  .dark input, .dark select, .dark textarea {
+    color: #f5f5f4;
+  }
+
+  ::placeholder {
+    color: #a8a29e;
+    opacity: 1;
+  }
+
+  .dark ::placeholder {
+    color: #78716c;
+    opacity: 1;
+  }
 }
 
 /* Safe area padding helper for iOS devices with home indicator */

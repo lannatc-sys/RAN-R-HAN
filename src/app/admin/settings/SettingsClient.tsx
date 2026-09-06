@@ -295,16 +295,16 @@ export function SettingsClient({
       {/* Header & Lock Button */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-stone-900">ตั้งค่าร้านค้าและรายงานยอดขาย</h1>
-          <p className="text-xs text-stone-500">จัดการข้อมูลร้าน บัญชีพร้อมเพย์ รหัส PIN และสถิติยอดขาย</p>
+          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">ตั้งค่าร้านค้าและรายงานยอดขาย</h1>
+          <p className="text-xs text-stone-500 dark:text-stone-400">จัดการข้อมูลร้าน บัญชีพร้อมเพย์ รหัส PIN และสถิติยอดขาย</p>
         </div>
 
         <button
           type="button"
           onClick={handleLock}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:text-stone-900 text-xs font-semibold bg-white hover:bg-stone-50 shadow-xs transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white text-xs font-semibold bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 shadow-xs transition-colors cursor-pointer"
         >
-          <Lock className="w-3.5 h-3.5 text-stone-400" />
+          <Lock className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
           <span>ล็อคหน้าจอนี้</span>
         </button>
       </div>
@@ -359,41 +359,41 @@ export function SettingsClient({
       </div>
 
       {/* KDS PIN Management Card */}
-      <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+          <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
             <Shield className="w-5 h-5 text-amber-600" />
             <span>รหัสความปลอดภัย PIN 4 หลัก (KDS & ตั้งค่าร้าน)</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-bold">
+            <span className="text-[11px] font-mono bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-2 py-0.5 rounded-md font-bold">
               {showPinCode ? `PIN: ${shop.kds_pin || '0000'}` : 'PIN: ••••'}
             </span>
             <button
               type="button"
               onClick={() => setShowPinCode(!showPinCode)}
-              className="text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
+              className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 cursor-pointer"
             >
               {showPinCode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
 
-        <p className="text-xs text-stone-500 leading-relaxed">
+        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
           รหัส PIN 4 หลักใช้สำหรับยืนยันเมื่อพนักงานกดยกเลิกออเดอร์หน้าจอ KDS
           และใช้ล็อกการเข้าถึงหน้าตั้งค่าร้านค้าและรายงานยอดขายเพื่อป้องกันพนักงานทั่วไปเข้าถึง
           (ค่าเริ่มต้นคือ 0000)
         </p>
 
         {pinSuccess && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600" />
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>เปลี่ยนรหัส PIN สำเร็จเรียบร้อยแล้ว</span>
           </div>
         )}
 
         {pinError && (
-          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             <span>{pinError}</span>
           </div>
@@ -402,7 +402,7 @@ export function SettingsClient({
         <form onSubmit={handleSavePin} className="space-y-3 pt-2">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 รหัส PIN เดิม (4 หลัก)
               </label>
               <input
@@ -411,12 +411,12 @@ export function SettingsClient({
                 value={currentPinInput}
                 onChange={(e) => setCurrentPinInput(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="PIN เดิม (ถ้ามี)"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 รหัส PIN ใหม่ (4 หลัก)
               </label>
               <input
@@ -426,12 +426,12 @@ export function SettingsClient({
                 value={newPinInput}
                 onChange={(e) => setNewPinInput(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="เช่น 1234"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 ยืนยันรหัส PIN ใหม่
               </label>
               <input
@@ -441,7 +441,7 @@ export function SettingsClient({
                 value={confirmPinInput}
                 onChange={(e) => setConfirmPinInput(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="กรอกอีกครั้ง"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
               />
             </div>
           </div>
@@ -460,38 +460,38 @@ export function SettingsClient({
       </div>
 
       {/* SlipOK Automated Slip Check API Key (Encrypted Write-Only) */}
-      <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
-        <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+      <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
           <ShieldCheck className="w-5 h-5 text-amber-600" />
           <span>ระบบตรวจสอบสลิปอัตโนมัติ (SlipOK / OkSlip)</span>
         </div>
 
-        <p className="text-xs text-stone-500 leading-relaxed">
+        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
           นำ API Key จากบัญชี SlipOK ของร้านคุณมาใส่ที่นี่ ระบบจะทำการเข้ารหัสระดับสูง (AES-256-GCM)
           เพื่อความปลอดภัยของข้อมูล และไม่แสดงคีย์ย้อนหลัง
         </p>
 
         {credsSuccess && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600" />
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>บันทึก API Key และเข้ารหัสความปลอดภัยเรียบร้อยแล้ว</span>
           </div>
         )}
 
         {credsError && (
-          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             <span>{credsError}</span>
           </div>
         )}
 
         {isHasCreds && !showKeyInput ? (
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
               <div>
-                <div className="text-xs font-bold text-emerald-900">ตั้งค่า API Key แล้ว ✅</div>
-                <div className="text-[11px] text-emerald-700">
+                <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200">ตั้งค่า API Key แล้ว ✅</div>
+                <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
                   ระบบกำลังตรวจสลิปอัตโนมัติผ่านผู้ให้บริการ: {slipProvider}
                 </div>
               </div>
@@ -500,7 +500,7 @@ export function SettingsClient({
             <button
               type="button"
               onClick={() => setShowKeyInput(true)}
-              className="px-3 py-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-stone-800 hover:bg-emerald-50 dark:hover:bg-stone-700 text-emerald-800 dark:text-emerald-200 text-xs font-bold transition-colors cursor-pointer"
             >
               เปลี่ยน API Key
             </button>
@@ -508,18 +508,18 @@ export function SettingsClient({
         ) : (
           <form onSubmit={handleSaveCredentials} className="space-y-3 pt-2">
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 ระบุ SlipOK API Key (จะถูกบันทึกทับและเข้ารหัส)
               </label>
               <div className="relative">
-                <Key className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Key className="w-4 h-4 text-stone-400 dark:text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="เช่น slp_live_xxxxxxxxxxxxxxxxxxxxxxxx"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
                 />
               </div>
             </div>
@@ -529,7 +529,7 @@ export function SettingsClient({
                 <button
                   type="button"
                   onClick={() => setShowKeyInput(false)}
-                  className="px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   ยกเลิก
                 </button>
@@ -552,30 +552,30 @@ export function SettingsClient({
       </div>
 
       {/* Fulfillment Channels Card (Governed by Plan) */}
-      <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+          <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
             <Utensils className="w-5 h-5 text-amber-600" />
             <span>ช่องทางการสั่งอาหาร (Fulfillment Channels)</span>
           </div>
-          <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+          <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             แพ็กเกจ: {planEntitlements.planName}
           </span>
         </div>
 
-        <p className="text-xs text-stone-500 leading-relaxed">
+        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
           กำหนดรูปแบบคำสั่งซื้อที่ร้านเปิดรับผ่านหน้าร้านออนไลน์ โดยตัวเลือกที่เปิดใช้งานจะขึ้นอยู่กับระดับแพ็กเกจ (Plan) ที่ร้านใช้งาน
         </p>
 
         {channelsSuccess && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>บันทึกการตั้งค่าช่องทางการสั่งอาหารเรียบร้อยแล้ว</span>
           </div>
         )}
 
         {channelsError && (
-          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{channelsError}</span>
           </div>
@@ -583,19 +583,19 @@ export function SettingsClient({
 
         <form onSubmit={handleSaveChannels} className="space-y-3 pt-1">
           {/* 1. ทานที่ร้าน (Dine-in) */}
-          <div className="p-4 rounded-2xl border border-stone-200/80 bg-stone-50/50 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-800/40 flex items-center justify-between gap-3">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <Utensils className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-bold text-stone-900">ทานที่ร้าน (Dine-in)</span>
+                <Utensils className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-bold text-stone-900 dark:text-stone-100">ทานที่ร้าน (Dine-in)</span>
                 {!planEntitlements.canDineIn && (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-stone-200 text-stone-600 flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center gap-1">
                     <Lock className="w-3 h-3" />
                     Standard / Pro
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-stone-500">
+              <p className="text-[11px] text-stone-500 dark:text-stone-400">
                 ลูกค้าสั่งผ่านมือถือและระบุเลขโต๊ะ เพื่อให้พนักงานไปเสิร์ฟที่โต๊ะอาหาร
               </p>
             </div>
@@ -608,24 +608,24 @@ export function SettingsClient({
                   onChange={(e) => setAllowDineIn(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                <div className="w-11 h-6 bg-stone-200 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
               </label>
             ) : (
-              <span className="text-xs text-stone-400 font-medium">ไม่รองรับในแพ็กเกจนี้</span>
+              <span className="text-xs text-stone-400 dark:text-stone-500 font-medium">ไม่รองรับในแพ็กเกจนี้</span>
             )}
           </div>
 
           {/* 2. รับที่ร้าน (Takeaway / Pick-up) */}
-          <div className="p-4 rounded-2xl border border-stone-200/80 bg-stone-50/50 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-800/40 flex items-center justify-between gap-3">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-amber-600" />
-                <span className="text-xs font-bold text-stone-900">รับหน้าร้าน / กลับบ้าน (Pick-up / Takeaway)</span>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <ShoppingBag className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-xs font-bold text-stone-900 dark:text-stone-100">รับหน้าร้าน / กลับบ้าน (Pick-up / Takeaway)</span>
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                   ทุกแพ็กเกจ
                 </span>
               </div>
-              <p className="text-[11px] text-stone-500">
+              <p className="text-[11px] text-stone-500 dark:text-stone-400">
                 ลูกค้าสั่งล่วงหน้า เลือกเวลาประมาณการมารับ แล้วมารับอาหารที่หน้าร้าน
               </p>
             </div>
@@ -637,33 +637,33 @@ export function SettingsClient({
                 onChange={(e) => setAllowTakeaway(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+              <div className="w-11 h-6 bg-stone-200 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
             </label>
           </div>
 
           {/* 3. ร้านจัดส่งเอง (Store Delivery) */}
-          <div className="p-4 rounded-2xl border border-stone-200/80 bg-stone-50/50 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-800/40 flex items-center justify-between gap-3">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <Bike className="w-4 h-4 text-purple-600" />
-                <span className="text-xs font-bold text-stone-900">ร้านจัดส่งเอง (Store Delivery)</span>
+                <Bike className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-xs font-bold text-stone-900 dark:text-stone-100">ร้านจัดส่งเอง (Store Delivery)</span>
                 {planEntitlements.canDelivery ? (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
                     Pro / Premium
                   </span>
                 ) : shop.is_delivery_enabled ? (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-purple-600" />
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-200 border border-purple-300 dark:border-purple-700 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-purple-600 dark:text-purple-400" />
                     สิทธิ์พิเศษ Superadmin
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-stone-200 text-stone-600 flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center gap-1">
                     <Lock className="w-3 h-3" />
                     Pro / Premium
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-stone-500">
+              <p className="text-[11px] text-stone-500 dark:text-stone-400">
                 ลูกค้ากรอกชื่อ เบอร์โทร ที่อยู่จัดส่ง และส่งพิกัด GPS เพื่อให้พนักงานร้านไปส่ง
               </p>
             </div>
@@ -676,10 +676,10 @@ export function SettingsClient({
                   onChange={(e) => setAllowDelivery(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                <div className="w-11 h-6 bg-stone-200 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
               </label>
             ) : (
-              <span className="text-xs text-stone-400 font-medium">ไม่รองรับในแพ็กเกจนี้</span>
+              <span className="text-xs text-stone-400 dark:text-stone-500 font-medium">ไม่รองรับในแพ็กเกจนี้</span>
             )}
           </div>
 
@@ -687,7 +687,7 @@ export function SettingsClient({
             <button
               type="submit"
               disabled={isSavingChannels}
-              className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+              className="px-5 py-2.5 bg-stone-900 dark:bg-amber-600 hover:bg-stone-800 dark:hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {isSavingChannels ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -701,17 +701,17 @@ export function SettingsClient({
       </div>
 
       {/* Consent-based Support Access Card */}
-      <div className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+          <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
             <Headphones className="w-5 h-5 text-amber-600" />
             <span>สิทธิ์การเข้าถึงเพื่อตรวจสอบปัญหา (Consent-based Support Access)</span>
           </div>
           <span
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${
               isSupportActive
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-stone-100 text-stone-600 border border-stone-200'
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-700'
             }`}
           >
             <span
@@ -723,35 +723,35 @@ export function SettingsClient({
           </span>
         </div>
 
-        <p className="text-xs text-stone-500 leading-relaxed">
+        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
           หากร้านต้องการให้ทีมงาน Superadmin ช่วยตรวจสอบปัญหาทางบัญชีหรือออเดอร์ ร้านสามารถกด{' '}
-          <strong className="text-stone-700">"อนุญาตให้ทีมงานเข้าถึงข้อมูลยอดขาย"</strong> ได้ชั่วคราว
+          <strong className="text-stone-700 dark:text-stone-200">"อนุญาตให้ทีมงานเข้าถึงข้อมูลยอดขาย"</strong> ได้ชั่วคราว
           โดยระบบจะเพิกถอนสิทธิ์อัตโนมัติเมื่อครบกำหนด 24 หรือ 48 ชั่วโมง
           เพื่อปกป้องข้อมูลทางการเงินและความเป็นส่วนตัวของร้านค้าคุณ
         </p>
 
         {supportSuccessMsg && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>{supportSuccessMsg}</span>
           </div>
         )}
 
         {supportErrorMsg && (
-          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{supportErrorMsg}</span>
           </div>
         )}
 
         {isSupportActive ? (
-          <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
-              <div className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-emerald-600" />
+              <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>สิทธิ์กำลังเปิดใช้งานอยู่ (หมดอายุในอีก ~{remainingHours} ชั่วโมง)</span>
               </div>
-              <div className="text-[11px] text-emerald-700 font-mono">
+              <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-mono">
                 หมดอายุวันที่:{' '}
                 {new Date(supportExpiresAt!).toLocaleString('th-TH', {
                   dateStyle: 'medium',
@@ -794,7 +794,7 @@ export function SettingsClient({
               type="button"
               disabled={isUpdatingSupport}
               onClick={() => handleGrantAccess(48)}
-              className="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
             >
               {isUpdatingSupport ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -810,22 +810,22 @@ export function SettingsClient({
       {/* Shop Info & PromptPay Config Form */}
       <form
         onSubmit={handleSaveShopInfo}
-        className="bg-white p-6 rounded-3xl border border-stone-200/80 shadow-xs space-y-4"
+        className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4"
       >
-        <div className="flex items-center gap-2 font-bold text-stone-900 text-sm">
+        <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
           <CreditCard className="w-5 h-5 text-amber-600" />
           <span>ข้อมูลร้านค้าและพร้อมเพย์</span>
         </div>
 
         {shopSuccess && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600" />
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>บันทึกข้อมูลร้านค้าเรียบร้อยแล้ว</span>
           </div>
         )}
 
         {shopError && (
-          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             <span>{shopError}</span>
           </div>
@@ -833,19 +833,19 @@ export function SettingsClient({
 
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1">ชื่อร้านค้า</label>
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">ชื่อร้านค้า</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 หมายเลขพร้อมเพย์ (เบอร์โทร 10 หลัก หรือ เลขบัตร ปชช. 13 หลัก)
               </label>
               <input
@@ -854,12 +854,12 @@ export function SettingsClient({
                 onChange={(e) => setPromptpayId(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="เช่น 0891234567"
                 required
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 ชื่อบัญชีพร้อมเพย์ (แสดงให้ลูกค้าตรวจสอบ)
               </label>
               <input
@@ -868,14 +868,14 @@ export function SettingsClient({
                 onChange={(e) => setPromptpayName(e.target.value)}
                 placeholder="เช่น นางสมศรี มีโชค"
                 required
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 ค่าบริการ Service Charge (%)
               </label>
               <input
@@ -885,22 +885,22 @@ export function SettingsClient({
                 max="30"
                 value={serviceCharge}
                 onChange={(e) => setServiceCharge(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 รูปแบบภาษีมูลค่าเพิ่ม (VAT)
               </label>
               <select
                 value={vatMode}
                 onChange={(e) => setVatMode(e.target.value as any)}
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
-                <option value="none">ไม่คิด VAT</option>
-                <option value="inclusive">รวมในราคาอาหารแล้ว (Inclusive 7%)</option>
-                <option value="exclusive">คิดเพิ่มจากราคาอาหาร (Exclusive 7%)</option>
+                <option value="none" className="bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100">ไม่คิด VAT</option>
+                <option value="inclusive" className="bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100">รวมในราคาอาหารแล้ว (Inclusive 7%)</option>
+                <option value="exclusive" className="bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100">คิดเพิ่มจากราคาอาหาร (Exclusive 7%)</option>
               </select>
             </div>
           </div>
