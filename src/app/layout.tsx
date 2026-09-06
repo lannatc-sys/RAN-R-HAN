@@ -4,21 +4,20 @@ import { ThemeProvider } from '@/lib/theme/ThemeContext';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 
 export const metadata: Metadata = {
-  title: 'รับอาหาร (Rab-R-HAN) - สั่งอาหารออนไลน์และรับที่ร้าน',
-  description: 'ระบบสั่งอาหารออนไลน์ รับที่ร้าน พร้อมเพย์ และคิวออเดอร์',
+  title: 'RAN-R-HAN - ระบบสั่งอาหารออนไลน์และจัดการร้านอาหาร',
+  description: 'ระบบสั่งอาหารออนไลน์ จัดการร้านอาหาร รับที่ร้าน พร้อมเพย์ และคิวออเดอร์',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Rab-R-HAN',
+    title: 'RAN-R-HAN',
   },
 };
 
 const themeInitScript = `
 (function() {
   try {
-    var key = 'rab_r_han_theme';
-    var theme = localStorage.getItem(key);
+    var theme = localStorage.getItem('ran_r_han_theme') || localStorage.getItem('rab_r_han_theme');
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (theme === 'dark' || (!theme && prefersDark)) {
       document.documentElement.classList.add('dark');

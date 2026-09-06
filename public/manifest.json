@@ -1,7 +1,7 @@
 {
-  "name": "รับอาหาร (Rab-R-HAN)",
-  "short_name": "รับอาหาร",
-  "description": "ระบบสั่งอาหารออนไลน์ รับหน้าร้าน",
+  "name": "RAN-R-HAN (ร้านอาหาร)",
+  "short_name": "RAN-R-HAN",
+  "description": "ระบบสั่งอาหารออนไลน์และจัดการร้านอาหาร",
   "start_url": "/admin/orders",
   "display": "standalone",
   "background_color": "#ffffff",

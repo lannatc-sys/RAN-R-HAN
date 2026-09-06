@@ -14,7 +14,8 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = 'rab_r_han_theme';
+const THEME_STORAGE_KEY = 'ran_r_han_theme';
+const LEGACY_THEME_STORAGE_KEY = 'rab_r_han_theme';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('system');
@@ -23,7 +24,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // ตรวจจับ System preference
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+      const saved = (localStorage.getItem(THEME_STORAGE_KEY) || localStorage.getItem(LEGACY_THEME_STORAGE_KEY)) as Theme | null;
       if (saved === 'light' || saved === 'dark' || saved === 'system') {
         setThemeState(saved);
       }

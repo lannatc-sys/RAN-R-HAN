@@ -5,7 +5,7 @@ import { createAdminClient } from './supabase/admin';
 try {
   if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT || 'mailto:admin@rab-r-han.local',
+      process.env.VAPID_SUBJECT || 'mailto:admin@ran-r-han.local',
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
       process.env.VAPID_PRIVATE_KEY
     );

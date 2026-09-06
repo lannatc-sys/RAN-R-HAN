@@ -33,7 +33,7 @@ const admin = createClient(supabaseUrl, serviceRoleKey, {
 
 async function runE2ETests() {
   console.log('========================================================');
-  console.log('🚀 Starting End-to-End Test Suite for Rab-R-HAN (Supabase)');
+  console.log('🚀 Starting End-to-End Test Suite for RAN-R-HAN (Supabase)');
   console.log('========================================================\n');
 
   // ดึงร้านค้าและเมนูตัวอย่าง (เลือกร้านแรกที่สร้าง ซึ่งมี seed เมนูอาหาร)

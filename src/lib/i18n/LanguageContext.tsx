@@ -13,7 +13,8 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const LANGUAGE_STORAGE_KEY = 'rab_r_han_lang';
+const LANGUAGE_STORAGE_KEY = 'ran_r_han_lang';
+const LEGACY_LANGUAGE_STORAGE_KEY = 'rab_r_han_lang';
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>('th');
@@ -21,7 +22,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY) as Language | null;
+      const saved = (localStorage.getItem(LANGUAGE_STORAGE_KEY) || localStorage.getItem(LEGACY_LANGUAGE_STORAGE_KEY)) as Language | null;
       if (saved === 'th' || saved === 'en') {
         setLangState(saved);
       } else {

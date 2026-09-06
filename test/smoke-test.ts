@@ -4,7 +4,7 @@ import { createOrderSchema } from '../src/lib/validations/order';
 import { generatePromptPayQR } from '../src/lib/promptpay';
 
 async function runTests() {
-  console.log('--- Starting Smoke Tests for Rab-R-HAN ---\n');
+  console.log('--- Starting Smoke Tests for RAN-R-HAN ---\n');
 
   // Test 1: Crypto AES-256-GCM
   console.log('1. Testing AES-256-GCM encryption & decryption...');

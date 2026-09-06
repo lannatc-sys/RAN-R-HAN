@@ -65,7 +65,7 @@ export default async function HomePage() {
 
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-              รับอาหาร (Rab-R-HAN)
+              RAN-R-HAN
             </h1>
             <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 leading-relaxed">
               สั่งอาหารออนไลน์ ทานที่ร้าน รับหน้าร้าน หรือให้ร้านจัดส่ง พร้อมระบบสลิปอัตโนมัติ
@@ -176,7 +176,7 @@ export default async function HomePage() {
         </div>
 
         <div className="pt-2 text-center text-[11px] text-stone-400 dark:text-stone-500">
-          Rab-R-HAN Platform • Bilingual & Responsive Multi-device
+          RAN-R-HAN Platform • Bilingual & Responsive Multi-device
         </div>
       </div>
     </main>

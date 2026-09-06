@@ -1,5 +1,5 @@
 -- =====================================================================
--- RAB-R-HAN (รับ-อาหาร) DATABASE SCHEMA & RLS POLICIES
+-- RAN-R-HAN DATABASE SCHEMA & RLS POLICIES
 -- Multi-tenant Restaurant SaaS (QR Ordering + POS)
 -- Designed for Supabase (PostgreSQL 15+)
 -- =====================================================================
