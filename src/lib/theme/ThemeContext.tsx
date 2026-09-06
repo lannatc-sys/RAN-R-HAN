@@ -103,21 +103,43 @@ export function useTheme() {
 }
 
 export function ThemeToggle({ className = '' }: { className?: string }) {
-  const { resolvedTheme, toggleTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className={`inline-flex items-center justify-center w-8 h-8 rounded-xl text-xs font-medium transition-all border shadow-2xs cursor-pointer select-none bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 ${className}`}
-      title={resolvedTheme === 'dark' ? 'สลับเป็นโหมดสว่าง (Light)' : 'สลับเป็นโหมดมืด (Dark)'}
-      aria-label="Toggle theme"
+    <div
+      className={`inline-flex items-center p-0.5 rounded-xl bg-stone-100 dark:bg-stone-800/90 border border-stone-200/90 dark:border-stone-700 shadow-2xs transition-colors select-none ${className}`}
+      role="group"
+      aria-label="เลือกโหมดสว่างหรือโหมดมืด"
     >
-      {resolvedTheme === 'dark' ? (
-        <Sun className="w-4 h-4 text-amber-400 animate-in spin-in-180 duration-200" />
-      ) : (
-        <Moon className="w-4 h-4 text-stone-600 animate-in spin-in-180 duration-200" />
-      )}
-    </button>
+      <button
+        type="button"
+        onClick={() => setTheme('light')}
+        className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          resolvedTheme === 'light'
+            ? 'bg-white text-amber-800 shadow-xs ring-1 ring-stone-900/5 font-extrabold'
+            : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+        }`}
+        title="สลับเป็นโหมดสว่าง (Light Mode)"
+        aria-pressed={resolvedTheme === 'light'}
+      >
+        <Sun className={`w-3.5 h-3.5 ${resolvedTheme === 'light' ? 'text-amber-500 fill-amber-500/20' : 'text-stone-400'}`} />
+        <span className="text-[11px]">สว่าง</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setTheme('dark')}
+        className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          resolvedTheme === 'dark'
+            ? 'bg-stone-900 text-amber-300 shadow-xs ring-1 ring-stone-700 font-extrabold'
+            : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+        }`}
+        title="สลับเป็นโหมดมืด (Dark Mode)"
+        aria-pressed={resolvedTheme === 'dark'}
+      >
+        <Moon className={`w-3.5 h-3.5 ${resolvedTheme === 'dark' ? 'text-amber-400 fill-amber-400/20' : 'text-stone-400'}`} />
+        <span className="text-[11px]">มืด</span>
+      </button>
+    </div>
   );
 }
