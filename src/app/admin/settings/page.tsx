@@ -46,7 +46,7 @@ export default async function AdminSettingsPage() {
   // ตรวจสอบว่าร้านนี้มีการตั้งค่า API key ไว้แล้วหรือไม่ (ไม่ดึง api_key_encrypted ออกมา)
   const { data: creds } = await admin
     .from('shop_payment_credentials')
-    .select('slip_check_provider')
+    .select('slip_check_provider, api_url')
     .eq('shop_id', shopId)
     .maybeSingle();
 
@@ -72,6 +72,7 @@ export default async function AdminSettingsPage() {
       shop={shop as Shop}
       hasSlipCredentials={!!creds}
       slipProvider={creds?.slip_check_provider || 'slipok'}
+      initialApiUrl={creds?.api_url || ''}
       todaySales={todaySales}
       todayOrderCount={todayOrderCount}
       isPrivacyMode={isPrivacyMode}

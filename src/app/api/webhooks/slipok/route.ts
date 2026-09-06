@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'SHOP_NOT_FOUND: Shop not found' }, { status: 404 });
     }
 
-    // 3. ดึง API key ของร้านจาก shop_payment_credentials (ถอดรหัสเฉพาะฝั่ง server)
+    // 3. ดึง API URL และ API key ของร้านจาก shop_payment_credentials (ถอดรหัสเฉพาะฝั่ง server)
     const { data: creds } = await admin
       .from('shop_payment_credentials')
-      .select('api_key_encrypted, slip_check_provider')
+      .select('api_key_encrypted, api_url, slip_check_provider')
       .eq('shop_id', shop.id)
       .single();
 

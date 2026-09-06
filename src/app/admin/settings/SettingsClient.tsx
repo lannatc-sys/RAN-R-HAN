@@ -38,6 +38,7 @@ interface SettingsClientProps {
   shop: Shop;
   hasSlipCredentials: boolean;
   slipProvider: string;
+  initialApiUrl?: string;
   todaySales?: number;
   todayOrderCount?: number;
   isPrivacyMode?: boolean;
@@ -47,6 +48,7 @@ export function SettingsClient({
   shop,
   hasSlipCredentials,
   slipProvider,
+  initialApiUrl = '',
   todaySales = 0,
   todayOrderCount = 0,
   isPrivacyMode = false,
@@ -72,9 +74,10 @@ export function SettingsClient({
   const [serviceCharge, setServiceCharge] = useState(shop.service_charge.toString());
   const [vatMode, setVatMode] = useState(shop.vat_mode);
 
-  // SlipOK Creds State (Write-only)
+  // SlipOK Creds State (SLIPOK API Endpoint & SLIPOK_API_KEY)
   const [isHasCreds, setIsHasCreds] = useState(hasSlipCredentials);
   const [showKeyInput, setShowKeyInput] = useState(!hasSlipCredentials);
+  const [apiUrl, setApiUrl] = useState(initialApiUrl);
   const [apiKey, setApiKey] = useState('');
   const [isSavingCreds, setIsSavingCreds] = useState(false);
   const [credsSuccess, setCredsSuccess] = useState(false);
@@ -219,6 +222,7 @@ export function SettingsClient({
     const res = await saveSlipCredentialsAction({
       shop_id: shop.id,
       provider: 'slipok',
+      api_url: apiUrl.trim() || undefined,
       api_key: apiKey.trim(),
     });
 
@@ -302,7 +306,7 @@ export function SettingsClient({
         <button
           type="button"
           onClick={handleLock}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white text-xs font-semibold bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 shadow-xs transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:white text-xs font-semibold bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 shadow-xs transition-colors cursor-pointer"
         >
           <Lock className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" />
           <span>ล็อคหน้าจอนี้</span>
@@ -459,7 +463,7 @@ export function SettingsClient({
         </form>
       </div>
 
-      {/* SlipOK Automated Slip Check API Key (Encrypted Write-Only) */}
+      {/* SlipOK Automated Slip Check API (2 ค่า: SLIPOK API และ SLIPOK_API_KEY) */}
       <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
         <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
           <ShieldCheck className="w-5 h-5 text-amber-600" />
@@ -467,14 +471,13 @@ export function SettingsClient({
         </div>
 
         <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
-          นำ API Key จากบัญชี SlipOK ของร้านคุณมาใส่ที่นี่ ระบบจะทำการเข้ารหัสระดับสูง (AES-256-GCM)
-          เพื่อความปลอดภัยของข้อมูล และไม่แสดงคีย์ย้อนหลัง
+          ระบุค่า <strong>SLIPOK API</strong> (URL Endpoint หรือสาขา) และ <strong>SLIPOK_API_KEY</strong> จากระบบ SlipOK เพื่อเปิดใช้งานการตรวจสลิปอัตโนมัติ โดยคีย์จะถูกเข้ารหัสระดับสูง (AES-256-GCM) เพื่อความปลอดภัยสูงสุด
         </p>
 
         {credsSuccess && (
           <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
             <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>บันทึก API Key และเข้ารหัสความปลอดภัยเรียบร้อยแล้ว</span>
+            <span>บันทึกการตั้งค่า SlipOK และเข้ารหัสความปลอดภัยเรียบร้อยแล้ว</span>
           </div>
         )}
 
@@ -486,13 +489,13 @@ export function SettingsClient({
         )}
 
         {isHasCreds && !showKeyInput ? (
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
               <div>
-                <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200">ตั้งค่า API Key แล้ว ✅</div>
+                <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200">ตั้งค่า SlipOK เรียบร้อยแล้ว ✅</div>
                 <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
-                  ระบบกำลังตรวจสลิปอัตโนมัติผ่านผู้ให้บริการ: {slipProvider}
+                  {apiUrl ? `SLIPOK API: ${apiUrl}` : 'ระบบกำลังตรวจสลิปอัตโนมัติผ่านผู้ให้บริการ SlipOK'}
                 </div>
               </div>
             </div>
@@ -500,16 +503,34 @@ export function SettingsClient({
             <button
               type="button"
               onClick={() => setShowKeyInput(true)}
-              className="px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-stone-800 hover:bg-emerald-50 dark:hover:bg-stone-700 text-emerald-800 dark:text-emerald-200 text-xs font-bold transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-stone-800 hover:bg-emerald-50 dark:hover:bg-stone-700 text-emerald-800 dark:text-emerald-200 text-xs font-bold transition-colors cursor-pointer self-start sm:self-auto"
             >
-              เปลี่ยน API Key
+              แก้ไขการตั้งค่า SlipOK
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSaveCredentials} className="space-y-3 pt-2">
+          <form onSubmit={handleSaveCredentials} className="space-y-3.5 pt-2">
+            {/* 1. SLIPOK API (Endpoint URL) */}
             <div>
               <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                ระบุ SlipOK API Key (จะถูกบันทึกทับและเข้ารหัส)
+                SLIPOK API (URL Endpoint / สาขา)
+              </label>
+              <input
+                type="text"
+                value={apiUrl}
+                onChange={(e) => setApiUrl(e.target.value)}
+                placeholder="เช่น https://api.slipok.com/api/line/apikey/xxx หรือ branch id"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+              />
+              <span className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 block">
+                ระบุ URL สำหรับเรียกตรวจสลิปของ SlipOK
+              </span>
+            </div>
+
+            {/* 2. SLIPOK_API_KEY */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                SLIPOK_API_KEY <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Key className="w-4 h-4 text-stone-400 dark:text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -522,9 +543,12 @@ export function SettingsClient({
                   className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
                 />
               </div>
+              <span className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 block">
+                API Key จะถูกเข้ารหัส AES-256-GCM ทันที และไม่แสดงคีย์ย้อนหลัง
+              </span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-1">
               {isHasCreds && (
                 <button
                   type="button"
@@ -537,14 +561,14 @@ export function SettingsClient({
               <button
                 type="submit"
                 disabled={isSavingCreds}
-                className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {isSavingCreds ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
                   <Check className="w-3.5 h-3.5" />
                 )}
-                <span>บันทึก API Key</span>
+                <span>บันทึกการตั้งค่า SlipOK</span>
               </button>
             </div>
           </form>

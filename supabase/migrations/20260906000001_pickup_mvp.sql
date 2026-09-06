@@ -37,10 +37,11 @@ create unique index if not exists payments_trans_ref_uq
     on public.payments (trans_ref)
     where trans_ref is not null;
 
--- 4. ตาราง shop_payment_credentials สำหรับเก็บ API key ตรวจสลิปแบบเข้ารหัส
+-- 4. ตาราง shop_payment_credentials สำหรับเก็บ API URL และ API Key ตรวจสลิปแบบเข้ารหัส
 create table if not exists public.shop_payment_credentials (
     shop_id uuid primary key references public.shops(id) on delete cascade,
     slip_check_provider text not null default 'slipok',
+    api_url text,
     api_key_encrypted bytea not null,
     updated_at timestamptz not null default timezone('utc'::text, now())
 );

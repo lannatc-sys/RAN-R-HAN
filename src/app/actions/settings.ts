@@ -101,16 +101,18 @@ export async function revokeSupportAccessAction(
 }
 
 /**
- * บันทึก API key ของผู้ให้บริการตรวจสลิป (เช่น SlipOK) แบบเข้ารหัส (Write-only)
+ * บันทึก API URL และ API Key ของผู้ให้บริการตรวจสลิป (SlipOK)
+ * โดย API Key จะถูกเข้ารหัสด้วย AES-256-GCM (Write-only)
  * ห้ามส่งค่า decrypted กลับไปยัง client เด็ดขาด
  */
 export async function saveSlipCredentialsAction(data: {
   shop_id: string;
   provider: string;
+  api_url?: string;
   api_key: string;
 }) {
   if (!data.api_key || data.api_key.trim().length === 0) {
-    return { success: false, error: 'กรุณาระบุ API Key' };
+    return { success: false, error: 'กรุณาระบุ SLIPOK_API_KEY' };
   }
 
   try {
@@ -122,6 +124,7 @@ export async function saveSlipCredentialsAction(data: {
       {
         shop_id: data.shop_id,
         slip_check_provider: data.provider || 'slipok',
+        api_url: data.api_url?.trim() || null,
         api_key_encrypted: encryptedBuffer,
         updated_at: new Date().toISOString(),
       },
