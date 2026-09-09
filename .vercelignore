@@ -1,0 +1,13 @@
+# Files excluded from the Vercel deployment upload (build does not need them).
+.next
+test
+scripts
+supabase
+stitch_thai_pos
+stitch_thai_pos.zip
+seed.sql
+ระบบร้านอาหารแบบ Multi-tenant (SaaS).sql
+Blueprint.md
+TODO.md
+docs
+*.tsbuildinfo
