@@ -22,3 +22,6 @@ pnpm-debug.log*
 Thumbs.db
 node_modules
 *.tsbuildinfo
+
+# Local export artifacts
+stitch_thai_pos.zip
