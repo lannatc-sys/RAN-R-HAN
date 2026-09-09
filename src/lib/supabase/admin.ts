@@ -10,9 +10,13 @@ export function createAdminClient() {
     process.env.SUPABASE_URL ||
     'https://hqfzahyvwsjrvlgvaxda.supabase.co';
   const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SECRET_KEY ||
-    'sb_secret_p8zlWmPMN89hHGCRwiLyKw_UDfiyBPa';
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      'Missing SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY). Copy the `secret` key from Supabase Dashboard → Settings → API Keys into .env.local / Vercel env.'
+    );
+  }
 
   return createSupabaseClient(supabaseUrl, serviceRoleKey, {
     auth: {
