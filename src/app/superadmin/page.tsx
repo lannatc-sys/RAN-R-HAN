@@ -36,7 +36,7 @@ export default async function SuperadminDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black text-slate-950 tracking-tight">
-            ภาพรวมแพลตฟอร์ม Kin-D SaaS
+            ภาพรวมแพลตฟอร์ม RAN-R-HAN
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             ศูนย์กลางการมอนิเตอร์และบริหารร้านอาหารทั้งหมดในระบบ (Privacy First - ไม่แสดงยอดขายทางการเงิน)

@@ -58,12 +58,12 @@ export function SuperadminSidebar() {
       <div className="space-y-6">
         {/* Brand */}
         <div className="flex items-center gap-3 px-2 py-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-amber-500/20">
-            K
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-amber-500/20">
+            R
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-white tracking-tight text-sm">Kin-D Platform</span>
+              <span className="font-bold text-white tracking-tight text-sm">RAN-R-HAN</span>
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
             <div className="text-[11px] text-amber-400 font-medium">Super Admin Console</div>
