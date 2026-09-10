@@ -119,13 +119,12 @@
    - Authorization: `Bearer <CRON_SECRET>`
 4. **Telegram Bot API**:
    - Config: `TELEGRAM_BOT_TOKEN` และ `TELEGRAM_BOT_USERNAME` ใน [`.env.local`](file:///d:/system%20make/Ran-R-HAN/.env.local)
-   - Status: บอท `@ranrhan_bot` ออนไลน์และพร้อมเชื่อมต่อ
+   - Status: บอท `@ranrhan_bot` ออนไลน์สมบูรณ์ Webhook ชี้ไปที่ `https://ran-r-han.vercel.app/api/telegram/webhook` และตั้งค่าคำอธิบายภาษาไทยเรียบร้อย
 
 ---
 
 ## 🚀 5. สิ่งที่สามารถทำต่อได้ในรอบถัดไป (Next Steps)
 
-1. **ตั้งค่า Telegram Webhook บน Production:** หลัง Deploy Vercel รัน `curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://<YOUR-DOMAIN>/api/telegram/webhook"`
-2. **ทดสอบระบบสลิป:** นำ SlipOK API Key จริงของร้านค้ามากรอกและทดสอบผ่าน `/admin/settings`
-3. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
-4. **Deploy ขึ้น Production:** ตามคู่มือใน [docs/DEPLOY.md](file:///d:/system%20make/Ran-R-HAN/docs/DEPLOY.md)
+1. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
+2. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
+3. **เริ่มพัฒนาระบบไรเดอร์ (Rider System):** เริ่มสร้าง Database Schema และ API ตามเอกสาร [docs/03-rider-system-architecture.md](file:///d:/system%20make/Ran-R-HAN/docs/03-rider-system-architecture.md)
