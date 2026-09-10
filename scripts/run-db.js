@@ -78,6 +78,15 @@ async function runDatabaseSetup() {
       console.log('   [SUCCESS] Telegram notifications & link tokens schema applied.\n');
     }
 
+    // 1.5 Run dispatch_timeout_atomic.sql (Cron dispatch timeout - RPC + security)
+    const dispatchTimeoutPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260912000001_dispatch_timeout_atomic.sql');
+    if (fs.existsSync(dispatchTimeoutPath)) {
+      console.log('1.5 Executing supabase/migrations/20260912000001_dispatch_timeout_atomic.sql...');
+      const dispatchTimeoutSql = fs.readFileSync(dispatchTimeoutPath, 'utf-8');
+      await client.query(dispatchTimeoutSql);
+      console.log('   [SUCCESS] Dispatch timeout RPC and security applied.\n');
+    }
+
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');
     const seedPath = path.join(__dirname, '..', 'seed.sql');

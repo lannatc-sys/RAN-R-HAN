@@ -30,8 +30,17 @@ async function handle(req: NextRequest) {
       ran_at: new Date().toISOString(),
     });
   } catch (err) {
-    console.error('[cron/dispatch-timeout] Unexpected error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // CRITICAL: RPC failure ต้องไม่กลืน — คืน non-2xx และ ok:false
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error('[cron/dispatch-timeout] RPC/Infrastructure failure:', errorMessage);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: 'Dispatch timeout processing failed',
+        // ห้ามเปิดเผยรายละเอียด error ให้ client — บันทึกใน log เท่านั้น
+      },
+      { status: 502 } // Bad Gateway — signal ว่า upstream (RPC) ล้มเหลว
+    );
   }
 }
 

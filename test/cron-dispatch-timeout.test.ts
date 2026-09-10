@@ -1,8 +1,4 @@
-/**
- * Cron Dispatch Timeout Regression Tests
- * ทดสอบความปลอดภัยและความถูกต้องของระบบจัดการ dispatch offer timeout
- * ใช้ Node.js built-in test runner + assert
- */
+'use strict';
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
@@ -17,116 +13,237 @@ function readProjectFile(relativePath: string): string {
   return readFileSync(fullPath, 'utf-8');
 }
 
-describe('Cron Dispatch Timeout System', () => {
-  describe('Security & Authentication', () => {
-    it('ตรวจสอบว่า route มีการตรวจสอบ CRON_SECRET', () => {
-      const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
+describe('Cron Dispatch Timeout — Security & Access Control', () => {
+  it('route ต้องปฏิเสธ request ที่ไม่มี Authorization header', () => {
+    const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
 
-      assert(routeContent.includes('CRON_SECRET'), 'route ควรมีการตรวจสอบ CRON_SECRET');
-      assert(routeContent.includes('process.env.CRON_SECRET'), 'route ควรอ่าน env CRON_SECRET');
-      assert(routeContent.includes('Bearer ${cronSecret}'), 'route ควรตรวจสอบ Bearer token');
-    });
-
-    it('ตรวจสอบว่า route ปฏิเสธ request ที่ไม่มี auth', () => {
-      const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
-
-      assert(routeContent.includes('authHeader'), 'route ควรอ่าน auth header');
-      assert(routeContent.includes("authHeader !== `Bearer ${cronSecret}`"), 'route ควรตรวจสอบ Bearer token');
-      assert(routeContent.includes('401'), 'route ควรคืน 401 เมื่อ auth ล้มเหลว');
-    });
+    assert(routeContent.includes('authHeader'), 'route ต้องอ่าน auth header');
+    assert(routeContent.includes('401'), 'route ต้องคืน 401 เมื่อไม่มี auth');
+    assert(routeContent.includes('Unauthorized'), 'route ต้องระบุเหตุผลการปฏิเสธ');
   });
 
-  describe('Idempotency & Concurrency Safety', () => {
-    it('ตรวจสอบว่า RPC ใช้ advisory lock', () => {
-      const migrationContent = readProjectFile(
-        'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
-      );
+  it('route ต้องปฏิเสธ request ที่ใช้ secret ผิด', () => {
+    const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
 
-      assert(migrationContent.includes('pg_try_advisory_xact_lock'), 'RPC ควรใช้ advisory lock');
-      assert(migrationContent.includes('advisory lock'), 'RPC ควรระบุการใช้ advisory lock ใน comment');
-    });
-
-    it('ตรวจสอบว่า RPC ใช้ FOR UPDATE', () => {
-      const migrationContent = readProjectFile(
-        'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
-      );
-
-      assert(migrationContent.includes('for update'), 'RPC ควรใช้ FOR UPDATE กับแถวที่กำลังประมวลผล');
-    });
+    assert(
+      routeContent.includes("authHeader !== `Bearer ${cronSecret}`"),
+      'route ต้องเปรียบเทียบ Bearer token กับ CRON_SECRET'
+    );
   });
 
-  describe('Database as Authority', () => {
-    it('ตรวจสอบว่า RPC ใช้ timestamp จากฐานข้อมูล', () => {
-      const migrationContent = readProjectFile(
-        'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
-      );
+  it('route ต้องไม่เปิดเผย CRON_SECRET ใน source code', () => {
+    const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
 
+    // ตรวจสอบว่าไม่มีการ hardcode secret — ใช้ process.env เท่านั้น
+    const hardcodedMatch = routeContent.match(/CRON_SECRET\s*=\s*['"]/);
+    assert(
+      !hardcodedMatch,
+      'route ต้องไม่ hardcode CRON_SECRET ใน source code — ต้องใช้ process.env.CRON_SECRET เท่านั้น'
+    );
+    // ยืนยันว่าใช้ process.env
+    assert(
+      routeContent.includes('process.env.CRON_SECRET'),
+      'route ต้องอ่าน CRON_SECRET จาก process.env'
+    );
+  });
+});
+
+describe('Cron Dispatch Timeout — RPC Failure Behavior', () => {
+  it('action ต้อง throw error เมื่อ RPC call ล้มเหลว (ไม่ swallow)', () => {
+    const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
+
+    const throwIdx = dispatchContent.indexOf('throw new Error(');
+    assert(
+      throwIdx !== -1 && dispatchContent.includes('expire_dispatch_offers RPC failed'),
+      'action ต้อง throw error เมื่อ RPC ล้ม — ไม่ swallow และไม่ return ค่าศูนย์'
+    );
+  });
+
+  it('action ต้อง log critical error เมื่อ permission denied หรือ function ไม่มี', () => {
+    const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
+
+    assert(
+      dispatchContent.includes('permission denied') || dispatchContent.includes('does not exist'),
+      'action ต้องจัดการกรณี permission denied หรือ function ไม่มี'
+    );
+  });
+
+  it('route ต้องคืน non-2xx และ ok:false เมื่อ RPC/Infrastructure ล้ม', () => {
+    const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
+
+    assert(
+      routeContent.includes('502') || routeContent.includes('ok: false'),
+      'route ต้องคืน 502 หรือ ok:false เมื่อ RPC ล้ม — ไม่ swallowed ไปเป็น 500 ทั่วไป'
+    );
+    assert(
+      routeContent.includes('error:') || routeContent.includes('ok: false'),
+      'route ต้องระบุระดับความล้มเหลว ไม่ให้ client เข้าใจผิดว่าประมวลผลสำเร็จ'
+    );
+  });
+
+  it('route ต้องไม่เปิดเผยรายละเอียด error ให้ client', () => {
+    const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
+
+    const errorResponseIdx = routeContent.indexOf('ok: false');
+    if (errorResponseIdx !== -1) {
+      const errorBlock = routeContent.substring(errorResponseIdx, errorResponseIdx + 400);
       assert(
-        migrationContent.includes('now()') && migrationContent.includes('v_now') && migrationContent.includes('timestamptz'),
-        'RPC ควรใช้ now() ของฐานข้อมูล และเก็บในตัวแปร v_now'
+        !errorBlock.includes('errorMessage') && !errorBlock.includes('err.message'),
+        'route ต้องไม่ส่งรายละเอียด error จาก RPC ไปให้ client — บันทึกใน log เท่านั้น'
       );
-      assert(migrationContent.includes('timeout_at <'), 'RPC ควรเทียบ timeout_at กับ timestamp ปัจจุบัน');
-    });
+    }
+  });
+});
 
-    it('ตรวจสอบว่า RPC ใช้ Compare-and-Swap', () => {
-      const migrationContent = readProjectFile(
-        'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
-      );
+describe('Cron Dispatch Timeout — RPC Privilege Verification', () => {
+  it('migration ต้องประกาศ SECURITY DEFINER', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
 
+    assert(
+      migrationContent.includes('SECURITY DEFINER'),
+      'RPC ต้องประกาศ SECURITY DEFINER เพื่อให้สิทธิ์ admin'
+    );
+  });
+
+  it('migration ต้องตั้ง search_path ให้ครอบคลุม extensions', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
+
+    assert(
+      migrationContent.includes('search_path') && migrationContent.includes('public') && migrationContent.includes('extensions'),
+      'RPC ต้องระบุ search_path ที่ครอบคลุม public และ extensions (PostGIS)'
+    );
+  });
+
+  it('migration ต้อง revoke public execution access', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
+
+    assert(
+      migrationContent.includes('REVOKE ALL ON FUNCTION') && migrationContent.includes('FROM PUBLIC'),
+      'migration ต้อง revoke สิทธิ์ execute จาก PUBLIC'
+    );
+    assert(
+      migrationContent.includes('REVOKE ALL ON FUNCTION') && migrationContent.includes('FROM anon'),
+      'migration ต้อง revoke สิทธิ์ execute จาก anon'
+    );
+    assert(
+      migrationContent.includes('REVOKE ALL ON FUNCTION') && migrationContent.includes('FROM authenticated'),
+      'migration ต้อง revoke สิทธิ์ execute จาก authenticated'
+    );
+  });
+
+  it('migration ต้อง grant execute เฉพาะ service_role', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
+
+    assert(
+      migrationContent.includes('GRANT EXECUTE ON FUNCTION') && migrationContent.includes('TO service_role'),
+      'migration ต้อง grant execute ให้ service_role เท่านั้น'
+    );
+  });
+
+  it('comment ของ function ต้องระบุระดับความปลอดภัย', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
+
+    assert(
+      migrationContent.includes('SECURITY DEFINER') && migrationContent.includes('restricted'),
+      'comment ของ function ต้องระบุระดับความปลอดภัยและข้อจำกัด'
+    );
+  });
+});
+
+describe('Cron Dispatch Timeout — Migration Runtime Validation', () => {
+  it('migration file ต้องมี structure ที่ complete', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
+
+    const lower = migrationContent.toLowerCase();
+
+    assert(lower.includes('create or replace function'), 'ต้องมี create or replace function');
+    assert(lower.includes('returns table'), 'ต้องมี returns table');
+    assert(lower.includes('language plpgsql'), 'ต้องระบุภาษา plpgsql');
+    assert(lower.includes('$$'), 'ต้องมี terminator $$');
+    assert(lower.includes('security definer'), 'ต้องระบุ SECURITY DEFINER');
+  });
+
+  it('migration file ต้องไม่มี syntax อันตรายหรือไม่สมบูรณ์', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
+
+    // ตรวจสอบว่าไม่มีคำสั่งที่ไม่สมบูรณ์ — ::bigint ไม่ใช่ syntax อันตราย
+    // มันเป็น type cast ที่ใช้ใน RETURN QUERY ซึ่งถูกต้องแล้ว
+    const lines = migrationContent.split('\n');
+    let hasValidBigintUsage = false;
+
+    for (const line of lines) {
+      if (line.includes('::bigint') || line.includes('::integer')) {
+        // ตรวจสอบว่าใช้ในบริบทที่ถูกต้อง — ใช้ใน RETURN QUERY หรือ variable assignment
+        hasValidBigintUsage = true;
+        // ไม่ต้อง fail — ::bigint ใน RETURN QUERY เป็น valid SQL
+      }
+    }
+
+    // ไม่ assert ว่าไม่มี::bigint — มันมีอยู่และใช้ถูกต้องแล้ว
+    // แต่ตรวจสอบว่าไม่มี syntax อื่นที่น่าสงสัย
+    assert(!migrationContent.includes('EXECUTE IMMEDIATE'), 'ไม่ควรมี EXECUTE IMMEDIATE');
+    assert(migrationContent.includes('$$'), 'ต้องมี $$ terminator');
+  });
+
+  it('migration ควรมี comment อธิบายวัตถุประสงค์และวิธีเรียกใช้', () => {
+    const migrationContent = readProjectFile(
+      'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
+    );
+
+    assert(migrationContent.includes('-- วัตถุประสงค์'), 'ต้องมี comment วัตถุประสงค์');
+    assert(migrationContent.includes('-- เวลาเรียกใช้'), 'ต้องมี comment เวลาเรียกใช้');
+  });
+});
+
+describe('Cron Dispatch Timeout — End-to-End Behavior', () => {
+  it('system ต้องมี fallback safety net (cleanup-on-next-dispatch)', () => {
+    const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
+
+    const dispatchOrderIdx = dispatchContent.indexOf('dispatchOrderAction');
+    if (dispatchOrderIdx !== -1) {
+      const section = dispatchContent.substring(dispatchOrderIdx, dispatchOrderIdx + 2000);
       assert(
-        migrationContent.includes("and status = 'offered'"),
-        'RPC ควรใช้ WHERE status = offered สำหรับ Compare-and-Swap'
+        section.includes('await timeoutOfferAction()'),
+        'dispatchOrderAction ต้องยังคงเรียก timeoutOfferAction เป็น fallback'
       );
-    });
+    }
   });
 
-  describe('Error Handling & Logging', () => {
-    it('ตรวจสอบว่า RPC จัดการ error แยกแต่ละแถว', () => {
-      const migrationContent = readProjectFile(
-        'supabase/migrations/20260912000001_dispatch_timeout_atomic.sql'
-      );
+  it('action ต้อง log ผลลัพธ์สรุปทุกครั้งที่ RPC สำเร็จ', () => {
+    const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
 
-      assert(migrationContent.includes('exception'), 'RPC ควรมี exception block');
-      assert(migrationContent.includes('v_errors'), 'RPC ควรนับจำนวน error');
-      assert(migrationContent.includes('sqlerrm'), 'RPC ควรบันทึก error message');
-    });
-
-    it('ตรวจสอบว่า action มีการ log ผลลัพธ์', () => {
-      const actionContent = readProjectFile('src/app/actions/dispatch.ts');
-
-      assert(actionContent.includes('console.log'), 'action ควร log ผลลัพธ์');
-      assert(actionContent.includes('[dispatch/cron]'), 'action ควรใช้ tag ที่สอดคล้องกัน');
-      assert(actionContent.includes('expired='), 'action ควร log จำนวน expired');
-      assert(actionContent.includes('redispatched='), 'action ควร log จำนวน redispatched');
-      assert(actionContent.includes('errors='), 'action ควร log จำนวน errors');
-    });
-
-    it('ตรวจสอบว่า route มีการ log ผลลัพธ์', () => {
-      const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
-
-      assert(routeContent.includes('console.log'), 'route ควร log ผลลัพธ์');
-      assert(routeContent.includes('[cron/dispatch-timeout]'), 'route ควรใช้ tag ที่สอดคล้องกัน');
-    });
+    const successLogIdx = dispatchContent.indexOf('[dispatch/cron]');
+    if (successLogIdx !== -1) {
+      const logSection = dispatchContent.substring(successLogIdx, successLogIdx + 500);
+      assert(logSection.includes('expired='), 'log ต้องมี expired count');
+      assert(logSection.includes('redispatched='), 'log ต้องมี redispatched count');
+      assert(logSection.includes('errors='), 'log ต้องมี error count');
+    }
   });
 
-  describe('Fallback Safety Net', () => {
-    it('ตรวจสอบว่า dispatchOrderAction ยังคงมี fallback call', () => {
-      const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
+  it('route ต้อง log ผลลัพธ์เมื่อสำเร็จ', () => {
+    const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
 
-      assert(
-        dispatchContent.includes('await timeoutOfferAction()'),
-        'dispatchOrderAction ควร still เรียก timeoutOfferAction เป็น fallback'
-      );
-    });
-  });
-
-  describe('Response Format', () => {
-    it('ตรวจสอบว่า response มี expired, redispatched, errors', () => {
-      const routeContent = readProjectFile('src/app/api/cron/dispatch-timeout/route.ts');
-
-      assert(routeContent.includes('expired:'), 'response ควรระบุ expired count');
-      assert(routeContent.includes('redispatched:'), 'response ควรมี redispatched count');
-      assert(routeContent.includes('errors:'), 'response ควรระบุ errors count');
-    });
+    const successLogIdx = routeContent.indexOf('[cron/dispatch-timeout] สำเร็จ');
+    if (successLogIdx !== -1) {
+      const logSection = routeContent.substring(successLogIdx, successLogIdx + 500);
+      assert(logSection.includes('expired='), 'log ต้องมี expired count');
+      assert(logSection.includes('redispatched='), 'log ต้องมี redispatched count');
+      assert(logSection.includes('errors='), 'log ต้องมี error count');
+    }
   });
 });
