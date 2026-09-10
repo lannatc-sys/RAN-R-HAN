@@ -6,7 +6,7 @@ import {
   isPodRequired,
   gpsPingIntervalMs,
   offerSecondsLeft,
-  splitDeliveryFee,
+  estimateRiderPayout,
   mapsNavigationUrl,
   GPS_PING_IDLE_MS,
   GPS_PING_ACTIVE_MS,
@@ -90,24 +90,19 @@ describe('⏱️ Rider App — Offer Countdown', () => {
   });
 });
 
-describe('💰 Rider App — Delivery Fee Split (80/20)', () => {
-  test('แบ่งค่าจัดส่ง 80/20 และรวมกันต้องเท่ายอดเดิมเสมอ', () => {
-    const { riderPayout, riderPool } = splitDeliveryFee(25);
-    assert.equal(riderPayout, 20);
-    assert.equal(riderPool, 5);
-    assert.equal(riderPayout + riderPool, 25);
+describe('💰 Rider App — Locked Phase-1 Base Rate', () => {
+  test('ระยะทางไม่เกิน 5 กม. จ่ายไรเดอร์ 15 บาท', () => {
+    assert.deepEqual(estimateRiderPayout(5), { riderPayout: 15, needsReview: false });
+    assert.deepEqual(estimateRiderPayout(2.5), { riderPayout: 15, needsReview: false });
   });
 
-  test('เศษทศนิยมต้องไม่ทำให้ยอดรวมเพี้ยน', () => {
-    const fee = 33.33;
-    const { riderPayout, riderPool } = splitDeliveryFee(fee);
-    assert.equal(Math.round((riderPayout + riderPool) * 100) / 100, fee);
+  test('ระยะเกิน 5 กม. แสดงขั้นต่ำ 15 บาทและบังคับ review', () => {
+    assert.deepEqual(estimateRiderPayout(7), { riderPayout: 15, needsReview: true });
   });
 
-  test('ค่าจัดส่ง 0 หรือค่าผิดปกติ = 0 ทั้งคู่', () => {
-    assert.deepEqual(splitDeliveryFee(0), { riderPayout: 0, riderPool: 0 });
-    assert.deepEqual(splitDeliveryFee(-10), { riderPayout: 0, riderPool: 0 });
-    assert.deepEqual(splitDeliveryFee(NaN), { riderPayout: 0, riderPool: 0 });
+  test('ไม่มีระยะทางต้องบังคับ review แทนการเดาสูตร', () => {
+    assert.deepEqual(estimateRiderPayout(null), { riderPayout: 15, needsReview: true });
+    assert.deepEqual(estimateRiderPayout(NaN), { riderPayout: 15, needsReview: true });
   });
 });
 

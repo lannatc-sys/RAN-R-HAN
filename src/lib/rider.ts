@@ -83,19 +83,24 @@ export function offerSecondsLeft(timeoutAtIso: string | null, nowMs: number = Da
   return diff <= 0 ? 0 : Math.ceil(diff / 1000);
 }
 
-/**
- * แบ่งค่าจัดส่งเป็นค่าตอบแทนไรเดอร์ / กองกลาง Rider Pool (§11)
- * Phase 1 ล็อกไว้ที่ 80 / 20 — ปัดทศนิยม 2 ตำแหน่ง และรับประกันว่ารวมกันเท่าเดิมเสมอ
- */
-export const RIDER_PAYOUT_RATIO = 0.8;
+/** Phase-1 locked rate: 15 baht for the first 5 km (§11.1). */
+export const RIDER_BASE_PAYOUT = 15;
+export const RIDER_BASE_DISTANCE_KM = 5;
 
-export function splitDeliveryFee(deliveryFee: number): { riderPayout: number; riderPool: number } {
-  if (!Number.isFinite(deliveryFee) || deliveryFee <= 0) {
-    return { riderPayout: 0, riderPool: 0 };
-  }
-  const riderPayout = Math.round(deliveryFee * RIDER_PAYOUT_RATIO * 100) / 100;
-  const riderPool = Math.round((deliveryFee - riderPayout) * 100) / 100;
-  return { riderPayout, riderPool };
+/**
+ * Returns the guaranteed Phase-1 base payout. Distances above 5 km (or missing
+ * distance data) require settlement review because the extra-km rate is not yet
+ * approved; the client must never invent a percentage split.
+ */
+export function estimateRiderPayout(distanceKm: number | null | undefined): {
+  riderPayout: number;
+  needsReview: boolean;
+} {
+  const distanceKnown = typeof distanceKm === 'number' && Number.isFinite(distanceKm);
+  return {
+    riderPayout: RIDER_BASE_PAYOUT,
+    needsReview: !distanceKnown || distanceKm > RIDER_BASE_DISTANCE_KM,
+  };
 }
 
 /** ลิงก์นำทาง Google Maps (ฟรี ไม่ต้องใช้ API Key) */

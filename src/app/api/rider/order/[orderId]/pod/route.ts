@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 const VALID_POD_EVENT_TYPES = ['delivered', 'unreachable_drop', 'picked_up'] as const;
 type PodEventType = typeof VALID_POD_EVENT_TYPES[number];
@@ -39,7 +40,6 @@ export async function POST(
     const eventType = formData.get('event_type') as PodEventType | null;
     const gpsLatStr = formData.get('gps_lat') as string | null;
     const gpsLngStr = formData.get('gps_lng') as string | null;
-    const deliveryEventId = formData.get('delivery_event_id') as string | null;
 
     // 3. Validate
     if (!file) {
@@ -106,8 +106,9 @@ export async function POST(
     const timestamp = serverReceivedAt.getTime();
     const storagePath = `pod/${order.shop_id}/${orderId}/${timestamp}_${eventType}.${ext}`;
 
+    const adminClient = createAdminClient();
     const fileBuffer = await file.arrayBuffer();
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await adminClient.storage
       .from('pod-uploads')
       .upload(storagePath, fileBuffer, {
         contentType: file.type,
@@ -123,13 +124,14 @@ export async function POST(
     }
 
     // 7. บันทึก Metadata ใน pod_uploads (พร้อม POD Watermark §9.3)
-    const { data: podRecord, error: insertError } = await supabase
+    const { data: podRecord, error: insertError } = await adminClient
       .from('pod_uploads')
       .insert({
         order_id: orderId,
         rider_id: rider.id,
         shop_id: order.shop_id,
-        delivery_event_id: deliveryEventId ?? null,
+        // Always unclaimed here. The final event RPC locks and claims this row.
+        delivery_event_id: null,
         storage_path: storagePath,
         event_type: eventType,
         // Server Timestamp — Source of Truth (ไม่ใช้นาฬิกามือถือ §9.3)
@@ -143,7 +145,7 @@ export async function POST(
     if (insertError || !podRecord) {
       console.error('[pod/upload] Metadata insert error:', insertError);
       // ลบไฟล์ที่อัปโหลดไปแล้วถ้า metadata บันทึกไม่ได้
-      await supabase.storage.from('pod-uploads').remove([storagePath]);
+      await adminClient.storage.from('pod-uploads').remove([storagePath]);
       return NextResponse.json(
         { error: 'ไม่สามารถบันทึกข้อมูล POD ได้' },
         { status: 500 }

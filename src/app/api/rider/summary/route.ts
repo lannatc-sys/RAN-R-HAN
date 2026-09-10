@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { splitDeliveryFee } from '@/lib/rider';
+import { estimateRiderPayout } from '@/lib/rider';
 
 /**
  * GET /api/rider/summary
@@ -38,14 +38,14 @@ export async function GET(_req: NextRequest) {
 
     const { data: deliveredOrders } = await supabase
       .from('orders')
-      .select('id, delivery_fee, updated_at')
+      .select('id, estimated_distance_km, updated_at')
       .eq('assigned_rider_id', rider.id)
       .eq('dispatch_status', 'delivered')
       .gte('updated_at', startIso);
 
     const list = deliveredOrders ?? [];
     const estimatedPayout = list.reduce(
-      (sum, o) => sum + splitDeliveryFee(Number(o.delivery_fee ?? 0)).riderPayout,
+      (sum, o) => sum + estimateRiderPayout(o.estimated_distance_km).riderPayout,
       0
     );
 

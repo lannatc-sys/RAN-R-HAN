@@ -12,7 +12,7 @@ import {
   mapsNavigationUrl,
   nextRiderEvent,
   offerSecondsLeft,
-  splitDeliveryFee,
+  estimateRiderPayout,
   type DeliveryEventType,
 } from '@/lib/rider';
 import {
@@ -42,6 +42,7 @@ interface ActiveOrder {
   order_no: number | string | null;
   total: number | null;
   delivery_fee: number | null;
+  estimated_distance_km: number | null;
   delivery_address: string | null;
   delivery_lat: number | null;
   delivery_lng: number | null;
@@ -497,7 +498,7 @@ export function RiderClient({
             <Row label={rt.address} value={offer.order?.delivery_address ?? '-'} />
             <Row
               label={rt.yourPayout}
-              value={`${splitDeliveryFee(Number(offer.order?.delivery_fee ?? 0)).riderPayout.toLocaleString()} ${rt.baht}`}
+              value={`${estimateRiderPayout(offer.order?.estimated_distance_km).riderPayout.toLocaleString()} ${rt.baht}`}
             />
           </dl>
           <div className="grid grid-cols-2 gap-2">
@@ -588,7 +589,7 @@ function JobCard({
   onEvent: (evt: DeliveryEventType) => void;
 }) {
   const next = nextRiderEvent(order.last_event);
-  const payout = splitDeliveryFee(Number(order.delivery_fee ?? 0)).riderPayout;
+  const payout = estimateRiderPayout(order.estimated_distance_km).riderPayout;
   const shopUrl = mapsNavigationUrl(shop?.shop_lat, shop?.shop_lng, shop?.address ?? undefined);
   const customerUrl = mapsNavigationUrl(order.delivery_lat, order.delivery_lng, order.delivery_address ?? undefined);
 

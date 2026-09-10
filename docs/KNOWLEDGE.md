@@ -216,3 +216,9 @@ SUPER_ADMIN_USER=             ← email superadmin (comma-separated)
 - **SECURITY DEFINER = ต้องเช็คสิทธิ์เอง** — ฟังก์ชันที่คืนพิกัดไรเดอร์ต้องมี `has_shop_access()` เสมอ (ยกเว้นเรียกด้วย service_role) ไม่งั้นข้อมูลตำแหน่งคนรั่วข้ามร้าน
 - **สรุปยอดรายวันต้องใช้เวลาไทย** — `date(updated_at)` เป็น UTC ทำให้ยอดของช่วง 00:00–07:00 น. ตกไปวันก่อนหน้า ต้องใช้ `(updated_at at time zone 'Asia/Bangkok')::date`
 - **ลำดับที่ปลอดภัยของการปิดงานไรเดอร์คือ อัปโหลด POD ก่อน แล้วค่อยบันทึก Event** — ถ้าบันทึก Event ก่อนแล้วอัปโหลดพลาด จะได้ออเดอร์ที่ระบุว่า "ส่งสำเร็จ" โดยไม่มีหลักฐานภาพ
+- **ลำดับอย่างเดียวไม่พอ: Event + POD claim + Order status ต้องอยู่ใน Database Transaction เดียว** — ใช้ `finalize_rider_delivery_event()` พร้อม row lock; ห้ามแยกเป็นหลายคำสั่งจาก API
+- **Rider ห้าม UPDATE `dispatch_offers` โดยตรงแม้ row เป็นของตัวเอง** — การ Accept/Reject ต้องผ่าน `respond_to_dispatch_offer()` เพื่อบังคับ Timeout, Work Session, Capacity และ Double-assignment guard แบบ atomic
+- **การเปลี่ยนสถานะที่กระทบ Capacity/กะงานของ Rider ต้องใช้ rider-scoped transaction advisory lock เดียวกัน** — `respond_to_dispatch_offer()` และ `close_rider_work_session()` ล็อกด้วย Rider ID ก่อนล็อกแถว เพื่อ serialize การ Accept หลายรายการและการ Accept ที่ชนกับ Close Session โดยไม่เกิด lock-order inversion
+- **Close Work Session ต้องเป็น Transaction** — ปิด Session, ลบ `rider_current_locations` และ Reject Offer ค้างผ่าน `close_rider_work_session()` เท่านั้น
+- **ไฟล์ POD เป็นข้อมูลส่วนบุคคลที่เข้าถึงผ่าน Platform API เท่านั้น** — private bucket ต้องไม่มี direct SELECT policy สำหรับ Rider/Staff; server ตรวจสิทธิ์ก่อนอ่านเสมอ
+- **Phase-1 Rider Rate ห้ามใช้สูตร 80/20** — Base Rate ที่ล็อกคือ 15 บาทสำหรับ 5 กม.แรก (ร้าน 7.50 + ลูกค้า 7.50); ระยะเกิน 5 กม.หรือไม่มีข้อมูลระยะทางต้อง Flag `PENDING_RATE_CARD` เพื่อให้คนตรวจ ห้ามเดาอัตราเพิ่มเอง

@@ -1,99 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+interface CloseSessionResult {
+  session_id: string;
+  closed_at: string;
+}
+
 /**
  * POST /api/rider/session/close
- * ไรเดอร์กด "Close System" เพื่อปิด Work Session ที่เปิดอยู่
- * GPS จะหยุดส่งทันที (ตาม PDPA - Privacy by Design)
- *
- * Body: { session_id?: string } (ถ้าไม่ระบุจะ auto-close session ล่าสุดที่ยังเปิดอยู่)
- * Returns: { session_id: string, closed_at: string }
+ * Session closure, current-location deletion and pending-offer rejection happen
+ * atomically in the database. Success is returned only after all three commit.
  */
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
-
-    // 1. ตรวจ Authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json().catch(() => ({}));
-    const { session_id } = body;
+    const sessionId = typeof body.session_id === 'string' ? body.session_id : null;
 
-    // 2. หา rider record ของ user นี้
-    const { data: rider, error: riderError } = await supabase
-      .from('riders')
-      .select('id')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (riderError || !rider) {
-      return NextResponse.json(
-        { error: 'ไม่พบข้อมูลไรเดอร์' },
-        { status: 404 }
-      );
-    }
-
-    // 3. หา session ที่จะปิด
-    let sessionQuery = supabase
-      .from('rider_work_sessions')
-      .select('id')
-      .eq('rider_id', rider.id)
-      .eq('status', 'open');
-
-    if (session_id) {
-      sessionQuery = sessionQuery.eq('id', session_id);
-    }
-
-    const { data: session } = await sessionQuery.maybeSingle();
-
-    if (!session) {
-      return NextResponse.json(
-        { error: 'ไม่มี Work Session ที่เปิดอยู่' },
-        { status: 404 }
-      );
-    }
-
-    // 4. ปิด session + ลบพิกัดปัจจุบัน (PDPA: หยุดเก็บ GPS เมื่อปิด session)
-    const closedAt = new Date().toISOString();
-
-    // ปิดงาน = ปฏิเสธ Offer ที่ยังค้างอยู่ทั้งหมด เพื่อให้ Dispatch หาไรเดอร์คนถัดไปทันที (§6)
-    await supabase
-      .from('dispatch_offers')
-      .update({ status: 'rejected', responded_at: closedAt })
-      .eq('rider_id', rider.id)
-      .eq('status', 'offered');
-
-    const [sessionUpdate, locationDelete] = await Promise.allSettled([
-      supabase
-        .from('rider_work_sessions')
-        .update({ status: 'closed', closed_at: closedAt })
-        .eq('id', session.id),
-      supabase
-        .from('rider_current_locations')
-        .delete()
-        .eq('rider_id', rider.id),
-    ]);
-
-    if (sessionUpdate.status === 'rejected') {
-      console.error('[session/close] Update error:', sessionUpdate.reason);
-      return NextResponse.json(
-        { error: 'ไม่สามารถปิด Work Session ได้' },
-        { status: 500 }
-      );
-    }
-
-    // location delete failure is non-critical — log only
-    if (locationDelete.status === 'rejected') {
-      console.warn('[session/close] Location delete failed (non-critical):', locationDelete.reason);
-    }
-
-    return NextResponse.json({
-      session_id: session.id,
-      closed_at: closedAt,
+    const { data, error } = await supabase.rpc('close_rider_work_session', {
+      p_session_id: sessionId,
     });
+
+    if (error) {
+      const notFound = error.message.includes('OPEN_WORK_SESSION_NOT_FOUND');
+      console.error('[session/close] RPC error:', error.code);
+      return NextResponse.json(
+        { error: notFound ? 'ไม่มี Work Session ที่เปิดอยู่' : 'ไม่สามารถปิด Work Session ได้' },
+        { status: notFound ? 404 : 500 }
+      );
+    }
+
+    return NextResponse.json(data as CloseSessionResult);
   } catch (err) {
     console.error('[session/close] Unexpected error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

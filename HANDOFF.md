@@ -1,8 +1,8 @@
 # 🤝 Project Handoff & Status Log (RAN-R-HAN)
 
 > **บันทึกสถานะการส่งมอบงาน (Handoff Document)**  
-> **วันเวลาที่อัปเดตล่าสุด:** 2026-09-11 01:20 (GMT+7)  
-> **สถานะภาพรวม:** ✅ พร้อมใช้งาน (Production Ready / Quality Gate Passed 100%)  
+> **วันเวลาที่อัปเดตล่าสุด:** 2026-09-11 (GMT+7) — Rider P0 hardening
+> **สถานะภาพรวม:** 🟡 Quality Gate ผ่าน; Rider P0 แก้แล้ว แต่ยังไม่ Production Ready จนกว่าจะปิด P1 และ Legal/Financial Gates ใน §17
 > *เอกสารฉบับนี้ถูกซิงก์กับ [docs/HANDOFF.md](file:///d:/system%20make/Ran-R-HAN/docs/HANDOFF.md)*
 
 ---
@@ -94,23 +94,30 @@
   3. **ระบบภาษา (i18n):**
      - เพิ่มคีย์แปลภาษา TH/EN สำหรับ UI ตรวจสลิปใน [`src/lib/i18n/translations.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/i18n/translations.ts)
 
-### G. ระบบไรเดอร์และการจ่ายงาน (Rider & Dispatch System) — *เสร็จสิ้น Phase 1 🎯*
+### G. ระบบไรเดอร์และการจ่ายงาน (Rider & Dispatch System) — *P0 Hardening เสร็จแล้ว; ยังไม่ Production Ready*
 - **วัตถุประสงค์:** เปิดใช้ระบบส่งอาหารด้วยไรเดอร์ตามเอกสาร [docs/03-rider-system-architecture.md](file:///d:/system%20make/Ran-R-HAN/docs/03-rider-system-architecture.md)
 - **Database (รันลง Supabase เรียบร้อยแล้ว):**
   - เปิด Extension `postgis` (schema `extensions`) และสร้าง 9 ตารางหลัก: `riders`, `rider_work_sessions`, `rider_current_locations` (PostGIS + GiST index), `dispatch_offers`, `delivery_events`, `pod_uploads`, `daily_settlements`, `settlement_line_items`, `rider_pool_ledger`
   - เพิ่มคอลัมน์ในตาราง `orders`: `assigned_rider_id`, `dispatch_status`, `delivery_fee`, `estimated_distance_km`
   - เพิ่มคอลัมน์พิกัดร้าน `shops.shop_lat` / `shops.shop_lng` (จุดศูนย์กลางค้นหาไรเดอร์)
   - สร้าง Storage bucket `pod-uploads` แบบ Private พร้อม RLS (ห้าม Public Link ตาม §9.2)
-  - Migration: `20260911000001` ถึง `20260911000004`
+  - Migration: `20260911000001` ถึง `20260911000006` (`00005`–`00006` P0 hardening รันบน Supabase แล้ว)
 - **บั๊กที่ตรวจพบและแก้ก่อนรัน (Review Gate):**
   1. Migration เรียก `set_updated_at()` ที่ไม่มีจริงในโปรเจกต์ → แก้เป็น `handle_updated_at()`
   2. RPC ตั้ง `search_path = public` แต่ PostGIS อยู่ schema `extensions` → ระบบหาไรเดอร์จะพังทุกครั้ง → แก้เป็น `public, extensions`
   3. `find_available_riders` เป็น SECURITY DEFINER แต่ไม่เช็คสิทธิ์ร้าน → ใครก็ดูพิกัดไรเดอร์ร้านอื่นได้ → เพิ่มเงื่อนไข `has_shop_access()` (ยกเว้น service_role)
   4. `p_exclude_rider_ids` เป็น NULL ทำให้ query ไม่คืนไรเดอร์เลย → ใส่ `coalesce(..., '{}')`
   5. สรุปยอดรายวันใช้เวลา UTC → แก้เป็นเวลาไทย `Asia/Bangkok`
-  6. RLS เดิมให้ไรเดอร์ `for all` บน `dispatch_offers` (แอบสร้าง/แก้ offer เองได้) → จำกัดเหลือ `select` + `update` เฉพาะของตัวเอง
+  6. RLS เดิมยังให้ไรเดอร์ `update` ทุกคอลัมน์ใน `dispatch_offers` → ถอนสิทธิ์เขียนตรงทั้งหมดและบังคับผ่าน transactional RPC
   7. Dispatch ค้นหาไรเดอร์รอบ "พิกัดลูกค้า" แทน "พิกัดร้าน" → แก้ให้ยึดพิกัดร้านเป็นจุดรับอาหาร
   8. Race condition: `.update()` ของ supabase-js ไม่ error เมื่อไม่โดนแถวไหน → เพิ่ม `.select()` ตรวจจำนวนแถว (Compare-and-Swap) ทั้งตอนรับงาน/ปฏิเสธ/หมดเวลา
+- **P0 hardening (`20260911000005`–`20260911000006`):**
+  - `respond_to_dispatch_offer()` ล็อกระดับไรเดอร์ + Offer + Order, ตรวจ Timeout/Work Session/ความจุ 2 งาน และ Assign แบบ atomic; การรับหลาย Offer พร้อมกันจะถูก serialize ไม่ให้เกิน Capacity
+  - `close_rider_work_session()` ใช้ล็อกระดับไรเดอร์ชุดเดียวกัน จึงไม่ชนกับการ Accept Offer ที่เกิดพร้อมกัน
+  - `close_rider_work_session()` ปิด Session + ลบ GPS + ยกเลิก Offer ใน transaction เดียว
+  - `finalize_rider_delivery_event()` ตรวจ State + lock/claim POD + ปิด Order ใน transaction เดียว ป้องกัน POD ซ้ำ
+  - ถอน direct write ของ Rider ต่อ Offer/Event/POD metadata และถอน direct read ของไฟล์ POD
+  - จำกัด internal `SECURITY DEFINER` RPC ให้ `service_role` และแทนสูตร 80/20 ด้วย Base Rate 15 บาท/5 กม.; ระยะเกินหรือไม่ทราบถูก Flag รอ Review
 - **หน้าไรเดอร์ (Rider PWA) — ของใหม่รอบนี้:**
   - [`/rider/login`](file:///d:/system%20make/Ran-R-HAN/src/app/rider/login/page.tsx) — เข้าสู่ระบบสำหรับไรเดอร์
   - [`/rider`](file:///d:/system%20make/Ran-R-HAN/src/app/rider/RiderClient.tsx) — ปุ่มเริ่มงาน/ปิดงาน, ส่งพิกัด GPS อัตโนมัติ (Idle 60 วิ / ระหว่างส่ง 15 วิ, หยุดทันทีเมื่อปิดงานตาม PDPA), การ์ดงานใหม่พร้อมนับถอยหลัง, ปุ่มไล่สถานะงาน 5 ขั้น, ปุ่มนำทาง Google Maps และโทรหาลูกค้า, แนบภาพ POD, สรุปงาน/ค่าตอบแทนวันนี้ — รองรับ TH/EN, Dark Mode และมือถือตั้งแต่ 320px
@@ -128,7 +135,7 @@
 
 | การทดสอบ | คำสั่ง | สถานะ | หมายเหตุ |
 | :--- | :--- | :---: | :--- |
-| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 111/111 tests ผ่านทั้งหมด (100%) รวม test/rider.test.ts และ test/rider-app.test.ts |
+| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 117/117 tests ผ่านทั้งหมด รวม Rider P0 security regression tests 6 รายการ |
 | **Integration & Smoke** | `pnpm test` | 🟢 PASS | ครอบคลุม Auth, Orders, Payment, KDS, Delivery, Legal, Telegram & Rider |
 | **Next.js Production Build** | `pnpm build` | 🟢 PASS | ผ่านครบ 35/35 routes ไม่มี Error (รวม /rider และ /rider/login) |
 | **TypeScript Strict** | `npx tsc --noEmit` | 🟢 PASS | ไม่มี Error |
@@ -161,4 +168,3 @@
 5. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
 6. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
 7. **Blocker ก่อน Production ของระบบไรเดอร์ (§17):** โครงสร้างกองกลาง Rider Pool, สัญญา Rider Agreement, ผู้ดูแลบัญชีกลาง และเรื่องภาษี ยังต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดใช้จริง
-

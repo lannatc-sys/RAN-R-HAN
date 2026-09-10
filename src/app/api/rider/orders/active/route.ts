@@ -28,7 +28,7 @@ export async function GET(_req: NextRequest) {
 
     const { data: orders } = await supabase
       .from('orders')
-      .select('id, order_no, status, dispatch_status, total, delivery_fee, delivery_address, delivery_lat, delivery_lng, customer_name, customer_phone, note, created_at')
+      .select('id, order_no, status, dispatch_status, total, delivery_fee, estimated_distance_km, delivery_address, delivery_lat, delivery_lng, customer_name, customer_phone, note, created_at')
       .eq('assigned_rider_id', rider.id)
       .in('dispatch_status', ['assigned', 'in_transit'])
       .order('created_at', { ascending: true })
