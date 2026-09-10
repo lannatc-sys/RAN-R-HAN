@@ -347,7 +347,7 @@ export async function timeoutOfferAction(): Promise<{ timed_out: number; redispa
   const errors = result.error_count || 0;
 
   console.log(
-    `[dispatch/cron] expire_dispatch_offers 결과: expired=${timed_out}, redispatched=${redispatched}, errors=${errors}, run_at=${result.run_at}`
+    `[dispatch/cron] expire_dispatch_offers result: expired=${timed_out}, redispatched=${redispatched}, errors=${errors}, run_at=${result.run_at}`
   );
 
   return { timed_out, redispatched, errors };
