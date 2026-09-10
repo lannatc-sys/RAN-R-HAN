@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { OrdersKDSClient } from './OrdersKDSClient';
 import { Order, Shop } from '@/lib/types';
 import { redirect } from 'next/navigation';
+import { checkIsSuperadmin } from '@/app/actions/superadmin';
 
 export default async function AdminOrdersPage() {
   const supabase = await createClient();
@@ -14,8 +15,16 @@ export default async function AdminOrdersPage() {
   const cookieStore = await cookies();
   const impersonatedShopId = cookieStore.get('impersonated_shop_id')?.value;
 
-  let shopId: string | null = impersonatedShopId || null;
-  const isImpersonated = !!impersonatedShopId;
+  let shopId: string | null = null;
+  let isImpersonated = false;
+
+  if (impersonatedShopId) {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (isSuperadmin) {
+      shopId = impersonatedShopId;
+      isImpersonated = true;
+    }
+  }
 
   if (!shopId && user) {
     const { data: userProfile } = await admin
@@ -24,12 +33,6 @@ export default async function AdminOrdersPage() {
       .eq('id', user.id)
       .single();
     shopId = userProfile?.shop_id || null;
-  }
-
-  // Fallback to first shop for dev review if not logged in
-  if (!shopId) {
-    const { data: defaultShop } = await admin.from('shops').select('id').limit(1).maybeSingle();
-    shopId = defaultShop?.id || null;
   }
 
   if (!shopId) {

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { AdminNavbar } from '@/components/admin/AdminNavbar';
-import { stopImpersonatingAction } from '@/app/actions/superadmin';
+import { stopImpersonatingAction, checkIsSuperadmin } from '@/app/actions/superadmin';
 import { Shop } from '@/lib/types';
 
 export default async function AdminLayout({
@@ -22,15 +22,19 @@ export default async function AdminLayout({
   const impersonatedShopId = cookieStore.get('impersonated_shop_id')?.value;
 
   if (impersonatedShopId) {
-    const { data: impShop } = await admin
-      .from('shops')
-      .select('*')
-      .eq('id', impersonatedShopId)
-      .maybeSingle();
+    const { isSuperadmin } = await checkIsSuperadmin();
 
-    if (impShop) {
-      currentShop = impShop as Shop;
-      isImpersonated = true;
+    if (isSuperadmin) {
+      const { data: impShop } = await admin
+        .from('shops')
+        .select('*')
+        .eq('id', impersonatedShopId)
+        .maybeSingle();
+
+      if (impShop) {
+        currentShop = impShop as Shop;
+        isImpersonated = true;
+      }
     }
   }
 
@@ -52,20 +56,8 @@ export default async function AdminLayout({
     }
   }
 
-  // หากยังไม่ได้ login ให้ fallback ไปยังร้านตัวอย่างแรกสำหรับ dev testing หรือ redirect
   if (!currentShop) {
-    const { data: defaultShop } = await admin
-      .from('shops')
-      .select('*')
-      .eq('is_active', true)
-      .limit(1)
-      .maybeSingle();
-
-    if (defaultShop) {
-      currentShop = defaultShop as Shop;
-    } else {
-      redirect('/login');
-    }
+    redirect('/login');
   }
 
   const hasSupportConsent = Boolean(
