@@ -51,6 +51,33 @@ async function runDatabaseSetup() {
       console.log('   [SUCCESS] Pickup MVP schema, kds_pin, credentials, and RPC applied.\n');
     }
 
+    // 1.2 Run delivery_system.sql (Zone, Delivery Trips, Preorder)
+    const deliveryPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260910000001_delivery_system.sql');
+    if (fs.existsSync(deliveryPath)) {
+      console.log('1.2 Executing supabase/migrations/20260910000001_delivery_system.sql...');
+      const deliverySql = fs.readFileSync(deliveryPath, 'utf-8');
+      await client.query(deliverySql);
+      console.log('   [SUCCESS] Delivery & Preorder schema and default locations applied.\n');
+    }
+
+    // 1.3 Run legal_pdpa_compliance.sql (Consent logs, Audit logs, Data Subject Requests)
+    const legalPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260910000002_legal_pdpa_compliance.sql');
+    if (fs.existsSync(legalPath)) {
+      console.log('1.3 Executing supabase/migrations/20260910000002_legal_pdpa_compliance.sql...');
+      const legalSql = fs.readFileSync(legalPath, 'utf-8');
+      await client.query(legalSql);
+      console.log('   [SUCCESS] Legal & PDPA compliance schema applied.\n');
+    }
+
+    // 1.4 Run telegram_notifications.sql (Telegram link tokens, chat id, shop settings)
+    const telegramPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260910000003_telegram_notifications.sql');
+    if (fs.existsSync(telegramPath)) {
+      console.log('1.4 Executing supabase/migrations/20260910000003_telegram_notifications.sql...');
+      const telegramSql = fs.readFileSync(telegramPath, 'utf-8');
+      await client.query(telegramSql);
+      console.log('   [SUCCESS] Telegram notifications & link tokens schema applied.\n');
+    }
+
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');
     const seedPath = path.join(__dirname, '..', 'seed.sql');

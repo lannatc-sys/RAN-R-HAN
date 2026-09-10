@@ -129,9 +129,9 @@ export default async function HomePage() {
                   className="flex items-center justify-between w-full px-4 py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-2xl shadow-md shadow-amber-600/20 transition-all group min-h-[48px]"
                 >
                   <div className="flex items-center gap-3 text-left min-w-0">
-                    {shop.logo ? (
+                    {shop.logo_url || shop.logo ? (
                       <img
-                        src={shop.logo}
+                        src={shop.logo_url || shop.logo || ''}
                         alt={shop.name}
                         className="w-9 h-9 rounded-xl object-cover bg-white/20 shrink-0"
                       />

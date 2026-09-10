@@ -76,7 +76,6 @@ export function PinModal({
     const targetPin = expectedPin || '0000';
     if (inputPin === targetPin) {
       onSuccess();
-      onClose();
     } else {
       setIsShaking(true);
       setError('รหัส PIN ไม่ถูกต้อง');

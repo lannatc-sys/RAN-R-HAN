@@ -12,7 +12,8 @@ export interface Shop {
   id: string;
   slug: string;
   name: string;
-  logo: string | null;
+  logo?: string | null;
+  logo_url?: string | null;
   phone?: string | null;
   address?: string | null;
   promptpay_id: string | null;
@@ -32,6 +33,7 @@ export interface Shop {
   allow_takeaway?: boolean;
   allow_delivery?: boolean;
   is_delivery_enabled?: boolean;
+  telegram_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -132,6 +134,7 @@ export interface Order {
   delivery_lat?: number | null;
   delivery_lng?: number | null;
   pickup_at: string | null;
+  telegram_chat_id?: string | null;
   created_at: string;
   updated_at: string;
   order_items?: OrderItem[];
@@ -165,3 +168,153 @@ export interface PlatformStats {
   totalOrders: number;
   todayOrders: number;
 }
+
+// =============================================================================
+// Delivery & Preorder Types
+// =============================================================================
+
+export interface DeliveryLocation {
+  id: string;
+  shop_id: string | null;
+  name: string;
+  zone_name: string;
+  lat: number;
+  lng: number;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type DeliveryTripStatus = 'draft' | 'in_transit' | 'completed' | 'cancelled';
+export type DeliveryItemStatus = 'pending' | 'delivered' | 'failed';
+
+export interface DeliveryTrip {
+  id: string;
+  shop_id: string;
+  trip_name: string;
+  trip_date: string;
+  cutoff_at: string | null;
+  delivery_time_window: string | null;
+  status: DeliveryTripStatus;
+  created_at: string;
+  updated_at: string;
+  items_count?: number;
+  delivered_count?: number;
+}
+
+export interface DeliveryTripItem {
+  id: string;
+  trip_id: string;
+  location_id: string | null;
+  recipient_name: string;
+  recipient_phone: string;
+  location_note: string | null;
+  items_summary: string;
+  order_reference_id: string | null;
+  delivery_status: DeliveryItemStatus;
+  delivered_at: string | null;
+  created_at: string;
+  location?: DeliveryLocation | null;
+}
+
+export type PreorderRoundStatus = 'open' | 'closed' | 'completed';
+
+export interface PreorderRound {
+  id: string;
+  shop_id: string;
+  title: string;
+  cutoff_at: string;
+  delivery_date: string;
+  delivery_time_window: string | null;
+  status: PreorderRoundStatus;
+  created_at: string;
+  updated_at: string;
+  items_count?: number;
+  total_revenue?: number;
+}
+
+export interface PreorderItem {
+  id: string;
+  round_id: string;
+  location_id: string | null;
+  recipient_name: string;
+  recipient_phone: string;
+  location_note: string | null;
+  items_summary: string;
+  total_amount: number;
+  payment_method: 'promptpay' | 'cash';
+  payment_status: 'pending' | 'verified';
+  raw_input_text: string | null;
+  created_at: string;
+  location?: DeliveryLocation | null;
+}
+
+export interface ParsedCommentOrder {
+  recipient_name: string;
+  recipient_phone: string;
+  location_id: string | null;
+  location_name: string | null;
+  location_note: string | null;
+  items_summary: string;
+  total_amount: number;
+  raw_text: string;
+}
+
+// ==============================================================================
+// 7. LEGAL & PDPA COMPLIANCE TYPES (WP-19 to WP-23)
+// ==============================================================================
+
+export type ConsentType = 'terms_and_privacy' | 'gps_location' | 'marketing';
+
+export interface ConsentLog {
+  id: string;
+  shop_id?: string | null;
+  order_id?: string | null;
+  customer_phone?: string | null;
+  consent_type: ConsentType;
+  policy_version: string;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  accepted_at: string;
+}
+
+export interface AuditLog {
+  id: string;
+  shop_id?: string | null;
+  user_id?: string | null;
+  action: string;
+  entity_type: string;
+  entity_id?: string | null;
+  details?: Record<string, any> | null;
+  ip_address?: string | null;
+  created_at: string;
+}
+
+export type DataSubjectRequestType =
+  | 'access'
+  | 'copy'
+  | 'correct'
+  | 'delete'
+  | 'suspend'
+  | 'portability'
+  | 'withdraw'
+  | 'object';
+
+export type DataSubjectRequestStatus = 'pending' | 'in_progress' | 'completed' | 'rejected';
+
+export interface DataSubjectRequest {
+  id: string;
+  shop_id?: string | null;
+  requester_name: string;
+  requester_phone: string;
+  requester_email?: string | null;
+  request_type: DataSubjectRequestType;
+  details?: string | null;
+  status: DataSubjectRequestStatus;
+  admin_notes?: string | null;
+  due_date: string;
+  completed_at?: string | null;
+  created_at: string;
+}
+
+

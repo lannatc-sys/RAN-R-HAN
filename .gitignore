@@ -28,3 +28,5 @@ stitch_thai_pos.zip
 
 .vercel
 .env*
+records/
+.skillclaw/

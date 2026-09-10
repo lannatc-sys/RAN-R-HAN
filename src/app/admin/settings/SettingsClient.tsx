@@ -11,6 +11,10 @@ import {
   revokeSupportAccessAction,
   updateFulfillmentChannelsAction,
 } from '@/app/actions/settings';
+import {
+  updateShopTelegramSettingsAction,
+  sendTelegramTestAction,
+} from '@/app/actions/telegram';
 import { getPlanEntitlements } from '@/lib/plans';
 import { PinModal } from '@/components/admin/PinModal';
 import {
@@ -32,6 +36,9 @@ import {
   ShoppingBag,
   Bike,
   Sparkles,
+  Send,
+  MessageSquare,
+  ExternalLink,
 } from 'lucide-react';
 
 interface SettingsClientProps {
@@ -270,6 +277,49 @@ export function SettingsClient({
       setTimeout(() => setPinSuccess(false), 3000);
     } else {
       setPinError(res.error || 'ไม่สามารถเปลี่ยนรหัส PIN ได้');
+    }
+  };
+
+  // Telegram Settings State
+  const [telegramEnabled, setTelegramEnabled] = useState(shop.telegram_enabled !== false);
+  const [isUpdatingTelegram, setIsUpdatingTelegram] = useState(false);
+  const [telegramSuccess, setTelegramSuccess] = useState<string | null>(null);
+  const [telegramError, setTelegramError] = useState<string | null>(null);
+  const [testChatId, setTestChatId] = useState('');
+  const [isTestingTelegram, setIsTestingTelegram] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const handleToggleTelegram = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdatingTelegram(true);
+    setTelegramSuccess(null);
+    setTelegramError(null);
+
+    const res = await updateShopTelegramSettingsAction(shop.id, telegramEnabled);
+    setIsUpdatingTelegram(false);
+
+    if (res.success) {
+      setTelegramSuccess('บันทึกการตั้งค่าการแจ้งเตือน Telegram เรียบร้อยแล้ว');
+      setTimeout(() => setTelegramSuccess(null), 3000);
+    } else {
+      setTelegramError(res.error || 'ไม่สามารถบันทึกการตั้งค่าได้');
+    }
+  };
+
+  const handleSendTestTelegram = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testChatId.trim()) return;
+
+    setIsTestingTelegram(true);
+    setTestResult(null);
+
+    const res = await sendTelegramTestAction(testChatId.trim(), shop.name);
+    setIsTestingTelegram(false);
+
+    if (res.success) {
+      setTestResult({ success: true, message: 'ส่งข้อความทดสอบสำเร็จ! ตรวจสอบแอป Telegram ได้เลยครับ ✅' });
+    } else {
+      setTestResult({ success: false, message: res.error || 'ส่งข้อความไม่สำเร็จ กรุณาตรวจสอบ Chat ID และกด Start บอทก่อน' });
     }
   };
 
@@ -573,6 +623,148 @@ export function SettingsClient({
             </div>
           </form>
         )}
+      </div>
+
+      {/* Telegram Customer Notification Bot Card */}
+      <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
+            <div className="w-8 h-8 rounded-xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+              <Send className="w-4 h-4" />
+            </div>
+            <span>ระบบแจ้งเตือนลูกค้าผ่าน Telegram Bot</span>
+          </div>
+          <a
+            href="https://t.me/ranrhan_bot"
+            target="_blank"
+            rel="noreferrer"
+            className="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 flex items-center gap-1 hover:opacity-80 transition-opacity"
+          >
+            <span>@ranrhan_bot</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+
+        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
+          ส่งข้อความแจ้งเตือนสถานะอาหารอัตโนมัติ (รับออเดอร์, กำลังปรุง, พร้อมรับ) ตรงถึงลูกค้าผ่าน Telegram แบบ 1-on-1 โดยไม่มีค่าใช้จ่าย ลูกค้าสามารถกดปุ่มเชื่อมต่อได้จากหน้าสรุปคำสั่งซื้อ
+        </p>
+
+        {/* Bot Status Banner */}
+        <div className="p-3.5 rounded-2xl bg-sky-50/60 dark:bg-sky-950/30 border border-sky-200/80 dark:border-sky-800/60 text-xs flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div>
+              <span className="font-bold text-sky-900 dark:text-sky-200">บอทออนไลน์พร้อมทำงาน: </span>
+              <span className="text-sky-700 dark:text-sky-400 font-mono text-[11px]">RAN-R-HAN (@ranrhan_bot)</span>
+            </div>
+          </div>
+          <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-950/80 px-2 py-0.5 rounded-md">
+            พร้อมใช้งาน
+          </span>
+        </div>
+
+        {telegramSuccess && (
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{telegramSuccess}</span>
+          </div>
+        )}
+
+        {telegramError && (
+          <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{telegramError}</span>
+          </div>
+        )}
+
+        {/* Toggle Switch */}
+        <form onSubmit={handleToggleTelegram} className="pt-1 space-y-4">
+          <div className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-800/40 flex items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <div className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-sky-500" />
+                <span>เปิดใช้งานการแจ้งเตือน Telegram สำหรับร้านนี้</span>
+              </div>
+              <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                เมื่อเปิดใช้งาน ลูกค้าที่กดเชื่อมต่อจะได้รับแจ้งเตือนสถานะอาหารอัตโนมัติ
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={telegramEnabled}
+                onChange={(e) => setTelegramEnabled(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer dark:bg-stone-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-stone-600 peer-checked:bg-sky-600"></div>
+            </label>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={isUpdatingTelegram}
+              className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {isUpdatingTelegram ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Check className="w-3.5 h-3.5" />
+              )}
+              <span>บันทึกการตั้งค่า Telegram</span>
+            </button>
+          </div>
+        </form>
+
+        {/* Test Telegram Message Box */}
+        <div className="pt-3 border-t border-stone-100 dark:border-stone-800/80">
+          <div className="text-xs font-bold text-stone-800 dark:text-stone-200 mb-1.5 flex items-center gap-1.5">
+            <Send className="w-3.5 h-3.5 text-stone-400" />
+            <span>ทดสอบส่งข้อความ (Test Telegram Notification)</span>
+          </div>
+          <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-3">
+            กรอก Telegram Chat ID ของคุณ เพื่อทดสอบว่าบอทสามารถส่งข้อความหาคุณได้ถูกต้อง (ทักบอท @ranrhan_bot แล้วกด Start ก่อนทดสอบ)
+          </p>
+
+          <form onSubmit={handleSendTestTelegram} className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={testChatId}
+              onChange={(e) => setTestChatId(e.target.value)}
+              placeholder="ระบุ Chat ID เช่น 123456789"
+              className="flex-1 px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+            <button
+              type="submit"
+              disabled={isTestingTelegram || !testChatId.trim()}
+              className="px-4 py-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {isTestingTelegram ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Send className="w-3.5 h-3.5 text-sky-500" />
+              )}
+              <span>ส่งข้อความทดสอบ</span>
+            </button>
+          </form>
+
+          {testResult && (
+            <div
+              className={`mt-2.5 p-3 rounded-xl text-xs flex items-center gap-2 ${
+                testResult.success
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                  : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+              }`}
+            >
+              {testResult.success ? (
+                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+              )}
+              <span>{testResult.message}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Fulfillment Channels Card (Governed by Plan) */}

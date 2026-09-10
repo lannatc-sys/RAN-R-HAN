@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { formatThaiError } from '@/lib/thai-errors';
 import { sendPushToShop } from '@/lib/push';
+import { sendOrderStatusMessage } from '@/lib/telegram';
 
 export async function createPickupOrderAction(rawInput: CreateOrderInput) {
   try {
@@ -137,9 +138,50 @@ export async function updateOrderStatusAction(
       return { success: false, error: formatThaiError(error) };
     }
 
+    // แจ้งเตือนสถานะออเดอร์ไปยัง Telegram ของลูกค้า (แบบ Background Asynchronous)
+    triggerTelegramOrderStatusNotification(orderId, newStatus).catch((err) =>
+      console.error('[Telegram] Order status trigger error:', err)
+    );
+
     return { success: true };
   } catch (error: any) {
     return { success: false, error: formatThaiError(error) };
+  }
+}
+
+/**
+ * ฟังก์ชันช่วยส่งการแจ้งเตือน Telegram ตามสถานะออเดอร์
+ */
+async function triggerTelegramOrderStatusNotification(orderId: string, status: string) {
+  try {
+    const admin = createAdminClient();
+    const { data: order } = await admin
+      .from('orders')
+      .select(`
+        order_no,
+        telegram_chat_id,
+        shops (
+          name,
+          telegram_enabled
+        )
+      `)
+      .eq('id', orderId)
+      .maybeSingle();
+
+    if (order && order.telegram_chat_id) {
+      const shop = Array.isArray(order.shops) ? order.shops[0] : order.shops;
+      if (!shop || (shop as any).telegram_enabled !== false) {
+        const shopName = (shop as any)?.name || 'RAN-R-HAN';
+        await sendOrderStatusMessage(
+          order.telegram_chat_id,
+          status,
+          order.order_no,
+          shopName
+        );
+      }
+    }
+  } catch (tgErr) {
+    console.error('[Telegram Notification Warning]:', tgErr);
   }
 }
 
@@ -173,11 +215,19 @@ export async function confirmCashPaymentAction(orderId: string) {
     }
 
     // 2. ปรับ order status เป็น confirmed ถ้ายัง pending อยู่
-    await admin
+    const { data: updatedOrder } = await admin
       .from('orders')
       .update({ status: 'confirmed', updated_at: new Date().toISOString() })
       .eq('id', orderId)
-      .eq('status', 'pending');
+      .eq('status', 'pending')
+      .select('id')
+      .maybeSingle();
+
+    if (updatedOrder) {
+      triggerTelegramOrderStatusNotification(orderId, 'confirmed').catch((err) =>
+        console.error('[Telegram] Cash confirm trigger error:', err)
+      );
+    }
 
     return { success: true };
   } catch (error: any) {

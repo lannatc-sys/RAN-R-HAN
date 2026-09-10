@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
-import { ChefHat, ShoppingBag, UtensilsCrossed, Settings, LogOut, Store, Shield } from 'lucide-react';
+import { ChefHat, ShoppingBag, UtensilsCrossed, Settings, LogOut, Store, Shield, Truck } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { HeaderControls } from '@/components/common/HeaderControls';
 
@@ -27,6 +27,7 @@ export function AdminNavbar({ shopId, shopName }: AdminNavbarProps) {
   const navItems = [
     { href: '/admin/orders', label: t.nav.queue, icon: ChefHat },
     { href: '/admin/walk-in', label: t.nav.walkIn, icon: ShoppingBag },
+    { href: '/admin/delivery', label: lang === 'th' ? 'จัดส่ง/รอบส่ง' : 'Delivery', icon: Truck },
     { href: '/admin/menu', label: t.nav.menu, icon: UtensilsCrossed },
     { href: '/admin/settings', label: t.nav.settings, icon: Settings },
   ];

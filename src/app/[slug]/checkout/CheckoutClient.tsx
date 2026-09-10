@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shop, CartItem, OrderType } from '@/lib/types';
 import { createPickupOrderAction } from '@/app/actions/order';
+import { createConsentLogAction } from '@/app/actions/legal';
 import {
   ArrowLeft,
   Phone,
@@ -18,6 +19,7 @@ import {
   Check,
   User,
   Utensils,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { getActiveFulfillmentModes } from '@/lib/plans';
@@ -44,6 +46,8 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryLat, setDeliveryLat] = useState<number | null>(null);
   const [deliveryLng, setDeliveryLng] = useState<number | null>(null);
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const [gpsConsentTime, setGpsConsentTime] = useState<string | null>(null);
   const [isGettingGps, setIsGettingGps] = useState(false);
   const [gpsSuccess, setGpsSuccess] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
@@ -102,6 +106,7 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
         setDeliveryLat(Number(position.coords.latitude.toFixed(6)));
         setDeliveryLng(Number(position.coords.longitude.toFixed(6)));
         setGpsSuccess(true);
+        setGpsConsentTime(new Date().toISOString());
         setIsGettingGps(false);
       },
       (error) => {
@@ -137,6 +142,16 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
       return;
     }
 
+    // ตรวจสอบการยอมรับเงื่อนไขและนโยบายความเป็นส่วนตัว (WP-20)
+    if (!isTermsAccepted) {
+      setErrorMessage(
+        lang === 'th'
+          ? 'กรุณาทำเครื่องหมายยินยอมข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัวก่อนสั่งซื้อ'
+          : 'Please accept the Terms of Service and Privacy Policy before placing order.'
+      );
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -166,6 +181,30 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
         setErrorMessage(result.error || (lang === 'th' ? 'เกิดข้อผิดพลาดในการส่งคำสั่งซื้อ' : 'Failed to place order'));
         setIsLoading(false);
         return;
+      }
+
+      // บันทึกหลักฐานการให้ความยินยอม (Consent Evidence - WP-20)
+      const orderId = result.data.order_id;
+      const clientPhone = phone.trim() || undefined;
+
+      // 1. ความยินยอมข้อกำหนดและนโยบายความเป็นส่วนตัว
+      createConsentLogAction({
+        shop_id: shop.id,
+        order_id: orderId,
+        customer_phone: clientPhone,
+        consent_type: 'terms_and_privacy',
+        policy_version: '2026-09-10',
+      }).catch(err => console.error('[Consent Log Error]:', err));
+
+      // 2. ความยินยอมแชร์พิกัด GPS (หากมีการระบุพิกัด)
+      if (deliveryLat && deliveryLng) {
+        createConsentLogAction({
+          shop_id: shop.id,
+          order_id: orderId,
+          customer_phone: clientPhone,
+          consent_type: 'gps_location',
+          policy_version: '2026-09-10',
+        }).catch(err => console.error('[GPS Consent Log Error]:', err));
       }
 
       // ล้างตะกร้าสินค้าใน localStorage
@@ -666,11 +705,43 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
             </div>
           </div>
 
+          {/* PDPA & Terms Consent Checkbox (WP-20) */}
+          <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-stone-900 border border-amber-200/80 dark:border-stone-800 space-y-2">
+            <label className="flex items-start gap-3 cursor-pointer text-xs text-stone-700 dark:text-stone-300">
+              <input
+                type="checkbox"
+                required
+                checked={isTermsAccepted}
+                onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer shrink-0"
+              />
+              <span className="leading-relaxed">
+                ข้าพเจ้าได้อ่านและยอมรับ{' '}
+                <Link
+                  href={`/${shop.slug}/terms`}
+                  target="_blank"
+                  className="font-bold underline text-amber-700 dark:text-amber-400 hover:text-amber-800"
+                >
+                  ข้อกำหนดการใช้งาน
+                </Link>{' '}
+                และ{' '}
+                <Link
+                  href={`/${shop.slug}/privacy`}
+                  target="_blank"
+                  className="font-bold underline text-amber-700 dark:text-amber-400 hover:text-amber-800"
+                >
+                  นโยบายความเป็นส่วนตัว (PDPA)
+                </Link>{' '}
+                และยินยอมให้ประมวลผลข้อมูลส่วนบุคคลเพื่อการจัดเตรียมอาหารและการติดต่อจัดส่ง *
+              </span>
+            </label>
+          </div>
+
           {/* Submit Button with Safe Area */}
-          <div className="pb-safe pt-2">
+          <div className="pb-safe pt-1">
             <button
               type="submit"
-              disabled={isLoading || cart.length === 0}
+              disabled={isLoading || cart.length === 0 || !isTermsAccepted}
               className={`w-full py-3.5 sm:py-4 px-6 disabled:opacity-50 text-white font-semibold rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all text-sm sm:text-base cursor-pointer min-h-[48px] ${
                 orderType === 'delivery'
                   ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/30'

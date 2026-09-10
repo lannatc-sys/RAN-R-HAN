@@ -84,7 +84,7 @@ BEGIN
             'ข้าวกะเพราหมูกรอบสูตรโบราณ',
             'หมูกรอบหนังกรอบเนื้อนุ่ม ผัดพริกแห้งและใบกะเพราป่ารสจัดจ้าน',
             75.00,
-            'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/kaphrao-moo-sap.webp',
             true, 1
         ),
         (
@@ -92,7 +92,7 @@ BEGIN
             'ข้าวผัดปูจัมโบ้',
             'ข้าวหอมมะลิเม็ดร่วนผัดไฟแรง ใส่เนื้อปูก้อนสดหวานหอมกลิ่นกระทะ',
             120.00,
-            'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/khao-phat-goong.webp',
             true, 2
         ),
         (
@@ -100,7 +100,7 @@ BEGIN
             'ผัดไทยกุ้งสดแม่น้ำ',
             'เส้นจันทน์เหนียวนุ่ม ผัดซอสมะขามสูตรลับ พร้อมกุ้งแม่น้ำตัวโต',
             110.00,
-            'https://images.unsplash.com/photo-1559847844-5315695dadae?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/pad-thai-goong.webp',
             true, 3
         ),
         (
@@ -116,7 +116,7 @@ BEGIN
             'ราดหน้าหมี่กรอบทะเล',
             'บะหมี่ทอดกรอบสีทอง น้ำราดหน้าเหนียวข้นกลมกล่อม หมึก กุ้ง ปลา ชิ้นโต',
             95.00,
-            'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/rad-na-moo.webp',
             true, 5
         ),
 
@@ -150,7 +150,7 @@ BEGIN
             'ไข่เจียวปูฟูกรอบ',
             'ไข่เจียวทอดฟูกรอบสีเหลืองทอง อัดแน่นด้วยเนื้อปูสด',
             140.00,
-            'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/khai-jiao-song-krueng.webp',
             true, 9
         ),
 
@@ -160,7 +160,7 @@ BEGIN
             'ต้มยำกุ้งแม่น้ำน้ำข้น',
             'สมุนไพรสด ข่า ตะไคร้ ใบมะกรูด น้ำพริกเผาและนมข้นสด รสชาติจัดจ้านเข้มข้น',
             180.00,
-            'https://images.unsplash.com/photo-1548943487-a2e4e43b4853?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/tom-yum-goong.webp',
             true, 10
         ),
         (
@@ -186,7 +186,7 @@ BEGIN
             'ชาไทยโบราณเย็นพรีเมียม',
             'ชาตรามือคัดเกรด ชงสดเข้มข้น หอมมันนมสดแท้ หวานมันกลมกล่อม',
             45.00,
-            'https://images.unsplash.com/photo-1558857563-b37cf5a91f54?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/cha-yen.webp',
             true, 13
         ),
         (
@@ -202,7 +202,7 @@ BEGIN
             'ข้าวเหนียวมะม่วงน้ำดอกไม้',
             'มะม่วงน้ำดอกไม้สุกหวานฉ่ำ ข้าวเหนียวมูนกะทิสด โรยถั่วทองกรุบกรอบ',
             89.00,
-            'https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=600&auto=format&fit=crop',
+            'https://hqfzahyvwsjrvlgvaxda.supabase.co/storage/v1/object/public/shop-assets/demo/menu/mango-sticky-rice.webp',
             true, 15
         )
     ON CONFLICT (id) DO UPDATE SET

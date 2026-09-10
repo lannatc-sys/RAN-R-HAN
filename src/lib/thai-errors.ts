@@ -30,7 +30,7 @@ export function formatThaiError(error: any): string {
   if (msg.includes('MENU_NOT_FOUND')) {
     return 'ไม่พบรายการอาหารที่ระบุในร้านนี้';
   }
-  if (msg.includes('MENU_UNAVAILABLE')) {
+  if (msg.includes('MENU_UNAVAILABLE') || msg.includes('MENU_NOT_AVAILABLE')) {
     return 'รายการอาหารบางอย่างหมดชั่วคราว กรุณาปรับเปลี่ยนรายการ';
   }
   if (msg.includes('ORDER_NOT_FOUND')) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Shop, Category, MenuItem, Option, CartItem } from '@/lib/types';
 import { OptionModal } from '@/components/customer/OptionModal';
 import { CartDrawer } from '@/components/customer/CartDrawer';
@@ -105,9 +106,9 @@ export function MenuClient({ shop, categories, menuItems }: MenuClientProps) {
       <header className="bg-white dark:bg-stone-900 border-b border-stone-200/70 dark:border-stone-800 sticky top-0 z-30 shadow-xs transition-colors">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            {shop.logo ? (
+            {shop.logo_url || shop.logo ? (
               <img
-                src={shop.logo}
+                src={shop.logo_url || shop.logo || ''}
                 alt={shop.name}
                 className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-stone-100 dark:border-stone-800 shadow-xs shrink-0"
               />
@@ -218,6 +219,26 @@ export function MenuClient({ shop, categories, menuItems }: MenuClientProps) {
             </div>
           ))
         )}
+
+        {/* Legal & Policy Footer */}
+        <footer className="mt-12 pt-8 pb-16 border-t border-stone-200 dark:border-stone-800 text-center text-xs text-stone-400 dark:text-stone-500 space-y-2">
+          <div className="flex items-center justify-center gap-4">
+            <Link
+              href={`/${shop.slug}/terms`}
+              className="hover:text-stone-700 dark:hover:text-stone-300 transition underline underline-offset-4"
+            >
+              ข้อกำหนดการใช้งาน
+            </Link>
+            <span>•</span>
+            <Link
+              href={`/${shop.slug}/privacy`}
+              className="hover:text-stone-700 dark:hover:text-stone-300 transition underline underline-offset-4"
+            >
+              นโยบายความเป็นส่วนตัว (PDPA)
+            </Link>
+          </div>
+          <p>© 2026 {shop.name} • ขับเคลื่อนโดยแพลตฟอร์ม RAN-R-HAN</p>
+        </footer>
       </main>
 
       {/* Sticky Bottom Cart Bar with Safe Area */}

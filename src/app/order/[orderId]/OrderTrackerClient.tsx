@@ -16,10 +16,14 @@ import {
   Bike,
   MapPin,
   Utensils,
+  Send,
+  ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { HeaderControls } from '@/components/common/HeaderControls';
+import { createTelegramLinkAction } from '@/app/actions/telegram';
 
 interface OrderTrackerClientProps {
   initialOrder: Order;
@@ -38,6 +42,27 @@ export function OrderTrackerClient({
   const [order, setOrder] = useState<Order>(initialOrder);
   const [payment, setPayment] = useState<Payment | null>(initialPayment);
   const [copied, setCopied] = useState(false);
+  const [isConnectingTelegram, setIsConnectingTelegram] = useState(false);
+  const [telegramError, setTelegramError] = useState<string | null>(null);
+  const [telegramOpened, setTelegramOpened] = useState(false);
+
+  const handleConnectTelegram = async () => {
+    setIsConnectingTelegram(true);
+    setTelegramError(null);
+    try {
+      const res = await createTelegramLinkAction(order.id);
+      if (res.success && res.botUrl) {
+        setTelegramOpened(true);
+        window.open(res.botUrl, '_blank');
+      } else {
+        setTelegramError(res.error || 'ไม่สามารถสร้างลิงก์ Telegram ได้');
+      }
+    } catch (err: any) {
+      setTelegramError(err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      setIsConnectingTelegram(false);
+    }
+  };
 
   // Subscribe to real-time updates for this order and payment
   useEffect(() => {
@@ -301,6 +326,81 @@ export function OrderTrackerClient({
               : lang === 'th' ? 'ชำระด้วยเงินสดตอนมารับอาหาร' : 'Pay cash at counter upon pick-up'}
             : <b> {Number(order.total).toLocaleString(lang === 'th' ? 'th-TH' : 'en-US')} {t.common.currency}</b>
           </div>
+        )}
+
+        {/* Telegram Customer Notification Card */}
+        {order.status !== 'completed' && order.status !== 'cancelled' && (
+          order.telegram_chat_id ? (
+            <div className="bg-sky-50/80 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-2xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Send className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-sky-950 dark:text-sky-200 truncate">
+                    {lang === 'th' ? 'เชื่อมต่อ Telegram เรียบร้อยแล้ว ✅' : 'Connected to Telegram ✅'}
+                  </div>
+                  <div className="text-[11px] text-sky-700 dark:text-sky-400 truncate">
+                    {lang === 'th' ? 'ระบบจะส่งข้อความแจ้งเตือนหาคุณทันทีเมื่ออาหารพร้อม' : 'You will receive an alert when ready'}
+                  </div>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300 shrink-0">
+                @ranrhan_bot
+              </span>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-br from-sky-50 to-blue-50/50 dark:from-sky-950/40 dark:to-blue-950/30 border border-sky-200/80 dark:border-sky-800/60 p-4 sm:p-5 rounded-3xl space-y-3 shadow-xs">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-xs">
+                    <Send className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100">
+                      {lang === 'th' ? 'รับแจ้งเตือนผ่าน Telegram (ฟรี)' : 'Get Telegram Alerts (Free)'}
+                    </h3>
+                    <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                      {lang === 'th' ? 'ไม่ต้องเปิดหน้านี้ค้างไว้ รับแจ้งเตือนเมื่ออาหารพร้อมเสิร์ฟ' : 'No need to keep tab open. Get alert when ready.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {telegramError && (
+                <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 p-2.5 rounded-xl border border-red-200 dark:border-red-800">
+                  {telegramError}
+                </div>
+              )}
+
+              {telegramOpened ? (
+                <div className="bg-white/80 dark:bg-stone-900/80 p-3 rounded-2xl border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-300 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                    <span>{lang === 'th' ? 'เปิดแอป Telegram แล้วหรือยัง?' : 'Opened Telegram?'}</span>
+                  </div>
+                  <p className="text-[11px] text-stone-600 dark:text-stone-400">
+                    {lang === 'th' ? 'กรุณากดปุ่ม "Start" ในแอป Telegram 1 ครั้ง เพื่อเปิดรับการแจ้งเตือนคิวนี้ค่ะ' : 'Please tap "Start" in Telegram to subscribe to this order.'}
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleConnectTelegram}
+                  disabled={isConnectingTelegram}
+                  className="w-full py-2.5 px-4 bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {isConnectingTelegram ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  <span>{lang === 'th' ? 'เชื่อมต่อ Telegram (@ranrhan_bot)' : 'Connect Telegram (@ranrhan_bot)'}</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                </button>
+              )}
+            </div>
+          )
         )}
 
         {/* Status Timeline */}

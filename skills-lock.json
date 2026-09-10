@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "agentic-rd-skill": {
+      "source": "TheStreamCode/agentic-rd-skill",
+      "sourceType": "github",
+      "skillPath": "skills/agentic-rd-skill/SKILL.md",
+      "computedHash": "8267ff04f403b7bab254c9ff4e89d98b4d42e2c744b1d6fb7b050f31d75108ac"
+    }
+  }
+}

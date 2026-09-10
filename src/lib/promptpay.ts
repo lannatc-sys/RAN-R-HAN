@@ -2,6 +2,14 @@ import generatePayload from 'promptpay-qr';
 import QRCode from 'qrcode';
 
 /**
+ * ทำความสะอาดรหัสพร้อมเพย์ ลบช่องว่างและขีดออกให้เหลือเฉพาะตัวเลข
+ */
+export function normalizePromptPayId(promptpayId: string): string {
+  if (!promptpayId) return '';
+  return promptpayId.replace(/[^0-9]/g, '').trim();
+}
+
+/**
  * สร้าง Data URL ของภาพ QR Code พร้อมเพย์ตามมาตรฐาน EMVCo แบบระบุยอดเงิน
  * รองรับทั้งเบอร์โทรศัพท์ (10 หลัก), เลขบัตรประชาชน (13 หลัก), และ e-Wallet ID (15 หลัก)
  */
@@ -11,7 +19,7 @@ export async function generatePromptPayQR(promptpayId: string, amount: number): 
   }
 
   // ล้างอักขระที่ไม่ใช่ตัวเลข (ขีด, ช่องว่าง)
-  const cleanId = promptpayId.replace(/[^0-9]/g, '');
+  const cleanId = normalizePromptPayId(promptpayId);
 
   if (cleanId.length < 10) {
     throw new Error('INVALID_PROMPTPAY_ID: รหัสพร้อมเพย์ต้องเป็นเบอร์โทร 10 หลัก หรือเลขบัตรประชาชน 13 หลัก');
