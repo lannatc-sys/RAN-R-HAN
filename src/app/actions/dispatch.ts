@@ -326,49 +326,29 @@ async function notifyRiderViaTelegram(
 // timeoutOfferAction — Cron Job เรียกตรวจ Offer ที่หมดเวลา
 // ==============================================================================
 
-export async function timeoutOfferAction(): Promise<{ timed_out: number }> {
+export async function timeoutOfferAction(): Promise<{ timed_out: number; redispatched: number; errors: number }> {
   const adminClient = createAdminClient();
 
-  // หา offers ที่หมดเวลาและยังเป็น 'offered'
-  const { data: expiredOffers, error } = await adminClient
-    .from('dispatch_offers')
-    .select('id, order_id, dispatch_round')
-    .eq('status', 'offered')
-    .lt('timeout_at', new Date().toISOString());
+  // ใช้ RPC expire_dispatch_offers() แทนการ Query/direct update
+  // RPC นี้ใช้ advisory lock + FOR UPDATE เพื่อป้องกัน concurrent run
+  // และคืน summary (expired/redispatched/errors) สำหรับ logging
+  const { data, error } = await adminClient
+    .rpc('expire_dispatch_offers')
+    .single();
 
-  if (error || !expiredOffers || expiredOffers.length === 0) {
-    return { timed_out: 0 };
+  if (error) {
+    console.error('[dispatch] expire_dispatch_offers RPC error:', error);
+    return { timed_out: 0, redispatched: 0, errors: 1 };
   }
 
-  let timedOutCount = 0;
+  const result = (data as any) || {};
+  const timed_out = result.expired_count || 0;
+  const redispatched = result.redispatched_count || 0;
+  const errors = result.error_count || 0;
 
-  for (const offer of expiredOffers) {
-    // Mark as timed_out
-    // Compare-and-Swap: ต้องยังเป็น 'offered' อยู่จริง กันเขียนทับ offer ที่ไรเดอร์เพิ่งกดรับ
-    const { data: expired } = await adminClient
-      .from('dispatch_offers')
-      .update({ status: 'timed_out', responded_at: new Date().toISOString() })
-      .eq('id', offer.id)
-      .eq('status', 'offered')
-      .select('id');
+  console.log(
+    `[dispatch/cron] expire_dispatch_offers 결과: expired=${timed_out}, redispatched=${redispatched}, errors=${errors}, run_at=${result.run_at}`
+  );
 
-    if (!expired || expired.length === 0) {
-      continue; // ไรเดอร์ตอบทันพอดี — ไม่ต้องทำอะไรต่อ
-    }
-
-    // Re-dispatch ถ้ายังไม่ครบ MAX_DISPATCH_ROUNDS
-    if (offer.dispatch_round < MAX_DISPATCH_ROUNDS) {
-      // Trigger re-dispatch หลัง 2–3 นาที (Phase 1: ให้ Admin Re-trigger เอง)
-      // TODO Phase 1b+: เพิ่ม pg_cron หรือ Vercel Cron สำหรับ auto re-dispatch
-      await adminClient
-        .from('orders')
-        .update({ dispatch_status: 'pending' })
-        .eq('id', offer.order_id)
-        .eq('dispatch_status', 'dispatching');
-    }
-
-    timedOutCount++;
-  }
-
-  return { timed_out: timedOutCount };
+  return { timed_out, redispatched, errors };
 }

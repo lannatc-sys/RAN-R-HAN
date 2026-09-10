@@ -19,7 +19,16 @@ async function handle(req: NextRequest) {
 
   try {
     const result = await timeoutOfferAction();
-    return NextResponse.json({ ok: true, ...result, ran_at: new Date().toISOString() });
+    console.log(
+      `[cron/dispatch-timeout] สำเร็จ: expired=${result.timed_out ?? 0}, redispatched=${result.redispatched ?? 0}, errors=${result.errors ?? 0}, ran_at=${new Date().toISOString()}`
+    );
+    return NextResponse.json({
+      ok: true,
+      expired: result.timed_out ?? 0,
+      redispatched: result.redispatched ?? 0,
+      errors: result.errors ?? 0,
+      ran_at: new Date().toISOString(),
+    });
   } catch (err) {
     console.error('[cron/dispatch-timeout] Unexpected error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
