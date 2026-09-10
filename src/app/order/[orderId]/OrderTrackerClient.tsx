@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Order, Shop, Payment } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -19,11 +19,17 @@ import {
   Send,
   ExternalLink,
   Loader2,
+  Upload,
+  AlertCircle,
+  X,
+  ShieldCheck,
+  ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { HeaderControls } from '@/components/common/HeaderControls';
 import { createTelegramLinkAction } from '@/app/actions/telegram';
+import { uploadAndVerifySlipAction } from '@/app/actions/payment';
 
 interface OrderTrackerClientProps {
   initialOrder: Order;
@@ -45,6 +51,77 @@ export function OrderTrackerClient({
   const [isConnectingTelegram, setIsConnectingTelegram] = useState(false);
   const [telegramError, setTelegramError] = useState<string | null>(null);
   const [telegramOpened, setTelegramOpened] = useState(false);
+
+  // Slip Upload & Verification State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [slipPreviewUrl, setSlipPreviewUrl] = useState<string | null>(null);
+  const [isVerifyingSlip, setIsVerifyingSlip] = useState(false);
+  const [slipError, setSlipError] = useState<string | null>(null);
+  const [slipSuccess, setSlipSuccess] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setSlipError(lang === 'th' ? 'กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)' : 'Please select an image file (JPG, PNG, WEBP)');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setSlipError(lang === 'th' ? 'ขนาดไฟล์รูปภาพต้องไม่เกิน 10MB' : 'File size must not exceed 10MB');
+      return;
+    }
+
+    setSlipFile(file);
+    setSlipPreviewUrl(URL.createObjectURL(file));
+    setSlipError(null);
+    setSlipSuccess(null);
+  };
+
+  const handleClearFile = () => {
+    setSlipFile(null);
+    if (slipPreviewUrl) {
+      URL.revokeObjectURL(slipPreviewUrl);
+      setSlipPreviewUrl(null);
+    }
+    setSlipError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleVerifySlip = async () => {
+    if (!slipFile) {
+      setSlipError(lang === 'th' ? 'กรุณาเลือกไฟล์รูปภาพสลิป' : 'Please select a slip image');
+      return;
+    }
+
+    setIsVerifyingSlip(true);
+    setSlipError(null);
+    setSlipSuccess(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('order_id', order.id);
+      formData.append('slip', slipFile);
+
+      const res = await uploadAndVerifySlipAction(formData);
+
+      if (res.success) {
+        setSlipSuccess(res.message || (lang === 'th' ? 'ตรวจสอบสลิปสำเร็จ!' : 'Slip verified successfully!'));
+        setPayment((prev) => (prev ? { ...prev, status: 'verified' } : null));
+        setOrder((prev) => ({ ...prev, status: 'confirmed' }));
+      } else {
+        setSlipError(res.error || (lang === 'th' ? 'ตรวจสอบสลิปไม่สำเร็จ' : 'Verification failed'));
+      }
+    } catch (err: any) {
+      setSlipError(err?.message || (lang === 'th' ? 'เกิดข้อผิดพลาดในการตรวจสอบสลิป' : 'An error occurred'));
+    } finally {
+      setIsVerifyingSlip(false);
+    }
+  };
 
   const handleConnectTelegram = async () => {
     setIsConnectingTelegram(true);
@@ -304,6 +381,127 @@ export function OrderTrackerClient({
             <div className="text-[11px] text-stone-400 dark:text-stone-500 bg-amber-50/70 dark:bg-amber-950/40 p-3 rounded-2xl border border-amber-100 dark:border-amber-900/40 flex items-center justify-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
               <span>{t.tracker.autoRefreshNotice}</span>
+            </div>
+
+            {/* Divider: แนบสลิปเพื่อตรวจสอบ */}
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-dashed border-amber-200 dark:border-stone-700"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white dark:bg-stone-900 px-3 text-stone-400 dark:text-stone-500 font-medium text-[11px]">
+                  {lang === 'th' ? 'โอนเงินแล้ว? แนบสลิปเพื่อยืนยันทันที' : 'Paid? Upload slip for instant verification'}
+                </span>
+              </div>
+            </div>
+
+            {/* กล่องแนบสลิป SlipOK */}
+            <div className="bg-stone-50/80 dark:bg-stone-800/60 p-4 rounded-2xl border border-stone-200 dark:border-stone-700/80 space-y-3 text-left">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
+                    {t.tracker.uploadSlipTitle}
+                  </div>
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400 leading-tight">
+                    {t.tracker.uploadSlipDesc}
+                  </div>
+                </div>
+              </div>
+
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/png,image/jpeg,image/webp"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+
+              {/* Upload Drop Area / Preview */}
+              {!slipPreviewUrl ? (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-4 px-3 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-600 hover:border-amber-500 dark:hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-all flex flex-col items-center justify-center gap-1.5 text-stone-600 dark:text-stone-300 cursor-pointer group"
+                >
+                  <div className="w-9 h-9 rounded-full bg-stone-100 dark:bg-stone-700 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 flex items-center justify-center transition-colors">
+                    <Upload className="w-4 h-4 text-stone-500 dark:text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400" />
+                  </div>
+                  <span className="text-xs font-semibold text-stone-800 dark:text-stone-200">
+                    {t.tracker.selectSlipFile}
+                  </span>
+                  <span className="text-[10px] text-stone-400 dark:text-stone-500">
+                    JPG, PNG หรือภาพถ่ายจากมือถือ (สูงสุด 10MB)
+                  </span>
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="relative w-full max-h-52 bg-stone-100 dark:bg-stone-900 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 flex items-center justify-center p-2">
+                    <img
+                      src={slipPreviewUrl}
+                      alt="Slip Preview"
+                      className="max-h-44 object-contain rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleClearFile}
+                      disabled={isVerifyingSlip}
+                      className="absolute top-2.5 right-2.5 p-1 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white transition-colors cursor-pointer"
+                      title={t.tracker.changeSlipFile}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isVerifyingSlip}
+                      className="flex-1 py-2 px-3 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      {t.tracker.changeSlipFile}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleVerifySlip}
+                      disabled={isVerifyingSlip}
+                      className="flex-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    >
+                      {isVerifyingSlip ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{t.tracker.verifyingSlip}</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{t.tracker.verifySlipButton}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Error Message */}
+              {slipError && (
+                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 text-xs flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+                  <span className="leading-relaxed">{slipError}</span>
+                </div>
+              )}
+
+              {/* Success Message */}
+              {slipSuccess && (
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  <span>{slipSuccess}</span>
+                </div>
+              )}
             </div>
           </div>
         )}

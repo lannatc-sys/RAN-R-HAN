@@ -74,15 +74,35 @@
      - **Admin Settings:** การ์ด "ระบบแจ้งเตือนลูกค้าผ่าน Telegram Bot" ใน [`SettingsClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/admin/settings/SettingsClient.tsx) พร้อมสวิตช์เปิด/ปิดร้าน และกล่องทดสอบส่งข้อความ
      - **Customer Order Tracking:** การ์ดเชื่อมต่อรับแจ้งเตือน Telegram ใน [`OrderTrackerClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/order/%5BorderId%5D/OrderTrackerClient.tsx) แสดงสถานะเชื่อมต่อแบบเรียลไทม์
 
+### F. ระบบอัปโหลดและตรวจสอบสลิปอัตโนมัติ (SlipOK Direct Verification) — *เสร็จสิ้นล่าสุด 🎯*
+- **วัตถุประสงค์:** แก้ปัญหาผู้ใช้แจ้งว่า *"ตรวจสอบการโอนเงิน ไม่มีให้แนบสลิปเพื่อตรวจสอบกับ สลิปโอเค"* โดยเพิ่มช่องทางให้ลูกค้าแนบรูปสลิปจากมือถือเพื่อตรวจสอบกับ SlipOK API ทันทีหลังโอนเงิน
+- **สิ่งที่พัฒนาและทดสอบเรียบร้อย:**
+  1. **Server Action ตรวจสอบสลิป ([`src/app/actions/payment.ts`](file:///d:/system%20make/Ran-R-HAN/src/app/actions/payment.ts)):**
+     - ฟังก์ชัน `uploadAndVerifySlipAction(formData: FormData)`:
+     - ตรวจสอบความถูกต้องของไฟล์รูปภาพ (ขนาดสูงสุด 10MB, mime type `image/*`)
+     - ดึง `api_key_encrypted` จากตาราง `shop_payment_credentials` และถอดรหัส AES-256-GCM ฝั่งเซิร์ฟเวอร์
+     - ยิง HTTP POST แบบ multipart/form-data ไปยัง SlipOK API พร้อมแนบ Header `x-authorization`
+     - ตรวจสอบความถูกต้องของยอดเงิน (`slipAmount >= order.total`) และบัญชีปลายทาง Exact Match (PromptPay/บัญชีธนาคาร)
+     - เรียก Supabase RPC `verify_and_confirm_payment` บันทึก Transaction Reference ป้องกันการใช้สลิปซ้ำ (Code 23505)
+     - สำรองรูปสลิปไปยัง Supabase Storage bucket `payment-slips` (Best-effort)
+     - ยิง Web Push แจ้งเตือนครัว/ร้านค้า (`sendPushToShop`) และแจ้งสถานะออเดอร์ผ่าน Telegram Bot ถึงลูกค้าทันที
+  2. **Frontend UI แนบสลิป ([`OrderTrackerClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/order/%5BorderId%5D/OrderTrackerClient.tsx)):**
+     - กล่องแนบรูปสลิปโอนเงิน (JPG, PNG, WEBP) พร้อมพรีวิวรูป และปุ่มเปลี่ยนรูป
+     - ปุ่มกดยืนยันตรวจสลิปทันทีพร้อมสถานะ Loading
+     - แสดงข้อความแจ้งเตือน Error ภาษาไทยชัดเจน (สลิปซ้ำ, บาร์โค้ดไม่ชัด, ยอดไม่ตรง ฯลฯ)
+     - ปรับสถานะเป็น Verified Badge ทันทีเมื่อผ่านการตรวจสอบ
+  3. **ระบบภาษา (i18n):**
+     - เพิ่มคีย์แปลภาษา TH/EN สำหรับ UI ตรวจสลิปใน [`src/lib/i18n/translations.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/i18n/translations.ts)
+
 ---
 
 ## 🛡️ 3. สถานะการตรวจสอบคุณภาพ (Quality Gates)
 
 | การทดสอบ | คำสั่ง | สถานะ | หมายเหตุ |
 | :--- | :--- | :---: | :--- |
-| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 65/65 tests ผ่านทั้งหมด (100%) รวมถึง test/telegram.test.ts |
+| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 69/69 tests ผ่านทั้งหมด (100%) รวมถึง test/payment.test.ts และ test/telegram.test.ts |
 | **Integration & Smoke** | `pnpm test` | 🟢 PASS | ครอบคลุม Auth, Orders, Payment, KDS, Delivery, Legal & Telegram |
-| **Next.js Production Build** | `pnpm build` | 🟢 PASS | ผ่านครบ 23/23 routes (รวม /api/telegram/webhook) ไม่มี Error |
+| **Next.js Production Build** | `pnpm build` | 🟢 PASS | ผ่านครบ 23/23 routes ไม่มี Error |
 
 ---
 

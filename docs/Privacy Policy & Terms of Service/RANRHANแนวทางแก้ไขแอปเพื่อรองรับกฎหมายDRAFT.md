@@ -97,6 +97,60 @@
 
 ---
 
+## 🆕 WP-25: GPS Work Session Tracking + Consent (Rider)
+
+**สถานะปัจจุบัน:** ยังไม่มีการพัฒนา — เป็นงานใหม่ตาม [`03-rider-system-architecture.md`](../03-rider-system-architecture.md) §6, §7
+
+**งานที่ต้องทำ:**
+- สร้างตาราง `rider_work_sessions` (`start_work_at`, `close_system_at`, `work_session_id`)
+- ผูก `rider_current_locations` เข้ากับ `work_session_id` ที่กำลังเปิดอยู่ — หยุดรับ/หยุดบันทึกพิกัดทันทีเมื่อไม่มี Session เปิด
+- บันทึกหลักฐานความยินยอม/การรับทราบเงื่อนไข GPS Tracking ตอนไรเดอร์กด Start Work ครั้งแรก (คล้าย WP-20 แต่แยกชุดสำหรับไรเดอร์)
+
+**Priority:** สูง — เป็นเงื่อนไขก่อนเปิดใช้งาน Dispatch Engine จริง
+**เชื่อมโยง:** ขึ้นกับผลตัดสินใจฐานทางกฎหมาย (ข้อ 1.9 ใน Checklist)
+
+---
+
+## 🆕 WP-26: POD Archive Pipeline + Cross-border Disclosure
+
+**สถานะปัจจุบัน:** ยังไม่มีการพัฒนา — ตาม [`03-rider-system-architecture.md`](../03-rider-system-architecture.md) §9
+
+**งานที่ต้องทำ:**
+- Scheduled Worker ย้ายไฟล์ POD จาก Supabase Storage → Google Drive ตาม Hot Period ที่ล็อกแล้ว (รอค่าจาก Checklist 1.10)
+- ตรวจสอบสิทธิ์ (Auth + Role) ทุกครั้งก่อนเข้าถึงไฟล์ Archive — ห้าม Public Link เด็ดขาด
+- เพิ่มข้อความเปิดเผยการโอนข้อมูลออกนอกประเทศในหน้า Privacy Policy (WP-19) เมื่อทนายยืนยันฐานแล้ว
+
+**Priority:** สูง
+**เชื่อมโยง:** ต้องรอผลข้อ 1.10 ใน Checklist ก่อนเปิดใช้งานจริง
+
+---
+
+## 🆕 WP-27: Rider Pool Ledger + Audit Trail
+
+**สถานะปัจจุบัน:** ยังไม่มีการพัฒนา — ตาม [`03-rider-system-architecture.md`](../03-rider-system-architecture.md) §11.3, §15.1
+
+**งานที่ต้องทำ:**
+- สร้างตาราง `rider_pool_ledger` พร้อม Audit Trail ทุกรายการรับ-จ่าย
+- จำกัดสิทธิ์ผู้มีอำนาจอนุมัติการจ่ายจากกองกลางตามโครงสร้างที่ทนายยืนยัน (ข้อ 1.7)
+
+**Priority:** รอผลตัดสินใจทางกฎหมายเรื่องโครงสร้าง Rider Pool ก่อน (Checklist 1.7)
+**เชื่อมโยง:** Blocker เดียวกับ WP-24 (Controller/Processor) — ควรตัดสินใจพร้อมกัน
+
+---
+
+## 🆕 WP-28: Rider Agreement — หน้ายอมรับข้อตกลงในแอป Rider
+
+**สถานะปัจจุบัน:** ยังไม่มีทั้งเอกสารและ UI
+
+**งานที่ต้องทำ:**
+- รอ Rider Agreement ฉบับที่ทนายตรวจแล้ว (Checklist หมวด 2)
+- สร้างหน้ายอมรับข้อตกลง + บันทึก Consent Log แบบเดียวกับ WP-20 แต่แยกชุดสำหรับไรเดอร์ (ผูกกับ `rider_id` ไม่ใช่ `order_id`)
+
+**Priority:** Blocker ก่อนเปิดรับสมัครไรเดอร์จริง
+**เชื่อมโยง:** ต้องมี Rider Agreement ก่อนจึงจะทำ UI ได้
+
+---
+
 ## สรุปลำดับการทำงาน (ผูกกับ Phase ของแผนพัฒนาหลัก)
 
 | Phase | งานในเอกสารนี้ | เหตุผล |
@@ -104,6 +158,7 @@
 | Phase 1 (ความปลอดภัย — ทำก่อนสุด) | WP-21 (audit log พรีออเดอร์, ทำหลัง WP-2), ส่วน audit log ของ WP-24 | ต้องมีตัวตนผู้ใช้ที่เช็คแล้วก่อน ถึงจะบันทึก log ได้ถูกต้อง |
 | Phase 2 (ซิงก์เอกสาร) | WP-19 (หน้าเว็บ Privacy/ToS), WP-20 (consent UI) | ต้องมีหน้าให้ลิงก์ไปหาก่อนจะขอ consent ได้จริง |
 | Phase 3 (เทสต์/โครงสร้าง) | WP-22 (ระบบลบข้อมูลอัตโนมัติ) | ควรมี test coverage ที่มั่นคงก่อนเพิ่ม scheduled job ที่ลบข้อมูลจริง |
-| Phase 4 (รอตัดสินใจเจ้าของ/ทนาย) | WP-23 (สิทธิเจ้าของข้อมูล), WP-24 (Controller/Processor) | ขึ้นกับการตัดสินใจที่ยังไม่เกิดขึ้น |
+| Phase 4 (รอตัดสินใจเจ้าของ/ทนาย) | WP-23 (สิทธิเจ้าของข้อมูล), WP-24 (Controller/Processor), 🆕 WP-27 (Rider Pool Ledger) | ขึ้นกับการตัดสินใจที่ยังไม่เกิดขึ้น |
+| 🆕 Phase 5 (Rider System — ก่อนเปิดรับสมัครไรเดอร์) | WP-25 (GPS Work Session), WP-26 (POD Archive + Cross-border), WP-28 (Rider Agreement UI) | ต้องรอผล Legal Review ข้อ 1.6–1.10 ใน Checklist ก่อนเริ่มงานเทคนิคส่วนใหญ่ |
 
 **ข้อควรระวังสุดท้าย:** เอกสารนี้เป็นแผนงานเท่านั้น ยังไม่มีการเขียนโค้ดใดๆ ทั้งสิ้น หากต้องการให้เริ่มลงมือพัฒนาจริงตาม WP ข้อใด ต้องแจ้งขอให้เริ่มงานเขียนโค้ดแยกเป็นคำขอใหม่

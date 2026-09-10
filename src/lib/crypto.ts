@@ -42,9 +42,39 @@ export function encryptApiKey(plainText: string): Buffer {
  * ถอดรหัส Buffer จากฐานข้อมูล bytea
  * ห้าม log ผลลัพธ์ decrypted ออกมาเด็ดขาด
  */
-export function decryptApiKey(encryptedBuffer: Buffer | Uint8Array): string {
+export function decryptApiKey(encryptedBuffer: Buffer | Uint8Array | string): string {
   const key = getEncryptionKey();
-  const buf = Buffer.isBuffer(encryptedBuffer) ? encryptedBuffer : Buffer.from(encryptedBuffer);
+  let buf: Buffer;
+
+  if (typeof encryptedBuffer === 'string') {
+    const trimmed = encryptedBuffer.trim();
+    if (trimmed.startsWith('\\x')) {
+      buf = Buffer.from(trimmed.slice(2), 'hex');
+    } else if (trimmed.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        buf = Buffer.from(parsed.data || parsed);
+      } catch {
+        buf = Buffer.from(trimmed, 'hex');
+      }
+    } else {
+      buf = Buffer.from(trimmed, 'hex');
+    }
+  } else {
+    buf = Buffer.isBuffer(encryptedBuffer) ? encryptedBuffer : Buffer.from(encryptedBuffer);
+    // If bytea from Supabase contains serialized JSON: '{"type":"Buffer","data":[...]}'
+    if (buf.length > 20 && buf[0] === 123 /* '{' */) {
+      try {
+        const str = buf.toString('utf8');
+        if (str.startsWith('{"type":"Buffer"') || str.startsWith('{"data"')) {
+          const parsed = JSON.parse(str);
+          if (Array.isArray(parsed.data)) {
+            buf = Buffer.from(parsed.data);
+          }
+        }
+      } catch {}
+    }
+  }
 
   if (buf.length < IV_LENGTH + TAG_LENGTH) {
     throw new Error('Corrupt ciphertext: Buffer is too short');

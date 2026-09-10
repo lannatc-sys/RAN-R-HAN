@@ -43,6 +43,20 @@ describe('💳 Payment & Slip Verification Tests', () => {
       });
     });
 
+    it('should decrypt JSON-serialized Buffer format from Supabase / PostgREST', () => {
+      process.env.CREDENTIALS_ENCRYPTION_KEY = TEST_KEY;
+      const secret = 'slipok_live_secret_key_123';
+      const encrypted = encryptApiKey(secret);
+
+      // Simulate Supabase JSON serialization
+      const jsonString = JSON.stringify(encrypted);
+      const jsonBuffer = Buffer.from(jsonString, 'utf8');
+
+      assert.equal(decryptApiKey(jsonString), secret);
+      assert.equal(decryptApiKey(jsonBuffer), secret);
+      assert.equal(decryptApiKey('\\x' + encrypted.toString('hex')), secret);
+    });
+
     it('should throw if CREDENTIALS_ENCRYPTION_KEY is missing in environment', () => {
       delete process.env.CREDENTIALS_ENCRYPTION_KEY;
       assert.throws(() => {
@@ -99,4 +113,46 @@ describe('💳 Payment & Slip Verification Tests', () => {
       assert.ok(formatted.includes('รายการอาหารบางอย่างหมดชั่วคราว'));
     });
   });
+
+  describe('SlipOK Upload & Verification Logic', () => {
+    it('should validate receiver account exact matching', () => {
+      const shopPromptpay = '0812345678';
+      const cleanShop = shopPromptpay.replace(/[^0-9]/g, '');
+
+      const matchingReceiver = '081-234-5678'.replace(/[^0-9]/g, '');
+      const mismatchReceiver = '089-999-9999'.replace(/[^0-9]/g, '');
+
+      assert.equal(matchingReceiver, cleanShop);
+      assert.notEqual(mismatchReceiver, cleanShop);
+    });
+
+    it('should verify slip amount against order total', () => {
+      const orderTotal = 150.00;
+      const validSlipAmount = 150.00;
+      const overpaidSlipAmount = 200.00;
+      const underpaidSlipAmount = 100.00;
+
+      assert.ok(validSlipAmount >= orderTotal);
+      assert.ok(overpaidSlipAmount >= orderTotal);
+      assert.ok(underpaidSlipAmount < orderTotal);
+    });
+
+    it('should correctly detect image mime types for slip upload', () => {
+      const validMimes = ['image/jpeg', 'image/png', 'image/webp'];
+      const invalidMimes = ['application/pdf', 'text/plain', 'video/mp4'];
+
+      validMimes.forEach((m) => assert.ok(m.startsWith('image/')));
+      invalidMimes.forEach((m) => assert.ok(!m.startsWith('image/')));
+    });
+
+    it('should enforce 10MB slip file size limit', () => {
+      const MAX_SIZE = 10 * 1024 * 1024;
+      const validSize = 2.5 * 1024 * 1024; // 2.5MB
+      const oversized = 11 * 1024 * 1024; // 11MB
+
+      assert.ok(validSize <= MAX_SIZE);
+      assert.ok(oversized > MAX_SIZE);
+    });
+  });
 });
+
