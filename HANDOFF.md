@@ -1,7 +1,7 @@
 # 🤝 Project Handoff & Status Log (RAN-R-HAN)
 
 > **บันทึกสถานะการส่งมอบงาน (Handoff Document)**  
-> **วันเวลาที่อัปเดตล่าสุด:** 2026-09-10 14:05 (GMT+7)  
+> **วันเวลาที่อัปเดตล่าสุด:** 2026-09-11 01:20 (GMT+7)  
 > **สถานะภาพรวม:** ✅ พร้อมใช้งาน (Production Ready / Quality Gate Passed 100%)  
 > *เอกสารฉบับนี้ถูกซิงก์กับ [docs/HANDOFF.md](file:///d:/system%20make/Ran-R-HAN/docs/HANDOFF.md)*
 
@@ -94,15 +94,44 @@
   3. **ระบบภาษา (i18n):**
      - เพิ่มคีย์แปลภาษา TH/EN สำหรับ UI ตรวจสลิปใน [`src/lib/i18n/translations.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/i18n/translations.ts)
 
+### G. ระบบไรเดอร์และการจ่ายงาน (Rider & Dispatch System) — *เสร็จสิ้น Phase 1 🎯*
+- **วัตถุประสงค์:** เปิดใช้ระบบส่งอาหารด้วยไรเดอร์ตามเอกสาร [docs/03-rider-system-architecture.md](file:///d:/system%20make/Ran-R-HAN/docs/03-rider-system-architecture.md)
+- **Database (รันลง Supabase เรียบร้อยแล้ว):**
+  - เปิด Extension `postgis` (schema `extensions`) และสร้าง 9 ตารางหลัก: `riders`, `rider_work_sessions`, `rider_current_locations` (PostGIS + GiST index), `dispatch_offers`, `delivery_events`, `pod_uploads`, `daily_settlements`, `settlement_line_items`, `rider_pool_ledger`
+  - เพิ่มคอลัมน์ในตาราง `orders`: `assigned_rider_id`, `dispatch_status`, `delivery_fee`, `estimated_distance_km`
+  - เพิ่มคอลัมน์พิกัดร้าน `shops.shop_lat` / `shops.shop_lng` (จุดศูนย์กลางค้นหาไรเดอร์)
+  - สร้าง Storage bucket `pod-uploads` แบบ Private พร้อม RLS (ห้าม Public Link ตาม §9.2)
+  - Migration: `20260911000001` ถึง `20260911000004`
+- **บั๊กที่ตรวจพบและแก้ก่อนรัน (Review Gate):**
+  1. Migration เรียก `set_updated_at()` ที่ไม่มีจริงในโปรเจกต์ → แก้เป็น `handle_updated_at()`
+  2. RPC ตั้ง `search_path = public` แต่ PostGIS อยู่ schema `extensions` → ระบบหาไรเดอร์จะพังทุกครั้ง → แก้เป็น `public, extensions`
+  3. `find_available_riders` เป็น SECURITY DEFINER แต่ไม่เช็คสิทธิ์ร้าน → ใครก็ดูพิกัดไรเดอร์ร้านอื่นได้ → เพิ่มเงื่อนไข `has_shop_access()` (ยกเว้น service_role)
+  4. `p_exclude_rider_ids` เป็น NULL ทำให้ query ไม่คืนไรเดอร์เลย → ใส่ `coalesce(..., '{}')`
+  5. สรุปยอดรายวันใช้เวลา UTC → แก้เป็นเวลาไทย `Asia/Bangkok`
+  6. RLS เดิมให้ไรเดอร์ `for all` บน `dispatch_offers` (แอบสร้าง/แก้ offer เองได้) → จำกัดเหลือ `select` + `update` เฉพาะของตัวเอง
+  7. Dispatch ค้นหาไรเดอร์รอบ "พิกัดลูกค้า" แทน "พิกัดร้าน" → แก้ให้ยึดพิกัดร้านเป็นจุดรับอาหาร
+  8. Race condition: `.update()` ของ supabase-js ไม่ error เมื่อไม่โดนแถวไหน → เพิ่ม `.select()` ตรวจจำนวนแถว (Compare-and-Swap) ทั้งตอนรับงาน/ปฏิเสธ/หมดเวลา
+- **หน้าไรเดอร์ (Rider PWA) — ของใหม่รอบนี้:**
+  - [`/rider/login`](file:///d:/system%20make/Ran-R-HAN/src/app/rider/login/page.tsx) — เข้าสู่ระบบสำหรับไรเดอร์
+  - [`/rider`](file:///d:/system%20make/Ran-R-HAN/src/app/rider/RiderClient.tsx) — ปุ่มเริ่มงาน/ปิดงาน, ส่งพิกัด GPS อัตโนมัติ (Idle 60 วิ / ระหว่างส่ง 15 วิ, หยุดทันทีเมื่อปิดงานตาม PDPA), การ์ดงานใหม่พร้อมนับถอยหลัง, ปุ่มไล่สถานะงาน 5 ขั้น, ปุ่มนำทาง Google Maps และโทรหาลูกค้า, แนบภาพ POD, สรุปงาน/ค่าตอบแทนวันนี้ — รองรับ TH/EN, Dark Mode และมือถือตั้งแต่ 320px
+  - Logic ล้วน (ทดสอบได้) แยกไว้ที่ [`src/lib/rider.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/rider.ts)
+- **API ใหม่:** `GET /api/rider/offers/active`, `GET /api/rider/orders/active`, `GET /api/rider/summary`, `GET|POST /api/cron/dispatch-timeout` (ป้องกันด้วย `CRON_SECRET`)
+- **กฎที่บังคับฝั่งเซิร์ฟเวอร์ (ไม่เชื่อฝั่งมือถือ):**
+  - ปิดงานแบบ "ส่งสำเร็จ" หรือ "ติดต่อลูกค้าไม่ได้" **ต้องอัปโหลดภาพ POD สำเร็จก่อนเสมอ** (§9.1) — อัปโหลดพลาด = งานยังไม่ถูกปิด
+  - กดข้ามขั้น/กดซ้ำไม่ได้ (State Guard `isValidRiderEventTransition`)
+  - รับงานได้เฉพาะตอนมี Work Session เปิดอยู่ (§6 Online-First) และปิดงานจะยกเลิก Offer ที่ค้างอยู่ทันที
+  - เวลาและพิกัดยึดจากเซิร์ฟเวอร์เป็นหลัก (`server_received_at`)
+
 ---
 
 ## 🛡️ 3. สถานะการตรวจสอบคุณภาพ (Quality Gates)
 
 | การทดสอบ | คำสั่ง | สถานะ | หมายเหตุ |
 | :--- | :--- | :---: | :--- |
-| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 69/69 tests ผ่านทั้งหมด (100%) รวมถึง test/payment.test.ts และ test/telegram.test.ts |
-| **Integration & Smoke** | `pnpm test` | 🟢 PASS | ครอบคลุม Auth, Orders, Payment, KDS, Delivery, Legal & Telegram |
-| **Next.js Production Build** | `pnpm build` | 🟢 PASS | ผ่านครบ 23/23 routes ไม่มี Error |
+| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 111/111 tests ผ่านทั้งหมด (100%) รวม test/rider.test.ts และ test/rider-app.test.ts |
+| **Integration & Smoke** | `pnpm test` | 🟢 PASS | ครอบคลุม Auth, Orders, Payment, KDS, Delivery, Legal, Telegram & Rider |
+| **Next.js Production Build** | `pnpm build` | 🟢 PASS | ผ่านครบ 35/35 routes ไม่มี Error (รวม /rider และ /rider/login) |
+| **TypeScript Strict** | `npx tsc --noEmit` | 🟢 PASS | ไม่มี Error |
 
 ---
 
@@ -125,7 +154,11 @@
 
 ## 🚀 5. สิ่งที่สามารถทำต่อได้ในรอบถัดไป (Next Steps)
 
-1. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
-2. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
-3. **เริ่มพัฒนาระบบไรเดอร์ (Rider System):** เริ่มสร้าง Database Schema และ API ตามเอกสาร [docs/03-rider-system-architecture.md](file:///d:/system%20make/Ran-R-HAN/docs/03-rider-system-architecture.md)
+1. **ตั้งพิกัดร้านในระบบ:** กรอก `shops.shop_lat` / `shops.shop_lng` ของร้านที่เปิดใช้ระบบจัดส่ง — ถ้าไม่มีพิกัดร้าน ระบบจะ fallback ไปใช้พิกัดลูกค้าเป็นจุดค้นหาไรเดอร์ (แม่นน้อยกว่า)
+2. **สร้างบัญชีไรเดอร์จริง:** เพิ่มไรเดอร์ที่ `/admin/riders` แล้วผูก `auth_user_id` กับบัญชี Supabase Auth เพื่อให้ล็อกอินที่ `/rider` ได้
+3. **แจ้งเตือน Offer ถึงไรเดอร์:** ตอนนี้หน้า `/rider` ใช้การ Poll ทุก 5 วินาที — ขั้นถัดไปควรต่อ Web Push หรือ Telegram Bot ให้ไรเดอร์ (ฟังก์ชัน `notifyRiderViaTelegram` ใน `src/app/actions/dispatch.ts` ยังเป็น stub เขียน log อย่างเดียว)
+4. **ตั้ง Scheduler ให้ `/api/cron/dispatch-timeout`:** ปัจจุบันระบบเก็บกวาด Offer หมดเวลาตอนเริ่ม dispatch รอบใหม่อยู่แล้ว ถ้าต้องการให้ไวขึ้นให้ตั้งตัวจับเวลาภายนอก (เช่น cron-job.org ฟรี) ยิงทุก 1 นาทีพร้อม Header `Authorization: Bearer <CRON_SECRET>`
+5. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
+6. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
+7. **Blocker ก่อน Production ของระบบไรเดอร์ (§17):** โครงสร้างกองกลาง Rider Pool, สัญญา Rider Agreement, ผู้ดูแลบัญชีกลาง และเรื่องภาษี ยังต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดใช้จริง
 

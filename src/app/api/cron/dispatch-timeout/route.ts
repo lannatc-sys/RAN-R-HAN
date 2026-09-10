@@ -1,0 +1,35 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { timeoutOfferAction } from '@/app/actions/dispatch';
+
+/**
+ * GET|POST /api/cron/dispatch-timeout
+ * ปิด Offer ที่หมดเวลา แล้วคืน Order กลับเป็น pending เพื่อให้ Dispatch รอบถัดไปทำงาน (§5)
+ * ป้องกันด้วย Bearer CRON_SECRET เหมือน /api/cron/data-retention
+ */
+async function handle(req: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    return NextResponse.json({ error: 'CRON_SECRET is not configured' }, { status: 500 });
+  }
+
+  const authHeader = req.headers.get('authorization');
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const result = await timeoutOfferAction();
+    return NextResponse.json({ ok: true, ...result, ran_at: new Date().toISOString() });
+  } catch (err) {
+    console.error('[cron/dispatch-timeout] Unexpected error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  return handle(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handle(req);
+}

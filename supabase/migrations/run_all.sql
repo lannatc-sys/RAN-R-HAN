@@ -777,3 +777,12 @@ create policy "Staff can view payment slips"
         bucket_id = 'payment-slips'
         and auth.role() = 'authenticated'
     );
+
+-- ==============================================================================
+-- RIDER SYSTEM — Phase 1 (Migration 20260911000001 + 000002 + 000003)
+-- ต้องรัน run_all.sql ก่อน แล้วค่อยรัน migrations ต่อไปนี้แยก:
+--   1. supabase/migrations/20260911000001_rider_system.sql
+--   2. supabase/migrations/20260911000002_rider_rls.sql
+--   3. supabase/migrations/20260911000003_rider_rpc_functions.sql
+-- หรือ copy เนื้อหาจากทั้งสามไฟล์มาต่อท้ายนี้เพื่อรันครั้งเดียว
+-- ==============================================================================
