@@ -86,6 +86,7 @@ async function runDatabaseSetup() {
     await runMigrationFile(client, migrationsDir, '20260912000001_dispatch_timeout_atomic.sql', '1.11', 'Dispatch timeout RPC and security applied.');
     await runMigrationFile(client, migrationsDir, '20260912000002_lock_down_payment_rpc.sql', '1.12', 'Payment RPC lockdown applied.');
     await runMigrationFile(client, migrationsDir, '20260912000003_dispatch_order_lock.sql', '1.13', 'Dispatch order-scoped unique index applied.');
+    await runMigrationFile(client, migrationsDir, '20260912000004_rider_telegram_notification.sql', '1.14', 'Rider telegram & push channels schema applied.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');
