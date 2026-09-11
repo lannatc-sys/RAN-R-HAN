@@ -1,8 +1,9 @@
 # 🤝 Project Handoff & Status Log (RAN-R-HAN)
 
 > **บันทึกสถานะการส่งมอบงาน (Handoff Document)**  
-> **วันเวลาที่อัปเดตล่าสุด:** 2026-09-11 (GMT+7) — Rider P0 hardening
+> **วันเวลาที่อัปเดตล่าสุด:** 2026-09-12 (GMT+7) — Dispatch Timeout Atomic RPC hardening
 > **สถานะภาพรวม:** 🟡 Quality Gate ผ่าน; Rider P0 แก้แล้ว แต่ยังไม่ Production Ready จนกว่าจะปิด P1 และ Legal/Financial Gates ใน §17
+> ⚠️ **ค้างอยู่:** ฟังก์ชัน `expire_dispatch_offers()` บน Production DB ยังเป็นโค้ดคนละเวอร์ชันกับ PR #1 (§H ด้านล่าง) — ต้อง sync ด้วยมือก่อนใช้งานจริง
 > *เอกสารฉบับนี้ถูกซิงก์กับ [docs/HANDOFF.md](file:///d:/system%20make/Ran-R-HAN/docs/HANDOFF.md)*
 
 ---
@@ -129,13 +130,32 @@
   - รับงานได้เฉพาะตอนมี Work Session เปิดอยู่ (§6 Online-First) และปิดงานจะยกเลิก Offer ที่ค้างอยู่ทันที
   - เวลาและพิกัดยึดจากเซิร์ฟเวอร์เป็นหลัก (`server_received_at`)
 
+### H. Dispatch Timeout — Atomic RPC + Hardening ([PR #1](https://github.com/lannatc-sys/RAN-R-HAN/pull/1)) — *ตรวจสอบล่าสุด 2026-09-12*
+
+- **ปัญหาเดิม:** `timeoutOfferAction()` เดิม query offers ที่หมดเวลาแล้ววน loop update ทีละแถวจาก JS — เปิดช่องให้ cron วิ่งซ้อนกัน (concurrent run) แก้ไข offer เดียวกันพร้อมกัน และถ้า RPC/DB error จะถูกกลืนเงียบเป็น "1 error" มองจากภายนอกเหมือนสำเร็จ
+- **แก้แล้ว (migration [`20260912000001_dispatch_timeout_atomic.sql`](file:///d:/system%20make/Ran-R-HAN/supabase/migrations/20260912000001_dispatch_timeout_atomic.sql)):**
+  1. ย้าย logic ทั้งหมดเข้า RPC เดียว `expire_dispatch_offers()` — ใช้ `pg_try_advisory_xact_lock` กันสอง cron รันซ้อน + `FOR UPDATE` ล็อกแถวระหว่างประมวลผล ทำงานใน transaction เดียวจึง atomic
+  2. จำกัดสิทธิ์ `SECURITY DEFINER`: `REVOKE ALL` จาก `public`/`anon`/`authenticated`, `GRANT EXECUTE` ให้ `service_role` เท่านั้น
+  3. `search_path` ตั้งผ่าน SET clause ของตัวฟังก์ชัน (ไม่ใช่ `SET` ใน body) — กัน search_path รั่วไปติด connection อื่นตอน pool reuse (Supavisor/PgBouncer transaction mode)
+  4. `timeoutOfferAction()` และ `/api/cron/dispatch-timeout` เปลี่ยนจาก "กลืน error คืนศูนย์" เป็น **throw / ตอบ 502** เมื่อ RPC ล้มเหลวจริง — จุดเรียกแบบ opportunistic sweep ใน `dispatchOrderAction` ยังคง try/catch แบบ non-critical ตามเดิม
+  5. เพิ่ม regression test 18 รายการ (`test/cron-dispatch-timeout.test.ts`) ผูกเข้า `npm test`/`test:unit` แล้ว (ของเดิมมีไฟล์แต่ไม่เคยถูกเรียกจากสอง script นี้)
+  6. เพิ่ม `scripts/validate-migration.js` (เช็คโครงสร้างไฟล์ SQL แบบ static ไม่แตะ DB) และ `scripts/verify-rpc.js` (เช็คจริงกับ DB ผ่าน `DATABASE_URL` — **รันแล้วจะ mutate ข้อมูลจริง** ต้องระวังว่าเล็งไปที่ DB ไหน)
+- **ตรวจสอบกับ Production จริง (Supabase project `RAN-R-HAN` / `hqfzahyvwsjrvlgvaxda`) แล้วพบ:**
+  - ✅ `expire_dispatch_offers()` มีอยู่จริง, `SECURITY DEFINER = true`, สิทธิ์ EXECUTE เหลือแค่ `postgres` (owner) + `service_role` ตรงตามที่ตั้งใจ
+  - ⚠️ **โค้ดที่รันอยู่จริงยังเป็นเวอร์ชันก่อนข้อ 3** (ยังใช้ `SET search_path` แบบ in-body) — ถูก apply ผ่าน `scripts/run-db.js` ก่อนหน้านี้ ไม่ได้ผ่าน Supabase migration tracking (`list_migrations` เลยไม่เห็น `20260912000001` — ปกติ ไม่ใช่บั๊ก)
+  - พยายาม sync ให้ตรง PR ล่าสุดผ่าน Supabase MCP (`apply_migration`) แล้ว **ถูกบล็อกโดย Claude Code auto-mode safety classifier** (DDL เขียนเข้า production ต้องขอสิทธิ์เพิ่มที่ผู้ใช้ตั้งเองในการตั้งค่า ไม่สามารถ bypass จากในแชทได้)
+- **ต้องทำต่อ (ค้างอยู่ ยังไม่เสร็จ):** Sync production ให้ตรงกับไฟล์ migration ปัจจุบันในมือใดมือหนึ่ง:
+  1. รัน `node scripts/run-db.js` จาก terminal ของเครื่อง dev เอง (อ่าน `DATABASE_URL` จาก `.env.local` อัตโนมัติ), **หรือ**
+  2. Copy เนื้อหาไฟล์ [`20260912000001_dispatch_timeout_atomic.sql`](file:///d:/system%20make/Ran-R-HAN/supabase/migrations/20260912000001_dispatch_timeout_atomic.sql) ไปรันใน Supabase Dashboard → SQL Editor โดยตรง
+  - เป็น `CREATE OR REPLACE FUNCTION` + `REVOKE`/`GRANT`/`COMMENT` ล้วนๆ — idempotent ไม่แตะ/ไม่ลบข้อมูลใน `dispatch_offers`/`orders` เลย ปลอดภัยที่จะรันซ้ำได้
+
 ---
 
 ## 🛡️ 3. สถานะการตรวจสอบคุณภาพ (Quality Gates)
 
 | การทดสอบ | คำสั่ง | สถานะ | หมายเหตุ |
 | :--- | :--- | :---: | :--- |
-| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 117/117 tests ผ่านทั้งหมด รวม Rider P0 security regression tests 6 รายการ |
+| **Unit Tests** | `pnpm run test:unit` | 🟢 PASS | 135/135 tests ผ่านทั้งหมด รวม Rider P0 security regression tests 6 รายการ และ Dispatch Timeout RPC regression tests 18 รายการ (§H) |
 | **Integration & Smoke** | `pnpm test` | 🟢 PASS | ครอบคลุม Auth, Orders, Payment, KDS, Delivery, Legal, Telegram & Rider |
 | **Next.js Production Build** | `pnpm build` | 🟢 PASS | ผ่านครบ 35/35 routes ไม่มี Error (รวม /rider และ /rider/login) |
 | **TypeScript Strict** | `npx tsc --noEmit` | 🟢 PASS | ไม่มี Error |
@@ -164,7 +184,8 @@
 1. **ตั้งพิกัดร้านในระบบ:** กรอก `shops.shop_lat` / `shops.shop_lng` ของร้านที่เปิดใช้ระบบจัดส่ง — ถ้าไม่มีพิกัดร้าน ระบบจะ fallback ไปใช้พิกัดลูกค้าเป็นจุดค้นหาไรเดอร์ (แม่นน้อยกว่า)
 2. **สร้างบัญชีไรเดอร์จริง:** เพิ่มไรเดอร์ที่ `/admin/riders` แล้วผูก `auth_user_id` กับบัญชี Supabase Auth เพื่อให้ล็อกอินที่ `/rider` ได้
 3. **แจ้งเตือน Offer ถึงไรเดอร์:** ตอนนี้หน้า `/rider` ใช้การ Poll ทุก 5 วินาที — ขั้นถัดไปควรต่อ Web Push หรือ Telegram Bot ให้ไรเดอร์ (ฟังก์ชัน `notifyRiderViaTelegram` ใน `src/app/actions/dispatch.ts` ยังเป็น stub เขียน log อย่างเดียว)
-4. **ตั้ง Scheduler ให้ `/api/cron/dispatch-timeout`:** ปัจจุบันระบบเก็บกวาด Offer หมดเวลาตอนเริ่ม dispatch รอบใหม่อยู่แล้ว ถ้าต้องการให้ไวขึ้นให้ตั้งตัวจับเวลาภายนอก (เช่น cron-job.org ฟรี) ยิงทุก 1 นาทีพร้อม Header `Authorization: Bearer <CRON_SECRET>`
-5. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
-6. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
-7. **Blocker ก่อน Production ของระบบไรเดอร์ (§17):** โครงสร้างกองกลาง Rider Pool, สัญญา Rider Agreement, ผู้ดูแลบัญชีกลาง และเรื่องภาษี ยังต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดใช้จริง
+4. **Sync Production DB ให้ตรงกับ migration ล่าสุด (บล็อกอยู่ ดู §H):** `expire_dispatch_offers()` บน production ยังเป็นเวอร์ชันเก่ากว่า PR #1 — รัน `node scripts/run-db.js` หรือ paste SQL ใน Supabase Dashboard ก่อน
+5. **ตั้ง Scheduler ให้ `/api/cron/dispatch-timeout`:** ตอนนี้มี RPC atomic แล้ว (§H) แต่ยังต้องพึ่งการ sweep ตอนเริ่ม dispatch รอบใหม่เป็นหลัก ถ้าต้องการให้ไวขึ้นให้ตั้งตัวจับเวลาภายนอก (เช่น cron-job.org ฟรี) ยิงทุก 1 นาทีพร้อม Header `Authorization: Bearer <CRON_SECRET>`
+6. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
+7. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
+8. **Blocker ก่อน Production ของระบบไรเดอร์ (§17):** โครงสร้างกองกลาง Rider Pool, สัญญา Rider Agreement, ผู้ดูแลบัญชีกลาง และเรื่องภาษี ยังต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดใช้จริง
