@@ -36,13 +36,31 @@ async function handleRetention(req: NextRequest) {
     // 2. คำนวณวันย้อนหลัง 365 วัน (1 ปี)
     const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
 
-    // ก) ลบออเดอร์ที่ยกเลิก และไม่เคยชำระเงินสำเร็จ เกิน 90 วัน
-    const { data: deletedOrders, error: delOrderErr } = await admin
+    // ก) หาออเดอร์ที่เคยมีการชำระเงินสำเร็จ (verified) ไว้ก่อน — ห้ามลบออเดอร์เหล่านี้แม้จะถูกยกเลิก
+    // เพราะ payments.order_id เป็น ON DELETE CASCADE การลบ order จะทำลายหลักฐานการเงิน/บัญชีไปด้วย
+    const { data: paidOrderRows, error: paidLookupErr } = await admin
+      .from('payments')
+      .select('order_id')
+      .eq('status', 'verified');
+
+    if (paidLookupErr) {
+      console.error('[Retention Error - Paid Order Lookup]:', paidLookupErr);
+    }
+
+    const paidOrderIds = (paidOrderRows ?? []).map((p) => p.order_id);
+
+    // ข) ลบออเดอร์ที่ยกเลิก และไม่เคยชำระเงินสำเร็จ เกิน 90 วัน
+    let orderDeleteQuery = admin
       .from('orders')
       .delete()
       .eq('status', 'cancelled')
-      .lt('created_at', ninetyDaysAgo)
-      .select('id');
+      .lt('created_at', ninetyDaysAgo);
+
+    if (paidOrderIds.length > 0) {
+      orderDeleteQuery = orderDeleteQuery.not('id', 'in', `(${paidOrderIds.join(',')})`);
+    }
+
+    const { data: deletedOrders, error: delOrderErr } = await orderDeleteQuery.select('id');
 
     if (delOrderErr) {
       console.error('[Retention Error - Orders]:', delOrderErr);

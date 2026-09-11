@@ -78,13 +78,40 @@ async function runDatabaseSetup() {
       console.log('   [SUCCESS] Telegram notifications & link tokens schema applied.\n');
     }
 
-    // 1.5 Run dispatch_timeout_atomic.sql (Cron dispatch timeout - RPC + security)
+    // 1.5-1.10 Run rider system migrations, in order (tables dispatch_offers/orders.dispatch_status
+    // etc. come from these — 20260912000001 below depends on them and will fail without this)
+    const riderMigrations = [
+      '20260911000001_rider_system.sql',
+      '20260911000002_rider_rls.sql',
+      '20260911000003_rider_rpc_functions.sql',
+      '20260911000004_rider_storage_and_shop_geo.sql',
+      '20260911000005_rider_p0_hardening.sql',
+      '20260911000006_rider_concurrency_lock.sql',
+    ];
+    for (const [i, name] of riderMigrations.entries()) {
+      const p = path.join(__dirname, '..', 'supabase', 'migrations', name);
+      if (fs.existsSync(p)) {
+        console.log(`1.${5 + i} Executing supabase/migrations/${name}...`);
+        await client.query(fs.readFileSync(p, 'utf-8'));
+        console.log('   [SUCCESS] applied.\n');
+      }
+    }
+
+    // 1.11 Run dispatch_timeout_atomic.sql (Cron dispatch timeout - RPC + security)
     const dispatchTimeoutPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260912000001_dispatch_timeout_atomic.sql');
     if (fs.existsSync(dispatchTimeoutPath)) {
-      console.log('1.5 Executing supabase/migrations/20260912000001_dispatch_timeout_atomic.sql...');
+      console.log('1.11 Executing supabase/migrations/20260912000001_dispatch_timeout_atomic.sql...');
       const dispatchTimeoutSql = fs.readFileSync(dispatchTimeoutPath, 'utf-8');
       await client.query(dispatchTimeoutSql);
       console.log('   [SUCCESS] Dispatch timeout RPC and security applied.\n');
+    }
+
+    // 1.12 Run lock_down_payment_rpc.sql (revoke anon/authenticated on verify_and_confirm_payment)
+    const lockPaymentPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260912000002_lock_down_payment_rpc.sql');
+    if (fs.existsSync(lockPaymentPath)) {
+      console.log('1.12 Executing supabase/migrations/20260912000002_lock_down_payment_rpc.sql...');
+      await client.query(fs.readFileSync(lockPaymentPath, 'utf-8'));
+      console.log('   [SUCCESS] Payment RPC lockdown applied.\n');
     }
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
