@@ -3,7 +3,6 @@
 > **บันทึกสถานะการส่งมอบงาน (Handoff Document)**  
 > **วันเวลาที่อัปเดตล่าสุด:** 2026-09-12 (GMT+7) — Dispatch Timeout Atomic RPC hardening
 > **สถานะภาพรวม:** 🟡 Quality Gate ผ่าน; Rider P0 แก้แล้ว แต่ยังไม่ Production Ready จนกว่าจะปิด P1 และ Legal/Financial Gates ใน §17
-> ⚠️ **ค้างอยู่:** ฟังก์ชัน `expire_dispatch_offers()` บน Production DB ยังเป็นโค้ดคนละเวอร์ชันกับ PR #1 (§H ด้านล่าง) — ต้อง sync ด้วยมือก่อนใช้งานจริง
 > *เอกสารฉบับนี้ถูกซิงก์กับ [docs/HANDOFF.md](file:///d:/system%20make/Ran-R-HAN/docs/HANDOFF.md)*
 
 ---
@@ -142,12 +141,8 @@
   6. เพิ่ม `scripts/validate-migration.js` (เช็คโครงสร้างไฟล์ SQL แบบ static ไม่แตะ DB) และ `scripts/verify-rpc.js` (เช็คจริงกับ DB ผ่าน `DATABASE_URL` — **รันแล้วจะ mutate ข้อมูลจริง** ต้องระวังว่าเล็งไปที่ DB ไหน)
 - **ตรวจสอบกับ Production จริง (Supabase project `RAN-R-HAN` / `hqfzahyvwsjrvlgvaxda`) แล้วพบ:**
   - ✅ `expire_dispatch_offers()` มีอยู่จริง, `SECURITY DEFINER = true`, สิทธิ์ EXECUTE เหลือแค่ `postgres` (owner) + `service_role` ตรงตามที่ตั้งใจ
-  - ⚠️ **โค้ดที่รันอยู่จริงยังเป็นเวอร์ชันก่อนข้อ 3** (ยังใช้ `SET search_path` แบบ in-body) — ถูก apply ผ่าน `scripts/run-db.js` ก่อนหน้านี้ ไม่ได้ผ่าน Supabase migration tracking (`list_migrations` เลยไม่เห็น `20260912000001` — ปกติ ไม่ใช่บั๊ก)
-  - พยายาม sync ให้ตรง PR ล่าสุดผ่าน Supabase MCP (`apply_migration`) แล้ว **ถูกบล็อกโดย Claude Code auto-mode safety classifier** (DDL เขียนเข้า production ต้องขอสิทธิ์เพิ่มที่ผู้ใช้ตั้งเองในการตั้งค่า ไม่สามารถ bypass จากในแชทได้)
-- **ต้องทำต่อ (ค้างอยู่ ยังไม่เสร็จ):** Sync production ให้ตรงกับไฟล์ migration ปัจจุบันในมือใดมือหนึ่ง:
-  1. รัน `node scripts/run-db.js` จาก terminal ของเครื่อง dev เอง (อ่าน `DATABASE_URL` จาก `.env.local` อัตโนมัติ), **หรือ**
-  2. Copy เนื้อหาไฟล์ [`20260912000001_dispatch_timeout_atomic.sql`](file:///d:/system%20make/Ran-R-HAN/supabase/migrations/20260912000001_dispatch_timeout_atomic.sql) ไปรันใน Supabase Dashboard → SQL Editor โดยตรง
-  - เป็น `CREATE OR REPLACE FUNCTION` + `REVOKE`/`GRANT`/`COMMENT` ล้วนๆ — idempotent ไม่แตะ/ไม่ลบข้อมูลใน `dispatch_offers`/`orders` เลย ปลอดภัยที่จะรันซ้ำได้
+  - ระหว่างตรวจครั้งแรกพบว่าโค้ดที่รันอยู่จริงยังเป็นเวอร์ชันก่อนย้าย `SET search_path` มาเป็น function attribute — ผู้ใช้ paste SQL รันเองใน Supabase Dashboard → SQL Editor แล้ว (`Success. No rows returned`)
+  - **✅ ยืนยันแล้วว่า sync ตรงกับ PR #1 ล่าสุด:** `proconfig` ของฟังก์ชันบน production คือ `search_path=public, extensions` ตรงกับ commit `0fe31e7`, สิทธิ์ EXECUTE ยังเหลือแค่ `postgres`/`service_role` เหมือนเดิม — ปิดรายการนี้แล้ว
 
 ---
 
@@ -184,8 +179,7 @@
 1. **ตั้งพิกัดร้านในระบบ:** กรอก `shops.shop_lat` / `shops.shop_lng` ของร้านที่เปิดใช้ระบบจัดส่ง — ถ้าไม่มีพิกัดร้าน ระบบจะ fallback ไปใช้พิกัดลูกค้าเป็นจุดค้นหาไรเดอร์ (แม่นน้อยกว่า)
 2. **สร้างบัญชีไรเดอร์จริง:** เพิ่มไรเดอร์ที่ `/admin/riders` แล้วผูก `auth_user_id` กับบัญชี Supabase Auth เพื่อให้ล็อกอินที่ `/rider` ได้
 3. **แจ้งเตือน Offer ถึงไรเดอร์:** ตอนนี้หน้า `/rider` ใช้การ Poll ทุก 5 วินาที — ขั้นถัดไปควรต่อ Web Push หรือ Telegram Bot ให้ไรเดอร์ (ฟังก์ชัน `notifyRiderViaTelegram` ใน `src/app/actions/dispatch.ts` ยังเป็น stub เขียน log อย่างเดียว)
-4. **Sync Production DB ให้ตรงกับ migration ล่าสุด (บล็อกอยู่ ดู §H):** `expire_dispatch_offers()` บน production ยังเป็นเวอร์ชันเก่ากว่า PR #1 — รัน `node scripts/run-db.js` หรือ paste SQL ใน Supabase Dashboard ก่อน
-5. **ตั้ง Scheduler ให้ `/api/cron/dispatch-timeout`:** ตอนนี้มี RPC atomic แล้ว (§H) แต่ยังต้องพึ่งการ sweep ตอนเริ่ม dispatch รอบใหม่เป็นหลัก ถ้าต้องการให้ไวขึ้นให้ตั้งตัวจับเวลาภายนอก (เช่น cron-job.org ฟรี) ยิงทุก 1 นาทีพร้อม Header `Authorization: Bearer <CRON_SECRET>`
-6. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
-7. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
-8. **Blocker ก่อน Production ของระบบไรเดอร์ (§17):** โครงสร้างกองกลาง Rider Pool, สัญญา Rider Agreement, ผู้ดูแลบัญชีกลาง และเรื่องภาษี ยังต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดใช้จริง
+4. **ตั้ง Scheduler ให้ `/api/cron/dispatch-timeout`:** ตอนนี้มี RPC atomic แล้ว (§H, sync ขึ้น production เรียบร้อย) แต่ยังต้องพึ่งการ sweep ตอนเริ่ม dispatch รอบใหม่เป็นหลัก ถ้าต้องการให้ไวขึ้นให้ตั้งตัวจับเวลาภายนอก (เช่น cron-job.org ฟรี) ยิงทุก 1 นาทีพร้อม Header `Authorization: Bearer <CRON_SECRET>`
+5. **ทดสอบ Web Push บนมือถือจริง:** ทดสอบเปิดรับแจ้งเตือนสำหรับพนักงาน/ห้องครัว (iOS Safari PWA + Android)
+6. **ระบบสลิปบน Production:** นำ SlipOK Webhook URL และ Secret ไปใส่ใน SlipOK Dashboard ของร้านป้าแดง
+7. **Blocker ก่อน Production ของระบบไรเดอร์ (§17):** โครงสร้างกองกลาง Rider Pool, สัญญา Rider Agreement, ผู้ดูแลบัญชีกลาง และเรื่องภาษี ยังต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดใช้จริง
