@@ -144,6 +144,16 @@
   - ระหว่างตรวจครั้งแรกพบว่าโค้ดที่รันอยู่จริงยังเป็นเวอร์ชันก่อนย้าย `SET search_path` มาเป็น function attribute — ผู้ใช้ paste SQL รันเองใน Supabase Dashboard → SQL Editor แล้ว (`Success. No rows returned`)
   - **✅ ยืนยันแล้วว่า sync ตรงกับ PR #1 ล่าสุด:** `proconfig` ของฟังก์ชันบน production คือ `search_path=public, extensions` ตรงกับ commit `0fe31e7`, สิทธิ์ EXECUTE ยังเหลือแค่ `postgres`/`service_role` เหมือนเดิม — ปิดรายการนี้แล้ว
 
+### I. External Review (CODEX) — P0/P1 Fixes ([PR #1](https://github.com/lannatc-sys/RAN-R-HAN/pull/1)) — *ปิดครบแล้ว 2026-09-12*
+
+รับรีวิวจากภายนอก (CODEX) บน PR #1 ที่ commit `0bccbe0` พบ P0 2 ข้อ + P1 หลายข้อ ตรวจสอบแต่ละข้อกับโค้ด/ฐานข้อมูลจริงก่อนแก้ (ไม่เชื่อรายงานเปล่าๆ) แล้วปิดครบ:
+
+- **P0 #1 (`6b8e693`):** `data-retention` cron ลบออเดอร์ยกเลิกเกิน 90 วันโดยไม่เช็ค payment status — และ `payments.order_id` เป็น `ON DELETE CASCADE` แปลว่าลบ order = ลบหลักฐานจ่ายเงินทิ้งถาวร แก้ให้เช็คก่อนว่ามี payment ที่ `verified` ไหม
+- **P0 #2 (`6b8e693`, เสริมด้วย `e18bf1b`):** `scripts/run-db.js` (path `npm run db:setup`) ข้าม rider migrations ทั้ง 6 ไฟล์และ `lock_down_payment_rpc` เพิ่มเข้าไปครบ, ภายหลังพบว่าเมื่อรันจริงกับ production ที่มี migration เก่าอยู่แล้ว `CREATE POLICY` (ไม่มี `IF NOT EXISTS`) ทำให้ script abort ทั้งชุด — refactor เป็น `runMigrationFile()` helper ที่ skip error class "already exists" (`42710`/`42P07`/`42723`/`42701`) แทนการ abort
+- **P1 (`739fdae`):** `verify-rpc.js` exit 0 แม้ check ล้มเหลว (แก้ให้ exit 1), rider session-start แข่งกันแล้วได้ 500 แทนคืน session เดิม (จับ `23505` แล้ว re-select), dispatch race — เพิ่ม partial unique index `uq_dispatch_offers_one_active_per_order` (`WHERE status='offered'`) กัน order เดียวมี offer active ซ้ำ + reorder timeout sweep ให้รันก่อน mark `dispatching` กันสถานะโดน undo, PII (เบอร์โทรไรเดอร์) หลุดใน log
+- **ยืนยันกับ production จริงครบทุกจุด:** `verify_and_confirm_payment()` และ trigger function ทั้ง 3 ตัวมี `search_path` pin ถูกต้อง, สิทธิ์ EXECUTE จำกัดแค่ `service_role`, index `uq_dispatch_offers_one_active_per_order` มีอยู่จริงบน `dispatch_offers`
+- **ยังไม่ทำ (นอกเหนือ code fix — ต้องตัดสินใจแยก):** ระบบแจ้งเตือนไรเดอร์จริง (Telegram/Push — ตอนนี้เป็น stub log), fallback พิกัดลูกค้าแทนร้าน (product decision), GitHub Actions CI, legal review ของ workflow ยืนยันจ่ายเงิน, รีแฟคเตอร์ `RiderClient.tsx`/routes ที่ auth ซ้ำ, เคลียร์ `any`/string-state, แยก PR ก้อนใหญ่
+
 ---
 
 ## 🛡️ 3. สถานะการตรวจสอบคุณภาพ (Quality Gates)
