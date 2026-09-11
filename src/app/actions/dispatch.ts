@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { notifyRiderNewOffer } from '@/lib/rider-notification';
 
 // ==============================================================================
 // Types
@@ -52,7 +53,7 @@ export async function dispatchOrderAction(
   // 2. ดึงข้อมูล Order
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select('id, shop_id, delivery_lat, delivery_lng, dispatch_status')
+    .select('id, order_no, shop_id, delivery_lat, delivery_lng, delivery_address, total, dispatch_status, estimated_distance_km')
     .eq('id', orderId)
     .single();
 
@@ -133,9 +134,24 @@ export async function dispatchOrderAction(
     typeof shopGeo?.shop_lat === 'number' && typeof shopGeo?.shop_lng === 'number';
 
   if (!hasShopGeo) {
-    console.warn(
-      `[dispatch] ร้าน ${order.shop_id} ยังไม่ได้ตั้งพิกัดร้าน — fallback ใช้พิกัดปลายทางลูกค้าเป็นจุดค้นหาไรเดอร์`
-    );
+    if (process.env.ALLOW_GEO_FALLBACK === 'true') {
+      console.warn(
+        `[dispatch] [WARNING] ร้าน ${order.shop_id} ยังไม่ได้ตั้งพิกัดร้าน — fallback ใช้พิกัดปลายทางลูกค้าเป็นจุดค้นหาไรเดอร์ (ALLOW_GEO_FALLBACK=true)`
+      );
+    } else {
+      console.error(
+        `[dispatch] [ERROR] ร้าน ${order.shop_id} ยังไม่ได้ตั้งพิกัดร้าน (shop_lat, shop_lng) — ปฏิเสธการ Dispatch`
+      );
+      await supabase
+        .from('orders')
+        .update({ dispatch_status: 'pending' })
+        .eq('id', orderId);
+
+      return {
+        success: false,
+        error: 'ร้านค้ายังไม่ได้ตั้งพิกัดร้าน (shop_lat, shop_lng) กรุณาตั้งค่าพิกัดร้านที่หน้าตั้งค่าก่อนใช้ระบบจัดส่ง',
+      };
+    }
   }
 
   // ใช้พิกัดร้านทั้งคู่ หรือไม่ใช้เลย — ห้ามผสม lat ร้านกับ lng ลูกค้า
@@ -202,8 +218,16 @@ export async function dispatchOrderAction(
     return { success: false, error: 'ไม่สามารถสร้าง Dispatch Offer ได้' };
   }
 
-  // 8. แจ้ง Rider ผ่าน Telegram (Phase 1 — ชั่วคราวแทน Mobile Push)
-  await notifyRiderViaTelegram(adminClient, bestRider.id, orderId, newOffer.id, OFFER_TIMEOUT_SECONDS);
+  // 8. แจ้ง Rider ผ่าน Web Push และ Telegram (Phase 1)
+  await notifyRiderNewOffer(adminClient, bestRider.id, {
+    orderId,
+    offerId: newOffer.id,
+    orderNo: order.order_no ?? orderId.slice(0, 8),
+    deliveryAddress: order.delivery_address ?? '',
+    estimatedDistanceKm: order.estimated_distance_km ?? null,
+    total: order.total ?? undefined,
+    timeoutSeconds: OFFER_TIMEOUT_SECONDS,
+  });
 
   return {
     success: true,
@@ -289,45 +313,7 @@ function scoreCandidates(candidates: CandidateRider[]): CandidateRider[] {
   return [...candidates].sort((a, b) => calculateScore(b) - calculateScore(a));
 }
 
-// ==============================================================================
-// notifyRiderViaTelegram — แจ้ง Offer ผ่าน Telegram (Phase 1 fallback)
-// ==============================================================================
 
-async function notifyRiderViaTelegram(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  adminClient: any,
-  riderId: string,
-  orderId: string,
-  offerId: string,
-  timeoutSeconds: number
-) {
-  try {
-    // ดึง telegram_chat_id ของไรเดอร์ (เก็บใน riders.note หรือตาราง metadata — Phase 1 placeholder)
-    // TODO: เพิ่มคอลัมน์ telegram_chat_id ใน riders table เมื่อระบบ mobile พร้อม
-    const { data: rider } = await adminClient
-      .from('riders')
-      .select('display_name, phone')
-      .eq('id', riderId)
-      .single();
-
-    if (!rider) return;
-
-    // Redact phone number — production logs shouldn't carry raw PII.
-    const maskedPhone = rider.phone ? `xxx-xxx-${String(rider.phone).slice(-2)}` : 'unknown';
-
-    // Log notification attempt (จะส่งผ่าน Telegram ได้เมื่อ rider มี chat_id)
-    console.log(
-      `[dispatch] 📱 Offer ${offerId} → Rider ${riderId} (${rider.display_name}, phone ${maskedPhone})` +
-      ` | Order: ${orderId} | Timeout: ${timeoutSeconds}s`
-    );
-
-    // TODO Phase 1c: เมื่อ riders มีคอลัมน์ telegram_chat_id
-    // await sendTelegramMessage(rider.telegram_chat_id, formatOfferMessage(...));
-  } catch (err) {
-    // Non-critical — Dispatch ยังสำเร็จแม้แจ้งเตือนล้มเหลว
-    console.warn('[dispatch] Telegram notify failed (non-critical):', err);
-  }
-}
 
 // ==============================================================================
 // timeoutOfferAction — Cron Job เรียกตรวจ Offer ที่หมดเวลา

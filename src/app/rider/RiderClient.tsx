@@ -19,6 +19,7 @@ import {
   Bike, Power, MapPin, Navigation, Phone, Camera, Loader2,
   AlertCircle, CheckCircle2, WifiOff, LogOut, Wallet, PackageCheck,
 } from 'lucide-react';
+import { PushNotificationPrompt } from '@/components/admin/PushNotificationPrompt';
 
 const POLL_INTERVAL_MS = 5000;
 const SUMMARY_INTERVAL_MS = 60000;
@@ -464,6 +465,11 @@ export function RiderClient({
               {rt.startedAt} {new Date(session.started_at).toLocaleTimeString(lang === 'th' ? 'th-TH' : 'en-GB', { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
+        </div>
+
+        {/* Web Push Prompt for Rider */}
+        <div className="mb-3">
+          <PushNotificationPrompt shopId={rider.shop_id} />
         </div>
 
         <button

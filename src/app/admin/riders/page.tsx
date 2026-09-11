@@ -46,7 +46,9 @@ export default async function RidersPage() {
       status,
       performance_score,
       created_at,
-      auth_user_id
+      auth_user_id,
+      telegram_chat_id,
+      push_enabled
     `)
     .eq('shop_id', shopId)
     .order('created_at', { ascending: false });
