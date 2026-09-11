@@ -89,15 +89,18 @@ export function parseFacebookComment(
     itemsSummary = tokens.slice(1).join(' ').trim();
   }
 
-  // หากมีคำว่า "ข้าง", "หน้า", "จุดสังเกต", "ซอย" ให้แยกเป็น note
+  // หากมีคำว่า "ข้าง", "หน้า", "จุดสังเกต", "ซอย" ให้แยกเป็น note โดยเอาคำที่ปรากฏก่อนสุด
   const noteKeywords = ['ข้าง', 'ซอย', 'หน้าตู้', 'ประตู', 'ชั้น', 'เบอร์'];
+  let earliestIdx = -1;
   for (const kw of noteKeywords) {
     const idx = itemsSummary.indexOf(kw);
-    if (idx !== -1) {
-      locationNote = itemsSummary.substring(idx).trim();
-      itemsSummary = itemsSummary.substring(0, idx).trim();
-      break;
+    if (idx !== -1 && (earliestIdx === -1 || idx < earliestIdx)) {
+      earliestIdx = idx;
     }
+  }
+  if (earliestIdx !== -1) {
+    locationNote = itemsSummary.substring(earliestIdx).trim();
+    itemsSummary = itemsSummary.substring(0, earliestIdx).trim();
   }
 
   if (!itemsSummary && tokens.length > 0) {
