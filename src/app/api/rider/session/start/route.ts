@@ -77,6 +77,27 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (insertError || !newSession) {
+      // Unique constraint uq_rider_one_open_work_session means a concurrent
+      // request already opened a session for this rider between our check
+      // above and this insert. Re-select and return it — same shape as the
+      // "already open" response — instead of a raw 500.
+      if (insertError?.code === '23505') {
+        const { data: raceSession } = await supabase
+          .from('rider_work_sessions')
+          .select('id, started_at')
+          .eq('rider_id', rider.id)
+          .eq('status', 'open')
+          .maybeSingle();
+
+        if (raceSession) {
+          return NextResponse.json({
+            session_id: raceSession.id,
+            started_at: raceSession.started_at,
+            resumed: true,
+          });
+        }
+      }
+
       console.error('[session/start] Insert error:', insertError);
       return NextResponse.json(
         { error: 'ไม่สามารถเปิด Work Session ได้' },

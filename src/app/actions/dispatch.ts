@@ -77,20 +77,24 @@ export async function dispatchOrderAction(
     return { success: false, error: 'Order ไม่มีพิกัดปลายทาง (delivery_lat/lng)' };
   }
 
-  // 3. อัปเดต Order เป็น dispatching
-  await supabase
-    .from('orders')
-    .update({ dispatch_status: 'dispatching' })
-    .eq('id', orderId);
-
-  // 4. หา round ล่าสุดที่ dispatch แล้ว
-  // เก็บกวาด Offer ที่หมดเวลาก่อนเริ่มรอบใหม่ (ไม่ต้องพึ่ง Cron รายนาที = ประหยัดต้นทุน)
+  // 3. เก็บกวาด Offer ที่หมดเวลาก่อนเริ่มรอบใหม่ (ไม่ต้องพึ่ง Cron รายนาที = ประหยัดต้นทุน)
+  // ต้องรันก่อน mark order เป็น dispatching เสมอ — ถ้า order นี้มี offer ค้างจากรอบก่อน
+  // ที่หมดเวลาไปแล้วแต่ cron ยังไม่ทัน sweep, expire_dispatch_offers() จะ reset order
+  // กลับเป็น pending ทันที ถ้า sweep รันหลัง mark dispatching มันจะ undo สถานะที่เพิ่งตั้งไป
+  // และปล่อยให้ order ค้างเป็น pending ทั้งที่ offer รอบใหม่ถูกสร้างและ active อยู่จริง
   try {
     await timeoutOfferAction();
   } catch (err) {
     console.warn('[dispatch] timeout sweep failed (non-critical):', err);
   }
 
+  // 4. อัปเดต Order เป็น dispatching
+  await supabase
+    .from('orders')
+    .update({ dispatch_status: 'dispatching' })
+    .eq('id', orderId);
+
+  // 5. หา round ล่าสุดที่ dispatch แล้ว
   const { data: lastOffer } = await supabase
     .from('dispatch_offers')
     .select('dispatch_round')
@@ -308,9 +312,12 @@ async function notifyRiderViaTelegram(
 
     if (!rider) return;
 
+    // Redact phone number — production logs shouldn't carry raw PII.
+    const maskedPhone = rider.phone ? `xxx-xxx-${String(rider.phone).slice(-2)}` : 'unknown';
+
     // Log notification attempt (จะส่งผ่าน Telegram ได้เมื่อ rider มี chat_id)
     console.log(
-      `[dispatch] 📱 Offer ${offerId} → Rider ${rider.display_name} (${rider.phone})` +
+      `[dispatch] 📱 Offer ${offerId} → Rider ${riderId} (${rider.display_name}, phone ${maskedPhone})` +
       ` | Order: ${orderId} | Timeout: ${timeoutSeconds}s`
     );
 

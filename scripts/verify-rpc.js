@@ -121,6 +121,10 @@ async function main() {
     }
 
     console.log('\n=== RPC Verification Complete ===');
+
+    if (!allPassed) {
+      process.exit(1);
+    }
   } catch (err) {
     console.error('Error during verification:', err.message);
     if (err.code === '42501') {
