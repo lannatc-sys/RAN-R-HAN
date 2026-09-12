@@ -205,3 +205,20 @@ SUPER_ADMIN_USER=             ← email superadmin (comma-separated)
 3. หน้าแผนที่ Leaflet + ปุ่มโทร + ปุ่มนำทาง
 4. `preorder_rounds` + `preorder_items` + Text Parser / OCR
 5. เชื่อมพรีออเดอร์ → สร้าง delivery_trip อัตโนมัติ
+
+## Rider System — บทเรียนจาก Phase 1 (2026-09-11)
+
+- **PostGIS บน Supabase อยู่ schema `extensions` ไม่ใช่ `public`** — ฟังก์ชันใดที่ประกาศ `set search_path = public` แล้วเรียก `ST_*` แบบไม่ระบุ schema จะพังตอน runtime ไม่ใช่ตอนสร้าง ต้องใช้ `set search_path = public, extensions` หรือเรียกแบบ `extensions.ST_...`
+- **trigger function ของโปรเจกต์นี้ชื่อ `handle_updated_at()`** (ไม่ใช่ `set_updated_at()`) — migration ใหม่ต้องอ้างชื่อนี้เท่านั้น
+- **`supabase-js .update()` ไม่ error เมื่ออัปเดตไม่โดนแถวไหนเลย** — ทุกจุดที่เป็น Compare-and-Swap (รับงาน, ปฏิเสธงาน, ตัดหมดเวลา) ต้องต่อ `.select()` แล้วเช็ค `length === 0` เสมอ ไม่งั้นจะรายงานว่าสำเร็จทั้งที่ไม่มีอะไรเกิดขึ้น
+- **`x != all(NULL)` ใน SQL คืนค่า NULL ทั้ง predicate** — array parameter ที่อาจเป็น NULL ต้องห่อ `coalesce(arr, '{}')` ไม่งั้น query จะไม่คืนแถวใดเลยแบบเงียบๆ
+- **`ALTER TYPE ... ADD VALUE` ใน DO block ทำไม่ได้** — ถ้าครอบด้วย `exception when others then null` จะกลืน error ไปเงียบๆ ทำให้คิดว่าเพิ่ม enum สำเร็จทั้งที่ไม่ได้เพิ่ม
+- **SECURITY DEFINER = ต้องเช็คสิทธิ์เอง** — ฟังก์ชันที่คืนพิกัดไรเดอร์ต้องมี `has_shop_access()` เสมอ (ยกเว้นเรียกด้วย service_role) ไม่งั้นข้อมูลตำแหน่งคนรั่วข้ามร้าน
+- **สรุปยอดรายวันต้องใช้เวลาไทย** — `date(updated_at)` เป็น UTC ทำให้ยอดของช่วง 00:00–07:00 น. ตกไปวันก่อนหน้า ต้องใช้ `(updated_at at time zone 'Asia/Bangkok')::date`
+- **ลำดับที่ปลอดภัยของการปิดงานไรเดอร์คือ อัปโหลด POD ก่อน แล้วค่อยบันทึก Event** — ถ้าบันทึก Event ก่อนแล้วอัปโหลดพลาด จะได้ออเดอร์ที่ระบุว่า "ส่งสำเร็จ" โดยไม่มีหลักฐานภาพ
+- **ลำดับอย่างเดียวไม่พอ: Event + POD claim + Order status ต้องอยู่ใน Database Transaction เดียว** — ใช้ `finalize_rider_delivery_event()` พร้อม row lock; ห้ามแยกเป็นหลายคำสั่งจาก API
+- **Rider ห้าม UPDATE `dispatch_offers` โดยตรงแม้ row เป็นของตัวเอง** — การ Accept/Reject ต้องผ่าน `respond_to_dispatch_offer()` เพื่อบังคับ Timeout, Work Session, Capacity และ Double-assignment guard แบบ atomic
+- **การเปลี่ยนสถานะที่กระทบ Capacity/กะงานของ Rider ต้องใช้ rider-scoped transaction advisory lock เดียวกัน** — `respond_to_dispatch_offer()` และ `close_rider_work_session()` ล็อกด้วย Rider ID ก่อนล็อกแถว เพื่อ serialize การ Accept หลายรายการและการ Accept ที่ชนกับ Close Session โดยไม่เกิด lock-order inversion
+- **Close Work Session ต้องเป็น Transaction** — ปิด Session, ลบ `rider_current_locations` และ Reject Offer ค้างผ่าน `close_rider_work_session()` เท่านั้น
+- **ไฟล์ POD เป็นข้อมูลส่วนบุคคลที่เข้าถึงผ่าน Platform API เท่านั้น** — private bucket ต้องไม่มี direct SELECT policy สำหรับ Rider/Staff; server ตรวจสิทธิ์ก่อนอ่านเสมอ
+- **Phase-1 Rider Rate ห้ามใช้สูตร 80/20** — Base Rate ที่ล็อกคือ 15 บาทสำหรับ 5 กม.แรก (ร้าน 7.50 + ลูกค้า 7.50); ระยะเกิน 5 กม.หรือไม่มีข้อมูลระยะทางต้อง Flag `PENDING_RATE_CARD` เพื่อให้คนตรวจ ห้ามเดาอัตราเพิ่มเอง

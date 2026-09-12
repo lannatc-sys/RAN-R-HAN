@@ -221,3 +221,58 @@ export async function updateFulfillmentChannelsAction(data: {
     return { success: false, error: err.message || 'Failed to update channels' };
   }
 }
+
+/**
+ * อัปเดตพิกัดที่ตั้งร้านค้า (shop_lat, shop_lng) สำหรับระบบจัดส่งและค้นหาไรเดอร์
+ */
+export async function updateShopGeoAction(data: {
+  shop_id: string;
+  shop_lat: number | null;
+  shop_lng: number | null;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { shop_id, shop_lat, shop_lng } = data;
+
+    if (!shop_id) {
+      return { success: false, error: 'ไม่พบรหัสร้านค้า' };
+    }
+
+    // Validation: ต้องระบุทั้งคู่ หรือเว้นว่างทั้งคู่
+    const hasLat = shop_lat !== null && shop_lat !== undefined && !isNaN(shop_lat);
+    const hasLng = shop_lng !== null && shop_lng !== undefined && !isNaN(shop_lng);
+
+    if ((hasLat && !hasLng) || (!hasLat && hasLng)) {
+      return { success: false, error: 'กรุณาระบุทั้งละติจูด (Latitude) และลองจิจูด (Longitude) ให้ครบถ้วน' };
+    }
+
+    if (hasLat && hasLng) {
+      if (shop_lat! < -90 || shop_lat! > 90) {
+        return { success: false, error: 'ละติจูดต้องอยู่ระหว่าง -90 ถึง 90 องศา' };
+      }
+      if (shop_lng! < -180 || shop_lng! > 180) {
+        return { success: false, error: 'ลองจิจูดต้องอยู่ระหว่าง -180 ถึง 180 องศา' };
+      }
+    }
+
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from('shops')
+      .update({
+        shop_lat: hasLat ? shop_lat : null,
+        shop_lng: hasLng ? shop_lng : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', shop_id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    safeRevalidate('/admin/settings');
+    return { success: true };
+  } catch (err: any) {
+    console.error('updateShopGeoAction error:', err);
+    return { success: false, error: err.message || 'Failed to update shop coordinates' };
+  }
+}
+

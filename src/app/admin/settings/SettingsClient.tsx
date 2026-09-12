@@ -10,6 +10,7 @@ import {
   grantSupportAccessAction,
   revokeSupportAccessAction,
   updateFulfillmentChannelsAction,
+  updateShopGeoAction,
 } from '@/app/actions/settings';
 import {
   updateShopTelegramSettingsAction,
@@ -39,6 +40,8 @@ import {
   Send,
   MessageSquare,
   ExternalLink,
+  MapPin,
+  Crosshair,
 } from 'lucide-react';
 
 interface SettingsClientProps {
@@ -136,6 +139,70 @@ export function SettingsClient({
     }
     setChannelsSuccess(true);
     setTimeout(() => setChannelsSuccess(false), 4000);
+  };
+
+  // Store Geo Coordinates State
+  const [shopLat, setShopLat] = useState<string>(
+    shop.shop_lat !== null && shop.shop_lat !== undefined ? String(shop.shop_lat) : ''
+  );
+  const [shopLng, setShopLng] = useState<string>(
+    shop.shop_lng !== null && shop.shop_lng !== undefined ? String(shop.shop_lng) : ''
+  );
+  const [isSavingGeo, setIsSavingGeo] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [geoSuccessMsg, setGeoSuccessMsg] = useState<string | null>(null);
+  const [geoErrorMsg, setGeoErrorMsg] = useState<string | null>(null);
+
+  const handleGetGps = () => {
+    if (!navigator.geolocation) {
+      setGeoErrorMsg('อุปกรณ์หรือเบราว์เซอร์นี้ไม่รองรับการดึงพิกัด GPS');
+      return;
+    }
+    setIsLocating(true);
+    setGeoErrorMsg(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setShopLat(position.coords.latitude.toFixed(6));
+        setShopLng(position.coords.longitude.toFixed(6));
+        setIsLocating(false);
+      },
+      (err) => {
+        setIsLocating(false);
+        setGeoErrorMsg(`ไม่สามารถดึงพิกัดได้: ${err.message}`);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleSaveGeo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingGeo(true);
+    setGeoErrorMsg(null);
+    setGeoSuccessMsg(null);
+
+    const parsedLat = shopLat.trim() !== '' ? parseFloat(shopLat.trim()) : null;
+    const parsedLng = shopLng.trim() !== '' ? parseFloat(shopLng.trim()) : null;
+
+    if ((parsedLat !== null && isNaN(parsedLat)) || (parsedLng !== null && isNaN(parsedLng))) {
+      setIsSavingGeo(false);
+      setGeoErrorMsg('พิกัดละติจูดและลองจิจูดต้องเป็นตัวเลขที่ถูกต้อง');
+      return;
+    }
+
+    const res = await updateShopGeoAction({
+      shop_id: shop.id,
+      shop_lat: parsedLat,
+      shop_lng: parsedLng,
+    });
+
+    setIsSavingGeo(false);
+    if (!res.success) {
+      setGeoErrorMsg(res.error || 'ไม่สามารถบันทึกพิกัดร้านค้าได้');
+      return;
+    }
+    setGeoSuccessMsg('บันทึกพิกัดร้านค้าสำเร็จ');
+    router.refresh();
+    setTimeout(() => setGeoSuccessMsg(null), 4000);
   };
 
   // Consent-based Support Access State
@@ -911,6 +978,119 @@ export function SettingsClient({
                 <Check className="w-3.5 h-3.5" />
               )}
               <span>บันทึกการตั้งค่าช่องทาง</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Store Geo Location Card */}
+      <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100 text-sm">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <span>พิกัดร้านค้าสำหรับระบบจัดส่ง (Store Location for Delivery)</span>
+          </div>
+          {shopLat && shopLng ? (
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+              <Check className="w-3 h-3" />
+              ตั้งพิกัดแล้ว
+            </span>
+          ) : (
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              ยังไม่ตั้งพิกัด
+            </span>
+          )}
+        </div>
+
+        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
+          ระบบ Dispatch ใช้พิกัดร้านค้านี้เป็นจุดศูนย์กลางในการค้นหาและจ่ายงานให้ไรเดอร์ที่อยู่ใกล้ร้านที่สุด หากยังไม่ได้ตั้งพิกัด ระบบจัดส่งจะไม่สามารถทำงานได้อย่างถูกต้อง
+        </p>
+
+        {geoSuccessMsg && (
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{geoSuccessMsg}</span>
+          </div>
+        )}
+
+        {geoErrorMsg && (
+          <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{geoErrorMsg}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSaveGeo} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                ละติจูด (Latitude)
+              </label>
+              <input
+                type="text"
+                value={shopLat}
+                onChange={(e) => setShopLat(e.target.value)}
+                placeholder="เช่น 19.302145"
+                className="w-full px-3.5 py-2 rounded-xl text-xs border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+                ลองจิจูด (Longitude)
+              </label>
+              <input
+                type="text"
+                value={shopLng}
+                onChange={(e) => setShopLng(e.target.value)}
+                placeholder="เช่น 97.965412"
+                className="w-full px-3.5 py-2 rounded-xl text-xs border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleGetGps}
+                disabled={isLocating}
+                className="px-3.5 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {isLocating ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
+                ) : (
+                  <Crosshair className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                )}
+                <span>ดึงพิกัดปัจจุบัน (GPS)</span>
+              </button>
+
+              {shopLat && shopLng && !isNaN(parseFloat(shopLat)) && !isNaN(parseFloat(shopLng)) && (
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${shopLat}&mlon=${shopLng}#map=16/${shopLat}/${shopLng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-2 rounded-xl text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                >
+                  <span>ดูแผนที่ OpenStreetMap</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSavingGeo}
+              className="px-5 py-2 bg-stone-900 dark:bg-amber-600 hover:bg-stone-800 dark:hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {isSavingGeo ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Check className="w-3.5 h-3.5" />
+              )}
+              <span>บันทึกพิกัดร้าน</span>
             </button>
           </div>
         </form>

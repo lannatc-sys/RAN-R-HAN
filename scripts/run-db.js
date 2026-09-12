@@ -22,6 +22,34 @@ if (!connectionString) {
   process.exit(1);
 }
 
+// Postgres error codes for "already exists" — safe to skip when re-running this
+// script against a database that has already had some/all migrations applied.
+// (CREATE TABLE/FUNCTION in these migrations already use IF NOT EXISTS / OR REPLACE,
+// but CREATE POLICY and a few other DDL statements have no idempotent form.)
+const ALREADY_EXISTS_CODES = new Set([
+  '42710', // duplicate_object (e.g. CREATE POLICY, CREATE TYPE without a guard)
+  '42P07', // duplicate_table
+  '42723', // duplicate_function
+  '42701', // duplicate_column
+]);
+
+async function runMigrationFile(client, migrationsDir, fileName, stepLabel, successMessage) {
+  const filePath = path.join(migrationsDir, fileName);
+  if (!fs.existsSync(filePath)) return;
+
+  console.log(`${stepLabel} Executing supabase/migrations/${fileName}...`);
+  try {
+    await client.query(fs.readFileSync(filePath, 'utf-8'));
+    console.log(`   [SUCCESS] ${successMessage}\n`);
+  } catch (err) {
+    if (ALREADY_EXISTS_CODES.has(err.code)) {
+      console.log(`   [SKIPPED] Already applied (${err.code}: ${err.message}).\n`);
+    } else {
+      throw err;
+    }
+  }
+}
+
 async function runDatabaseSetup() {
   console.log('Connecting to PostgreSQL database...');
   const client = new Client({
@@ -29,54 +57,36 @@ async function runDatabaseSetup() {
     ssl: { rejectUnauthorized: false },
   });
 
+  const migrationsDir = path.join(__dirname, '..', 'supabase', 'migrations');
+
   try {
     await client.connect();
     console.log('Connected successfully to Supabase PostgreSQL.\n');
 
-    // 1. Run migrations (run_all.sql)
-    const runAllPath = path.join(__dirname, '..', 'supabase', 'migrations', 'run_all.sql');
-    if (fs.existsSync(runAllPath)) {
-      console.log('1. Executing supabase/migrations/run_all.sql...');
-      const sql = fs.readFileSync(runAllPath, 'utf-8');
-      await client.query(sql);
-      console.log('   [SUCCESS] Initial schema, types, and RLS applied.\n');
+    await runMigrationFile(client, migrationsDir, 'run_all.sql', '1.', 'Initial schema, types, and RLS applied.');
+    await runMigrationFile(client, migrationsDir, '20260906000001_pickup_mvp.sql', '1.1', 'Pickup MVP schema, kds_pin, credentials, and RPC applied.');
+    await runMigrationFile(client, migrationsDir, '20260910000001_delivery_system.sql', '1.2', 'Delivery & Preorder schema and default locations applied.');
+    await runMigrationFile(client, migrationsDir, '20260910000002_legal_pdpa_compliance.sql', '1.3', 'Legal & PDPA compliance schema applied.');
+    await runMigrationFile(client, migrationsDir, '20260910000003_telegram_notifications.sql', '1.4', 'Telegram notifications & link tokens schema applied.');
+
+    // 1.5-1.10 Rider system migrations, in order (tables dispatch_offers/orders.dispatch_status
+    // etc. come from these — 20260912000001 below depends on them and will fail without this)
+    const riderMigrations = [
+      '20260911000001_rider_system.sql',
+      '20260911000002_rider_rls.sql',
+      '20260911000003_rider_rpc_functions.sql',
+      '20260911000004_rider_storage_and_shop_geo.sql',
+      '20260911000005_rider_p0_hardening.sql',
+      '20260911000006_rider_concurrency_lock.sql',
+    ];
+    for (const [i, name] of riderMigrations.entries()) {
+      await runMigrationFile(client, migrationsDir, name, `1.${5 + i}`, 'applied.');
     }
 
-    // 1.1 Run pickup_mvp.sql (MVP additions, kds_pin, credentials, RPC)
-    const mvpPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260906000001_pickup_mvp.sql');
-    if (fs.existsSync(mvpPath)) {
-      console.log('1.1 Executing supabase/migrations/20260906000001_pickup_mvp.sql...');
-      const mvpSql = fs.readFileSync(mvpPath, 'utf-8');
-      await client.query(mvpSql);
-      console.log('   [SUCCESS] Pickup MVP schema, kds_pin, credentials, and RPC applied.\n');
-    }
-
-    // 1.2 Run delivery_system.sql (Zone, Delivery Trips, Preorder)
-    const deliveryPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260910000001_delivery_system.sql');
-    if (fs.existsSync(deliveryPath)) {
-      console.log('1.2 Executing supabase/migrations/20260910000001_delivery_system.sql...');
-      const deliverySql = fs.readFileSync(deliveryPath, 'utf-8');
-      await client.query(deliverySql);
-      console.log('   [SUCCESS] Delivery & Preorder schema and default locations applied.\n');
-    }
-
-    // 1.3 Run legal_pdpa_compliance.sql (Consent logs, Audit logs, Data Subject Requests)
-    const legalPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260910000002_legal_pdpa_compliance.sql');
-    if (fs.existsSync(legalPath)) {
-      console.log('1.3 Executing supabase/migrations/20260910000002_legal_pdpa_compliance.sql...');
-      const legalSql = fs.readFileSync(legalPath, 'utf-8');
-      await client.query(legalSql);
-      console.log('   [SUCCESS] Legal & PDPA compliance schema applied.\n');
-    }
-
-    // 1.4 Run telegram_notifications.sql (Telegram link tokens, chat id, shop settings)
-    const telegramPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260910000003_telegram_notifications.sql');
-    if (fs.existsSync(telegramPath)) {
-      console.log('1.4 Executing supabase/migrations/20260910000003_telegram_notifications.sql...');
-      const telegramSql = fs.readFileSync(telegramPath, 'utf-8');
-      await client.query(telegramSql);
-      console.log('   [SUCCESS] Telegram notifications & link tokens schema applied.\n');
-    }
+    await runMigrationFile(client, migrationsDir, '20260912000001_dispatch_timeout_atomic.sql', '1.11', 'Dispatch timeout RPC and security applied.');
+    await runMigrationFile(client, migrationsDir, '20260912000002_lock_down_payment_rpc.sql', '1.12', 'Payment RPC lockdown applied.');
+    await runMigrationFile(client, migrationsDir, '20260912000003_dispatch_order_lock.sql', '1.13', 'Dispatch order-scoped unique index applied.');
+    await runMigrationFile(client, migrationsDir, '20260912000004_rider_telegram_notification.sql', '1.14', 'Rider telegram & push channels schema applied.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');

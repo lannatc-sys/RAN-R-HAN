@@ -34,6 +34,8 @@ export interface Shop {
   allow_delivery?: boolean;
   is_delivery_enabled?: boolean;
   telegram_enabled?: boolean;
+  shop_lat?: number | null;
+  shop_lng?: number | null;
   created_at: string;
   updated_at: string;
 }

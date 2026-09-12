@@ -183,4 +183,76 @@ describe('🚚 Delivery & Preorder System Tests', () => {
       assert.equal(res.success, true);
     });
   });
+
+  describe('Preorder to Delivery Trip Mapping & Edge Cases', () => {
+    it('should extract location note properly when keywords like ซอย, ข้าง, ประตู appear', () => {
+      const comment = 'คุณนิด 0891234567 สวนสาธารณะหนองจองคำ ขนมจีนน้ำยา 3 ชุด ซอย 2 ข้างศาลาแปดเหลี่ยม';
+      const parsed = parseFacebookComment(comment, mockLocations);
+
+      assert.equal(parsed.recipient_phone, '0891234567');
+      assert.equal(parsed.location_id, 'loc-3');
+      assert.equal(parsed.recipient_name, 'คุณนิด');
+      assert.equal(parsed.items_summary, 'ขนมจีนน้ำยา 3 ชุด');
+      assert.equal(parsed.location_note, 'ซอย 2 ข้างศาลาแปดเหลี่ยม');
+    });
+
+    it('should group items with unknown/null location using fallback coordinates', () => {
+      const items: DeliveryTripItem[] = [
+        {
+          id: 'item-null-loc',
+          trip_id: 'trip-1',
+          location_id: null,
+          recipient_name: 'นิรนาม',
+          recipient_phone: '0890000000',
+          location_note: 'ส่งถึงบ้าน',
+          items_summary: 'ข้าวต้ม 1',
+          order_reference_id: null,
+          delivery_status: 'pending',
+          delivered_at: null,
+          created_at: new Date().toISOString(),
+          location: undefined,
+        },
+      ];
+
+      const grouped = groupTripItemsByLocation(items);
+      assert.equal(grouped.length, 1);
+      assert.equal(grouped[0].locationId, 'unknown');
+      assert.equal(grouped[0].locationName, 'จุดรับระบุพิเศษ / อื่นๆ');
+      assert.equal(grouped[0].lat, 19.3005);
+      assert.equal(grouped[0].lng, 97.9678);
+    });
+
+    it('should correctly map preorder items schema fields to delivery trip items', () => {
+      const preorderItem = {
+        id: 'pre-123',
+        round_id: 'round-abc',
+        location_id: 'loc-1',
+        recipient_name: 'ลุงหมง',
+        recipient_phone: '0812223344',
+        location_note: 'หน้าป้อมยาม',
+        items_summary: 'ข้าวซอยไก่ 2 ชาม',
+        total_amount: 120,
+        payment_method: 'promptpay',
+        payment_status: 'verified',
+        raw_input_text: 'ลุงหมง 081-222-3344 กาดเทศบาลเมืองแม่ฮ่องสอน ข้าวซอยไก่ 2 ชาม หน้าป้อมยาม',
+      };
+
+      const mappedTripItem = {
+        trip_id: 'trip-target-999',
+        location_id: preorderItem.location_id,
+        recipient_name: preorderItem.recipient_name,
+        recipient_phone: preorderItem.recipient_phone,
+        location_note: preorderItem.location_note,
+        items_summary: preorderItem.items_summary,
+        order_reference_id: preorderItem.id,
+        delivery_status: 'pending',
+      };
+
+      assert.equal(mappedTripItem.trip_id, 'trip-target-999');
+      assert.equal(mappedTripItem.order_reference_id, preorderItem.id);
+      assert.equal(mappedTripItem.recipient_name, preorderItem.recipient_name);
+      assert.equal(mappedTripItem.location_id, preorderItem.location_id);
+      assert.equal(mappedTripItem.delivery_status, 'pending');
+    });
+  });
 });
