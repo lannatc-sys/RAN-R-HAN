@@ -2,11 +2,21 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+  ChefHat,
+  LogOut,
+  Settings,
+  Shield,
+  ShoppingBag,
+  Store,
+  Truck,
+  UtensilsCrossed,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { PushNotificationPrompt } from './PushNotificationPrompt';
-import { ChefHat, ShoppingBag, UtensilsCrossed, Settings, LogOut, Store, Shield, Truck } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { HeaderControls } from '@/components/common/HeaderControls';
+import { AdminMobileNavigation } from './AdminMobileNavigation';
+import { PushNotificationPrompt } from './PushNotificationPrompt';
 
 interface AdminNavbarProps {
   shopId: string;
@@ -18,12 +28,6 @@ export function AdminNavbar({ shopId, shopName }: AdminNavbarProps) {
   const router = useRouter();
   const { t, lang } = useLanguage();
 
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
-
   const navItems = [
     { href: '/admin/orders', label: t.nav.queue, icon: ChefHat },
     { href: '/admin/walk-in', label: t.nav.walkIn, icon: ShoppingBag },
@@ -32,57 +36,65 @@ export function AdminNavbar({ shopId, shopName }: AdminNavbarProps) {
     { href: '/admin/settings', label: t.nav.settings, icon: Settings },
   ];
 
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
   return (
-    <header className="bg-white dark:bg-stone-900 border-b border-stone-200/80 dark:border-stone-800 sticky top-0 z-40 transition-colors">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3">
-        {/* Brand & Shop Name */}
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-            <Store className="w-4 h-4 sm:w-5 sm:h-5" />
+    <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-white text-stone-900 transition-colors dark:border-stone-800 dark:bg-stone-900 dark:text-stone-100">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-2.5 sm:px-4">
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-600 font-bold text-white shadow-xs sm:h-9 sm:w-9">
+            <Store aria-hidden="true" className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div className="min-w-0">
-            <div className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 leading-tight truncate">
+            <div className="truncate text-xs font-bold leading-tight sm:text-sm">
               {shopName}
             </div>
-            <div className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 truncate">
+            <div className="truncate text-[10px] text-stone-400 dark:text-stone-500 sm:text-[11px]">
               {lang === 'th' ? 'ระบบจัดการหลังร้าน (POS/KDS)' : 'Store Management (POS/KDS)'}
             </div>
           </div>
         </div>
 
-        {/* Push Notification Toggle (Desktop) */}
-        <div className="hidden lg:flex items-center">
+        <div className="hidden items-center gap-1.5 lg:flex">
           <PushNotificationPrompt shopId={shopId} />
-        </div>
-
-        {/* Actions & Controls */}
-        <div className="flex items-center gap-1.5 shrink-0">
           <HeaderControls />
-
           <Link
             href="/superadmin"
-            className="text-stone-500 dark:text-stone-400 hover:text-amber-800 dark:hover:text-amber-400 text-xs flex items-center gap-1.5 p-2 rounded-xl hover:bg-amber-50/80 dark:hover:bg-stone-800 transition-colors"
+            className="flex items-center gap-1.5 rounded-xl p-2 text-xs text-stone-500 transition-colors hover:bg-amber-50/80 hover:text-amber-800 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-amber-400"
             title="ศูนย์ควบคุม Superadmin"
           >
-            <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span className="hidden md:inline font-semibold">{t.nav.superadmin}</span>
+            <Shield aria-hidden="true" className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <span className="font-semibold">{t.nav.superadmin}</span>
           </Link>
-
-          {/* Logout */}
           <button
             type="button"
             onClick={handleLogout}
-            className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-xs flex items-center gap-1.5 p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
-            aria-label={t.nav.logout}
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl p-2 text-xs text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
           >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">{t.nav.logout}</span>
+            <LogOut aria-hidden="true" className="h-4 w-4" />
+            <span>{t.nav.logout}</span>
           </button>
         </div>
+
+        <AdminMobileNavigation
+          shopId={shopId}
+          shopName={shopName}
+          navItems={navItems}
+          lang={lang}
+          superadminLabel={t.nav.superadmin}
+          logoutLabel={t.nav.logout}
+          onLogout={handleLogout}
+        />
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 overflow-x-auto flex gap-1 border-t border-stone-100 dark:border-stone-800 no-scrollbar">
+      <nav
+        aria-label={lang === 'th' ? 'เมนูจัดการร้าน' : 'Admin navigation'}
+        className="hidden max-w-6xl items-center gap-1 border-t border-stone-100 px-4 dark:border-stone-800 lg:mx-auto lg:flex"
+      >
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -90,18 +102,19 @@ export function AdminNavbar({ shopId, shopName }: AdminNavbarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-all ${
+              aria-current={isActive ? 'page' : undefined}
+              className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors ${
                 isActive
                   ? 'border-amber-600 text-amber-800 dark:text-amber-400'
-                  : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                  : 'border-transparent text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200'
               }`}
             >
-              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Icon aria-hidden="true" className="h-4 w-4" />
               <span>{item.label}</span>
             </Link>
           );
         })}
-      </div>
+      </nav>
     </header>
   );
 }
