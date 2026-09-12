@@ -1,14 +1,68 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
 import { encryptApiKey } from '@/lib/crypto';
+import { formatThaiError } from '@/lib/thai-errors';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 function safeRevalidate(path: string) {
   try {
     revalidatePath(path);
   } catch {
     // Ignore when called outside HTTP request lifecycle
+  }
+}
+
+const shopOpenStatusSchema = z.object({
+  shop_id: z.string().uuid(),
+  is_open: z.boolean(),
+});
+
+/**
+ * เปิดหรือปิดรับออเดอร์ของร้านผ่าน RPC ที่ตรวจสิทธิ์สมาชิกของร้าน
+ * ใช้ session-bound client เพื่อให้ auth.uid() พร้อมสำหรับ has_shop_access().
+ */
+export async function updateShopOpenStatusAction(data: {
+  shop_id: string;
+  is_open: boolean;
+}): Promise<{ success: boolean; isOpen?: boolean; error?: string }> {
+  const validated = shopOpenStatusSchema.safeParse(data);
+  if (!validated.success) {
+    return { success: false, error: 'ข้อมูลสถานะร้านไม่ถูกต้อง' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนเปลี่ยนสถานะร้าน' };
+    }
+
+    const { data: result, error } = await supabase.rpc('set_shop_open_status', {
+      p_shop_id: validated.data.shop_id,
+      p_is_open: validated.data.is_open,
+    });
+
+    if (error) {
+      return { success: false, error: formatThaiError(error) };
+    }
+
+    const response = result as { slug?: string; is_open?: boolean } | null;
+    safeRevalidate('/admin/settings');
+    if (response?.slug) {
+      safeRevalidate(`/${response.slug}`);
+      safeRevalidate(`/${response.slug}/checkout`);
+    }
+
+    return {
+      success: true,
+      isOpen: response?.is_open ?? validated.data.is_open,
+    };
+  } catch (error: unknown) {
+    return { success: false, error: formatThaiError(error) };
   }
 }
 
@@ -275,4 +329,3 @@ export async function updateShopGeoAction(data: {
     return { success: false, error: err.message || 'Failed to update shop coordinates' };
   }
 }
-

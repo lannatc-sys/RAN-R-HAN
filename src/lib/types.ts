@@ -21,6 +21,7 @@ export interface Shop {
   plan: string;
   status: ShopStatus;
   is_active: boolean;
+  is_open?: boolean;
   expires_at: string | null;
   plan_expires_at?: string | null;
   service_charge: number;
@@ -318,5 +319,4 @@ export interface DataSubjectRequest {
   completed_at?: string | null;
   created_at: string;
 }
-
 

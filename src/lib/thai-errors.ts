@@ -18,6 +18,9 @@ export function formatThaiError(error: any): string {
   if (msg.includes('SHOP_NOT_FOUND')) {
     return 'ไม่พบร้านค้านี้ หรือร้านค้าปิดให้บริการชั่วคราว';
   }
+  if (msg.includes('SHOP_CLOSED')) {
+    return 'ร้านปิดรับออเดอร์ชั่วคราว กรุณาลองใหม่เมื่อร้านเปิดให้บริการ';
+  }
   if (msg.includes('EMPTY_CART')) {
     return 'ไม่มีรายการอาหารในตะกร้า กรุณาเลือกเมนูก่อนสั่งซื้อ';
   }
