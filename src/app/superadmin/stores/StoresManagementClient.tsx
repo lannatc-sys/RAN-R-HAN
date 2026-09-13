@@ -147,7 +147,7 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ค้นหาตามชื่อร้าน, Slug, หรือเบอร์โทร..."
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
           />
         </div>
 
@@ -156,12 +156,13 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+            style={{ colorScheme: 'light' }}
+            className="w-full sm:w-auto px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
           >
-            <option value="all">สถานะทั้งหมด</option>
-            <option value="active">เปิดบริการ (Active)</option>
-            <option value="suspended">ระงับชั่วคราว (Suspended)</option>
-            <option value="expired">หมดอายุ (Expired)</option>
+            <option value="all" className="bg-white text-slate-900">สถานะทั้งหมด</option>
+            <option value="active" className="bg-white text-slate-900">เปิดบริการ (Active)</option>
+            <option value="suspended" className="bg-white text-slate-900">ระงับชั่วคราว (Suspended)</option>
+            <option value="expired" className="bg-white text-slate-900">หมดอายุ (Expired)</option>
           </select>
         </div>
       </div>
@@ -339,12 +340,13 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                 <select
                   value={newPlan}
                   onChange={(e) => setNewPlan(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                  style={{ colorScheme: 'light' }}
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
                 >
-                  <option value="basic">Basic (ทดลองใช้ / ไม่เกิน 50 บิล)</option>
-                  <option value="standard">Standard (ร้านขนาดกลาง)</option>
-                  <option value="pro">Pro (ไม่จำกัดบิล + Realtime)</option>
-                  <option value="enterprise">Enterprise (กำหนดเอง)</option>
+                  <option value="basic" className="bg-white text-slate-900">Basic (ทดลองใช้ / ไม่เกิน 50 บิล)</option>
+                  <option value="standard" className="bg-white text-slate-900">Standard (ร้านขนาดกลาง)</option>
+                  <option value="pro" className="bg-white text-slate-900">Pro (ไม่จำกัดบิล + Realtime)</option>
+                  <option value="enterprise" className="bg-white text-slate-900">Enterprise (กำหนดเอง)</option>
                 </select>
               </div>
 

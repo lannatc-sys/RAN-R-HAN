@@ -75,7 +75,7 @@ export default function SuperadminAnnouncementsPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="เช่น อัปเดตฟีเจอร์ใหม่ประจำเดือน หรือ แจ้งปิดปรับปรุงระบบ"
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
             />
           </div>
 
@@ -130,7 +130,7 @@ export default function SuperadminAnnouncementsPage() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="ระบุข้อความประกาศที่ต้องการให้ปรากฏบนหน้าจัดการของร้านอาหารทุกร้าน..."
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
             />
           </div>
 

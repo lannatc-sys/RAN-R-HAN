@@ -153,7 +153,7 @@ export function SuperadminTopbar({ userEmail, fullName }: SuperadminTopbarProps)
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="เช่น ส้มตำยายเพ็ญ สาขา 1"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
                 />
               </div>
 
@@ -168,7 +168,7 @@ export function SuperadminTopbar({ userEmail, fullName }: SuperadminTopbarProps)
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
                     placeholder="เช่น 0812345678"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
                   />
                 </div>
 
@@ -179,12 +179,13 @@ export function SuperadminTopbar({ userEmail, fullName }: SuperadminTopbarProps)
                   <select
                     value={plan}
                     onChange={(e) => setPlan(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                    style={{ colorScheme: 'light' }}
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
                   >
-                    <option value="basic">Basic (ทดลองใช้)</option>
-                    <option value="standard">Standard (ร้านทั่วไป)</option>
-                    <option value="pro">Pro (ไม่จำกัดบิล)</option>
-                    <option value="enterprise">Enterprise</option>
+                    <option value="basic" className="bg-white text-slate-900">Basic (ทดลองใช้)</option>
+                    <option value="standard" className="bg-white text-slate-900">Standard (ร้านทั่วไป)</option>
+                    <option value="pro" className="bg-white text-slate-900">Pro (ไม่จำกัดบิล)</option>
+                    <option value="enterprise" className="bg-white text-slate-900">Enterprise</option>
                   </select>
                 </div>
               </div>
@@ -198,7 +199,7 @@ export function SuperadminTopbar({ userEmail, fullName }: SuperadminTopbarProps)
                   value={promptpayId}
                   onChange={(e) => setPromptpayId(e.target.value)}
                   placeholder="เว้นว่างไว้จะใช้เบอร์โทรของร้าน"
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
                 />
               </div>
 
