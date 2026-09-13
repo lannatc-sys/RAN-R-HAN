@@ -190,6 +190,66 @@ export async function getAllStoresAction(query?: string, statusFilter?: string):
   }
 }
 
+export interface ShopAreaPin {
+  id: string;
+  name: string;
+  slug: string;
+  status: string | null;
+  shop_lat: number | null;
+  shop_lng: number | null;
+  service_area_enabled: boolean | null;
+  service_radius_m: number | null;
+  rider_work_radius_m: number | null;
+}
+
+/**
+ * ร้านทั้งหมดสำหรับชั้นปักหมุดบนแผนที่พื้นที่ให้บริการ
+ *
+ * เลือกเฉพาะคอลัมน์ที่แผนที่ใช้จริง ไม่ดึงทั้งแถว เพราะ shops เก็บของอย่าง
+ * kds_pin และ support_access_expires_at ที่ไม่มีเหตุผลให้ส่งออกไปฝั่ง client
+ */
+export async function getShopsForAreaMapAction(): Promise<{
+  success: boolean;
+  shops?: ShopAreaPin[];
+  error?: string;
+}> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from('shops')
+      .select(
+        'id, name, slug, status, shop_lat, shop_lng, service_area_enabled, service_radius_m, rider_work_radius_m'
+      )
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+
+    // numeric มาเป็นสตริงจาก postgres ผ่าน supabase-js จึงแปลงที่นี่ครั้งเดียว
+    const shops: ShopAreaPin[] = (data || []).map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      status: s.status ?? null,
+      shop_lat: s.shop_lat === null ? null : Number(s.shop_lat),
+      shop_lng: s.shop_lng === null ? null : Number(s.shop_lng),
+      service_area_enabled: s.service_area_enabled ?? null,
+      service_radius_m: s.service_radius_m === null ? null : Number(s.service_radius_m),
+      rider_work_radius_m:
+        s.rider_work_radius_m === null ? null : Number(s.rider_work_radius_m),
+    }));
+
+    return { success: true, shops };
+  } catch (err: any) {
+    console.error('getShopsForAreaMapAction error:', err);
+    return { success: false, error: err.message || 'Failed to fetch shops' };
+  }
+}
+
 /**
  * อัปเดตสถานะร้านค้า (Active / Suspended / Expired)
  */

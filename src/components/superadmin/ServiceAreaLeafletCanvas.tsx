@@ -7,6 +7,7 @@ import type {
   PolygonDraft,
 } from '@/components/service-area-map/types';
 import { isClosedRing } from '@/components/service-area-map/types';
+import type { ShopAreaPin } from '@/app/actions/superadmin';
 import 'leaflet/dist/leaflet.css';
 
 /** Mae Hong Son municipality, used until a shop's own coordinates are wired in. */
@@ -23,6 +24,10 @@ interface ServiceAreaLeafletCanvasProps {
   activeKind: AreaKind;
   onAddPoint?: (kind: AreaKind, point: LngLat) => void;
   disabled?: boolean;
+  /** Shops that have coordinates; drawn as pins with their current radius. */
+  shops?: ShopAreaPin[];
+  selectedShopId?: string | null;
+  onSelectShop?: (shopId: string) => void;
 }
 
 export default function ServiceAreaLeafletCanvas({
@@ -30,11 +35,17 @@ export default function ServiceAreaLeafletCanvas({
   activeKind,
   onAddPoint,
   disabled = false,
+  shops = [],
+  selectedShopId = null,
+  onSelectShop,
 }: ServiceAreaLeafletCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
+  const shopLayerRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
+  const selectShopRef = useRef<(id: string) => void>(() => {});
+  selectShopRef.current = (id: string) => onSelectShop?.(id);
 
   // Keeps the click handler reading fresh props without tearing the map down.
   const handlerRef = useRef<(lngLat: LngLat) => void>(() => {});
@@ -68,6 +79,8 @@ export default function ServiceAreaLeafletCanvas({
       });
 
       mapRef.current = map;
+      // Shops sit beneath the draft so a vertex is never hidden by a pin.
+      shopLayerRef.current = L.layerGroup().addTo(map);
       layerRef.current = L.layerGroup().addTo(map);
     });
 
@@ -77,9 +90,57 @@ export default function ServiceAreaLeafletCanvas({
         mapRef.current.remove();
         mapRef.current = null;
         layerRef.current = null;
+        shopLayerRef.current = null;
       }
     };
   }, []);
+
+  // Redraw the shop pins whenever the shop list or the selection changes.
+  useEffect(() => {
+    const L = leafletRef.current;
+    const layer = shopLayerRef.current;
+    if (!L || !layer) return;
+
+    layer.clearLayers();
+
+    for (const shop of shops) {
+      if (shop.shop_lat === null || shop.shop_lng === null) continue;
+      const at: [number, number] = [shop.shop_lat, shop.shop_lng];
+      const selected = shop.id === selectedShopId;
+
+      // The radius a shop uses today, so it is visible what a polygon replaces.
+      const radius =
+        activeKind === 'customer' ? shop.service_radius_m : shop.rider_work_radius_m;
+      if (radius && radius > 0) {
+        L.circle(at, {
+          radius,
+          color: '#94a3b8',
+          weight: 1,
+          dashArray: '4 4',
+          fillOpacity: selected ? 0.06 : 0.02,
+          interactive: false,
+        }).addTo(layer);
+      }
+
+      L.circleMarker(at, {
+        radius: selected ? 9 : 7,
+        color: selected ? '#0f172a' : '#64748b',
+        fillColor: shop.service_area_enabled ? '#22c55e' : '#ffffff',
+        fillOpacity: 1,
+        weight: selected ? 3 : 2,
+      })
+        .bindTooltip(
+          `${shop.name}${shop.service_area_enabled ? '' : ' (ยังไม่เปิดจำกัดพื้นที่)'}`,
+          { direction: 'top' }
+        )
+        .on('click', (e: any) => {
+          // Selecting a shop must not also drop a vertex.
+          L.DomEvent.stopPropagation(e);
+          selectShopRef.current(shop.id);
+        })
+        .addTo(layer);
+    }
+  }, [shops, selectedShopId, activeKind]);
 
   // Redraw whenever the draft changes.
   useEffect(() => {
