@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { MapPin, MapPinOff, CircleCheck, CircleSlash } from 'lucide-react';
+import { MapPin, MapPinOff, CircleCheck, CircleSlash, Crosshair, Save } from 'lucide-react';
 import { ServiceAreaMapEditorShell } from '@/components/service-area-map';
 import type { ShopAreaPin } from '@/app/actions/superadmin';
+import {
+  setShopLocationAction,
+  setShopServiceAreaPolygonAction,
+} from '@/app/actions/superadmin';
+import { polygonDraftToGeoJson, type PolygonDraft } from '@/components/service-area-map';
 
 // Leaflet touches window on import, so it must stay out of the server render.
 const ServiceAreaLeafletCanvas = dynamic(
@@ -28,6 +33,54 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
     located[0]?.id ?? null
   );
   const selected = located.find((s) => s.id === selectedShopId) ?? null;
+
+  const [pinMode, setPinMode] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  // The shell owns the draft. The save button only needs to read whatever it is
+  // holding at click time, so a ref avoids a second render per vertex.
+  const draftRef = useRef<PolygonDraft | null>(null);
+
+  const handleSetLocation = (lngLat: [number, number]) => {
+    if (!selectedShopId) return;
+    setMessage(null);
+    startTransition(async () => {
+      const res = await setShopLocationAction({
+        shopId: selectedShopId,
+        lng: lngLat[0],
+        lat: lngLat[1],
+      });
+      setMessage(
+        res.success
+          ? { ok: true, text: 'ปักหมุดร้านเรียบร้อย' }
+          : { ok: false, text: res.error ?? 'ปักหมุดไม่สำเร็จ' }
+      );
+      if (res.success) setPinMode(false);
+    });
+  };
+
+  const handleSavePolygon = () => {
+    const draft = draftRef.current;
+    if (!selectedShopId || !draft) return;
+    const geojson = polygonDraftToGeoJson(draft);
+    if (!geojson) {
+      setMessage({ ok: false, text: 'ต้องปิดวงแหวนก่อนจึงจะบันทึกได้' });
+      return;
+    }
+    setMessage(null);
+    startTransition(async () => {
+      const res = await setShopServiceAreaPolygonAction({
+        shopId: selectedShopId,
+        kind: draft.kind,
+        geojson,
+      });
+      setMessage(
+        res.success
+          ? { ok: true, text: 'บันทึกพื้นที่เรียบร้อย' }
+          : { ok: false, text: res.error ?? 'บันทึกไม่สำเร็จ' }
+      );
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -108,15 +161,58 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
         </div>
       )}
 
+      {selected && (
+        <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setPinMode((v) => !v)}
+            disabled={pending}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-colors disabled:opacity-50 ${
+              pinMode
+                ? 'bg-amber-600 border-amber-600 text-white'
+                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5" />
+            <span>{pinMode ? 'กำลังปักหมุด — คลิกบนแผนที่' : 'ย้ายตำแหน่งร้าน'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSavePolygon}
+            disabled={pending}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors disabled:opacity-50"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>บันทึกพื้นที่ของ {selected.name}</span>
+          </button>
+
+          {message && (
+            <span
+              className={`text-xs font-semibold ${
+                message.ok ? 'text-emerald-700' : 'text-rose-700'
+              }`}
+            >
+              {message.text}
+            </span>
+          )}
+        </div>
+      )}
+
       <ServiceAreaMapEditorShell
-        renderCanvas={(props) => (
-          <ServiceAreaLeafletCanvas
-            {...props}
-            shops={located}
-            selectedShopId={selectedShopId}
-            onSelectShop={setSelectedShopId}
-          />
-        )}
+        renderCanvas={(props) => {
+          draftRef.current = props.draft;
+          return (
+            <ServiceAreaLeafletCanvas
+              {...props}
+              shops={located}
+              selectedShopId={selectedShopId}
+              onSelectShop={setSelectedShopId}
+              pinMode={pinMode}
+              onSetShopLocation={handleSetLocation}
+            />
+          );
+        }}
       />
     </div>
   );

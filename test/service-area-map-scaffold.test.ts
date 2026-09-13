@@ -17,6 +17,15 @@ import {
 
 const SCAFFOLD_DIR = path.join(__dirname, '..', 'src', 'components', 'service-area-map');
 
+/**
+ * Matches an import of the scaffold module, not the words anywhere in a file.
+ *
+ * A route string such as revalidatePath('/superadmin/service-area-map') names
+ * the page, it does not pull the components in, and failing on it would train
+ * people to widen the allow list for things that were never violations.
+ */
+const SCAFFOLD_IMPORT = /from\s+['"][^'"]*components\/service-area-map[^'"]*['"]|require\(\s*['"][^'"]*components\/service-area-map[^'"]*['"]/;
+
 /** Every .ts/.tsx file under a directory, including subdirectories. */
 function collectSourceFiles(dir: string): string[] {
   const out: string[] = [];
@@ -219,7 +228,7 @@ describe('Service Area Map UI Scaffold — Contract & Isolation Guards', () => {
       assert.ok(fs.existsSync(clientSettingsPath), 'ServiceAreaSettingsClient.tsx must exist');
       const content = fs.readFileSync(clientSettingsPath, 'utf-8');
       assert.equal(
-        content.includes('service-area-map'),
+        SCAFFOLD_IMPORT.test(content),
         false,
         'Production ServiceAreaSettingsClient.tsx must NOT import service-area-map scaffold'
       );
@@ -242,7 +251,7 @@ describe('Service Area Map UI Scaffold — Contract & Isolation Guards', () => {
             scanDir(fullPath);
           } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) {
             const content = fs.readFileSync(fullPath, 'utf-8');
-            if (!content.includes('service-area-map')) continue;
+            if (!SCAFFOLD_IMPORT.test(content)) continue;
             const relative = path.relative(APP_DIR, fullPath);
             if (!APPROVED.includes(relative)) offenders.push(relative);
           }
@@ -254,6 +263,19 @@ describe('Service Area Map UI Scaffold — Contract & Isolation Guards', () => {
         offenders,
         [],
         `Only ${APPROVED.join(' and ')} may import the scaffold`
+      );
+    });
+
+    it('a route string is not mistaken for an import', () => {
+      assert.equal(
+        SCAFFOLD_IMPORT.test("revalidatePath('/superadmin/service-area-map');"),
+        false,
+        'naming the route must not count as importing the scaffold'
+      );
+      assert.equal(
+        SCAFFOLD_IMPORT.test("import { x } from '@/components/service-area-map';"),
+        true,
+        'an actual import must still be caught'
       );
     });
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import Link from 'next/link';
 import { CheckCircle2, Loader2, MapPin, ShieldAlert } from 'lucide-react';
 import { updateServiceAreaSettingsAction } from '@/app/actions/settings';
 import type { Shop } from '@/lib/types';
@@ -9,6 +8,17 @@ import type { Shop } from '@/lib/types';
 interface ServiceAreaSettingsClientProps {
   shop: Shop;
 }
+
+/**
+ * พื้นที่ให้บริการถูกย้ายไปอยู่กับ superadmin แล้ว หน้านี้จึงเหลือแสดงอย่างเดียว
+ *
+ * ด่านจริงอยู่ที่ฟังก์ชันในฐานข้อมูล (set_shop_service_area_settings ตรวจ
+ * is_superadmin) หน้านี้เพียงไม่ยื่นปุ่มให้กดเปล่า ๆ
+ *
+ * คืนสิทธิ์ให้เจ้าของร้านได้โดยเปลี่ยนค่านี้เป็น true แล้วย้อน migration
+ * 20260914000002 ด้วย ลำพังค่านี้อย่างเดียวจะได้ปุ่มที่กดแล้ว SHOP_ACCESS_DENIED
+ */
+const SHOP_CAN_EDIT_SERVICE_AREA = false;
 
 export function ServiceAreaSettingsClient({ shop }: ServiceAreaSettingsClientProps) {
   const hasShopCoordinates =
@@ -70,14 +80,9 @@ export function ServiceAreaSettingsClient({ shop }: ServiceAreaSettingsClientPro
             <div>
               <h2 className="font-bold">ยังเปิดใช้งานไม่ได้</h2>
               <p className="mt-1 text-sm leading-6">
-                กรุณาบันทึกละติจูดและลองจิจูดของร้านก่อน ระบบจึงจะคำนวณขอบเขตได้
+                ร้านของคุณยังไม่ได้ถูกปักหมุดบนแผนที่ ระบบจึงยังคำนวณขอบเขตไม่ได้
+                กรุณาติดต่อผู้ดูแลแพลตฟอร์มเพื่อปักหมุดตำแหน่งร้าน
               </p>
-              <Link
-                href="/admin/settings"
-                className="mt-2 inline-flex min-h-11 items-center font-bold underline underline-offset-4"
-              >
-                ไปตั้งค่าพิกัดร้าน
-              </Link>
             </div>
           </div>
         </section>
@@ -100,7 +105,7 @@ export function ServiceAreaSettingsClient({ shop }: ServiceAreaSettingsClientPro
               name="service_area_enabled"
               type="checkbox"
               checked={enabled}
-              disabled={!hasShopCoordinates}
+              disabled={!SHOP_CAN_EDIT_SERVICE_AREA || !hasShopCoordinates}
               onChange={(event) => setEnabled(event.target.checked)}
               className="h-6 w-6 shrink-0 accent-amber-600"
             />
@@ -113,6 +118,7 @@ export function ServiceAreaSettingsClient({ shop }: ServiceAreaSettingsClientPro
             <input
               id="service-radius"
               name="service_radius_m"
+              disabled={!SHOP_CAN_EDIT_SERVICE_AREA}
               type="number"
               inputMode="numeric"
               min={1}
@@ -136,6 +142,7 @@ export function ServiceAreaSettingsClient({ shop }: ServiceAreaSettingsClientPro
             <input
               id="rider-radius"
               name="rider_work_radius_m"
+              disabled={!SHOP_CAN_EDIT_SERVICE_AREA}
               type="number"
               inputMode="numeric"
               min={1}
@@ -172,6 +179,7 @@ export function ServiceAreaSettingsClient({ shop }: ServiceAreaSettingsClientPro
           )}
         </div>
 
+        {SHOP_CAN_EDIT_SERVICE_AREA && (
         <button
           type="submit"
           disabled={saving}
@@ -180,6 +188,14 @@ export function ServiceAreaSettingsClient({ shop }: ServiceAreaSettingsClientPro
           {saving && <Loader2 aria-hidden="true" className="h-5 w-5 animate-spin" />}
           {saving ? 'กำลังบันทึก…' : 'บันทึกขอบเขตบริการ'}
         </button>
+        )}
+
+        {!SHOP_CAN_EDIT_SERVICE_AREA && (
+          <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
+            ขอบเขตนี้กำหนดโดยผู้ดูแลแพลตฟอร์ม หน้านี้แสดงค่าที่ใช้อยู่จริงเพื่อให้ทราบว่า
+            ร้านของคุณรับออเดอร์จัดส่งได้ถึงระยะใด หากต้องการเปลี่ยนกรุณาติดต่อผู้ดูแลระบบ
+          </p>
+        )}
       </form>
     </main>
   );

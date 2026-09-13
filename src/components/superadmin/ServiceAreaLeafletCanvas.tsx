@@ -28,6 +28,9 @@ interface ServiceAreaLeafletCanvasProps {
   shops?: ShopAreaPin[];
   selectedShopId?: string | null;
   onSelectShop?: (shopId: string) => void;
+  /** When true a click places the selected shop instead of a polygon vertex. */
+  pinMode?: boolean;
+  onSetShopLocation?: (lngLat: LngLat) => void;
 }
 
 export default function ServiceAreaLeafletCanvas({
@@ -38,6 +41,8 @@ export default function ServiceAreaLeafletCanvas({
   shops = [],
   selectedShopId = null,
   onSelectShop,
+  pinMode = false,
+  onSetShopLocation,
 }: ServiceAreaLeafletCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -50,7 +55,12 @@ export default function ServiceAreaLeafletCanvas({
   // Keeps the click handler reading fresh props without tearing the map down.
   const handlerRef = useRef<(lngLat: LngLat) => void>(() => {});
   handlerRef.current = (lngLat: LngLat) => {
-    if (disabled || isClosedRing(draft.coordinates)) return;
+    if (disabled) return;
+    if (pinMode) {
+      onSetShopLocation?.(lngLat);
+      return;
+    }
+    if (isClosedRing(draft.coordinates)) return;
     onAddPoint?.(activeKind, lngLat);
   };
 
@@ -182,17 +192,19 @@ export default function ServiceAreaLeafletCanvas({
     <div className="relative w-full">
       <div
         ref={containerRef}
-        className="w-full min-h-[280px] sm:min-h-[420px] aspect-[4/3] sm:aspect-[16/10] rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 z-0"
-        style={{ cursor: disabled || closed ? 'default' : 'crosshair' }}
+        className="w-full min-h-[280px] sm:min-h-[420px] aspect-[4/3] sm:aspect-[16/10] rounded-xl overflow-hidden border border-slate-300 z-0"
+        style={{ cursor: disabled || (!pinMode && closed) ? 'default' : 'crosshair' }}
         role="application"
         aria-label={`แผนที่สำหรับวาดพื้นที่${activeKind === 'customer' ? 'ลูกค้า' : 'ไรเดอร์'}`}
       />
-      <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+      <p className="mt-2 text-[11px] text-slate-500">
         {disabled
           ? 'โหมดอ่านอย่างเดียว'
-          : closed
-            ? 'วงแหวนปิดแล้ว กด "ล้าง" เพื่อเริ่มวาดใหม่'
-            : 'คลิกบนแผนที่เพื่อวางจุด ต้องมีอย่างน้อย 3 จุดจึงจะปิดวงแหวนได้'}
+          : pinMode
+            ? 'คลิกบนแผนที่เพื่อย้ายตำแหน่งร้านที่เลือก'
+            : closed
+              ? 'วงแหวนปิดแล้ว กด "ล้าง" เพื่อเริ่มวาดใหม่'
+              : 'คลิกบนแผนที่เพื่อวางจุด ต้องมีอย่างน้อย 3 จุดจึงจะปิดวงแหวนได้'}
       </p>
     </div>
   );

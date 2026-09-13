@@ -57,6 +57,13 @@ interface SettingsClientProps {
   isPrivacyMode?: boolean;
 }
 
+/**
+ * พิกัดร้านถูกย้ายไปให้ superadmin เป็นคนปักหมุดบนแผนที่กลาง
+ * หน้านี้จึงเหลือแสดงค่าที่ใช้อยู่ ด่านจริงอยู่ที่ update_shop_geo ซึ่งตรวจ is_superadmin
+ * คืนสิทธิ์ได้โดยเปลี่ยนเป็น true พร้อมย้อน migration 20260914000002
+ */
+const SHOP_CAN_EDIT_LOCATION = false;
+
 export function SettingsClient({
   shop,
   hasSlipCredentials,
@@ -1167,6 +1174,8 @@ export function SettingsClient({
                 type="text"
                 value={shopLat}
                 onChange={(e) => setShopLat(e.target.value)}
+                disabled={!SHOP_CAN_EDIT_LOCATION}
+                readOnly={!SHOP_CAN_EDIT_LOCATION}
                 placeholder="เช่น 19.302145"
                 className="w-full px-3.5 py-2 rounded-xl text-xs border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
               />
@@ -1179,6 +1188,8 @@ export function SettingsClient({
                 type="text"
                 value={shopLng}
                 onChange={(e) => setShopLng(e.target.value)}
+                disabled={!SHOP_CAN_EDIT_LOCATION}
+                readOnly={!SHOP_CAN_EDIT_LOCATION}
                 placeholder="เช่น 97.965412"
                 className="w-full px-3.5 py-2 rounded-xl text-xs border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
               />
@@ -1187,6 +1198,7 @@ export function SettingsClient({
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex items-center gap-2">
+              {SHOP_CAN_EDIT_LOCATION && (
               <button
                 type="button"
                 onClick={handleGetGps}
@@ -1200,6 +1212,7 @@ export function SettingsClient({
                 )}
                 <span>ดึงพิกัดปัจจุบัน (GPS)</span>
               </button>
+              )}
 
               {shopLat && shopLng && !isNaN(parseFloat(shopLat)) && !isNaN(parseFloat(shopLng)) && (
                 <a
@@ -1214,6 +1227,7 @@ export function SettingsClient({
               )}
             </div>
 
+            {SHOP_CAN_EDIT_LOCATION ? (
             <button
               type="submit"
               disabled={isSavingGeo}
@@ -1226,6 +1240,12 @@ export function SettingsClient({
               )}
               <span>บันทึกพิกัดร้าน</span>
             </button>
+            ) : (
+              <p className="text-xs text-stone-600 dark:text-stone-400 max-w-md">
+                ตำแหน่งร้านถูกปักหมุดโดยผู้ดูแลแพลตฟอร์มบนแผนที่กลาง
+                หากตำแหน่งไม่ถูกต้องกรุณาติดต่อผู้ดูแลระบบ
+              </p>
+            )}
           </div>
         </form>
       </div>

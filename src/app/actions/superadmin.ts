@@ -251,6 +251,83 @@ export async function getShopsForAreaMapAction(): Promise<{
 }
 
 /**
+ * ปักหมุดตำแหน่งร้านจากแผนที่ superadmin
+ *
+ * เรียก update_shop_geo ซึ่งเป็น security definer และตั้งแต่ migration
+ * 20260914000002 เป็นต้นไปตรวจ is_superadmin ด่านจริงจึงอยู่ในฐานข้อมูล
+ * ไม่ใช่ที่นี่ การตรวจซ้ำข้างล่างมีไว้ให้ข้อความผิดพลาดอ่านรู้เรื่องเท่านั้น
+ */
+export async function setShopLocationAction(input: {
+  shopId: string;
+  lat: number;
+  lng: number;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    if (!Number.isFinite(input.lat) || !Number.isFinite(input.lng)) {
+      return { success: false, error: 'พิกัดไม่ถูกต้อง' };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('update_shop_geo', {
+      p_shop_id: input.shopId,
+      p_shop_lat: input.lat,
+      p_shop_lng: input.lng,
+    });
+
+    if (error) throw error;
+
+    revalidatePath('/superadmin/service-area-map');
+    return { success: true };
+  } catch (err: any) {
+    console.error('setShopLocationAction error:', err);
+    return { success: false, error: err.message || 'ปักหมุดร้านไม่สำเร็จ' };
+  }
+}
+
+/**
+ * บันทึกรูปหลายเหลี่ยมพื้นที่ให้บริการ ส่ง geojson เป็น null เพื่อลบแล้วกลับไปใช้รัศมี
+ */
+export async function setShopServiceAreaPolygonAction(input: {
+  shopId: string;
+  kind: 'customer' | 'rider';
+  geojson: unknown | null;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('set_shop_service_area_polygon', {
+      p_shop_id: input.shopId,
+      p_kind: input.kind,
+      p_geojson: input.geojson,
+    });
+
+    if (error) throw error;
+
+    revalidatePath('/superadmin/service-area-map');
+    return { success: true };
+  } catch (err: any) {
+    console.error('setShopServiceAreaPolygonAction error:', err);
+    const msg = String(err?.message || '');
+    if (msg.includes('INVALID_SERVICE_AREA_POLYGON')) {
+      return { success: false, error: 'รูปหลายเหลี่ยมไม่ถูกต้อง เส้นอาจตัดกันเองหรือมีจุดน้อยเกินไป' };
+    }
+    if (msg.includes('SERVICE_AREA_POLYGON_TOO_LARGE')) {
+      return { success: false, error: 'พื้นที่ที่วาดใหญ่เกินเพดานที่ระบบอนุญาต' };
+    }
+    return { success: false, error: err.message || 'บันทึกพื้นที่ไม่สำเร็จ' };
+  }
+}
+
+/**
  * อัปเดตสถานะร้านค้า (Active / Suspended / Expired)
  */
 export async function updateStoreStatusAction(
