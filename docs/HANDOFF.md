@@ -224,13 +224,33 @@ GitHub Actions Gate:
 
 หมายเหตุ: ถ้ารอ scheduled run ตามแผนเดิมโดยไม่ทดสอบ dispatch ก่อน scheduled run แรกก็จะ fail 401 เช่นกัน การทดสอบ dispatch คือสิ่งที่เปิดเผยบั๊กนี้
 
-### ข้อ 6 คงสถานะ NOT VERIFIED
+### GitHub Actions scheduler ไม่ deliver — ยกเลิกการใช้เป็นตัวหลัก
 
-เกณฑ์ข้อ 6 คือ run ที่ event=`schedule` สำเร็จจริง ซึ่งยังไม่เกิด — `workflow_dispatch` ไม่ใช้แทน
+เฝ้าตรวจต่อเนื่อง 2 ชั่วโมง 29 นาที (09:36Z ที่ workflow ขึ้น default branch → 12:05Z) cron `*/5 * * * *` ควรฟายประมาณ 30 ครั้ง **ได้ 0 ครั้ง** ไม่มี run ที่ event=`schedule` เลยแม้แต่ครั้งเดียว
 
-config ฝั่งเราผ่านครบแล้ว (default branch, state=`active`, cron syntax, `CRON_SECRET` ตรง, ไม่ติด environment gate) เหลือรอ scheduler ของ GitHub ซึ่งบน public repo free tier ดีเลย์หรือ drop รอบได้ตามปกติ เมื่อฟายจะได้ 200
+config ฝั่งเราผ่านครบทุกข้อ (default branch, state=`active`, cron syntax, `CRON_SECRET` ตรง, ไม่ติด environment gate) และ `workflow_dispatch` รันผ่าน 200 ทั้งสาม จึงสรุปว่าปัญหาอยู่ที่ scheduler ของ GitHub เอง ไม่ใช่ config — ตรงกับ comment ในไฟล์ workflow ที่ระบุไว้แต่แรกว่า `Primary 1-minute schedule should use cron-job.org` และให้ GitHub Actions เป็น fallback
 
-ถ้าต้องการความถี่จริงระดับ 1 นาที: Vercel team `maehongson` เป็น plan **hobby** (cron จำกัด 2 jobs และวันละครั้ง) จึงใช้ Vercel Cron แทนไม่ได้ ทางเลือกคือ cron-job.org ตามที่ comment ในไฟล์ workflow ระบุไว้
+Vercel Cron ใช้แทนไม่ได้: team `maehongson` เป็น plan **hobby** ซึ่งจำกัด 2 cron jobs และรันได้วันละครั้ง
+
+### ข้อ 6 VERIFIED ผ่าน cron-job.org
+
+ย้าย scheduler ไป cron-job.org ทั้งสามงาน ตรวจผลจาก Supabase edge logs (ไม่ใช้รายงาน success ของ cron-job.org เป็นหลักฐาน เพราะรอบแรกที่ตั้ง URL ผิดเป็น `/` ได้ 200 ของหน้า homepage และถูกรายงานว่าสำเร็จ)
+
+จำนวน RPC call ต่อนาทีที่นับได้จริงในฐานข้อมูล:
+
+| ช่วงเวลา (UTC) | geofence sweep | dispatch timeout | data retention |
+| :--- | :--- | :--- | :--- |
+| 11:12 – 12:37 | 0 | 0 | 0 |
+| 12:38 – 12:57 | 1/นาที ไม่ขาด | 1/นาที ไม่ขาด | 1/นาที (ผิด) |
+| 12:58 – 13:04 | 1/นาที ไม่ขาด | 1/นาที ไม่ขาด | 0 |
+
+ช่องว่าง 11:12–12:37 คือช่วงที่เหลือแต่ GitHub Actions ทำงานอยู่ตัวเดียว ยืนยันซ้ำจากฝั่ง DB ว่า scheduler ไม่เคย deliver
+
+ระหว่างตรวจพบว่า `data-retention` ถูกตั้งเป็นทุก 1 นาที แทนที่จะเป็นวันละครั้ง งานนี้ทำ DELETE จริงบน `orders` และ `audit_logs` จึงกินโควต้า Supabase Free และ Vercel Hobby โดยเปล่าประโยชน์ 1,440 ครั้ง/วัน แก้เป็น 03:00 Asia/Bangkok (= `0 20 * * *` UTC ตรงกับ workflow เดิม) แล้ว และยืนยันจาก log ว่าหยุดตั้งแต่ 12:58Z ขณะที่อีกสองงานยังมาครบทุกนาที
+
+สถานะ: **VERIFIED** — สายงาน scheduler → endpoint → Supabase RPC ทำงานจริงต่อเนื่อง ตรวจจากฝั่งฐานข้อมูล
+
+GitHub Actions workflow ทั้งสามยังคงไว้เป็น fallback และใช้ `workflow_dispatch` ได้
 
 ยัง **NOT VERIFIED** บนมือถือจริงในแม่ฮ่องสอนสำหรับ Background GPS, Web Push และวงจรรับงานไรเดอร์
 
