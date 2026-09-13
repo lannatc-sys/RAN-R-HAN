@@ -147,7 +147,7 @@ OSM tiles ที่โปรเจกต์ใช้อยู่แล้วใ�
 | **Migration runtime** | 🟢 **PASS ครบ 16 ขั้น** | รวม Service Area `00006` |
 | TypeScript | 🟢 **PASS** | |
 | `git diff --check` | 🟢 **PASS** | |
-| `pnpm build` | 🟡 **ไม่คงที่** | ดูหัวข้อ toolchain ด้านล่าง — **ยังไม่ถือว่าผ่าน** |
+| `pnpm build` | 🟢 **PASS** | 52/52 routes ผ่าน 3 รอบติดบน Node v24.19.0 หลังติดตั้ง node_modules ใหม่ |
 
 ### สภาพแวดล้อมที่ใช้ตรวจ (ทำซ้ำได้)
 
@@ -171,22 +171,32 @@ Settings กับ GPS ทำงานพร้อมกันโดยไม่
 **ช่องว่างนี้ถูกปิดแล้ว** ด้วย `test/service-area-postgres.integration.cjs` ซึ่งรัน SQL จริงกับ Postgres จริง
 รวมถึงทดสอบ concurrency ด้วย connection สองตัว — เทสต์ regex ยังอยู่ในฐานะ static check เท่านั้น ไม่ใช่หลักฐานหลักอีกต่อไป
 
-### 🔧 Toolchain — `pnpm build` ยังไม่นิ่ง (งานแยก ไม่ใช่บั๊กของ Service Area)
+### 🔧 Toolchain — `pnpm build` (แก้แล้ว ✅)
 
-**อาการ:** webpack crash `TypeError: Cannot read properties of undefined (reading 'length')`
-ที่ `next/dist/compiled/webpack/bundle5.js` โดย **stack trace ไม่มีชื่อไฟล์ในโปรเจกต์เลยสักไฟล์**
+**ผลล่าสุด 2026-09-13: ผ่าน 3 รอบติด** บน Node **v24.19.0** — รอบที่ 1 ล้าง `.next` ก่อน
+รอบที่ 2 และ 3 ใช้ cache เดิม ทั้งสามรอบ `Compiled successfully` 52 routes exit 0
 
-**สาเหตุที่ระบุได้:** บั๊กระหว่าง **Node 24.19.0** กับ Next/Webpack `WasmHash` ซึ่ง **ไม่คงที่ (nondeterministic)**
-บางรอบผ่าน บางรอบพัง ด้วยโค้ดชุดเดียวกัน
+**สาเหตุจริง: `node_modules` ที่ติดมาจากการย้าย SSD ข้ามเครื่อง**
 
-> ⚠️ **แก้ที่เคยจดไว้ว่า `rm -rf .next` แล้วหาย — ไม่ถูกต้อง**
-> รอบนั้น build ผ่านจริง (51 routes) แต่เป็นเพราะได้ run ที่บังเอิญผ่าน ไม่ใช่เพราะล้าง cache
-> หลังจากนั้นยังพังซ้ำอีกด้วยโค้ดเดิม **อย่าใช้การล้าง cache เป็นข้อสรุปว่าแก้แล้ว**
+แก้ด้วย
+```
+rm -rf node_modules .next
+pnpm install --frozen-lockfile
+```
+`--frozen-lockfile` ผ่านใน 8 วินาที ยืนยันว่า lockfile ตรงกับ `package.json`
 
-**สิ่งที่ต้องทำ:** ยืนยัน build ด้วย **Node 20 หรือ 22 LTS** แล้วพิจารณาปักหมุดเวอร์ชันด้วย `engines` + `.nvmrc`
-(ตอนนี้ repo **ไม่มีทั้งคู่** จึงไม่มีอะไรกัน Node ที่ใหม่เกินไป)
-เครื่องนี้ยังไม่มี nvm/fnm/volta/nvs ติดตั้งเลยสักตัว
----
+> ⚠️ **เรื่องนี้วินิจฉัยผิดมาแล้ว 2 รอบ บันทึกไว้กันเข้าใจผิดซ้ำ**
+>
+> | รอบ | สรุปตอนนั้น | ทำไมถึงผิด |
+> | :-- | :--- | :--- |
+> | 1 | `.next` cache เสีย ลบแล้วหาย | ลบแล้วผ่านจริง แต่เป็นเพราะได้ run ที่บังเอิญผ่าน หลังจากนั้นยังพังอีก |
+> | 2 | บั๊ก Node 24 + Webpack `WasmHash` ต้องถอยไป Node 20/22 | ตอนนี้ผ่าน 3 รอบติดบน Node 24 ตัวเดิม ทฤษฎีนี้อธิบายหลักฐานไม่ได้แล้ว |
+>
+> **ยังไม่ต้องถอย Node และยังไม่ต้องปัก `engines`/`.nvmrc` เพื่อแก้อาการนี้**
+> (จะปักเพื่อความสม่ำเสมอของทีมก็ทำได้ แต่คนละเหตุผล)
+
+**ข้อจำกัดของหลักฐาน:** ผ่าน 3 รอบไม่เท่ากับพิสูจน์ว่านิ่งถาวร
+ถ้าพังอีกให้ล้าง `node_modules` ก่อนเป็นอย่างแรก แล้วค่อยสงสัยเรื่องอื่น
 
 ## 5. ประวัติการตรวจสอบก่อนหน้า
 
@@ -241,7 +251,7 @@ migration รันผ่าน Docker image + `pg` ล้วน ๆ ซึ่�
 **ลำดับที่แนะนำ:** ลบ `supabase` ออกจาก `package.json` → `revert pnpm-lock.yaml` ทั้งไฟล์
 เหลือใน `package.json` แค่ของจริง: เพิ่ม 2 test file เข้า test script + `test:db:service-area`
 
-**3. `pnpm build` ยังไม่นิ่ง** — ต้องยืนยันด้วย Node 20/22 LTS ดูหัวข้อ toolchain ในข้อ 4
+**3. `pnpm build`** — ✅ แก้แล้ว ผ่าน 3 รอบติด ดูหัวข้อ toolchain ในข้อ 4
 
 **4. เอกสาร `docs/HANDOFF.md`** — แก้เลขเทสต์บรรทัด 224 และ 272 เป็น **228/228** และเพิ่มหัวข้อ Service Area (ตอนนี้ยังไม่มีเลย)
 
@@ -275,4 +285,4 @@ Claude worktree ที่ไม่มี commit ของตัวเองเ�
 `scripts/watch-live-order.ts`, ไฟล์ `.docx`/temp และ workflow `cron-data-retention.yml` + `cron-dispatch-timeout.yml`
 (สองตัวหลังเป็นฟีเจอร์อื่น ควรแยก commit)
 
-**ยังไม่ deploy** — build ต้องนิ่งบน Node 20/22 ก่อน (ดูข้อ 4)
+**พร้อม deploy ในแง่ build และ test แล้ว** — ที่เหลือคือ Gate 4 (ยืนยัน cron บน production จริง) และ Gate 6 (ทดสอบบนมือถือจริง)

@@ -246,7 +246,7 @@
 | **Unit & Smoke** | `pnpm test` | 🟢 PASS | รันทั้ง 230 unit tests + 4 smoke tests ผ่านครบถ้วน |
 | **PostgreSQL Integration** | `pnpm test:db:service-area` | 🟢 PASS | 11/11 สถานการณ์ ยิง SQL จริงบน `supabase/postgres:15.8.1.085` (PostGIS 3.3) migration ครบ 16 ขั้น |
 | **TypeScript Strict** | `npx tsc --noEmit` | 🟢 PASS | 0 Errors |
-| **Next.js Production Build** | `pnpm build` | 🟡 **ไม่คงที่** | เคยผ่าน 51/51 routes แต่พังไม่คงที่จากบั๊ก Node 24.19.0 + Webpack `WasmHash` **ต้องยืนยันบน Node 20/22 ก่อนถือว่าผ่าน** |
+| **Next.js Production Build** | `pnpm build` | 🟢 PASS | 52/52 routes ผ่าน 3 รอบติดบน Node v24.19.0 (ล้าง cache 1 รอบ ใช้ cache 2 รอบ) — อาการพังก่อนหน้าเกิดจาก `node_modules` ที่ติดมาจากการย้าย SSD แก้ด้วยการติดตั้งใหม่ |
 
 ---
 
@@ -290,5 +290,5 @@
 | **Gate 4** | External Scheduler `/api/cron/dispatch-timeout` | **CONFIGURED IN CODE / NOT YET VERIFIED IN DEPLOYED PRODUCTION** | Endpoint ป้องกันด้วย `CRON_SECRET` และตั้งค่าใน `vercel.json` แล้ว — หลัง push/deploy ต้องตรวจ cron invocation จริงจาก deployment/log |
 | **Gate 5** | Live Notification & Dispatch E2E | **PASS** | ทดสอบ Full Flow บน Production DB ผ่าน PostGIS, Offer, Graceful Notification Fallback และ Atomic Accept ผ่าน |
 | **Gate 6** | Physical Device E2E (Android + iOS PWA) | **PHYSICAL DEVICE E2E: NOT YET VERIFIED** | ห้ามถือว่าผ่านจนกว่าจะทดสอบบนฮาร์ดแวร์ Android และ iPhone จริงในพื้นที่ อ.เมือง แม่ฮ่องสอน (Background GPS / Web Push vibration) |
-| **Gate 7** | Quality Gates (Unit/Smoke/Typecheck/DB) | **PASS ยกเว้น Build** | Unit: 230/230, Smoke: 4/4, PostgreSQL integration: 11/11, TSC: 0 errors — **Build ยังไม่คงที่ ดูตาราง Quality Gates** |
+| **Gate 7** | Quality Gates (Unit/Smoke/Typecheck/Build/DB) | **ALL PASS** | Unit: 230/230, Smoke: 4/4, PostgreSQL integration: 11/11, TSC: 0 errors, Build: 52/52 routes (3 รอบติด) |
 | **Gate 8** | Git Branch & PR Organization | **READY** | แบ่งเป็น 4 คอมมิตแบบ atomic บน `feat/rider-system-phase1` โดยไม่แตะต้อง main |
