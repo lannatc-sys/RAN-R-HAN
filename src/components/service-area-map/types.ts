@@ -99,11 +99,15 @@ function signedRingArea(coordinates: LngLat[]): number {
 /**
  * Forces an exterior ring counter-clockwise, as RFC 7946 specifies.
  *
- * This is not cosmetic. A clockwise ring cast to geography(Polygon, 4326)
- * describes the whole globe minus the drawn shape, so the area check in
- * parse_area_polygon rejects it as SERVICE_AREA_POLYGON_TOO_LARGE — a baffling
- * message for someone who just drew a small neighbourhood. Normalising here
- * means the direction a person happens to drag never reaches the database.
+ * Correction to an earlier comment here: this does NOT prevent an inverted
+ * service area. Tested against this project's PostGIS 3.3.7 on 2026-09-14,
+ * ST_Covers returns the same answers for a clockwise ring as a
+ * counter-clockwise one, and ST_Area reports the small area either way, so a
+ * ring drawn clockwise is not rejected and does not select the wrong side.
+ *
+ * It is kept because RFC 7946 says exterior rings wind counter-clockwise, and
+ * anything else consuming this GeoJSON — another library, an export, a tool
+ * that is stricter than PostGIS — is entitled to rely on that.
  */
 export function toCounterClockwise(coordinates: LngLat[]): LngLat[] {
   return signedRingArea(coordinates) > 0

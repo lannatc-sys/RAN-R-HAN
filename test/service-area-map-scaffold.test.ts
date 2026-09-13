@@ -132,8 +132,8 @@ describe('Service Area Map UI Scaffold — Contract & Isolation Guards', () => {
       assert.ok(geoJson, 'a closed clockwise draft still serialises');
       assert.ok(
         shoelace(geoJson!.coordinates[0]) < 0,
-        'a clockwise ring reaching geography(Polygon) would describe the whole globe ' +
-          'minus the shape and trip SERVICE_AREA_POLYGON_TOO_LARGE'
+        'RFC 7946 winds exterior rings counter-clockwise, and consumers stricter ' +
+          'than PostGIS are entitled to rely on that'
       );
       assert.ok(
         isClosedRing(geoJson!.coordinates[0]),
