@@ -13,13 +13,19 @@ function normalizeAccountNumber(account: string | null | undefined): string {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. ตรวจสอบ Secret Header ถ้ามีการตั้งค่า
+    // 1. ตรวจสอบ Secret Header (fail-closed: ต้องตั้งค่าเสมอ ห้ามปล่อยผ่านเมื่อไม่มี secret)
     const expectedSecret = process.env.SLIPOK_WEBHOOK_SECRET;
-    if (expectedSecret) {
-      const incomingSecret = req.headers.get('x-slipok-secret') || req.headers.get('x-webhook-secret');
-      if (incomingSecret !== expectedSecret) {
-        return NextResponse.json({ error: 'UNAUTHORIZED: Secret header mismatch' }, { status: 401 });
-      }
+    if (!expectedSecret) {
+      console.error('[SlipOK Webhook] SLIPOK_WEBHOOK_SECRET is not configured — refusing request.');
+      return NextResponse.json(
+        { error: 'SERVER_MISCONFIGURED: SLIPOK_WEBHOOK_SECRET is not set' },
+        { status: 500 }
+      );
+    }
+
+    const incomingSecret = req.headers.get('x-slipok-secret') || req.headers.get('x-webhook-secret');
+    if (incomingSecret !== expectedSecret) {
+      return NextResponse.json({ error: 'UNAUTHORIZED: Secret header mismatch' }, { status: 401 });
     }
 
     const payload = await req.json();

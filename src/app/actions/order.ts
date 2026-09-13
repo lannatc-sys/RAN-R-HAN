@@ -199,7 +199,26 @@ export async function confirmCashPaymentAction(orderId: string) {
 
     const admin = createAdminClient();
 
-    // 1. อัปเดต payment เป็น verified
+    // 1. ค้นหา shop_id ของคำสั่งซื้อเพื่อผูกสิทธิ์
+    const { data: order, error: orderLookupError } = await admin
+      .from('orders')
+      .select('id, shop_id')
+      .eq('id', orderId)
+      .maybeSingle();
+
+    if (orderLookupError || !order) {
+      return { success: false, error: 'ไม่พบข้อมูลคำสั่งซื้อ' };
+    }
+
+    // 2. ตรวจสอบสิทธิ์ร้านค้า
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: order.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์ยืนยันการชำระเงินของร้านนี้' };
+    }
+
+    // 3. อัปเดต payment เป็น verified
     const { error: payError } = await admin
       .from('payments')
       .update({
@@ -214,7 +233,7 @@ export async function confirmCashPaymentAction(orderId: string) {
       return { success: false, error: formatThaiError(payError) };
     }
 
-    // 2. ปรับ order status เป็น confirmed ถ้ายัง pending อยู่
+    // 4. ปรับ order status เป็น confirmed ถ้ายัง pending อยู่
     const { data: updatedOrder } = await admin
       .from('orders')
       .update({ status: 'confirmed', updated_at: new Date().toISOString() })

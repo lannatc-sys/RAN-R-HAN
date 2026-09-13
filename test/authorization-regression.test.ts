@@ -236,3 +236,166 @@ describe('Tenant-scoped deletes: child rows must be scoped to their parent', () 
     );
   });
 });
+
+describe('Superadmin server actions authorization guards', () => {
+  const superadminSource = source('src/app/actions/superadmin.ts');
+
+  function extractFn(name: string): string {
+    const start = superadminSource.indexOf(`export async function ${name}`);
+    assert.ok(start !== -1, `Function ${name} not found in superadmin.ts`);
+    const nextExport = superadminSource.indexOf('\nexport ', start + 1);
+    return superadminSource.slice(start, nextExport !== -1 ? nextExport : undefined);
+  }
+
+  const superadminActions = [
+    'deleteStoreAction',
+    'getAllStoresAction',
+    'updateStoreStatusAction',
+    'updateStorePlanAction',
+  ];
+
+  for (const fnName of superadminActions) {
+    it(`${fnName} calls checkIsSuperadmin() and returns before createAdminClient()`, () => {
+      const fn = extractFn(fnName);
+      const checkIdx = fn.indexOf('checkIsSuperadmin()');
+      const createAdminIdx = fn.indexOf('createAdminClient()');
+
+      assert.ok(checkIdx !== -1, `${fnName} must call checkIsSuperadmin()`);
+      assert.ok(createAdminIdx !== -1, `${fnName} must call createAdminClient()`);
+      assert.ok(
+        checkIdx < createAdminIdx,
+        `${fnName} must call checkIsSuperadmin() BEFORE createAdminClient()`
+      );
+
+      // Must guard against !isSuperadmin and return early
+      const between = fn.slice(checkIdx, createAdminIdx);
+      assert.match(
+        between,
+        /if\s*\(\s*!isSuperadmin\s*\)\s*\{\s*return\b/,
+        `${fnName} must return early if !isSuperadmin before calling createAdminClient()`
+      );
+    });
+  }
+});
+
+describe('SlipOK settings domain allowlist and authorization guards', () => {
+  const settingsSource = source('src/app/actions/settings.ts');
+
+  function extractSettingsFn(name: string): string {
+    const start = settingsSource.indexOf(`export async function ${name}`);
+    assert.ok(start !== -1, `Function ${name} not found in settings.ts`);
+    const nextExport = settingsSource.indexOf('\nexport ', start + 1);
+    return settingsSource.slice(start, nextExport !== -1 ? nextExport : undefined);
+  }
+
+  it('saveSlipCredentialsAction checks shop access (has_shop_access)', () => {
+    const fn = extractSettingsFn('saveSlipCredentialsAction');
+    assert.match(
+      fn,
+      /has_shop_access[\s\S]*?lookup_shop_id:\s*data\.shop_id/,
+      'saveSlipCredentialsAction must check has_shop_access for data.shop_id'
+    );
+  });
+
+  it('saveSlipCredentialsAction validates hostname strictly using new URL().hostname === api.slipok.com', () => {
+    const fn = extractSettingsFn('saveSlipCredentialsAction');
+    assert.match(
+      fn,
+      /new\s+URL\(/,
+      'saveSlipCredentialsAction must parse URL using new URL()'
+    );
+    assert.match(
+      fn,
+      /\.hostname\s*!==\s*['"]api\.slipok\.com['"]|\.hostname\s*===\s*['"]api\.slipok\.com['"]/,
+      'saveSlipCredentialsAction must strictly check .hostname === api.slipok.com'
+    );
+
+    // Verify domain allowlist logic against malicious suffixes
+    const safeUrl = new URL('https://api.slipok.com/api/line/apikey/1');
+    const evilSubdomain = new URL('https://api.slipok.com.evil.co/steal');
+    const evilPrefix = new URL('https://evil-api.slipok.com/steal');
+
+    assert.equal(safeUrl.hostname === 'api.slipok.com', true);
+    assert.equal(evilSubdomain.hostname === 'api.slipok.com', false);
+    assert.equal(evilPrefix.hostname === 'api.slipok.com', false);
+  });
+});
+
+describe('Payment slips storage RLS policy migration', () => {
+  it('new migration exists and scopes payment-slips viewing to has_shop_access', () => {
+    const migration = source('supabase/migrations/20260913000001_secure_payment_slips_storage_policy.sql');
+    assert.match(
+      migration,
+      /drop\s+policy\s+if\s+exists\s+"Staff can view payment slips"\s+on\s+storage\.objects/i,
+      'Migration must drop old open policy'
+    );
+    assert.match(
+      migration,
+      /create\s+policy\s+"Staff can view payment slips"[\s\S]*?has_shop_access/i,
+      'Migration must recreate policy using has_shop_access'
+    );
+    assert.match(
+      migration,
+      /storage\.foldername\(name\)/i,
+      'Migration must extract shop_id from storage foldername'
+    );
+  });
+});
+
+describe('SlipOK webhook security: fail-closed on missing secret', () => {
+  it('webhooks/slipok rejects with HTTP 500 when SLIPOK_WEBHOOK_SECRET is not configured', () => {
+    const webhookSource = source('src/app/api/webhooks/slipok/route.ts');
+    assert.match(
+      webhookSource,
+      /if\s*\(\s*!expectedSecret\s*\)\s*\{[\s\S]*?status:\s*500\s*\}/,
+      'Webhook must return 500 when expected secret is missing (fail-closed)'
+    );
+    // Must NOT have the old fail-open if (expectedSecret) { ... } pattern without else
+    assert.doesNotMatch(
+      webhookSource,
+      /if\s*\(\s*expectedSecret\s*\)\s*\{[\s\S]*?incomingSecret\s*!==\s*expectedSecret[\s\S]*?\}\s*const payload = await req\.json\(\);/,
+      'Webhook must not skip validation when secret is undefined'
+    );
+  });
+});
+
+describe('Resource-level shop_id binding in mutations', () => {
+  it('updateShopSettingsAction checks user authentication and has_shop_access', () => {
+    const settings = source('src/app/actions/settings.ts');
+    const start = settings.indexOf('export async function updateShopSettingsAction');
+    const nextExport = settings.indexOf('\nexport ', start + 1);
+    const fn = settings.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    assert.match(fn, /has_shop_access[\s\S]*?lookup_shop_id:\s*data\.shop_id/);
+  });
+
+  it('updateMenuItemAction binds update to item shop_id and checks has_shop_access', () => {
+    const menu = source('src/app/actions/menu.ts');
+    const start = menu.indexOf('export async function updateMenuItemAction');
+    const nextExport = menu.indexOf('\nexport ', start + 1);
+    const fn = menu.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    assert.match(fn, /\.from\('menu_items'\)\s*\.select\('shop_id'\)\s*\.eq\('id',\s*data\.id\)/);
+    assert.match(fn, /has_shop_access[\s\S]*?lookup_shop_id:\s*item\.shop_id/);
+  });
+
+  it('deleteMenuItemAction binds delete to item shop_id and checks has_shop_access', () => {
+    const menu = source('src/app/actions/menu.ts');
+    const start = menu.indexOf('export async function deleteMenuItemAction');
+    const nextExport = menu.indexOf('\nexport ', start + 1);
+    const fn = menu.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    assert.match(fn, /\.from\('menu_items'\)\s*\.select\('shop_id'\)\s*\.eq\('id',\s*itemId\)/);
+    assert.match(fn, /has_shop_access[\s\S]*?lookup_shop_id:\s*item\.shop_id/);
+  });
+
+  it('confirmCashPaymentAction queries order shop_id and checks has_shop_access', () => {
+    const order = source('src/app/actions/order.ts');
+    const start = order.indexOf('export async function confirmCashPaymentAction');
+    const nextExport = order.indexOf('\nexport ', start + 1);
+    const fn = order.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    assert.match(fn, /\.from\('orders'\)\s*\.select\('id,\s*shop_id'\)\s*\.eq\('id',\s*orderId\)/);
+    assert.match(fn, /has_shop_access[\s\S]*?lookup_shop_id:\s*order\.shop_id/);
+  });
+});

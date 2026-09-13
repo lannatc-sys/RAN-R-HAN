@@ -94,6 +94,7 @@ async function runDatabaseSetup() {
     await runMigrationFile(client, migrationsDir, '20260912000004_rider_telegram_notification.sql', '1.14', 'Rider telegram & push channels schema applied.');
     await runMigrationFile(client, migrationsDir, '20260912000005_shop_open_status.sql', '1.15', 'Shop open/closed status schema and enforcement applied.');
     await runMigrationFile(client, migrationsDir, '20260912000006_service_area_enforcement.sql', '1.16', 'Service-area and rider geofence enforcement applied.');
+    await runMigrationFile(client, migrationsDir, '20260913000001_secure_payment_slips_storage_policy.sql', '1.17', 'Payment slips storage RLS policy scoped to shop access applied.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');
