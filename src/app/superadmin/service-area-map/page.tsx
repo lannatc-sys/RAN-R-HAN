@@ -8,8 +8,8 @@ export default function ServiceAreaMapPage() {
   return (
     <div className="space-y-4">
       <header className="space-y-1">
-        <h1 className="text-xl font-bold text-white">แก้ไขพื้นที่ให้บริการ (Service Area Map)</h1>
-        <p className="text-xs text-slate-400 leading-relaxed">
+        <h1 className="text-xl font-bold text-slate-900">แก้ไขพื้นที่ให้บริการ (Service Area Map)</h1>
+        <p className="text-xs text-slate-600 leading-relaxed">
           วาดขอบเขตพื้นที่ลูกค้าและพื้นที่ไรเดอร์ — รอบนี้เป็นการทดลองหน้าตาและการวาดเท่านั้น
           ยังไม่บันทึกลงฐานข้อมูล และยังไม่มีผลกับร้านใดในระบบ
         </p>

@@ -129,22 +129,22 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
   return (
     <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Top Scaffold Alert Banner */}
-      <header className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-amber-900 dark:text-amber-200 shadow-sm">
+      <header className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-900 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-2.5">
             <span className="text-xl" aria-hidden="true">
               🗺️
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">
                 ระบบจัดการขอบเขตพื้นที่บริการด้วยรูปหลายเหลี่ยม (Service Area Map Editor)
               </h2>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 โครงร่างหน้าจอจำลอง (Scaffold UI) — แยกขาดจากฐานข้อมูลจริง เพื่อการทดสอบ UX/UI ก่อนเชื่อมต่อ Leaflet Engine
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs bg-amber-200/70 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 font-semibold px-2.5 py-1 rounded-full border border-amber-300 dark:border-amber-700 whitespace-nowrap">
+          <span className="self-start sm:self-center text-xs bg-amber-200/70 text-amber-900 font-semibold px-2.5 py-1 rounded-full border border-amber-300 whitespace-nowrap">
             SCAFFOLD MODE
           </span>
         </div>
@@ -164,7 +164,7 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
         <div
           role="status"
           aria-live="polite"
-          className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200 text-xs px-3.5 py-2 rounded-lg flex items-center justify-between"
+          className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3.5 py-2 rounded-lg flex items-center justify-between"
         >
           <span>{feedbackMessage}</span>
           <button
@@ -200,7 +200,7 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
 
         {/* Right Column: Detailed Polygon Properties & Precedence Status */}
         <div className="lg:col-span-5 xl:col-span-4">
-          <PolygonDraftPanel draft={currentDraft} />
+          <PolygonDraftPanel draft={currentDraft} readOnly={readOnly} />
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { MousePointerClick, Zap } from 'lucide-react';
 import { AreaKind, LngLat, PolygonDraft, isClosedRing } from './types';
 
 interface MapCanvasPlaceholderProps {
@@ -38,11 +39,11 @@ export const MapCanvasPlaceholder: React.FC<MapCanvasPlaceholderProps> = ({
 
   return (
     <div
-      className={`relative w-full aspect-[4/3] sm:aspect-[16/10] min-h-[280px] sm:min-h-[420px] rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 flex flex-col justify-between select-none ${className}`}
+      className={`relative w-full aspect-[4/3] sm:aspect-[16/10] min-h-[280px] sm:min-h-[420px] rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm flex flex-col justify-between select-none ${className}`}
     >
       {/* Visual Map Grid Pattern (SVG without external network assets) */}
       <div
-        className={`absolute inset-0 opacity-40 dark:opacity-20 ${
+        className={`absolute inset-0 bg-slate-100 opacity-100 ${
           closed ? 'cursor-default' : 'cursor-crosshair'
         }`}
         onClick={handleCanvasClick}
@@ -62,7 +63,7 @@ export const MapCanvasPlaceholder: React.FC<MapCanvasPlaceholderProps> = ({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1"
-                className="text-slate-300 dark:text-slate-800"
+                className="text-slate-300"
               />
             </pattern>
           </defs>
@@ -78,8 +79,8 @@ export const MapCanvasPlaceholder: React.FC<MapCanvasPlaceholderProps> = ({
                   return `${x}%,${y}%`;
                 })
                 .join(' ')}
-              fill={closed ? (isCustomer ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)') : 'none'}
-              stroke={isCustomer ? '#2563eb' : '#059669'}
+              fill={closed ? (isCustomer ? 'rgba(245, 158, 11, 0.22)' : 'rgba(37, 99, 235, 0.22)') : 'none'}
+              stroke={isCustomer ? '#d97706' : '#1d4ed8'}
               strokeWidth="2.5"
               strokeDasharray={closed ? undefined : '4 4'}
             />
@@ -101,8 +102,8 @@ export const MapCanvasPlaceholder: React.FC<MapCanvasPlaceholderProps> = ({
                 isFirst || isClosing
                   ? 'bg-rose-600 ring-2 ring-rose-300'
                   : isCustomer
-                  ? 'bg-blue-600'
-                  : 'bg-emerald-600'
+                  ? 'bg-amber-500'
+                  : 'bg-blue-600'
               }`}
             >
               {i + 1}
@@ -113,50 +114,51 @@ export const MapCanvasPlaceholder: React.FC<MapCanvasPlaceholderProps> = ({
 
       {/* Top Banner: Mode Indicator & Phase Notice */}
       <div className="relative z-10 p-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-2">
+        <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
           <span
             className={`w-2.5 h-2.5 rounded-full ${
-              isCustomer ? 'bg-blue-500' : 'bg-emerald-500'
+              isCustomer ? 'bg-amber-500' : 'bg-blue-600'
             }`}
           />
-          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+          <span className="text-xs font-bold text-slate-900">
             {draft.label}
           </span>
-          <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-400 font-mono">
+          <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-mono border border-slate-200">
             {closed ? 'CLOSED RING' : `${draft.coordinates.length} PTS`}
           </span>
         </div>
 
-        <div className="bg-amber-100/90 dark:bg-amber-950/80 backdrop-blur-sm text-amber-900 dark:text-amber-200 px-2.5 py-1 rounded-md text-[11px] font-medium border border-amber-300/80 dark:border-amber-800 flex items-center gap-1">
-          <span>⚡</span>
+        <div className="bg-amber-50/90 backdrop-blur-sm text-amber-900 px-2.5 py-1 rounded-md text-[11px] font-medium border border-amber-200 flex items-center gap-1">
+          <Zap className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Map Tile Deferred (Scaffold Only)</span>
         </div>
       </div>
 
       {/* Center Guidance Overlay */}
       <div className="relative z-10 pointer-events-none p-4 text-center">
-        <div className="inline-block bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm max-w-sm">
-          <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+        <div className="inline-block bg-white/85 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm max-w-sm">
+          <p className="text-xs font-semibold text-slate-900 flex items-center justify-center gap-1.5">
+            <MousePointerClick className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
             {closed
-              ? '🎉 รูปหลายเหลี่ยมปิดสมบูรณ์แล้ว'
+              ? 'รูปหลายเหลี่ยมปิดสมบูรณ์แล้ว'
               : draft.coordinates.length > 0
-              ? '✎ คลิกบนพื้นที่เพื่อวางจุดต่อไป หรือกดปุ่ม "ปิดวง"'
-              : '🗺️ คลิกบนตารางเพื่อจำลองการปักหมุดจุดขอบเขต'}
+              ? 'คลิกบนพื้นที่เพื่อวางจุดต่อไป หรือกดปุ่ม "ปิดวง"'
+              : 'คลิกบนตารางเพื่อจำลองการปักหมุดจุดขอบเขต'}
           </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-[11px] text-slate-500 mt-0.5">
             Phase 2 จะเชื่อมต่อเอนจินแผนที่ Leaflet/OSM แบบโต้ตอบเต็มรูปแบบ
           </p>
         </div>
       </div>
 
       {/* Bottom Status Bar */}
-      <div className="relative z-10 p-2.5 bg-slate-900/80 text-white backdrop-blur-sm flex items-center justify-between text-xs px-4">
+      <div className="relative z-10 p-2.5 bg-white/90 backdrop-blur-sm border-t border-slate-200 flex items-center justify-between text-xs px-4">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] opacity-80">
+          <span className="font-mono text-[11px] text-slate-500">
             CRS: EPSG:4326 (WGS84 [lng, lat])
           </span>
         </div>
-        <div className="text-[11px] text-slate-300">
+        <div className="text-[11px] text-slate-500">
           {closed ? 'Polygon takes precedence over radius' : 'Radius active until polygon is closed'}
         </div>
       </div>

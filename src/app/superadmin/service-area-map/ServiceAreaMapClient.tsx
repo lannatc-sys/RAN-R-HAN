@@ -9,7 +9,7 @@ const ServiceAreaLeafletCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full min-h-[280px] sm:min-h-[420px] aspect-[4/3] sm:aspect-[16/10] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 text-sm">
+      <div className="w-full min-h-[280px] sm:min-h-[420px] aspect-[4/3] sm:aspect-[16/10] rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-600 text-sm">
         กำลังโหลดแผนที่แม่ฮ่องสอน...
       </div>
     ),
