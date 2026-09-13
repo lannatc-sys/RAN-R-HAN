@@ -1,6 +1,6 @@
 # 🗺️ Handoff — Service Area Enforcement
 
-> **As of:** 2026-09-13 10:00 (+07) — P1 Runtime Verification ปิดแล้ว
+> **As of:** 2026-09-13 12:30 (+07) — commit + push แล้ว PR #2 เปิดอยู่
 > **เขียนโดย:** Claude session `service-area-enforcement-audit-c08db0`
 > **ขอบเขตเอกสาร:** เฉพาะงาน Service Area Enforcement เท่านั้น ไม่ครอบคลุมงานอื่นใน `docs/HANDOFF.md`
 >
@@ -10,50 +10,41 @@
 
 ---
 
-## 1. โค้ดอยู่ที่ไหน (อ่านก่อนเริ่มงาน)
-
-งาน Service Area **ไม่ได้อยู่ใน worktree ใด ๆ** อยู่ใน checkout หลักเท่านั้น:
+## 1. สถานะปัจจุบัน (อ่านก่อนเริ่มงาน)
 
 | | |
 | :--- | :--- |
 | **Path** | `D:\system make\Ran-R-HAN` |
 | **Branch** | `codex/admin-mobile-nav` |
-| **Base commit** | `5d04bdf` |
-| **สถานะ** | **ยังไม่ commit** ทั้งหมดเป็น working-tree changes |
+| **HEAD** | `db6fb96` (merge `origin/main` เข้า branch) |
+| **สถานะ** | ✅ **commit และ push แล้ว** working tree สะอาด sync กับ origin |
+| **PR** | [#2](https://github.com/lannatc-sys/RAN-R-HAN/pull/2) — `MERGEABLE` / `CLEAN` CI เขียวครบ **ยังไม่ merge** |
 
-> 💡 **บทเรียนจาก session ก่อน — อย่าทำซ้ำ**
-> session นั้นถูกสร้างเป็น worktree แยก (`.claude/worktrees/service-area-enforcement-audit-c08db0` อยู่ที่ `6d42a19`
-> ซึ่ง **diverged** จาก `5d04bdf`) ทำให้ `git status` ขึ้นว่าสะอาดและมองไม่เห็นงาน Service Area เลยสักไฟล์
-> จน build/test ที่รันไปทั้งหมด**ไม่มีน้ำหนักเป็นหลักฐาน**
-> แม้จะ grant สิทธิ์โฟลเดอร์แล้ว **Edit/Write tool ก็ยังถูก guardrail บล็อก** (Bash เขียนได้ แต่ tool เขียนไม่ได้)
-> **ให้เปิด session ใน `D:\system make\Ran-R-HAN` ตรง ๆ เท่านั้น**
+`origin/main` ถูก merge เข้า branch นี้แล้วเพื่อแก้ conflict 10 ไฟล์ merge-base จึงขยับมาที่ `5f32de6`
+diff ที่ GitHub แสดง (47 ไฟล์ +4,933/-209) คือส่วนที่ branch นี้เพิ่มจาก main จริง ๆ
 
-### ไฟล์ใหม่ (untracked)
+> 💡 **บทเรียนเรื่อง worktree — อย่าทำซ้ำ**
+> เซสชันแรกถูกสร้างเป็น worktree แยกที่ base คนละ commit ทำให้ `git status` ขึ้นว่าสะอาด
+> และมองไม่เห็นงาน Service Area เลยสักไฟล์ จน build/test ที่รันไปทั้งหมดไม่มีน้ำหนักเป็นหลักฐาน
+> แม้ grant สิทธิ์โฟลเดอร์แล้ว Edit/Write tool ก็ยังถูก guardrail บล็อก (Bash เขียนได้ tool เขียนไม่ได้)
+> worktree ที่ไม่มี commit ของตัวเองถูกล้างไปแล้ว **ทำงานจาก checkout หลักที่เดียวเท่านั้น**
+
+### ไฟล์ของ Service Area (commit แล้วทั้งหมด)
 
 ```
 supabase/migrations/20260912000006_service_area_enforcement.sql   (809 บรรทัด)
-src/app/admin/service-area/page.tsx
-src/app/admin/service-area/ServiceAreaSettingsClient.tsx
-src/app/api/cron/rider-geofence-sweep/route.ts                    (62 บรรทัด)
+src/app/admin/service-area/{page.tsx,ServiceAreaSettingsClient.tsx}
+src/app/api/cron/rider-geofence-sweep/route.ts
 .github/workflows/cron-rider-geofence-sweep.yml
 test/service-area-enforcement.test.ts
 test/authorization-regression.test.ts
+test/service-area-postgres.integration.cjs
+docs/HANDOFF-service-area.md
 ```
 
-### ไฟล์เดิมที่ถูกแก้ (tracked, modified)
-
-```
-src/app/actions/settings.ts          ← updateServiceAreaSettingsAction
-src/lib/thai-errors.ts               ← ข้อความ OUTSIDE_SERVICE_AREA / OUTSIDE_WORK_AREA
-src/lib/types.ts                     ← Shop
-src/app/rider/RiderClient.tsx        ← แบนเนอร์เตือน + auto-close
-src/app/api/rider/session/start/route.ts
-src/app/api/rider/location/route.ts
-```
-
-> ✅ `src/components/admin/AdminNavbar.tsx` **เป็นงาน Service Area ด้วย** — เพิ่มลิงก์เมนู `/admin/service-area`
-> ถ้าไม่เอาเข้า commit หน้าจะเข้าไม่ถึง (เอกสารรุ่นก่อนเคยระบุผิดว่าเป็นงาน admin-mobile-nav)
-
+แก้ไฟล์เดิม: `src/app/actions/settings.ts` · `src/lib/thai-errors.ts` · `src/lib/types.ts` ·
+`src/app/rider/RiderClient.tsx` · `src/app/api/rider/{session/start,location}/route.ts` ·
+`src/components/admin/AdminNavbar.tsx` (เพิ่มลิงก์เมนูไปหน้า service-area) · `scripts/run-db.js` · `package.json`
 ---
 
 ## 2. สถานะเทียบกับ requirement
@@ -142,7 +133,7 @@ OSM tiles ที่โปรเจกต์ใช้อยู่แล้วใ�
 
 | รายการ | ผล | หมายเหตุ |
 | :--- | :---: | :--- |
-| `pnpm test` (unit) | 🟢 **PASS 228/228** | เพิ่มจาก 222 หลัง Codex เติมเทสต์ + smoke 4/4 PASS |
+| `pnpm test` (unit) | 🟢 **PASS 230/230** | เพิ่มจาก 222 → 228 (Codex) → 230 (regression test ของ IDOR) + smoke 4/4 PASS |
 | **PostgreSQL integration** | 🟢 **PASS 11/11** | `pnpm test:db:service-area` — รัน SQL จริงกับ Postgres จริง |
 | **Migration runtime** | 🟢 **PASS ครบ 16 ขั้น** | รวม Service Area `00006` |
 | TypeScript | 🟢 **PASS** | |
@@ -213,76 +204,49 @@ pnpm install --frozen-lockfile
 
 ---
 
-## 6. ลำดับการปิดงาน
+## 6. สถานะงาน
 
-| # | ขั้นตอน | สถานะ |
+| # | งาน | สถานะ |
 | :-: | :--- | :--- |
-| 1 | ปิดสถานะ Service Area phase ปัจจุบัน | 🟢 **เสร็จ** |
-| 2 | ทำ handoff แยก | 🟢 **เสร็จ** — เอกสารฉบับนี้ |
-| 3 | ยืนยัน source of truth ของ test count | 🟢 **เสร็จ** — **228/228** |
-| 4 | runtime-validate migration บน Postgres จริง | 🟢 **เสร็จ** — 16 migrations + 11 integration ผ่าน |
-| 5 | เปิด session ใหม่ทำ Map phase | 🟡 **ปลดล็อกแล้ว** — รอเจ้าของงานสั่งเริ่ม |
+| 1 | ปิดสถานะ Service Area phase 1 | 🟢 เสร็จ |
+| 2 | Handoff แยก | 🟢 เสร็จ — เอกสารฉบับนี้ |
+| 3 | ยืนยัน test count | 🟢 เสร็จ — **230/230** |
+| 4 | runtime-validate migration บน Postgres จริง | 🟢 เสร็จ — 16 migrations + 11 integration |
+| 5 | ลบ `supabase` dependency ที่ไม่มีใครใช้ | 🟢 เสร็จ — `pnpm-lock.yaml` กลับมาสะอาด ไม่ต้อง commit |
+| 6 | แก้เลขเทสต์ + เพิ่มหัวข้อ Service Area ใน `docs/HANDOFF.md` | 🟢 เสร็จ |
+| 7 | `pnpm build` เสถียร | 🟢 เสร็จ — 52 routes 3 รอบติด |
+| 8 | Cron → GitHub Actions | 🟢 เสร็จ — commit แล้วทั้ง 3 ไฟล์ |
+| 9 | ล้าง worktree | 🟢 เสร็จ |
+| 10 | commit + push | 🟢 เสร็จ — PR [#2](https://github.com/lannatc-sys/RAN-R-HAN/pull/2) เขียว รอ merge |
 
-**P1 Runtime Verification ปิดครบแล้ว** ตัวบล็อกเดิม (ข้อ 4) หมดไป
+### เหลือจริง ๆ
 
-### งานที่ยังค้าง
+**1. merge PR #2** — ตัวบล็อกทุกอย่างที่เหลือ
 
-**1. `supabase` dependency ที่ไม่มีใครใช้ — ควรเอาออก**
+หลัง merge จะได้สองอย่างทันที
+- cron ทั้ง 3 ตัวเริ่มยิงตามเวลา (GitHub Actions รัน `schedule` จาก **default branch เท่านั้น** ตอนนี้ยังไม่ยิงเลย)
+- `/api/cron/rider-geofence-sweep` เลิกคืน 404 บน production
 
-`package.json:45` มี `"supabase": "^2.117.0"` ใน `devDependencies` แต่**ไม่มีอะไรเรียกใช้เลย**
+**2. Gate 4 — ยืนยัน cron ยิงจริงบน production** (ทำได้หลัง merge + deploy)
 
-- `scripts/run-db.js` ใช้ `pg`
-- `test/service-area-postgres.integration.cjs` ใช้ `pg`
-- ไม่มี script/test/คำสั่งไหนเรียก supabase CLI
+สถานะล่าสุดที่วัดจาก production จริง
+```
+/api/cron/dispatch-timeout      401  ← มีอยู่แล้ว fail-closed ถูกต้อง
+/api/cron/data-retention        401  ← มีอยู่แล้ว fail-closed ถูกต้อง
+/api/cron/rider-geofence-sweep  404  ← ยังไม่ deploy
+```
+ต้องตรวจ: ไม่มี header → 401, secret ผิด → 401, secret ถูก → 200
+และยืนยันว่า `CRON_SECRET` บน Vercel ตรงกับที่ใช้ยิง (เคยมีประวัติไม่ตรงกัน)
 
-migration รันผ่าน Docker image + `pg` ล้วน ๆ ซึ่ง `pg` เป็น dependency เดิมอยู่แล้ว
-ถ้าปล่อยไว้ ทุกเครื่องและ CI จะโหลด CLI binary แยก platform (`@supabase/cli-darwin-arm64`, linux, win) หลายสิบ MB ทุกครั้งที่ `pnpm install` เพื่อเครื่องมือที่ไม่มีใครเรียก
+> ⚠️ **จุดที่มักถูกข้าม:** ยิง `workflow_dispatch` ผ่าน **ไม่ได้แปลว่า `schedule` ทำงาน**
+> ต้องรอถึงรอบจริงแล้วดูใน Actions run history ว่ามี run ที่ trigger เป็น `schedule`
+> ไม่งั้นจะได้ Gate ที่ผ่านบนกระดาษแต่ cron เงียบจริง
 
-**2. `pnpm-lock.yaml` — ปนกัน 2 เรื่อง อย่า revert ทั้งไฟล์ก่อนตัดสินใจข้อ 1**
+**3. Gate 6 — ทดสอบบนมือถือจริง** Android + iPhone ที่ อ.เมือง แม่ฮ่องสอน (Background GPS / Web Push)
 
-| ส่วน | คืออะไร | ทำยังไง |
-| :--- | :--- | :--- |
-| `supabase` + transitive (`@ecies/*`, `@noble/*`, `@supabase/cli-*`) | dependency จริงที่ถูกเพิ่ม | หายไปเองเมื่อลบตามข้อ 1 |
-| `libc: [glibc]` ถูกลบ **28 บรรทัด เพิ่ม 0** บน `@img/sharp-libvips-linux-*` | noise จาก pnpm คนละเวอร์ชัน (เครื่องนี้ 9.15.9) ไม่มีใครแตะ sharp `lockfileVersion` ยังเป็น `9.0` เท่าเดิม | **revert** |
+**4. Map phase** — วาดขอบเขตบนแผนที่ ปลดล็อกแล้ว แผนงานครบอยู่ในข้อ 3
 
-> ⚠️ การลบ `libc: [glibc]` ไม่ใช่แค่เรื่องความสวยงาม
-> ถ้า CI รันบน Alpine/musl metadata ที่หายไปอาจทำให้ pnpm เลือก glibc build ผิดตัว
+### ข้อสังเกตค้างไว้
 
-**ลำดับที่แนะนำ:** ลบ `supabase` ออกจาก `package.json` → `revert pnpm-lock.yaml` ทั้งไฟล์
-เหลือใน `package.json` แค่ของจริง: เพิ่ม 2 test file เข้า test script + `test:db:service-area`
-
-**3. `pnpm build`** — ✅ แก้แล้ว ผ่าน 3 รอบติด ดูหัวข้อ toolchain ในข้อ 4
-
-**4. เอกสาร `docs/HANDOFF.md`** — แก้เลขเทสต์บรรทัด 224 และ 272 เป็น **228/228** และเพิ่มหัวข้อ Service Area (ตอนนี้ยังไม่มีเลย)
-
-**5. Cron — ตัดสินใจแล้ว: ใช้ GitHub Actions** ✅
-
-เคยมีสองแนวทางชนกัน ถ้าปล่อยขึ้นทั้งคู่ `data-retention` จะรันซ้ำวันละสองรอบ
-
-| แนวทาง | สถานะ |
-| :--- | :--- |
-| `.github/workflows/cron-*.yml` (3 ไฟล์ ใน main checkout ยัง untracked) | 🟢 **เลือกใช้** ครบทั้ง 3 cron และเห็น log ที่เดียว |
-| `vercel.json` → `"crons"` | ❌ **ทิ้ง** เคยมีค้างใน worktree `continue-6de032` ครอบแค่ data-retention และ Vercel free plan จำกัดจำนวน cron |
-
-worktree `continue-6de032` ถูกลบไปแล้ว patch เก็บสำรองไว้ที่ scratchpad ของ session (ไม่ต้องใช้แล้ว)
-**`vercel.json` ใน main checkout ไม่มี `crons` อยู่แล้ว จึงไม่ต้องแก้อะไร**
-
-**6. Worktree — ล้างแล้ว** ✅
-
-Claude worktree ที่ไม่มี commit ของตัวเองเลย (0 ahead) ถูกลบทิ้ง เพราะทำให้ session สับสนว่าโค้ดอยู่ไหน
-จนรัน build/test ผิดที่มาแล้วหนึ่งรอบ
-
-เหลือ 3 ตัว: `D:/system make/Ran-R-HAN` (หลัก) · `rider-telegram-worktree` (branch มี 13 commits) ·
-`service-area-enforcement-audit-c08db0` (ว่าง ลบได้เลยเมื่อปิด session นั้น)
-
-> 💡 **ทำงานจาก `D:\system make\Ran-R-HAN` ที่เดียวเท่านั้น** อย่าสร้าง worktree ใหม่สำหรับงานนี้อีก
-
-### ข้อควรระวังตอน stage
-
-`git status` มีของหลายงานปนกัน ต้องคัดเฉพาะไฟล์ตามรายการในข้อ 1 เท่านั้น
-ไฟล์ที่ **ไม่ใช่** Service Area: `docs/rd/`, `public/qr/`, `record working time.md`,
-`scripts/generate-field-test-doc.py`, `scripts/test-telegram-push.js`, `scripts/verify-production-cron.ts`,
-`scripts/watch-live-order.ts`, ไฟล์ `.docx`/temp และ workflow `cron-data-retention.yml` + `cron-dispatch-timeout.yml`
-(สองตัวหลังเป็นฟีเจอร์อื่น ควรแยก commit)
-
-**พร้อม deploy ในแง่ build และ test แล้ว** — ที่เหลือคือ Gate 4 (ยืนยัน cron บน production จริง) และ Gate 6 (ทดสอบบนมือถือจริง)
+`CRON_SECRET` เคยถูกเขียนเป็น plaintext ใน `record working time.md` (scrub ออกก่อน commit แล้ว ไม่เคยขึ้น git)
+แต่ไฟล์นั้นเคยย้ายข้ามเครื่องและผ่าน AI หลายตัว ถ้าจะหมุน secret ใหม่สักรอบก็ไม่เสียหาย
