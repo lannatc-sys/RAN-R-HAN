@@ -48,7 +48,7 @@ async function runE2E() {
   const riderClient = createClient(supabaseUrl, supabaseAnonKey);
   const { data: authData, error: authError } = await riderClient.auth.signInWithPassword({
     email: 'rider1.kruapa@gmail.com',
-    password: 'RiderPass1234!',
+    password: process.env.PILOT_RIDER_PASSWORD!,
   });
   if (authError || !authData.user) throw new Error('Rider login failed: ' + authError?.message);
   console.log(`[PASS] Rider 1 authenticated: ${authData.user.id}`);
