@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { formatThaiError } from '../src/lib/thai-errors';
 
@@ -513,5 +513,26 @@ describe('payment-slips upload INSERT policy migration', () => {
   it('limits file size in the policy', () => {
     const sql = source('supabase/migrations/20260913000002_secure_payment_slips_upload_policy.sql');
     assert.match(sql, /metadata.*size.*bigint/is);
+  });
+});
+
+describe('Migration files are byte-clean for the SQL runner', () => {
+  // scripts/run-db.js ส่งเนื้อไฟล์เข้า client.query() ตรง ๆ ถ้าไฟล์มี BOM นำหน้า
+  // Postgres จะคืน syntax error ตั้งแต่อักขระแรก เทสต์ที่อ่านไฟล์เป็น string
+  // จับไม่ได้ เพราะ BOM ไม่กระทบการ regex กลางไฟล์
+  it('no migration starts with a UTF-8 BOM', () => {
+    const dir = resolve(root, 'supabase/migrations');
+    const offenders = readdirSync(dir)
+      .filter((f) => f.endsWith('.sql'))
+      .filter((f) => {
+        const buf = readFileSync(resolve(dir, f));
+        return buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf;
+      });
+
+    assert.deepEqual(
+      offenders,
+      [],
+      `migration เหล่านี้มี BOM นำหน้า จะทำให้ run-db.js ล้ม: ${offenders.join(', ')}`
+    );
   });
 });

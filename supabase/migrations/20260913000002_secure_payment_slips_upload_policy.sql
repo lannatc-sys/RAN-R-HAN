@@ -1,4 +1,4 @@
-﻿-- Migration: 20260913000002_secure_payment_slips_upload_policy
+-- Migration: 20260913000002_secure_payment_slips_upload_policy
 -- Purpose: Replace permissive "Anyone can upload payment slips" INSERT policy on
 --          storage.objects (bucket: payment-slips) with a hardened one that:
 --   1. Requires the caller to be authenticated (no anon uploads)

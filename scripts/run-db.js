@@ -44,7 +44,9 @@ async function runMigrationFile(client, migrationsDir, fileName, stepLabel, succ
 
   console.log(`${stepLabel} Executing supabase/migrations/${fileName}...`);
   try {
-    await client.query(fs.readFileSync(filePath, 'utf-8'));
+    // ตัด BOM ทิ้งก่อนส่งเข้า Postgres: ไฟล์ที่สร้างด้วย PowerShell Set-Content จะมี
+    // U+FEFF นำหน้า ซึ่งทำให้ Postgres คืน syntax error ตั้งแต่อักขระแรก
+    await client.query(fs.readFileSync(filePath, 'utf-8').replace(/^﻿/, ''));
     console.log(`   [SUCCESS] ${successMessage}\n`);
   } catch (err) {
     if (ALREADY_EXISTS_CODES.has(err.code)) {
