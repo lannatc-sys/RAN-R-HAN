@@ -2,35 +2,35 @@
 
 > แหล่งข้อมูล handoff หลักเพียงไฟล์เดียวของโปรเจกต์
 >
-> อัปเดตล่าสุด: 2026-09-13 (Asia/Bangkok)
+> อัปเดตล่าสุด: 2026-09-13 17:25 (Asia/Bangkok)
 >
 > Schema, migrations, production code และผลทดสอบที่รันจริงล่าสุด มีน้ำหนักสูงกว่าเอกสารนี้เสมอ
 
 ## 1. สถานะที่ตรวจสดล่าสุด
 
-ตรวจจาก checkout `D:\system make\Ran-R-HAN` เมื่อ 2026-09-13 ก่อนรวมเอกสาร:
+ตรวจจาก checkout `D:\system make\Ran-R-HAN` เมื่อ 2026-09-13 หลัง apply production migrations สำหรับ Gate 4:
 
 | รายการ | สถานะ |
 | --- | --- |
-| Working tree | สะอาดก่อนงานเอกสารรอบนี้ |
+| Working tree | `docs/HANDOFF.md` modified สำหรับบันทึกผลรอบนี้ และพบการลบไฟล์เอกสารอื่นค้างอยู่ระหว่างงาน; ไม่ได้กู้คืนหรือแก้ไฟล์เหล่านั้น |
 | Branch ปัจจุบัน | `fix/auth-idor-hardening` |
-| HEAD | `da08f4a` — strip UTF-8 BOM ก่อนรัน payment-slips migration |
+| HEAD | `36a2c8a` — docs: consolidate handoff, update quality gates, and add worktree configuration |
 | Remote branch | `origin/fix/auth-idor-hardening` อยู่ที่ commit เดียวกัน |
-| PR ของ branch ปัจจุบัน | กำลังจะเปิด |
+| PR ของ branch ปัจจุบัน | [PR #3](https://github.com/lannatc-sys/RAN-R-HAN/pull/3) MERGED เข้า `main` ที่ `7f123df` |
+| Remote `main` | `7f123df` — Merge pull request #3 from `lannatc-sys/fix/auth-idor-hardening` |
 | PR #2 | MERGED เข้า main เรียบร้อย (commit `6b78578`) |
 
 [PR #2 — Service area enforcement, security fixes, and cron scheduling](https://github.com/lannatc-sys/RAN-R-HAN/pull/2) (MERGED)
+[PR #3 — fix(security): auth and IDOR hardening, storage policies, and agent rules](https://github.com/lannatc-sys/RAN-R-HAN/pull/3) (MERGED)
 
 สถานะ GitHub/Vercel เปลี่ยนได้ ให้ตรวจใหม่ก่อน merge หรือ deploy
 
 ## 2. ลำดับงานถัดไป
 
-1. Merge PR #2 เมื่อเจ้าของโปรเจกต์อนุมัติ
-2. ซิงก์ `fix/auth-idor-hardening` กับ `main` หลัง merge และตรวจไม่ให้ diff ของ PR #2 ซ้ำ
-3. รัน targeted security tests แล้วเปิด PR แยกสำหรับ auth/IDOR hardening
-4. Deploy และตรวจ cron บน production
-5. ทดสอบภาคสนามบน Android และ iPhone จริง
-6. ทำ Service Area Map ต่อจาก migration WIP บน `feat/service-area-map`
+1. รอและตรวจ GitHub Actions ให้มี run ของ `Rider Geofence Sweep Cron` ที่ event เป็น `schedule` และ conclusion สำเร็จจริง; ห้ามใช้ `workflow_dispatch` แทนหลักฐานนี้
+2. ถ้า scheduled run ล้ม ให้ตรวจเฉพาะ log และความตรงกันของ `CRON_SECRET` ก่อนแก้ config เพิ่ม
+3. ทดสอบภาคสนามบน Android และ iPhone จริง
+4. ทำ Service Area Map ต่อจาก migration WIP บน `feat/service-area-map`
 
 ห้าม commit, push, merge, deploy หรือแก้ production โดยไม่มีคำสั่งจากเจ้าของโปรเจกต์
 
@@ -177,23 +177,60 @@ git diff --check
    - เพิ่ม `.worktrees/`, `.agents/worktrees/`, `.claude/worktrees/` ใน `.gitignore` และ `.git/info/exclude` เพื่อป้องกันไม่ให้โค้ดใน worktree หลุดเข้ามาใน git index
    - สามารถสร้าง isolated worktree สำหรับงานใหม่ด้วยคำสั่ง: `git worktree add .worktrees/<branch-name> -b <branch-name>` ตาม skill `using-git-worktrees` ได้ทันที
 
-## 8. Production gates ที่ยังไม่ปิด
+## 8. Production Gate 4 หลัง PR #3 merge
 
-ก่อน PR #2 deploy เคยตรวจได้:
+ดำเนินการจริงเมื่อ 2026-09-13 เวลา 16:36–16:50 Asia/Bangkok:
 
-```text
-/api/cron/dispatch-timeout      401 — endpoint มีอยู่และ fail-closed
-/api/cron/data-retention        401 — endpoint มีอยู่และ fail-closed
-/api/cron/rider-geofence-sweep  404 — ยังไม่ deploy
-```
+- PR #3 merge เข้า `main` สำเร็จที่ `7f123df` ก่อนแตะ schema production
+- Supabase project อยู่ Free Plan: **ไม่มี PITR และไม่มี scheduled backup**
+- สร้าง logical snapshot ด้วย PostgreSQL 17 `pg_dump --format=custom` ก่อน migration แล้ว ตรวจด้วย `pg_restore --list` ได้ 804 TOC entries
+- snapshot อยู่นอก repo ที่ `D:\system make\Ran-R-HAN-production-backups\prod-before-gate4-20260913T164119+0700.dump` ขนาด 453,012 bytes, SHA-256 `A53CF9FE817229AB9A9D64F0F1E050CC58C784E1A75C492CCD986C513F04F44D`
+- preflight ก่อน apply: sweep function=false, `service_radius_m`=false, permissive upload policy=1, duplicate rider pairs=0
+- จำนวนก่อน migration: `orders=3`, `shops=3`, `riders=2`
+- apply แบบ transaction ทีละไฟล์และตรวจผลก่อนตัวถัดไป ตามลำดับ `20260912000006_service_area_enforcement.sql` -> `20260913000001_secure_payment_slips_storage_policy.sql` -> `20260913000002_secure_payment_slips_upload_policy.sql`
+- `node scripts/run-db.js`: **NOT PERFORMED** เพราะขั้นแรก `run_all.sql` สามารถสร้าง payment-slip policies แบบหลวมกลับมาชั่วคราวได้
+- หลัง migration: sweep function=true, `service_radius_m`=true, policy `Anyone can upload payment slips`=0, own-shop upload policy=1, shop-scoped view policy=1
+- จำนวนหลัง migration: `orders=3`, `shops=3`, `riders=2` — เท่ากับก่อน migration
 
-หลัง merge/deploy ต้องตรวจใหม่:
+ผลยิง Production (`https://ran-r-han.vercel.app`) เวลา 16:49 Asia/Bangkok:
 
-- ไม่มี `Authorization` → 401
-- secret ผิด → 401
-- secret ถูก → 200
-- GitHub Actions มี run ที่ trigger จาก `schedule` จริง ไม่ใช่เพียง `workflow_dispatch`
-- `CRON_SECRET` ของ GitHub และ Vercel ตรงกัน
+| Endpoint | ไม่มี Header | มี Bearer `CRON_SECRET` | ผลรอบนี้ |
+| :--- | :--- | :--- | :--- |
+| `/api/cron/dispatch-timeout` | **401** | NOT PERFORMED | fail-closed ผ่าน |
+| `/api/cron/data-retention` | **401** | NOT PERFORMED | fail-closed ผ่าน |
+| `/api/cron/rider-geofence-sweep` | **401** | **200 OK** | ผ่าน (`success: true`, `closed_count: 0`) |
+
+GitHub Actions Gate:
+
+- `Rider Geofence Sweep Cron` state=`active`, cron=`*/5 * * * *`, workflow สร้างบน default branch เวลา 16:24:30 Asia/Bangkok
+- Actions permissions ของ repository เป็น enabled/allow all และ CI จาก push บน `main` ผ่านแล้ว
+- เฝ้าตรวจต่อเนื่องถึง 18:04 Asia/Bangkok (88 นาทีหลัง workflow ขึ้น default branch) ยังไม่มี run ที่ event=`schedule`: **NOT VERIFIED**
+
+### แก้ CRON_SECRET mismatch (18:08 Asia/Bangkok)
+
+สั่ง `workflow_dispatch` ทั้งสาม workflow เพื่อทดสอบสายงาน พบ **fail ทั้งหมดด้วย HTTP 401** `{"success":false,"error":"Unauthorized"}`
+
+วินิจฉัย: route ตอบ 500 เมื่อฝั่ง Vercel ไม่มี `CRON_SECRET` และตอบ 401 เมื่อค่าไม่ตรง — ที่ได้คือ 401 และ log แสดงค่าถูก mask เป็น `***` จึงสรุปว่าทั้งสองฝั่งมีค่าแต่ **คนละค่า** ไม่ใช่ปัญหา config หรือ scheduler
+
+แก้โดย set `CRON_SECRET` ฝั่ง GitHub Actions ใหม่ให้ตรงกับค่าบน Vercel Production แล้ว dispatch ซ้ำ:
+
+| Workflow | Run ID | HTTP | Response |
+| :--- | :--- | :--- | :--- |
+| Rider Geofence Sweep Cron | `34753775466` | **200** | `{"success":true,"summary":{"closed_count":0}}` |
+| Dispatch Timeout Cron | `34753777452` | **200** | `{"ok":true,"expired":0,"redispatched":0,"errors":0}` |
+| Daily Data Retention Cron | `34753779456` | **200** | `{"success":true,"summary":{"cancelledOrdersDeleted":0,"preorderRawTextsCleared":0,"auditLogsPurged":0}}` |
+
+สายงาน GitHub Actions → `CRON_SECRET` → Vercel endpoint → Supabase RPC: **VERIFIED** ครบทั้งสาม
+
+หมายเหตุ: ถ้ารอ scheduled run ตามแผนเดิมโดยไม่ทดสอบ dispatch ก่อน scheduled run แรกก็จะ fail 401 เช่นกัน การทดสอบ dispatch คือสิ่งที่เปิดเผยบั๊กนี้
+
+### ข้อ 6 คงสถานะ NOT VERIFIED
+
+เกณฑ์ข้อ 6 คือ run ที่ event=`schedule` สำเร็จจริง ซึ่งยังไม่เกิด — `workflow_dispatch` ไม่ใช้แทน
+
+config ฝั่งเราผ่านครบแล้ว (default branch, state=`active`, cron syntax, `CRON_SECRET` ตรง, ไม่ติด environment gate) เหลือรอ scheduler ของ GitHub ซึ่งบน public repo free tier ดีเลย์หรือ drop รอบได้ตามปกติ เมื่อฟายจะได้ 200
+
+ถ้าต้องการความถี่จริงระดับ 1 นาที: Vercel team `maehongson` เป็น plan **hobby** (cron จำกัด 2 jobs และวันละครั้ง) จึงใช้ Vercel Cron แทนไม่ได้ ทางเลือกคือ cron-job.org ตามที่ comment ในไฟล์ workflow ระบุไว้
 
 ยัง **NOT VERIFIED** บนมือถือจริงในแม่ฮ่องสอนสำหรับ Background GPS, Web Push และวงจรรับงานไรเดอร์
 
