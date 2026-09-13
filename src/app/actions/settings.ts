@@ -131,26 +131,43 @@ export async function updateShopSettingsAction(data: {
   service_charge: number;
   vat_mode: 'none' | 'inclusive' | 'exclusive';
 }) {
-  const admin = createAdminClient();
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนแก้ไขการตั้งค่า' };
+    }
 
-  const { error } = await admin
-    .from('shops')
-    .update({
-      name: data.name,
-      promptpay_id: data.promptpay_id || null,
-      promptpay_name: data.promptpay_name || null,
-      service_charge: data.service_charge,
-      vat_mode: data.vat_mode,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', data.shop_id);
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: data.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์แก้ไขการตั้งค่าของร้านนี้' };
+    }
 
-  if (error) {
+    const admin = createAdminClient();
+
+    const { error } = await admin
+      .from('shops')
+      .update({
+        name: data.name,
+        promptpay_id: data.promptpay_id || null,
+        promptpay_name: data.promptpay_name || null,
+        service_charge: data.service_charge,
+        vat_mode: data.vat_mode,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', data.shop_id);
+
+    if (error) {
+      return { success: false, error: formatThaiError(error) };
+    }
+
+    safeRevalidate('/admin/settings');
+    return { success: true };
+  } catch (error: unknown) {
     return { success: false, error: formatThaiError(error) };
   }
-
-  safeRevalidate('/admin/settings');
-  return { success: true };
 }
 
 /**
@@ -161,6 +178,19 @@ export async function grantSupportAccessAction(
   hours: 24 | 48 = 24
 ): Promise<{ success: boolean; expiresAt?: string; error?: string }> {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการข้อมูลของร้านค้านี้' };
+    }
+
     const admin = createAdminClient();
     const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 
@@ -190,6 +220,19 @@ export async function revokeSupportAccessAction(
   shopId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการข้อมูลของร้านค้านี้' };
+    }
+
     const admin = createAdminClient();
 
     const { error } = await admin
@@ -227,6 +270,39 @@ export async function saveSlipCredentialsAction(data: {
   }
 
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนบันทึกการตั้งค่า' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: data.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการข้อมูลของร้านค้านี้' };
+    }
+
+    // ตรวจสอบ allowlist โดเมนสำหรับ api_url
+    if (data.api_url && data.api_url.trim().length > 0) {
+      const rawUrl = data.api_url.trim();
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(rawUrl.startsWith('http://') || rawUrl.startsWith('https://') ? rawUrl : `https://${rawUrl}`);
+      } catch {
+        return { success: false, error: 'รูปแบบ API URL ไม่ถูกต้อง' };
+      }
+
+      // ต้องใช้ HTTPS เท่านั้น เพื่อป้องกัน API Key รั่วไหลผ่าน HTTP plaintext
+      if (parsedUrl.protocol !== 'https:') {
+        return { success: false, error: 'API URL ต้องใช้ HTTPS เท่านั้น' };
+      }
+
+      if (parsedUrl.hostname !== 'api.slipok.com') {
+        return { success: false, error: 'API URL ต้องเป็นโดเมน api.slipok.com เท่านั้น' };
+      }
+    }
+
     // เข้ารหัสด้วย AES-256-GCM ฝั่ง server
     const encryptedBuffer = encryptApiKey(data.api_key.trim());
     const admin = createAdminClient();
@@ -246,7 +322,7 @@ export async function saveSlipCredentialsAction(data: {
       return { success: false, error: formatThaiError(error) };
     }
 
-    revalidatePath('/admin/settings');
+    safeRevalidate('/admin/settings');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: formatThaiError(err) };
@@ -265,36 +341,53 @@ export async function updateKdsPinAction(data: {
     return { success: false, error: 'รหัส PIN ต้องเป็นตัวเลข 4 หลักเท่านั้น' };
   }
 
-  const admin = createAdminClient();
-
-  // ตรวจสอบ PIN เดิมถ้าส่งมา
-  if (data.current_pin !== undefined) {
-    const { data: shop } = await admin
-      .from('shops')
-      .select('kds_pin')
-      .eq('id', data.shop_id)
-      .single();
-
-    if (shop && (shop.kds_pin || '0000') !== data.current_pin) {
-      return { success: false, error: 'รหัส PIN เดิมไม่ถูกต้อง' };
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
     }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: data.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการข้อมูลของร้านค้านี้' };
+    }
+
+    const admin = createAdminClient();
+
+    // ตรวจสอบ PIN เดิมถ้าส่งมา
+    if (data.current_pin !== undefined) {
+      const { data: shop } = await admin
+        .from('shops')
+        .select('kds_pin')
+        .eq('id', data.shop_id)
+        .single();
+
+      if (shop && (shop.kds_pin || '0000') !== data.current_pin) {
+        return { success: false, error: 'รหัส PIN เดิมไม่ถูกต้อง' };
+      }
+    }
+
+    const { error } = await admin
+      .from('shops')
+      .update({
+        kds_pin: data.new_pin,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', data.shop_id);
+
+    if (error) {
+      return { success: false, error: formatThaiError(error) };
+    }
+
+    safeRevalidate('/admin/settings');
+    safeRevalidate('/admin/orders');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: formatThaiError(err) };
   }
-
-  const { error } = await admin
-    .from('shops')
-    .update({
-      kds_pin: data.new_pin,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', data.shop_id);
-
-  if (error) {
-    return { success: false, error: formatThaiError(error) };
-  }
-
-  safeRevalidate('/admin/settings');
-  safeRevalidate('/admin/orders');
-  return { success: true };
 }
 
 /**
@@ -307,6 +400,19 @@ export async function updateFulfillmentChannelsAction(data: {
   allow_delivery: boolean;
 }) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: data.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการข้อมูลของร้านค้านี้' };
+    }
+
     const admin = createAdminClient();
 
     const { error } = await admin
@@ -328,7 +434,6 @@ export async function updateFulfillmentChannelsAction(data: {
     safeRevalidate('/[slug]/checkout');
     return { success: true };
   } catch (err: any) {
-    console.error('updateFulfillmentChannelsAction error:', err);
     return { success: false, error: formatThaiError(err) };
   }
 }

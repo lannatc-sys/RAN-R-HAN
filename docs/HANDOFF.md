@@ -1,294 +1,254 @@
-# 🤝 Project Handoff & Status Log (RAN-R-HAN)
+# RAN-R-HAN — Project Handoff
 
-> **บันทึกสถานะการส่งมอบงาน (Handoff Document)**  
-> **วันเวลาที่อัปเดตล่าสุด:** 2026-09-12 (GMT+7) — Pre-Pilot Verification Audit Completed
-> **สถานะภาพรวม:** 🟡 CONDITIONALLY PILOT-READY (โค้ดและชุดทดสอบ Unit/Scenario ผ่านครบทุกหมวด A ถึง H แต่มี Production Blockers ที่ต้องเปิดใช้งานบนระบบจริง: 1) รัน migration 20260912000004 บน Supabase, 2) ตั้ง external cron scheduler, 3) บันทึกพิกัดร้านค้าจริง, 4) สร้างบัญชีไรเดอร์อย่างน้อย 2 คน, 5) REAL DEVICE E2E: NOT VERIFIED ยังไม่เคยทดสอบบนอุปกรณ์มือถือจริงหน้างาน)
-> *เอกสารฉบับนี้ถูกซิงก์กับ [docs/HANDOFF.md](file:///d:/system%20make/Ran-R-HAN/docs/HANDOFF.md)*
+> แหล่งข้อมูล handoff หลักเพียงไฟล์เดียวของโปรเจกต์
+>
+> อัปเดตล่าสุด: 2026-09-13 (Asia/Bangkok)
+>
+> Schema, migrations, production code และผลทดสอบที่รันจริงล่าสุด มีน้ำหนักสูงกว่าเอกสารนี้เสมอ
 
----
+## 1. สถานะที่ตรวจสดล่าสุด
 
-## 📌 1. สรุปสถานะล่าสุดของโปรเจกต์ (Executive Summary)
+ตรวจจาก checkout `D:\system make\Ran-R-HAN` เมื่อ 2026-09-13 ก่อนรวมเอกสาร:
 
-โปรเจกต์ **RAN-R-HAN (รับอาหาร)** เป็นระบบร้านอาหาร Multi-tenant SaaS สำหรับร้านอาหารท้องถิ่นในเขตเทศบาลเมืองแม่ฮ่องสอน  
-ปัจจุบันได้รับการพัฒนา ฟีเจอร์หลักครบถ้วน และผ่านการทดสอบทุกระดับ:
-- **ระบบสั่งอาหารและหน้าร้าน (Customer Order & Dine-in/Takeaway)**: ทำงานสมบูรณ์
-- **ระบบครัว KDS (Kitchen Display System)**: แสดงคิวอาหารเรียลไทม์ พร้อมระบบล็อกหน้าจอด้วย PIN 4 หลัก
-- **ระบบตรวจสอบการชำระเงิน (PromptPay & SlipOK)**: ป้องกันสลิปซ้ำ (Code 23505) และเข้ารหัส API Key ด้วย AES-256-GCM
-- **ระบบจัดส่งและพรีออเดอร์ (Zone & Delivery / Preorder)**: ตาม [docs/router-map.md](file:///d:/system%20make/Ran-R-HAN/docs/router-map.md) รองรับจุดรับในแม่ฮ่องสอน แผนที่ Leaflet.js (OpenStreetMap) ฟรี 100% และระบบ Smart Facebook Comment Parser
-- **ระบบความปลอดภัยทางกฎหมายและการคุ้มครองข้อมูลส่วนบุคคล (PDPA Compliance: WP-19 ถึง WP-23)**: ติดตั้งหน้าข้อกำหนดจริง, จุดขอ Consent ที่บันทึกหลักฐาน Timestamp, ระบบ Audit Log, Data Retention ลบข้อมูลอัตโนมัติตามกรอบ 90 วัน, และแบบฟอร์มยื่นคำขอใช้สิทธิของเจ้าของข้อมูล (DSR 8 สิทธิ)
+| รายการ | สถานะ |
+| --- | --- |
+| Working tree | สะอาดก่อนงานเอกสารรอบนี้ |
+| Branch ปัจจุบัน | `fix/auth-idor-hardening` |
+| HEAD | `da08f4a` — strip UTF-8 BOM ก่อนรัน payment-slips migration |
+| Remote branch | `origin/fix/auth-idor-hardening` อยู่ที่ commit เดียวกัน |
+| PR ของ branch ปัจจุบัน | กำลังจะเปิด |
+| PR #2 | MERGED เข้า main เรียบร้อย (commit `6b78578`) |
 
----
+[PR #2 — Service area enforcement, security fixes, and cron scheduling](https://github.com/lannatc-sys/RAN-R-HAN/pull/2) (MERGED)
 
-## 🛠️ 2. สิ่งที่ได้รับการพัฒนาและปรับปรุงล่าสุด (Recent Updates)
+สถานะ GitHub/Vercel เปลี่ยนได้ ให้ตรวจใหม่ก่อน merge หรือ deploy
 
-### A. ระบบกฎหมายและ PDPA Compliance (WP-19 ถึง WP-23) — *เสร็จสิ้นล่าสุด 🎯*
-1. **หน้าเว็บจริงสำหรับข้อกำหนดและนโยบาย (WP-19):**
-   - [`/terms`](file:///d:/system%20make/Ran-R-HAN/src/app/terms/page.tsx) และ [`/privacy`](file:///d:/system%20make/Ran-R-HAN/src/app/privacy/page.tsx) — หน้าระดับแพลตฟอร์ม
-   - [`/[slug]/terms`](file:///d:/system%20make/Ran-R-HAN/src/app/%5Bslug%5D/terms/page.tsx) และ [`/[slug]/privacy`](file:///d:/system%20make/Ran-R-HAN/src/app/%5Bslug%5D/privacy/page.tsx) — หน้าระดับร้านค้า แสดงชื่อผู้ควบคุมข้อมูลและช่องทางติดต่อจริง
-   - ลิงก์ Legal Footer ในหน้าเมนูร้านค้า [`MenuClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/%5Bslug%5D/MenuClient.tsx)
-2. **จุดขอความยินยอมและการบันทึกหลักฐาน Consent Logging (WP-20):**
-   - Checkbox บังคับยินยอมข้อกำหนดและนโยบายก่อนยืนยันสั่งซื้อใน [`CheckoutClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/%5Bslug%5D/checkout/CheckoutClient.tsx) (ปุ่มกดสั่งซื้อจะถูก Disabled จนกว่าจะกดยินยอม)
-   - บันทึกหลักฐานลงตาราง `consent_logs` (Timestamp, ประเภทความยินยอม, เวอร์ชันนโยบาย, IP/User-Agent) ทั้งเงื่อนไข ToS และการกดยินยอมแชร์พิกัด GPS
-3. **Audit Logging & Preorder Notice (WP-21):**
-   - บันทึก `audit_logs` อัตโนมัติทุกครั้งที่มีการนำเข้าคอมเมนต์ Facebook ใน `addBulkPreorderItemsAction`
-   - แบนเนอร์คำแนะนำข้อความ Consent แปะในโพสต์ Facebook ก่อนเปิดรับคอมเมนต์ ในหน้า [`PreorderRoundDetailClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/admin/delivery/preorder/%5Bid%5D/PreorderRoundDetailClient.tsx)
-4. **ระบบทำลายข้อมูลอัตโนมัติ (Automated Data Retention - WP-22):**
-   - Endpoint [`/api/cron/data-retention`](file:///d:/system%20make/Ran-R-HAN/src/app/api/cron/data-retention/route.ts) ตรวจสอบความปลอดภัยด้วย `CRON_SECRET`
-   - ลบออเดอร์ที่ยกเลิกเกิน 90 วัน, ล้างข้อความดิบคอมเมนต์ Facebook เก่ากว่า 90 วัน, ลบ Audit Log เก่ากว่า 1 ปี, และคุ้มครองข้อมูลทางบัญชี/ภาษี 5-7 ปี
-5. **แบบฟอร์มขอใช้สิทธิของเจ้าของข้อมูล (Data Subject Rights - WP-23):**
-   - คอมโพเนนต์ [`DataSubjectRequestForm.tsx`](file:///d:/system%20make/Ran-R-HAN/src/components/legal/DataSubjectRequestForm.tsx) รองรับสิทธิ 8 ประการตาม PDPA พร้อมระบบบันทึกลงตาราง `data_subject_requests` กำหนดส่งมอบผลภายใน 30 วัน
+## 2. ลำดับงานถัดไป
 
-### B. แก้ไขข้อผิดพลาด PinModal ([src/components/admin/PinModal.tsx](file:///d:/system%20make/Ran-R-HAN/src/components/admin/PinModal.tsx))
-- ปรับปรุงให้เรียกเฉพาะ `onSuccess()` เมื่อรหัส PIN ถูกต้อง ทำให้หน้าจอยังคงอยู่ที่ `/admin/settings` ไม่เด้งกลับไปหน้าแรก
+1. Merge PR #2 เมื่อเจ้าของโปรเจกต์อนุมัติ
+2. ซิงก์ `fix/auth-idor-hardening` กับ `main` หลัง merge และตรวจไม่ให้ diff ของ PR #2 ซ้ำ
+3. รัน targeted security tests แล้วเปิด PR แยกสำหรับ auth/IDOR hardening
+4. Deploy และตรวจ cron บน production
+5. ทดสอบภาคสนามบน Android และ iPhone จริง
+6. ทำ Service Area Map ต่อจาก migration WIP บน `feat/service-area-map`
 
-### C. ระบบจัดส่งและพรีออเดอร์ (Zone & Delivery System)
-- Database Migrations: [`supabase/migrations/20260910000001_delivery_system.sql`](file:///d:/system%20make/Ran-R-HAN/supabase/migrations/20260910000001_delivery_system.sql)
-- Smart Facebook Comment Parser: [`src/lib/delivery-parser.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/delivery-parser.ts)
+ห้าม commit, push, merge, deploy หรือแก้ production โดยไม่มีคำสั่งจากเจ้าของโปรเจกต์
 
-### D. รายงานรีวิวโครงการ (Project Review Report) — *เสร็จสิ้นล่าสุด 📋*
-- สร้าง [`docs/REPORTREVIEW.MD`](file:///d:/system%20make/Ran-R-HAN/docs/REPORTREVIEW.MD) — รีวิวภาพรวมโครงการครบทุกด้าน: Architecture, Feature Review, Security Assessment, Quality Gate (53/53), Gaps & Risks (🔴/🟠/🟡), Deployment Checklist, Next Steps
+## 3. งานใน PR #2
 
-### E. พัฒนาระบบแจ้งเตือนและตั้งค่า Telegram Bot ครบวงจร (@ranrhan_bot) — *เสร็จสิ้น Phase 1-6 🎯*
-- **วัตถุประสงค์:** ส่งการแจ้งเตือนสถานะออเดอร์ (1-on-1) ถึงลูกค้าโดยตรงผ่าน Telegram Bot ฟรี 100%
-- **ข้อมูลบอทที่เชื่อมต่อ:**
-  - Bot Name: `RAN-R-HAN`
-  - Bot Username: `@ranrhan_bot` (ID: `8740185324`)
-  - Deep Link URL: `https://t.me/ranrhan_bot?start=<TOKEN>`
-- **สิ่งที่พัฒนาและทดสอบเรียบร้อย:**
-  1. **Database Migration (`supabase/migrations/20260910000003_telegram_notifications.sql`):**
-     - เพิ่มคอลัมน์ `telegram_enabled` ในตาราง `shops` (default: TRUE)
-     - เพิ่มคอลัมน์ `telegram_chat_id` ในตาราง `orders`
-     - สร้างตาราง `telegram_link_tokens` พร้อม Index และ RLS (Token อายุ 15 นาที)
-     - รัน Migration ผ่าน `scripts/run-db.js` สำเร็จบน Supabase เรียบร้อย
-  2. **Backend Library ([`src/lib/telegram.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/telegram.ts)):**
-     - `sendTelegramMessage()`, `sendOrderStatusMessage()`, `sendTestTelegramMessage()`
-     - เทมเพลตข้อความ 5 สถานะ (`confirmed`, `cooking`, `served`, `completed`, `cancelled`) รองรับ TH/EN
-     - ทำงานแบบ Graceful Handling ไม่ทำให้ flow ออเดอร์หลักหยุดชะงัก
-  3. **Webhook Endpoint ([`src/app/api/telegram/webhook/route.ts`](file:///d:/system%20make/Ran-R-HAN/src/app/api/telegram/webhook/route.ts)):**
-     - รับ Event จาก Telegram Bot แกะ Token จาก `/start <TOKEN>` ตรวจสอบอายุและสถานะใช้งาน
-     - บันทึก `orders.telegram_chat_id` และตอบกลับลูกค้าทันที
-  4. **Server Actions:**
-     - [`src/app/actions/telegram.ts`](file:///d:/system%20make/Ran-R-HAN/src/app/actions/telegram.ts): สร้าง Deep Link, เปิด/ปิดแจ้งเตือนร้าน, ทดสอบส่งข้อความ
-     - [`src/app/actions/order.ts`](file:///d:/system%20make/Ran-R-HAN/src/app/actions/order.ts): ยิงแจ้งเตือนลูกค้าอัตโนมัติใน `updateOrderStatusAction()` และ `confirmCashPaymentAction()`
-  5. **Frontend UI:**
-     - **Admin Settings:** การ์ด "ระบบแจ้งเตือนลูกค้าผ่าน Telegram Bot" ใน [`SettingsClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/admin/settings/SettingsClient.tsx) พร้อมสวิตช์เปิด/ปิดร้าน และกล่องทดสอบส่งข้อความ
-     - **Customer Order Tracking:** การ์ดเชื่อมต่อรับแจ้งเตือน Telegram ใน [`OrderTrackerClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/order/%5BorderId%5D/OrderTrackerClient.tsx) แสดงสถานะเชื่อมต่อแบบเรียลไทม์
+PR #2 อยู่บน branch `codex/admin-mobile-nav` และรวม:
 
-### F. ระบบอัปโหลดและตรวจสอบสลิปอัตโนมัติ (SlipOK Direct Verification) — *เสร็จสิ้นล่าสุด 🎯*
-- **วัตถุประสงค์:** แก้ปัญหาผู้ใช้แจ้งว่า *"ตรวจสอบการโอนเงิน ไม่มีให้แนบสลิปเพื่อตรวจสอบกับ สลิปโอเค"* โดยเพิ่มช่องทางให้ลูกค้าแนบรูปสลิปจากมือถือเพื่อตรวจสอบกับ SlipOK API ทันทีหลังโอนเงิน
-- **สิ่งที่พัฒนาและทดสอบเรียบร้อย:**
-  1. **Server Action ตรวจสอบสลิป ([`src/app/actions/payment.ts`](file:///d:/system%20make/Ran-R-HAN/src/app/actions/payment.ts)):**
-     - ฟังก์ชัน `uploadAndVerifySlipAction(formData: FormData)`:
-     - ตรวจสอบความถูกต้องของไฟล์รูปภาพ (ขนาดสูงสุด 10MB, mime type `image/*`)
-     - ดึง `api_key_encrypted` จากตาราง `shop_payment_credentials` และถอดรหัส AES-256-GCM ฝั่งเซิร์ฟเวอร์
-     - ยิง HTTP POST แบบ multipart/form-data ไปยัง SlipOK API พร้อมแนบ Header `x-authorization`
-     - ตรวจสอบความถูกต้องของยอดเงิน (`slipAmount >= order.total`) และบัญชีปลายทาง Exact Match (PromptPay/บัญชีธนาคาร)
-     - เรียก Supabase RPC `verify_and_confirm_payment` บันทึก Transaction Reference ป้องกันการใช้สลิปซ้ำ (Code 23505)
-     - สำรองรูปสลิปไปยัง Supabase Storage bucket `payment-slips` (Best-effort)
-     - ยิง Web Push แจ้งเตือนครัว/ร้านค้า (`sendPushToShop`) และแจ้งสถานะออเดอร์ผ่าน Telegram Bot ถึงลูกค้าทันที
-  2. **Frontend UI แนบสลิป ([`OrderTrackerClient.tsx`](file:///d:/system%20make/Ran-R-HAN/src/app/order/%5BorderId%5D/OrderTrackerClient.tsx)):**
-     - กล่องแนบรูปสลิปโอนเงิน (JPG, PNG, WEBP) พร้อมพรีวิวรูป และปุ่มเปลี่ยนรูป
-     - ปุ่มกดยืนยันตรวจสลิปทันทีพร้อมสถานะ Loading
-     - แสดงข้อความแจ้งเตือน Error ภาษาไทยชัดเจน (สลิปซ้ำ, บาร์โค้ดไม่ชัด, ยอดไม่ตรง ฯลฯ)
-     - ปรับสถานะเป็น Verified Badge ทันทีเมื่อผ่านการตรวจสอบ
-  3. **ระบบภาษา (i18n):**
-     - เพิ่มคีย์แปลภาษา TH/EN สำหรับ UI ตรวจสลิปใน [`src/lib/i18n/translations.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/i18n/translations.ts)
+- เมนูแอดมินรองรับมือถือ
+- สถานะเปิด/ปิดร้าน
+- Service Area ระยะที่ 1 แบบวงกลมจากพิกัดร้าน
+- ป้องกันลูกค้านอกเขตสร้างออเดอร์ที่ชั้นฐานข้อมูล
+- จับเวลาไรเดอร์ออกนอกเขตและปิด session เมื่อเกิน 15 นาที
+- ให้ไรเดอร์กลับเข้าเขตแล้วเริ่มงานใหม่ได้
+- GitHub Actions สำหรับ cron ภายนอก
+- PostgreSQL integration test ของ Service Area
+- คู่มือและเครื่องมือทดสอบภาคสนาม
 
-### G. ระบบไรเดอร์และการจ่ายงาน (Rider & Dispatch System) — *P0 Hardening เสร็จแล้ว; ยังไม่ Production Ready*
-- **วัตถุประสงค์:** เปิดใช้ระบบส่งอาหารด้วยไรเดอร์ตามเอกสาร [docs/03-rider-system-architecture.md](file:///d:/system%20make/Ran-R-HAN/docs/03-rider-system-architecture.md)
-- **Database (รันลง Supabase เรียบร้อยแล้ว):**
-  - เปิด Extension `postgis` (schema `extensions`) และสร้าง 9 ตารางหลัก: `riders`, `rider_work_sessions`, `rider_current_locations` (PostGIS + GiST index), `dispatch_offers`, `delivery_events`, `pod_uploads`, `daily_settlements`, `settlement_line_items`, `rider_pool_ledger`
-  - เพิ่มคอลัมน์ในตาราง `orders`: `assigned_rider_id`, `dispatch_status`, `delivery_fee`, `estimated_distance_km`
-  - เพิ่มคอลัมน์พิกัดร้าน `shops.shop_lat` / `shops.shop_lng` (จุดศูนย์กลางค้นหาไรเดอร์)
-  - สร้าง Storage bucket `pod-uploads` แบบ Private พร้อม RLS (ห้าม Public Link ตาม §9.2)
-  - Migration: `20260911000001` ถึง `20260911000006` (`00005`–`00006` P0 hardening รันบน Supabase แล้ว)
-- **บั๊กที่ตรวจพบและแก้ก่อนรัน (Review Gate):**
-  1. Migration เรียก `set_updated_at()` ที่ไม่มีจริงในโปรเจกต์ → แก้เป็น `handle_updated_at()`
-  2. RPC ตั้ง `search_path = public` แต่ PostGIS อยู่ schema `extensions` → ระบบหาไรเดอร์จะพังทุกครั้ง → แก้เป็น `public, extensions`
-  3. `find_available_riders` เป็น SECURITY DEFINER แต่ไม่เช็คสิทธิ์ร้าน → ใครก็ดูพิกัดไรเดอร์ร้านอื่นได้ → เพิ่มเงื่อนไข `has_shop_access()` (ยกเว้น service_role)
-  4. `p_exclude_rider_ids` เป็น NULL ทำให้ query ไม่คืนไรเดอร์เลย → ใส่ `coalesce(..., '{}')`
-  5. สรุปยอดรายวันใช้เวลา UTC → แก้เป็นเวลาไทย `Asia/Bangkok`
-  6. RLS เดิมยังให้ไรเดอร์ `update` ทุกคอลัมน์ใน `dispatch_offers` → ถอนสิทธิ์เขียนตรงทั้งหมดและบังคับผ่าน transactional RPC
-  7. Dispatch ค้นหาไรเดอร์รอบ "พิกัดลูกค้า" แทน "พิกัดร้าน" → แก้ให้ยึดพิกัดร้านเป็นจุดรับอาหาร
-  8. Race condition: `.update()` ของ supabase-js ไม่ error เมื่อไม่โดนแถวไหน → เพิ่ม `.select()` ตรวจจำนวนแถว (Compare-and-Swap) ทั้งตอนรับงาน/ปฏิเสธ/หมดเวลา
-- **P0 hardening (`20260911000005`–`20260911000006`):**
-  - `respond_to_dispatch_offer()` ล็อกระดับไรเดอร์ + Offer + Order, ตรวจ Timeout/Work Session/ความจุ 2 งาน และ Assign แบบ atomic; การรับหลาย Offer พร้อมกันจะถูก serialize ไม่ให้เกิน Capacity
-  - `close_rider_work_session()` ใช้ล็อกระดับไรเดอร์ชุดเดียวกัน จึงไม่ชนกับการ Accept Offer ที่เกิดพร้อมกัน
-  - `close_rider_work_session()` ปิด Session + ลบ GPS + ยกเลิก Offer ใน transaction เดียว
-  - `finalize_rider_delivery_event()` ตรวจ State + lock/claim POD + ปิด Order ใน transaction เดียว ป้องกัน POD ซ้ำ
-  - ถอน direct write ของ Rider ต่อ Offer/Event/POD metadata และถอน direct read ของไฟล์ POD
-  - จำกัด internal `SECURITY DEFINER` RPC ให้ `service_role` และแทนสูตร 80/20 ด้วย Base Rate 15 บาท/5 กม.; ระยะเกินหรือไม่ทราบถูก Flag รอ Review
-- **หน้าไรเดอร์ (Rider PWA) — ของใหม่รอบนี้:**
-  - [`/rider/login`](file:///d:/system%20make/Ran-R-HAN/src/app/rider/login/page.tsx) — เข้าสู่ระบบสำหรับไรเดอร์
-  - [`/rider`](file:///d:/system%20make/Ran-R-HAN/src/app/rider/RiderClient.tsx) — ปุ่มเริ่มงาน/ปิดงาน, ส่งพิกัด GPS อัตโนมัติ (Idle 60 วิ / ระหว่างส่ง 15 วิ, หยุดทันทีเมื่อปิดงานตาม PDPA), การ์ดงานใหม่พร้อมนับถอยหลัง, ปุ่มไล่สถานะงาน 5 ขั้น, ปุ่มนำทาง Google Maps และโทรหาลูกค้า, แนบภาพ POD, สรุปงาน/ค่าตอบแทนวันนี้ — รองรับ TH/EN, Dark Mode และมือถือตั้งแต่ 320px
-  - Logic ล้วน (ทดสอบได้) แยกไว้ที่ [`src/lib/rider.ts`](file:///d:/system%20make/Ran-R-HAN/src/lib/rider.ts)
-- **API ใหม่:** `GET /api/rider/offers/active`, `GET /api/rider/orders/active`, `GET /api/rider/summary`, `GET|POST /api/cron/dispatch-timeout` (ป้องกันด้วย `CRON_SECRET`)
-- **กฎที่บังคับฝั่งเซิร์ฟเวอร์ (ไม่เชื่อฝั่งมือถือ):**
-  - ปิดงานแบบ "ส่งสำเร็จ" หรือ "ติดต่อลูกค้าไม่ได้" **ต้องอัปโหลดภาพ POD สำเร็จก่อนเสมอ** (§9.1) — อัปโหลดพลาด = งานยังไม่ถูกปิด
-  - กดข้ามขั้น/กดซ้ำไม่ได้ (State Guard `isValidRiderEventTransition`)
-  - รับงานได้เฉพาะตอนมี Work Session เปิดอยู่ (§6 Online-First) และปิดงานจะยกเลิก Offer ที่ค้างอยู่ทันที
-  - เวลาและพิกัดยึดจากเซิร์ฟเวอร์เป็นหลัก (`server_received_at`)
+### Service Area ระยะที่ 1
 
-### H. Dispatch Timeout — Atomic RPC + Hardening ([PR #1](https://github.com/lannatc-sys/RAN-R-HAN/pull/1)) — *ตรวจสอบล่าสุด 2026-09-12*
+ทำแล้ว:
 
-- **ปัญหาเดิม:** `timeoutOfferAction()` เดิม query offers ที่หมดเวลาแล้ววน loop update ทีละแถวจาก JS — เปิดช่องให้ cron วิ่งซ้อนกัน (concurrent run) แก้ไข offer เดียวกันพร้อมกัน และถ้า RPC/DB error จะถูกกลืนเงียบเป็น "1 error" มองจากภายนอกเหมือนสำเร็จ
-- **แก้แล้ว (migration [`20260912000001_dispatch_timeout_atomic.sql`](file:///d:/system%20make/Ran-R-HAN/supabase/migrations/20260912000001_dispatch_timeout_atomic.sql)):**
-  1. ย้าย logic ทั้งหมดเข้า RPC เดียว `expire_dispatch_offers()` — ใช้ `pg_try_advisory_xact_lock` กันสอง cron รันซ้อน + `FOR UPDATE` ล็อกแถวระหว่างประมวลผล ทำงานใน transaction เดียวจึง atomic
-  2. จำกัดสิทธิ์ `SECURITY DEFINER`: `REVOKE ALL` จาก `public`/`anon`/`authenticated`, `GRANT EXECUTE` ให้ `service_role` เท่านั้น
-  3. `search_path` ตั้งผ่าน SET clause ของตัวฟังก์ชัน (ไม่ใช่ `SET` ใน body) — กัน search_path รั่วไปติด connection อื่นตอน pool reuse (Supavisor/PgBouncer transaction mode)
-  4. `timeoutOfferAction()` และ `/api/cron/dispatch-timeout` เปลี่ยนจาก "กลืน error คืนศูนย์" เป็น **throw / ตอบ 502** เมื่อ RPC ล้มเหลวจริง — จุดเรียกแบบ opportunistic sweep ใน `dispatchOrderAction` ยังคง try/catch แบบ non-critical ตามเดิม
-  5. เพิ่ม regression test 18 รายการ (`test/cron-dispatch-timeout.test.ts`) ผูกเข้า `npm test`/`test:unit` แล้ว (ของเดิมมีไฟล์แต่ไม่เคยถูกเรียกจากสอง script นี้)
-  6. เพิ่ม `scripts/validate-migration.js` (เช็คโครงสร้างไฟล์ SQL แบบ static ไม่แตะ DB) และ `scripts/verify-rpc.js` (เช็คจริงกับ DB ผ่าน `DATABASE_URL` — **รันแล้วจะ mutate ข้อมูลจริง** ต้องระวังว่าเล็งไปที่ DB ไหน)
-- **ตรวจสอบกับ Production จริง (Supabase project `RAN-R-HAN` / `hqfzahyvwsjrvlgvaxda`) แล้วพบ:**
-  - ✅ `expire_dispatch_offers()` มีอยู่จริง, `SECURITY DEFINER = true`, สิทธิ์ EXECUTE เหลือแค่ `postgres` (owner) + `service_role` ตรงตามที่ตั้งใจ
-  - ระหว่างตรวจครั้งแรกพบว่าโค้ดที่รันอยู่จริงยังเป็นเวอร์ชันก่อนย้าย `SET search_path` มาเป็น function attribute — ผู้ใช้ paste SQL รันเองใน Supabase Dashboard → SQL Editor แล้ว (`Success. No rows returned`)
-  - **✅ ยืนยันแล้วว่า sync ตรงกับ PR #1 ล่าสุด:** `proconfig` ของฟังก์ชันบน production คือ `search_path=public, extensions` ตรงกับ commit `0fe31e7`, สิทธิ์ EXECUTE ยังเหลือแค่ `postgres`/`service_role` เหมือนเดิม — ปิดรายการนี้แล้ว
+- ลูกค้านอกเขตสั่งไม่ได้
+- พิกัดลูกค้าหรือร้านไม่ครบทำงานแบบ fail-closed
+- ไรเดอร์ออกนอกเขตเริ่มจับ `outside_area_since`
+- เกิน 15 นาที session ถูกปิดและถือว่าไม่รับงาน
+- กลับเข้าเขตแล้วเริ่ม session ใหม่ได้
+- Settings, GPS report และ sweep ใช้ advisory lock ชุดเดียวกัน
+- RPC ตรวจ authorization และ tenant access
+- cron endpoint `rider-geofence-sweep` ตรวจ `CRON_SECRET`
 
-### I. External Review (CODEX) — P0/P1 Fixes ([PR #1](https://github.com/lannatc-sys/RAN-R-HAN/pull/1)) — *ปิดครบแล้ว 2026-09-12*
+ไฟล์สำคัญ:
 
-รับรีวิวจากภายนอก (CODEX) บน PR #1 ที่ commit `0bccbe0` พบ P0 2 ข้อ + P1 หลายข้อ ตรวจสอบแต่ละข้อกับโค้ด/ฐานข้อมูลจริงก่อนแก้ (ไม่เชื่อรายงานเปล่าๆ) แล้วปิดครบ:
+- `supabase/migrations/20260912000006_service_area_enforcement.sql`
+- `src/app/admin/service-area/page.tsx`
+- `src/app/admin/service-area/ServiceAreaSettingsClient.tsx`
+- `src/app/api/cron/rider-geofence-sweep/route.ts`
+- `src/app/actions/settings.ts`
+- `src/app/rider/RiderClient.tsx`
+- `test/service-area-enforcement.test.ts`
+- `test/service-area-postgres.integration.cjs`
 
-- **P0 #1 (`6b8e693`):** `data-retention` cron ลบออเดอร์ยกเลิกเกิน 90 วันโดยไม่เช็ค payment status — และ `payments.order_id` เป็น `ON DELETE CASCADE` แปลว่าลบ order = ลบหลักฐานจ่ายเงินทิ้งถาวร แก้ให้เช็คก่อนว่ามี payment ที่ `verified` ไหม
-- **P0 #2 (`6b8e693`, เสริมด้วย `e18bf1b`):** `scripts/run-db.js` (path `npm run db:setup`) ข้าม rider migrations ทั้ง 6 ไฟล์และ `lock_down_payment_rpc` เพิ่มเข้าไปครบ, ภายหลังพบว่าเมื่อรันจริงกับ production ที่มี migration เก่าอยู่แล้ว `CREATE POLICY` (ไม่มี `IF NOT EXISTS`) ทำให้ script abort ทั้งชุด — refactor เป็น `runMigrationFile()` helper ที่ skip error class "already exists" (`42710`/`42P07`/`42723`/`42701`) แทนการ abort
-- **P1 (`739fdae`):** `verify-rpc.js` exit 0 แม้ check ล้มเหลว (แก้ให้ exit 1), rider session-start แข่งกันแล้วได้ 500 แทนคืน session เดิม (จับ `23505` แล้ว re-select), dispatch race — เพิ่ม partial unique index `uq_dispatch_offers_one_active_per_order` (`WHERE status='offered'`) กัน order เดียวมี offer active ซ้ำ + reorder timeout sweep ให้รันก่อน mark `dispatching` กันสถานะโดน undo, PII (เบอร์โทรไรเดอร์) หลุดใน log
-- **ยืนยันกับ production จริงครบทุกจุด:** `verify_and_confirm_payment()` และ trigger function ทั้ง 3 ตัวมี `search_path` pin ถูกต้อง, สิทธิ์ EXECUTE จำกัดแค่ `service_role`, index `uq_dispatch_offers_one_active_per_order` มีอยู่จริงบน `dispatch_offers`
+## 4. Branch ปัจจุบัน: Auth/IDOR Hardening
 
-### J. ปิดงานเตรียมความพร้อม Pilot จริง (System Readiness to Pilot Mission — Components A ถึง H) — *เสร็จสิ้นสมบูรณ์ 🎯*
+`fix/auth-idor-hardening` ต่อจากปลาย branch PR #2 และเพิ่ม commits:
 
-ดำเนินงานปิดงานค้างทางเทคนิคทุกด้านตามข้อกำหนด System Readiness to Pilot Mission:
+- `0ae811d` — ปิด IDOR, guard superadmin actions, จำกัด SlipOK domain, fail-closed webhook และเพิ่มความปลอดภัย payment slips
+- `ad657ac` — guard platform stats, ผูกการแก้ Telegram rider กับร้าน, ป้องกัน menu upload path และบังคับ HTTPS สำหรับ SlipOK
+- `da08f4a` — ตัด UTF-8 BOM ก่อนรัน payment-slips migration
 
-1. **Component A — Rider Notification จริง (Web Push + Telegram Bot):**
-   - Migration `20260912000004_rider_telegram_notification.sql` เพิ่มคอลัมน์ `telegram_chat_id` (bigint) และ `push_enabled` (boolean) พร้อม Partial Index บนตาราง `riders`
-   - เพิ่มขั้นตอน migration `1.14` ใน `scripts/run-db.js`
-   - พัฒนาโมดูล `src/lib/rider-notification.ts` รองรับการแจ้งเตือนแบบคู่ขนาน: Web Push (Primary จาก `push_subscriptions` ที่ผูกกับ `auth_user_id`) และ Telegram Bot `@ranrhan_bot` (Fallback/Supplement)
-   - เชื่อมต่อ `notifyRiderNewOffer()` เข้ากับ `dispatchOrderAction` แทน stub log เดิม
-   - เพิ่ม `PushNotificationPrompt` ใน `src/app/rider/RiderClient.tsx`
-   - ชุดทดสอบ Unit Test: `test/rider-notification.test.ts` (5/5 PASS)
+ไฟล์ที่ต่างจากปลาย branch PR #2:
 
-2. **Component B — External Cron Hardening & Documentation:**
-   - ตรวจสอบความปลอดภัย `/api/cron/dispatch-timeout/route.ts` บังคับ Bearer `CRON_SECRET`
-   - คืน HTTP 502 เมื่อ atomic RPC `expire_dispatch_offers` เกิดข้อผิดพลาดร้ายแรง ไม่กลืน error
-   - ตรวจสอบคู่มือการติดตั้ง `docs/cron-setup-guide.md` (ครอบคลุม cron-job.org, GitHub Actions, Vercel Cron)
-   - ชุดทดสอบ Regression Tests: `test/cron-dispatch-timeout.test.ts` (18/18 PASS)
+- `scripts/run-db.js`
+- `src/app/actions/menu.ts`
+- `src/app/actions/order.ts`
+- `src/app/actions/rider-admin.ts`
+- `src/app/actions/settings.ts`
+- `src/app/actions/superadmin.ts`
+- `src/app/api/webhooks/slipok/route.ts`
+- `supabase/migrations/20260913000001_secure_payment_slips_storage_policy.sql`
+- `supabase/migrations/20260913000002_secure_payment_slips_upload_policy.sql`
+- `test/authorization-regression.test.ts`
 
-3. **Component C — Store Geo Coordinates & Strict Dispatch Validation:**
-   - เพิ่มฟิลด์ `shop_lat?: number | null; shop_lng?: number | null;` ใน Interface `Shop` (`src/lib/types.ts`)
-   - พัฒนา Server Action `updateShopGeoAction` ใน `src/app/actions/settings.ts` ตรวจสอบพิกัด -90..90 และ -180..180 แบบ Pair Validation พร้อมกัน
-   - เพิ่ม Store Location Card ใน `/admin/settings` (`SettingsClient.tsx`) มีปุ่มดึงพิกัด GPS อัตโนมัติจากเบราว์เซอร์ และลิงก์พรีวิวบน OpenStreetMap
-   - ปรับปรุง `dispatchOrderAction` ใน `src/app/actions/dispatch.ts`: ปฏิเสธการ Dispatch ทันทีหากร้านค้าไม่มีพิกัด โดยแสดง Error ภาษาไทยชัดเจน ไม่แอบ Fallback ไปหาพิกัดลูกค้าใน Production (เปิดช่องทาง Bypass เฉพาะ Local Dev ผ่าน `ALLOW_GEO_FALLBACK=true`)
-   - ชุดทดสอบ Unit Test: `test/store-geo.test.ts` (6/6 PASS)
+หลัง PR #2 merge ต้องตรวจ ancestry/diff ใหม่ก่อนเปิด PR ของ branch นี้
 
-4. **Component D — Rider Account Management UI & Provisioning:**
-   - พัฒนา Server Actions ใน `src/app/actions/rider-admin.ts`: `createRiderAction` และ `updateRiderStatusAction`
-   - รองรับการสร้างบัญชี Supabase Auth ทันทีผ่าน `adminClient.auth.admin.createUser` พร้อมตั้งรหัสผ่านและ `email_confirm: true` และผูก `auth_user_id` เข้ากับแถวใน `riders`
-   - อัปเดต `src/app/admin/riders/page.tsx` และ `RidersClient.tsx` เพิ่ม Modal "เพิ่มไรเดอร์ใหม่" สวิตช์สลับสถานะ On Duty/Off Duty/Suspended และแสดงสถานะการเชื่อมต่อ Telegram / Web Push
+## 5. Service Area Map ระยะที่ 2
 
-5. **Component E — SlipOK Production Webhook Security & Verification:**
-   - ตรวจสอบความปลอดภัย `/api/webhooks/slipok/route.ts` และ `src/app/actions/payment.ts`
-   - ตรวจสอบ Secret Header `x-slipok-secret` / `x-webhook-secret`, บัญชีปลายทาง Exact Match (ตัดอักขระพิเศษ), การคืนรหัส HTTP 409 DUPLICATE_SLIP สำหรับข้อผิดพลาด PostgreSQL Code `23505`
-   - ตรวจสอบ Zero Secret Leakage: API key และ Webhook secret ไม่เคยถูกส่งออกไป client หรือ log
-   - ชุดทดสอบ Unit Test: `test/slipok-webhook.test.ts` (5/5 PASS)
+Requirement: superadmin คลิกหมุดทีละจุดบนแผนที่และปิดเป็น polygon แยกสองเขต:
 
-6. **Component F — Automated Lifecycle Scenario Simulation (REAL DEVICE E2E: NOT VERIFIED):**
-   - **ข้อจำกัดสำคัญ:** ชุดทดสอบนี้เป็นการจำลองสถานการณ์และวงจรสถานะผ่าน Node.js in-memory runner (`test/rider-e2e-scenarios.test.ts`) **ไม่ใช่การทดสอบบนอุปกรณ์มือถือจริงหน้างาน (REAL DEVICE E2E: NOT VERIFIED)** ซึ่งยังต้องดำเนินการทดสอบจริงในแม่ฮ่องสอนก่อน
-   - พัฒนาชุดทดสอบจำลองสถานการณ์ 15 เคสใน `test/rider-e2e-scenarios.test.ts`:
-     - Happy Path วงจรสถานะออเดอร์และเหตุการณ์ไรเดอร์
-     - การหมดเวลาและ Sequential Redispatch
-     - Capacity Limit สูงสุด 2 ออเดอร์
-     - การปฏิเสธ Duplicate Delivery Events
-     - กรณีติดต่อลูกค้าไม่ได้ (Unreachable Drop) และ Safe Drop POD
-     - กรณีรถเสีย/เหตุฉุกเฉิน (Breakdown)
-     - ความถี่การส่ง GPS (Idle 60s vs Active 15s) และการหยุดส่งทันทีเมื่อปิด Session ตาม PDPA
-     - กฎ Base Rate 15 บาท / 5 กม. แรก และการ Flag `PENDING_REVIEW` เมื่อระยะทางเกิน 5 กม. หรือไม่มีระยะทาง
-   - ชุดทดสอบ Scenario: `test/rider-e2e-scenarios.test.ts` (15/15 PASS ใน runner)
+- เขตที่ลูกค้าสั่งอาหารได้
+- เขตพื้นที่ทำงานของไรเดอร์
 
-7. **Component G — Legal & Financial Decision Gate:**
-   - ตรวจสอบร่างเอกสารทั้ง 9 ฉบับใน `docs/legal-financial-drafts.md` (Privacy Policy, Terms of Service, Customer Terms, Merchant Terms, Rider Terms, PDPA Consent, Refund/Cancellation, Safe Drop, Settlement Policy)
-   - ทุกเอกสารกำกับด้วยหัวเรื่อง `⚠️ DRAFT FOR PROFESSIONAL LEGAL REVIEW`
-   - กำกับ Callout `⚠️ LEGAL/FINANCIAL DECISION REQUIRED` ทุกจุดที่ต้องรอการตัดสินใจของผู้มีอำนาจ
-   - ห้าม Auto-sign และห้ามสรุปว่าเป็นไปตามกฎหมาย 100% จนกว่าจะผ่านที่ปรึกษากฎหมาย/บัญชีจริง
+สถานะ: **PARTIAL — เริ่ม migration แล้ว แต่ UI/RPC/tests ยังไม่ครบ**
 
-8. **Component H — Pre-order System Verification & Docs Drift Reconciliation:**
-   - ตรวจสอบ Schema ตาราง `preorder_rounds` และ `preorder_items` เทียบกับ RLS และ Server Actions
-   - ปรับปรุง `parseFacebookComment` ใน `src/lib/delivery-parser.ts` ใช้วิธีหาลำดับคำสังเกตก่อนหลัง (`earliestIdx`) ทำให้การแยกชื่อ, สินค้า, และจุดสังเกตแม่นยำยิ่งขึ้น
-   - ตรวจสอบขั้นตอนการแปลงรอบพรีออเดอร์เป็นเที่ยวส่ง (`convertPreorderRoundToTripAction`)
-   - บันทึกรายงานวิเคราะห์ข้อแตกต่าง (Docs Drift) ลงใน `docs/preorder-verification-report.md`
-   - ชุดทดสอบ Unit Test: `test/delivery.test.ts` (10/10 PASS)
+Branch `feat/service-area-map` มี WIP commit:
 
-### K. ระบบขอบเขตการให้บริการและพื้นที่ทำงานไรเดอร์ (Service Area Enforcement) — *เสร็จ Phase 1 🎯*
+- `6e75007` — เพิ่ม `supabase/migrations/20260913000001_service_area_polygon.sql`
 
-บังคับใช้ที่ชั้นฐานข้อมูลแทน API เพื่อไม่ให้ข้ามผ่านได้แม้เรียกตรง
+งานที่เหลือ:
 
-1. **ลูกค้านอกเขตสั่งไม่ได้:** trigger `trg_enforce_service_area_for_new_orders` บนตาราง `orders`
-   ปฏิเสธพร้อมข้อความ `อยู่นอกเขตบริการ กรุณารอแผนการขยายการให้บริการ`
-   และ fail-closed เมื่อพิกัดร้านเป็น NULL
-2. **ไรเดอร์นอกเขตเกิน 15 นาที:** ปิด work session อัตโนมัติ กลับเข้าเขตแล้วกดเริ่มงานใหม่ได้
-   บังคับ 3 จุด — ตอน report location, sweep query และ re-check หลังจับ lock
-3. **หน้าตั้งค่า:** `/admin/service-area` (ลิงก์อยู่ใน AdminNavbar) กำหนดรัศมีลูกค้าและรัศมีไรเดอร์แยกกัน
-4. **Cron:** `/api/cron/rider-geofence-sweep` เป็น fallback ปิด session ที่ค้าง ยิงจาก GitHub Actions ทุก 5 นาที
-5. **ความปลอดภัยเชิง concurrency:** ใช้ advisory lock + re-read แบบ `FOR UPDATE` กัน race
-   ระหว่างการแก้ตั้งค่ากับ GPS ที่รายงานเข้ามา และรักษา `outside_area_since` ด้วย `coalesce`
-   เพื่อไม่ให้ reset จนเลี่ยงกฎ 15 นาทีได้
-6. **ตรวจบน PostgreSQL จริง:** migration ครบ 16 ขั้น + integration 11 สถานการณ์
-   ครอบคลุม tenant isolation, fail-closed, timer และ concurrency สอง connection โดยไม่ deadlock
+1. รีวิว migration WIP กับ migrations ล่าสุด ป้องกันเลขและ function signature ชนกัน
+2. Predicate กลางใช้ polygon ก่อน และ fallback เป็น radius เมื่อร้านยังไม่มี polygon
+3. ใช้ predicate เดียวกันครบ order, rider start, GPS report, sweep, shop geo และ settings
+4. ตรวจ GeoJSON, geometry type, จำนวนจุด, `ST_IsValid` และเพดานขนาดพื้นที่
+5. สร้าง `ServiceAreaMapEditor.tsx` ด้วย Leaflet
+6. คลิกจุดแรกเพื่อปิด polygon และสลับแก้พื้นที่ลูกค้า/ไรเดอร์จากหน้าเดียว
+7. คงช่อง radius เป็น fallback สำหรับร้านเดิม
+8. ใช้ OSM เป็นค่าเริ่มต้นเพื่อลดค่าใช้จ่าย
+9. เพิ่ม unit/static tests และ PostgreSQL integration tests สำหรับ polygon
 
-> ⚠️ **ยังไม่รวมการวาดขอบเขตบนแผนที่** เฟสนี้ใช้รัศมีจากพิกัดร้านก่อน
-> รายละเอียดที่เหลือ แผนงาน และความเสี่ยงที่ยังค้าง อยู่ใน [`docs/HANDOFF-service-area.md`](./HANDOFF-service-area.md)
+ห้ามนำ migration WIP ไป production จนกว่า UI, RPC, authorization และ integration tests จะครบ
 
----
+## 6. หลักฐานคุณภาพล่าสุด
 
-## 🛡️ 3. สถานะการตรวจสอบคุณภาพ (Quality Gates)
+ผลตรวจและรันจริงบนเครื่องปัจจุบันหลังย้าย SSD กลับมา (2026-09-13 16:11 Asia/Bangkok):
 
-| การทดสอบ | คำสั่ง | สถานะ | หมายเหตุ |
-| :--- | :--- | :---: | :--- |
-| **Unit Tests** | `pnpm test:unit` | 🟢 PASS | 230/230 tests ผ่านทั้งหมด (100%) รวม 71 Test Suites |
-| **Smoke Tests** | `pnpm test:smoke` | 🟢 PASS | 4/4 suites ผ่านทั้งหมด (Encryption, Thai Errors, Zod Validation, PromptPay) |
-| **Unit & Smoke** | `pnpm test` | 🟢 PASS | รันทั้ง 230 unit tests + 4 smoke tests ผ่านครบถ้วน |
-| **PostgreSQL Integration** | `pnpm test:db:service-area` | 🟢 PASS | 11/11 สถานการณ์ ยิง SQL จริงบน `supabase/postgres:15.8.1.085` (PostGIS 3.3) migration ครบ 16 ขั้น |
-| **TypeScript Strict** | `npx tsc --noEmit` | 🟢 PASS | 0 Errors |
-| **Next.js Production Build** | `pnpm build` | 🟢 PASS | 52/52 routes ผ่าน 3 รอบติดบน Node v24.19.0 (ล้าง cache 1 รอบ ใช้ cache 2 รอบ) — อาการพังก่อนหน้าเกิดจาก `node_modules` ที่ติดมาจากการย้าย SSD แก้ด้วยการติดตั้งใหม่ |
+| Gate | ผลล่าสุดที่บันทึกไว้ | หมายเหตุ |
+| --- | --- | --- |
+| Unit tests | 254/254 ผ่าน (83 suites) | `pnpm test:unit` ผ่านทั้งหมด 100% |
+| Smoke tests | 4/4 ผ่าน | `pnpm test:smoke` (AES, Thai Error, Zod, PromptPay) |
+| E2E tests (Live Supabase) | 4/4 ผ่าน | `pnpm test:e2e` ทดสอบ PromptPay, Cash, Price isolation, 23505 duplicate slip |
+| TypeScript (`tsc --noEmit`) | ผ่าน (Exit 0) | ไม่มีข้อผิดพลาดทาง type |
+| `git diff --check` | ผ่าน (Exit 0) | ไม่มี whitespace conflict |
+| Production build | 51/51 routes ผ่าน | `pnpm build` (Next.js 15.5.25) compile และ static generation สำเร็จสมบูรณ์ |
+| PostgreSQL integration | Standby | รอ run ผ่าน Docker บน WSL2 (`OpenClawGateway`) หรือกำหนด `TEST_DATABASE_URL` |
 
----
+คำสั่งหลัก:
 
-## 🔑 4. การจัดการกุญแจและความลับ (Credentials & Keys)
+```powershell
+pnpm test:unit
+pnpm test:smoke
+pnpm test:e2e
+pnpm exec tsc --noEmit
+pnpm build
+git diff --check
+```
 
-1. **SlipOK API Key**:
-   - สามารถกรอกผ่านหน้าบ้านได้ที่: **`/admin/settings`** หมวด "ระบบตรวจสลิปอัตโนมัติ"
-   - Key จะถูกเข้ารหัส AES-256-GCM อัตโนมัติด้วย `CREDENTIALS_ENCRYPTION_KEY` ใน `.env.local`
-2. **SlipOK Webhook**:
-   - Endpoint: `POST /api/webhooks/slipok`
-   - Secret Header: ตรวจสอบผ่านตัวแปร `SLIPOK_WEBHOOK_SECRET` ใน [`.env.local`](file:///d:/system%20make/Ran-R-HAN/.env.local)
-3. **Data Retention Cron Secret**:
-   - Endpoint: `GET/POST /api/cron/data-retention`
-   - Authorization: `Bearer <CRON_SECRET>`
-4. **Dispatch Timeout Cron Secret**:
-   - Endpoint: `GET/POST /api/cron/dispatch-timeout`
-   - Authorization: `Bearer <CRON_SECRET>`
-5. **Telegram Bot API**:
-   - Config: `TELEGRAM_BOT_TOKEN` และ `TELEGRAM_BOT_USERNAME` ใน [`.env.local`](file:///d:/system%20make/Ran-R-HAN/.env.local)
-   - Status: บอท `@ranrhan_bot` ออนไลน์สมบูรณ์ พร้อมส่งข้อความ Offer งานใหม่และข้อความสถานะออเดอร์
+## 7. สภาพแวดล้อมหลังย้าย SSD กลับเครื่องเดิม
 
----
+บันทึกการตรวจสอบและปรับสภาพแวดล้อมเมื่อย้าย SSD กลับมาเครื่องที่เคยติดตั้งโปรเจกต์ (2026-09-13):
 
-## 🚀 5. ขั้นตอนสำหรับเริ่ม Closed Pilot (Pilot Go-Live Checklist)
+1. **Runtime & Package Manager**:
+   - Node.js: `v24.19.0` (ผ่านเกณฑ์ Next.js 15)
+   - pnpm: `9.15.9` (ตรงกับ `packageManager` ใน `package.json`)
+   - `node_modules` และ binaries ทำงานร่วมกับสภาพแวดล้อมปัจจุบันได้สมบูรณ์ ไม่พบ native artifact mismatch
 
-1. **ตั้งพิกัดร้านค้าจริง:** ผู้ดูแลร้านเข้าสู่ระบบที่ `/admin/settings` แล้วกดปุ่ม "ดึงพิกัดปัจจุบัน" เพื่อบันทึก `shop_lat` และ `shop_lng`
-2. **สร้างบัญชีไรเดอร์ 2-3 บัญชี:** เข้าสู่หน้า `/admin/riders` แล้วกด "เพิ่มไรเดอร์ใหม่" เพื่อสร้างบัญชีและรหัสผ่านสำหรับไรเดอร์ทดสอบ
-3. **ลงทะเบียนรับงานไรเดอร์:** ให้ไรเดอร์ทดสอบเข้าสู่ระบบที่ `/rider/login` จากมือถือ และกดเปิดใช้งาน Web Push Notification
-4. **เปิดใช้งาน Cron Job ภายนอก:** ตั้งค่าที่ cron-job.org ให้ยิงมาที่ `https://ran-r-han.vercel.app/api/cron/dispatch-timeout` ทุกๆ 1-2 นาที พร้อม Header `Authorization: Bearer <CRON_SECRET>`
-5. **การตัดสินใจทางธุรกิจ/กฎหมายก่อนเปิดกว้าง (Legal/Financial Gate):** ตรวจสอบและลงนามในเอกสารสัญญา Rider Agreement, ตรวจสอบสถานะการจ้างงาน, และกำหนดโครงสร้างการจัดการ Rider Pool ตามที่ระบุไว้ใน `docs/legal-financial-drafts.md`
+2. **Git & Repository Configuration**:
+   - Working Directory: `D:\system make\Ran-R-HAN`
+   - Active Branch: `fix/auth-idor-hardening`
+   - Remote URL: `https://github.com/lannatc-sys/RAN-R-HAN.git`
+   - Git User Profile: `Tanutcha Seemrnee` (`316379503+gamerx-99@users.noreply.github.com`)
+   - Credential Helper: `manager` (Git Credential Manager)
 
----
+3. **Database & External Services**:
+   - Cloud Supabase: เชื่อมต่อสำเร็จและยืนยันผ่าน E2E test (`https://hqfzahyvwsjrvlgvaxda.supabase.co`)
+   - Local Docker/Postgres: บน Windows host ไม่มีคำสั่ง `docker` ใน PATH โดยตรง แต่มี Docker 29.1.3 รันอยู่ใน WSL2 (`OpenClawGateway`) สามารถเรียกใช้สำหรับ local integration test ได้ผ่าน `wsl -d OpenClawGateway`
+   - Network Ports: Port `3000` ว่าง พร้อมรัน `pnpm dev` ได้ทันที
 
-## 🚦 6. Pilot Readiness Verification Matrix
+4. **สถานะความพร้อมของโค้ด**:
+   - ผ่านการคอมไพล์ Production build ครบทุก Route (51 routes)
+   - ผ่าน Unit tests และ E2E tests ร่วมกับฐานข้อมูลหลักครบถ้วน
 
-| Gate | รายการตรวจสอบ | สถานะจริง | หมายเหตุ / ขั้นตอนถัดไป |
-| :--- | :--- | :--- | :--- |
-| **Gate 1** | Production Migration `20260912000004` | **PASS** | คอลัมน์ `push_enabled`, `telegram_chat_id` และ Index ถูก apply บน Supabase Production เรียบร้อย |
-| **Gate 2** | พิกัดร้าน Pilot "ครัวป้าแดง" | **PASS** | บันทึกผ่าน `updateShopGeoAction` เรียบร้อย (`19.3005, 97.9678`) |
-| **Gate 3** | บัญชี Pilot Rider (2 บัญชี) | **PASS** | `rider1.kruapa@gmail.com` และ `rider2.kruapa@gmail.com` ทดสอบ Auth, Work Session และ PDPA purge ผ่าน |
-| **Gate 4** | External Scheduler `/api/cron/dispatch-timeout` | **CONFIGURED IN CODE / NOT YET VERIFIED IN DEPLOYED PRODUCTION** | Endpoint ป้องกันด้วย `CRON_SECRET` และตั้งค่าใน `vercel.json` แล้ว — หลัง push/deploy ต้องตรวจ cron invocation จริงจาก deployment/log |
-| **Gate 5** | Live Notification & Dispatch E2E | **PASS** | ทดสอบ Full Flow บน Production DB ผ่าน PostGIS, Offer, Graceful Notification Fallback และ Atomic Accept ผ่าน |
-| **Gate 6** | Physical Device E2E (Android + iOS PWA) | **PHYSICAL DEVICE E2E: NOT YET VERIFIED** | ห้ามถือว่าผ่านจนกว่าจะทดสอบบนฮาร์ดแวร์ Android และ iPhone จริงในพื้นที่ อ.เมือง แม่ฮ่องสอน (Background GPS / Web Push vibration) |
-| **Gate 7** | Quality Gates (Unit/Smoke/Typecheck/Build/DB) | **ALL PASS** | Unit: 230/230, Smoke: 4/4, PostgreSQL integration: 11/11, TSC: 0 errors, Build: 52/52 routes (3 รอบติด) |
-| **Gate 8** | Git Branch & PR Organization | **READY** | แบ่งเป็น 4 คอมมิตแบบ atomic บน `feat/rider-system-phase1` โดยไม่แตะต้อง main |
+5. **Git Worktree Isolation**:
+   - ตั้งค่าโครงสร้าง Git Worktree รองรับการทำงานคู่ขนานของ Agent/Antigravity โดยจัดสรรไดเรกทอรี `.worktrees/` (และ `.agents/worktrees/`)
+   - เพิ่ม `.worktrees/`, `.agents/worktrees/`, `.claude/worktrees/` ใน `.gitignore` และ `.git/info/exclude` เพื่อป้องกันไม่ให้โค้ดใน worktree หลุดเข้ามาใน git index
+   - สามารถสร้าง isolated worktree สำหรับงานใหม่ด้วยคำสั่ง: `git worktree add .worktrees/<branch-name> -b <branch-name>` ตาม skill `using-git-worktrees` ได้ทันที
+
+## 8. Production gates ที่ยังไม่ปิด
+
+ก่อน PR #2 deploy เคยตรวจได้:
+
+```text
+/api/cron/dispatch-timeout      401 — endpoint มีอยู่และ fail-closed
+/api/cron/data-retention        401 — endpoint มีอยู่และ fail-closed
+/api/cron/rider-geofence-sweep  404 — ยังไม่ deploy
+```
+
+หลัง merge/deploy ต้องตรวจใหม่:
+
+- ไม่มี `Authorization` → 401
+- secret ผิด → 401
+- secret ถูก → 200
+- GitHub Actions มี run ที่ trigger จาก `schedule` จริง ไม่ใช่เพียง `workflow_dispatch`
+- `CRON_SECRET` ของ GitHub และ Vercel ตรงกัน
+
+ยัง **NOT VERIFIED** บนมือถือจริงในแม่ฮ่องสอนสำหรับ Background GPS, Web Push และวงจรรับงานไรเดอร์
+
+## 9. PKCE/Login
+
+Production Google OAuth ส่ง callback กลับ `https://ran-r-han.vercel.app/auth/callback` ถูกต้อง และการทดสอบใน browser context เดียวกันพบว่า verifier ไปถึง callback
+
+Error `PKCE code verifier not found in storage` มีแนวโน้มเกิดเมื่อ callback เปิดคนละ storage context เช่น:
+
+- เริ่มใน LINE/Gmail in-app browser แต่ callback เปิด Chrome
+- เปิดลิงก์ยืนยันอีเมลอีก browser หรืออีก device
+- เปิด callback URL เก่าซ้ำ หรือ cookie ถูกล้าง
+
+สถานะ: **NOT FIXED** ต้องแยกก่อนว่าเกิดจาก Google OAuth หรือ email confirmation:
+
+- Google OAuth: รักษา browser/origin เดียวกัน, อัปเดต `@supabase/ssr` อย่างระมัดระวัง และพิจารณา PKCE flow ID
+- Email confirmation: พิจารณา `/auth/confirm` แบบ `token_hash + verifyOtp`
+
+ห้ามแสดง raw Supabase error ต่อผู้ใช้ ให้ map เป็นข้อความภาษาไทยและเริ่ม flow ใหม่
+
+## 10. งานที่พักไว้
+
+ระบบตรวจสอบชื่อบัญชี/เจ้าของร้านและ Telegram admin review ถูกพักจนกว่าระบบหลักพร้อม
+
+แนวคิดที่ตกลงไว้แต่ยังไม่เริ่ม:
+
+- ร้านกรอกข้อมูลยืนยันแล้วเข้าสถานะ `pending_admin_review`
+- Telegram ส่งข้อมูลปิดบังและลิงก์หน้าเว็บให้แอดมิน
+- แอดมินดูข้อมูลเต็มและอนุมัติผ่านหน้าเว็บที่ล็อกอินแล้ว
+- แก้ข้อมูลภายหลังแล้วกลับเป็น pending
+- ไม่ส่งเลขเต็มผ่าน Telegram, URL หรือ logs
+
+## 11. ข้อควรระวัง
+
+- ห้ามพิมพ์ secret, token, API key หรือข้อมูลส่วนบุคคลเต็มลง console/handoff
+- `CRON_SECRET` เคยปรากฏในไฟล์ทำงานภายในและถูก scrub แล้ว ควรพิจารณาหมุนก่อน pilot
+- การซ่อนเมนูไม่ใช่ authorization ต้องบังคับที่ server/RPC/RLS
+- Payment, SlipOK, Telegram และ cron ต้อง fail-closed เมื่อ config ไม่ครบ
+- ห้ามใช้ service-role client ในเส้นทางผู้ใช้โดยไม่มี authorization check ที่ชัดเจน
+- ห้ามสร้างหรือลบข้อมูลทดสอบบน production
+
+## 12. วิธีรับช่วงงานแบบประหยัด context
+
+AI ตัวถัดไป:
+
+1. อ่านไฟล์นี้ครั้งเดียว
+2. รัน `git status --short`, `git branch --show-current` และ `git log -5 --oneline`
+3. เทียบเฉพาะ commits/diff หลังสถานะล่าสุด
+4. เปิดเฉพาะไฟล์ที่เปลี่ยน ไม่รีวิวทั้ง repository ใหม่
+5. รัน targeted checks ก่อนและบันทึกผลจริงพร้อมเวลา
+6. ก่อนหยุด ให้อัปเดตไฟล์นี้โดยไม่สร้าง handoff เพิ่ม
+
+ใช้สถานะเพียง:
+
+- `DONE` — ทำเสร็จและมีหลักฐาน
+- `PARTIAL` — ทำบางส่วน
+- `BLOCKED` — ไปต่อไม่ได้เพราะ dependency/authority/environment
+- `NOT VERIFIED` — ยังไม่ได้ทดสอบจริง

@@ -1,21 +1,49 @@
 'use server';
 
+import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
 export async function toggleMenuItemAvailabilityAction(itemId: string, currentAvailable: boolean) {
-  const admin = createAdminClient();
-  const { error } = await admin
-    .from('menu_items')
-    .update({ is_available: !currentAvailable })
-    .eq('id', itemId);
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
 
-  if (error) {
-    return { success: false, error: error.message };
+    const admin = createAdminClient();
+    const { data: item, error: fetchErr } = await admin
+      .from('menu_items')
+      .select('shop_id')
+      .eq('id', itemId)
+      .maybeSingle();
+
+    if (fetchErr || !item) {
+      return { success: false, error: 'ไม่พบรายการอาหาร' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: item.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์แก้ไขรายการอาหารของร้านนี้' };
+    }
+
+    const { error } = await admin
+      .from('menu_items')
+      .update({ is_available: !currentAvailable })
+      .eq('id', itemId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/menu');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  revalidatePath('/admin/menu');
-  return { success: true };
 }
 
 export async function createMenuItemAction(data: {
@@ -26,23 +54,40 @@ export async function createMenuItemAction(data: {
   description?: string;
   image_url?: string;
 }) {
-  const admin = createAdminClient();
-  const { error } = await admin.from('menu_items').insert({
-    shop_id: data.shop_id,
-    category_id: data.category_id || null,
-    name: data.name,
-    price: data.price,
-    description: data.description || null,
-    image_url: data.image_url || null,
-    is_available: true,
-  });
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
 
-  if (error) {
-    return { success: false, error: error.message };
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: data.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์เพิ่มรายการอาหารในร้านนี้' };
+    }
+
+    const admin = createAdminClient();
+    const { error } = await admin.from('menu_items').insert({
+      shop_id: data.shop_id,
+      category_id: data.category_id || null,
+      name: data.name,
+      price: data.price,
+      description: data.description || null,
+      image_url: data.image_url || null,
+      is_available: true,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/menu');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  revalidatePath('/admin/menu');
-  return { success: true };
 }
 
 export async function updateMenuItemAction(data: {
@@ -54,7 +99,46 @@ export async function updateMenuItemAction(data: {
   image_url?: string | null;
 }) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
+
     const admin = createAdminClient();
+
+    // 1. ค้นหา shop_id ของเมนูนี้เพื่อผูกสิทธิ์
+    const { data: item, error: fetchErr } = await admin
+      .from('menu_items')
+      .select('shop_id')
+      .eq('id', data.id)
+      .maybeSingle();
+
+    if (fetchErr || !item) {
+      return { success: false, error: 'ไม่พบรายการอาหารที่ต้องการแก้ไข' };
+    }
+
+    // 2. ตรวจสอบว่าผู้ใช้มีสิทธิ์เข้าถึง shop_id นี้หรือไม่
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: item.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์แก้ไขรายการอาหารของร้านนี้' };
+    }
+
+    // 3. หากมีการระบุ category_id ให้ตรวจสอบว่าหมวดหมู่นั้นเป็นของร้านเดียวกันด้วย
+    if (data.category_id) {
+      const { data: cat } = await admin
+        .from('categories')
+        .select('shop_id')
+        .eq('id', data.category_id)
+        .maybeSingle();
+
+      if (!cat || cat.shop_id !== item.shop_id) {
+        return { success: false, error: 'หมวดหมู่อาหารไม่ถูกต้องหรือไม่ตรงกับร้านค้า' };
+      }
+    }
+
     const updatePayload: Record<string, any> = {};
 
     if (data.name !== undefined) updatePayload.name = data.name;
@@ -81,7 +165,33 @@ export async function updateMenuItemAction(data: {
 
 export async function deleteMenuItemAction(itemId: string) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
+
     const admin = createAdminClient();
+
+    // 1. ค้นหา shop_id ของเมนูนี้เพื่อผูกสิทธิ์
+    const { data: item, error: fetchErr } = await admin
+      .from('menu_items')
+      .select('shop_id')
+      .eq('id', itemId)
+      .maybeSingle();
+
+    if (fetchErr || !item) {
+      return { success: false, error: 'ไม่พบรายการอาหารที่ต้องการลบ' };
+    }
+
+    // 2. ตรวจสอบว่าผู้ใช้มีสิทธิ์เข้าถึง shop_id นี้หรือไม่
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: item.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์ลบรายการอาหารของร้านนี้' };
+    }
+
     const { error } = await admin.from('menu_items').delete().eq('id', itemId);
 
     if (error) {
@@ -98,7 +208,12 @@ export async function deleteMenuItemAction(itemId: string) {
 export async function uploadMenuImageAction(formData: FormData): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
     const file = formData.get('file') as File;
-    const shopId = (formData.get('shop_id') as string) || 'common';
+    const shopId = formData.get('shop_id') as string;
+
+    // ต้องระบุ shop_id เสมอ — ห้ามใช้ fallback 'common' เพราะเป็นช่องโหว่ bypass
+    if (!shopId || shopId.trim() === '' || shopId === 'common') {
+      return { success: false, error: 'กรุณาระบุ shop_id ที่ถูกต้อง' };
+    }
 
     if (!file) {
       return { success: false, error: 'ไม่พบไฟล์รูปภาพ' };
@@ -112,6 +227,20 @@ export async function uploadMenuImageAction(formData: FormData): Promise<{ succe
     // จำกัดขนาดไฟล์ไม่เกิน 5MB
     if (file.size > 5 * 1024 * 1024) {
       return { success: false, error: 'ขนาดไฟล์รูปภาพต้องไม่เกิน 5MB' };
+    }
+
+    // ตรวจสอบ session และสิทธิ์เข้าถึงร้าน
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนอัปโหลดรูปภาพ' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์อัปโหลดรูปภาพของร้านค้านี้' };
     }
 
     const admin = createAdminClient();
@@ -145,17 +274,34 @@ export async function uploadMenuImageAction(formData: FormData): Promise<{ succe
 }
 
 export async function createCategoryAction(shopId: string, name: string) {
-  const admin = createAdminClient();
-  const { error } = await admin.from('categories').insert({
-    shop_id: shopId,
-    name,
-    sort_order: 99,
-  });
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
 
-  if (error) {
-    return { success: false, error: error.message };
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการหมวดหมู่อาหารของร้านนี้' };
+    }
+
+    const admin = createAdminClient();
+    const { error } = await admin.from('categories').insert({
+      shop_id: shopId,
+      name,
+      sort_order: 99,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/menu');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
-
-  revalidatePath('/admin/menu');
-  return { success: true };
 }

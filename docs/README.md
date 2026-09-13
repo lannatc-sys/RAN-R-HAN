@@ -33,7 +33,7 @@
 | เอกสาร | รายละเอียด | ลิงก์ |
 |:---|:---|:---:|
 | **Deployment Guide** | คู่มือการ Deploy Frontend บน Vercel และการตั้งค่า Environment Variables / Supabase | [DEPLOY.md](file:///d:/system%20make/Ran-R-HAN/docs/DEPLOY.md) |
-| **Project Handoff & Status** | บันทึกสถานะส่งมอบงาน, ฟีเจอร์ล่าสุด, สถานะ Quality Gates (70/70 tests) | [HANDOFF.md](file:///d:/system%20make/Ran-R-HAN/docs/HANDOFF.md) |
+| **Project Handoff & Status** | แหล่งข้อมูล handoff เดียวของโปรเจกต์ รวมสถานะปัจจุบัน งานค้าง และหลักฐาน Quality Gates ล่าสุด | [HANDOFF.md](./HANDOFF.md) |
 | **Project Review Report** | รายงานการรีวิวโครงการ สรุปสถานะสถาปัตยกรรม ความปลอดภัย และความเสี่ยง | [REPORTREVIEW.MD](file:///d:/system%20make/Ran-R-HAN/docs/REPORTREVIEW.MD) |
 
 ---

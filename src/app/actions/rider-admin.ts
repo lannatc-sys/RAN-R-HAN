@@ -204,7 +204,31 @@ export async function updateRiderTelegramChatIdAction(
   telegramChatId: string | null
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนดำเนินการ' };
+    }
+
+    // ดึง shop_id ของไรเดอร์ก่อน เพื่อตรวจสอบสิทธิ์เข้าถึงร้าน
     const admin = createAdminClient();
+    const { data: rider, error: riderErr } = await admin
+      .from('riders')
+      .select('shop_id')
+      .eq('id', riderId)
+      .maybeSingle();
+
+    if (riderErr || !rider) {
+      return { success: false, error: 'ไม่พบข้อมูลไรเดอร์' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: rider.shop_id,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการไรเดอร์ของร้านค้านี้' };
+    }
+
     const { error } = await admin
       .from('riders')
       .update({

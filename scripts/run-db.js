@@ -44,7 +44,9 @@ async function runMigrationFile(client, migrationsDir, fileName, stepLabel, succ
 
   console.log(`${stepLabel} Executing supabase/migrations/${fileName}...`);
   try {
-    await client.query(fs.readFileSync(filePath, 'utf-8'));
+    // ตัด BOM ทิ้งก่อนส่งเข้า Postgres: ไฟล์ที่สร้างด้วย PowerShell Set-Content จะมี
+    // U+FEFF นำหน้า ซึ่งทำให้ Postgres คืน syntax error ตั้งแต่อักขระแรก
+    await client.query(fs.readFileSync(filePath, 'utf-8').replace(/^﻿/, ''));
     console.log(`   [SUCCESS] ${successMessage}\n`);
   } catch (err) {
     if (ALREADY_EXISTS_CODES.has(err.code)) {
@@ -94,6 +96,8 @@ async function runDatabaseSetup() {
     await runMigrationFile(client, migrationsDir, '20260912000004_rider_telegram_notification.sql', '1.14', 'Rider telegram & push channels schema applied.');
     await runMigrationFile(client, migrationsDir, '20260912000005_shop_open_status.sql', '1.15', 'Shop open/closed status schema and enforcement applied.');
     await runMigrationFile(client, migrationsDir, '20260912000006_service_area_enforcement.sql', '1.16', 'Service-area and rider geofence enforcement applied.');
+    await runMigrationFile(client, migrationsDir, '20260913000001_secure_payment_slips_storage_policy.sql', '1.17', 'Payment slips storage RLS policy scoped to shop access applied.');
+    await runMigrationFile(client, migrationsDir, '20260913000002_secure_payment_slips_upload_policy.sql', '1.18', 'Payment slips upload INSERT policy restricted to authenticated shop members with path/size limits applied.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');

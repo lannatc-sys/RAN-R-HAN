@@ -91,6 +91,11 @@ export async function getPlatformStatsAction(): Promise<{
   error?: string;
 }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     // 1. สถิติจำนวนร้านค้า
@@ -145,6 +150,11 @@ export async function getAllStoresAction(query?: string, statusFilter?: string):
   error?: string;
 }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     let dbQuery = admin.from('shops').select(`
@@ -188,6 +198,11 @@ export async function updateStoreStatusAction(
   status: ShopStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     const { error } = await admin
@@ -219,6 +234,11 @@ export async function updateStorePlanAction(
   expiresAt?: string | null
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     const { error } = await admin
@@ -249,6 +269,11 @@ export async function toggleStoreDeliveryOverrideAction(
   isEnabled: boolean
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     const { error } = await admin
@@ -278,6 +303,11 @@ export async function deleteStoreAction(
   shopId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     const { error } = await admin
@@ -307,6 +337,11 @@ export async function createStoreFromSuperadminAction(data: {
   promptpay_name?: string;
 }): Promise<{ success: boolean; shopId?: string; error?: string }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     const randomSuffix = Math.random().toString(36).substring(2, 7);

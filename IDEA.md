@@ -62,7 +62,7 @@ docs/KNOWLEDGE.md
 
 .agents/workflows/ran-r-han.md
 
-HANDOFF.md
+docs/HANDOFF.md
 
 Architecture / roadmap documents
 
@@ -78,7 +78,7 @@ docs/KNOWLEDGE.md
 
 .agents/workflows/ran-r-han.md
 
-HANDOFF.md
+docs/HANDOFF.md
 
 docs/TODO.md
 
@@ -450,7 +450,7 @@ migrations ผ่านเมื่อเกี่ยวข้อง
 
 documentation ที่จำเป็นถูก sync
 
-HANDOFF.md ถูกอัปเดตเมื่อเป็นงานสำคัญ
+docs/HANDOFF.md ถูกอัปเดตเมื่อเป็นงานสำคัญ
 
 รายงานผลต้องแยก:
 
