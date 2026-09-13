@@ -579,3 +579,160 @@ export async function stopImpersonatingAction(): Promise<{ success: boolean }> {
   cookieStore.delete('impersonated_shop_id');
   return { success: true };
 }
+
+export interface PromptpayChangeRequestItem {
+  id: string;
+  shop_id: string;
+  shop_name: string | null;
+  current_promptpay_id: string | null;
+  current_promptpay_name: string | null;
+  requested_promptpay_id: string;
+  requested_promptpay_name: string;
+  reason: string | null;
+  status: string;
+  requested_at: string;
+  requested_by: string | null;
+}
+
+/**
+ * อ่านคิวคำขอเปลี่ยนพร้อมเพย์ที่ค้างอนุมัติ
+ *
+ * ตาราง promptpay_change_requests เปิด RLS ไว้เฉพาะคนของร้านนั้น การอ่านคิวรวม
+ * จึงต้องผ่าน admin client (bypass RLS) และตรวจ checkIsSuperadmin() ก่อนเสมอ
+ *
+ * เลขพร้อมเพย์อาจเป็นเลขบัตรประชาชน (PDPA) ผลลัพธ์ของ action นี้มีเลขเต็ม
+ * ใช้ได้เฉพาะในหน้า /superadmin/approvals เท่านั้น ห้ามส่งต่อเข้า Telegram
+ * หรือ log ใด ๆ ที่อื่นให้ใช้ maskDigits จาก @/lib/telegram
+ */
+export async function listPromptpayRequestsAction(): Promise<{
+  success: boolean;
+  requests?: PromptpayChangeRequestItem[];
+  error?: string;
+}> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from('promptpay_change_requests')
+      .select(
+        'id, shop_id, current_promptpay_id, current_promptpay_name, requested_promptpay_id, requested_promptpay_name, reason, status, requested_at, requested_by, shops (name)'
+      )
+      .eq('status', 'pending')
+      .order('requested_at', { ascending: true });
+
+    if (error) throw error;
+
+    const requests: PromptpayChangeRequestItem[] = (data || []).map((row: any) => ({
+      id: row.id,
+      shop_id: row.shop_id,
+      shop_name: row.shops?.name ?? null,
+      current_promptpay_id: row.current_promptpay_id ?? null,
+      current_promptpay_name: row.current_promptpay_name ?? null,
+      requested_promptpay_id: row.requested_promptpay_id,
+      requested_promptpay_name: row.requested_promptpay_name,
+      reason: row.reason ?? null,
+      status: row.status,
+      requested_at: row.requested_at,
+      requested_by: row.requested_by ?? null,
+    }));
+
+    return { success: true, requests };
+  } catch (err: any) {
+    console.error('listPromptpayRequestsAction error:', err);
+    return { success: false, error: 'โหลดรายการคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' };
+  }
+}
+
+/**
+ * จำนวนคำขอที่ค้างอนุมัติ สำหรับ badge ในไซด์บาร์
+ *
+ * แยกจาก listPromptpayRequestsAction เพราะไซด์บาร์แสดงทุกหน้า superadmin
+ * การดึงเลขพร้อมเพย์เต็มมาทุกหน้าจะกระจายข้อมูล PDPA เกินจำเป็น
+ */
+export async function getPendingPromptpayCountAction(): Promise<{
+  success: boolean;
+  count?: number;
+  error?: string;
+}> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    const admin = createAdminClient();
+    const { count, error } = await admin
+      .from('promptpay_change_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending');
+
+    if (error) throw error;
+
+    return { success: true, count: count ?? 0 };
+  } catch (err: any) {
+    console.error('getPendingPromptpayCountAction error:', err);
+    return { success: false, error: 'โหลดจำนวนคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' };
+  }
+}
+
+/**
+ * อนุมัติหรือปฏิเสธคำขอเปลี่ยนพร้อมเพย์
+ *
+ * เรียก RPC review_promptpay_change ผ่าน session-bound client เพื่อให้
+ * auth.uid() พร้อมสำหรับ is_superadmin() ในฐานข้อมูล การเขียนลง shops และ
+ * audit_logs เกิดใน RPC ที่เดียวเท่านั้น ที่นี่ไม่แตะตารางโดยตรง
+ */
+export async function reviewPromptpayRequestAction(
+  requestId: string,
+  approve: boolean,
+  note?: string | null
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    if (!requestId || typeof requestId !== 'string' || requestId.trim().length === 0) {
+      return { success: false, error: 'ไม่พบคำขอที่ระบุ' };
+    }
+
+    const cleanNote = (note ?? '').trim();
+    if (cleanNote.length > 500) {
+      return { success: false, error: 'หมายเหตุยาวเกินไป (ไม่เกิน 500 ตัวอักษร)' };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('review_promptpay_change', {
+      p_request_id: requestId.trim(),
+      p_approve: approve,
+      p_note: cleanNote.length > 0 ? cleanNote : null,
+    });
+
+    if (error) {
+      const msg = String(error.message || '');
+      if (msg.includes('REQUEST_NOT_FOUND')) {
+        return { success: false, error: 'ไม่พบคำขอนี้ อาจถูกลบไปแล้ว' };
+      }
+      if (msg.includes('REQUEST_ALREADY_REVIEWED')) {
+        return { success: false, error: 'คำขอนี้ถูกดำเนินการไปแล้ว' };
+      }
+      if (msg.includes('SHOP_ACCESS_DENIED')) {
+        return { success: false, error: 'ไม่มีสิทธิ์ดำเนินการรายการนี้' };
+      }
+      throw error;
+    }
+
+    safeRevalidate('/superadmin/approvals');
+    return { success: true };
+  } catch (err: any) {
+    // ข้อความจากฐานข้อมูลห้ามหลุดถึง client ปลายทางได้แค่ข้อความคงที่
+    // กรณีที่ผู้ใช้ต้องรู้สาเหตุจริงถูกแปลไว้แล้วข้างบนก่อนถึงจุดนี้
+    console.error('reviewPromptpayRequestAction error:', err);
+    return { success: false, error: 'ดำเนินการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' };
+  }
+}
