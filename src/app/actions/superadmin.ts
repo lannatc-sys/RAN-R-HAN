@@ -91,6 +91,11 @@ export async function getPlatformStatsAction(): Promise<{
   error?: string;
 }> {
   try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
     const admin = createAdminClient();
 
     // 1. สถิติจำนวนร้านค้า

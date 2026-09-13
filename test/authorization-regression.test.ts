@@ -399,3 +399,119 @@ describe('Resource-level shop_id binding in mutations', () => {
     assert.match(fn, /has_shop_access[\s\S]*?lookup_shop_id:\s*order\.shop_id/);
   });
 });
+
+// ─── Item #6: getPlatformStatsAction superadmin guard ────────────────────────
+describe('getPlatformStatsAction – superadmin guard', () => {
+  it('calls checkIsSuperadmin() before createAdminClient()', () => {
+    const sa = source('src/app/actions/superadmin.ts');
+    const start = sa.indexOf('export async function getPlatformStatsAction');
+    const nextExport = sa.indexOf('\nexport ', start + 1);
+    const fn = sa.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    // checkIsSuperadmin must appear before createAdminClient
+    const idxCheck = fn.indexOf('checkIsSuperadmin()');
+    const idxAdmin = fn.indexOf('createAdminClient()');
+    assert.ok(idxCheck !== -1, 'checkIsSuperadmin() must be present');
+    assert.ok(idxAdmin !== -1, 'createAdminClient() must be present');
+    assert.ok(idxCheck < idxAdmin, 'checkIsSuperadmin() must be called before createAdminClient()');
+  });
+
+  it('returns early when not superadmin before touching admin client', () => {
+    const sa = source('src/app/actions/superadmin.ts');
+    const start = sa.indexOf('export async function getPlatformStatsAction');
+    const nextExport = sa.indexOf('\nexport ', start + 1);
+    const fn = sa.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    // Early return must appear before createAdminClient
+    const earlyReturnIdx = fn.indexOf('!isSuperadmin');
+    const adminIdx = fn.indexOf('createAdminClient()');
+    assert.ok(earlyReturnIdx !== -1, '!isSuperadmin guard must be present');
+    assert.ok(earlyReturnIdx < adminIdx, 'early return must precede createAdminClient()');
+  });
+});
+
+// ─── Item #7: updateRiderTelegramChatIdAction shop access check ───────────────
+describe('updateRiderTelegramChatIdAction – shop ownership check', () => {
+  it('looks up riders.shop_id before mutating', () => {
+    const ra = source('src/app/actions/rider-admin.ts');
+    const start = ra.indexOf('export async function updateRiderTelegramChatIdAction');
+    const fn = ra.slice(start);
+
+    assert.match(fn, /\.from\('riders'\)\s*\.select\('shop_id'\)\s*\.eq\('id',\s*riderId\)/);
+  });
+
+  it('checks has_shop_access with rider shop_id before mutating', () => {
+    const ra = source('src/app/actions/rider-admin.ts');
+    const start = ra.indexOf('export async function updateRiderTelegramChatIdAction');
+    const fn = ra.slice(start);
+
+    assert.match(fn, /has_shop_access[\s\S]*?lookup_shop_id:\s*rider\.shop_id/);
+  });
+});
+
+// ─── Item #8: uploadMenuImageAction auth + shop check ─────────────────────────
+describe('uploadMenuImageAction – auth and shop access check', () => {
+  it('rejects missing or "common" shop_id without auth check', () => {
+    const menu = source('src/app/actions/menu.ts');
+    const start = menu.indexOf('export async function uploadMenuImageAction');
+    const nextExport = menu.indexOf('\nexport ', start + 1);
+    const fn = menu.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    // Must NOT use the `|| 'common'` fallback pattern
+    assert.doesNotMatch(fn, /\|\|\s*'common'/);
+    // Must reject when shopId is 'common' or empty
+    assert.match(fn, /shopId === 'common'/);
+  });
+
+  it('checks has_shop_access with the provided shop_id', () => {
+    const menu = source('src/app/actions/menu.ts');
+    const start = menu.indexOf('export async function uploadMenuImageAction');
+    const nextExport = menu.indexOf('\nexport ', start + 1);
+    const fn = menu.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    assert.match(fn, /has_shop_access[\s\S]*?lookup_shop_id:\s*shopId/);
+  });
+});
+
+// ─── Item #9: saveSlipCredentialsAction HTTPS enforcement ────────────────────
+describe('saveSlipCredentialsAction – HTTPS protocol enforcement', () => {
+  it('rejects http:// by checking protocol before hostname', () => {
+    const settings = source('src/app/actions/settings.ts');
+    const start = settings.indexOf('export async function saveSlipCredentialsAction');
+    const nextExport = settings.indexOf('\nexport ', start + 1);
+    const fn = settings.slice(start, nextExport !== -1 ? nextExport : undefined);
+
+    assert.match(fn, /parsedUrl\.protocol\s*!==\s*'https:'/);
+    // Protocol check must appear before hostname check
+    const protoIdx = fn.indexOf("parsedUrl.protocol !== 'https:'");
+    const hostIdx = fn.indexOf("parsedUrl.hostname !== 'api.slipok.com'");
+    assert.ok(protoIdx !== -1, 'protocol check must exist');
+    assert.ok(hostIdx !== -1, 'hostname check must exist');
+    assert.ok(protoIdx < hostIdx, 'protocol check must come before hostname check');
+  });
+});
+
+// ─── Item #10: payment-slips INSERT policy ────────────────────────────────────
+describe('payment-slips upload INSERT policy migration', () => {
+  it('drops the permissive anon upload policy', () => {
+    const sql = source('supabase/migrations/20260913000002_secure_payment_slips_upload_policy.sql');
+    assert.match(sql, /drop policy if exists "Anyone can upload payment slips"/i);
+  });
+
+  it('restricts INSERT to authenticated role only', () => {
+    const sql = source('supabase/migrations/20260913000002_secure_payment_slips_upload_policy.sql');
+    assert.match(sql, /to\s+authenticated/i);
+    // Must NOT allow anon
+    assert.doesNotMatch(sql, /to\s+anon/i);
+  });
+
+  it('binds upload path to has_shop_access via foldername', () => {
+    const sql = source('supabase/migrations/20260913000002_secure_payment_slips_upload_policy.sql');
+    assert.match(sql, /has_shop_access.*foldername/is);
+  });
+
+  it('limits file size in the policy', () => {
+    const sql = source('supabase/migrations/20260913000002_secure_payment_slips_upload_policy.sql');
+    assert.match(sql, /metadata.*size.*bigint/is);
+  });
+});

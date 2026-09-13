@@ -293,6 +293,11 @@ export async function saveSlipCredentialsAction(data: {
         return { success: false, error: 'รูปแบบ API URL ไม่ถูกต้อง' };
       }
 
+      // ต้องใช้ HTTPS เท่านั้น เพื่อป้องกัน API Key รั่วไหลผ่าน HTTP plaintext
+      if (parsedUrl.protocol !== 'https:') {
+        return { success: false, error: 'API URL ต้องใช้ HTTPS เท่านั้น' };
+      }
+
       if (parsedUrl.hostname !== 'api.slipok.com') {
         return { success: false, error: 'API URL ต้องเป็นโดเมน api.slipok.com เท่านั้น' };
       }

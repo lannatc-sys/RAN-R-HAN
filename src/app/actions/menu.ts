@@ -208,7 +208,12 @@ export async function deleteMenuItemAction(itemId: string) {
 export async function uploadMenuImageAction(formData: FormData): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
     const file = formData.get('file') as File;
-    const shopId = (formData.get('shop_id') as string) || 'common';
+    const shopId = formData.get('shop_id') as string;
+
+    // ต้องระบุ shop_id เสมอ — ห้ามใช้ fallback 'common' เพราะเป็นช่องโหว่ bypass
+    if (!shopId || shopId.trim() === '' || shopId === 'common') {
+      return { success: false, error: 'กรุณาระบุ shop_id ที่ถูกต้อง' };
+    }
 
     if (!file) {
       return { success: false, error: 'ไม่พบไฟล์รูปภาพ' };
@@ -222,6 +227,20 @@ export async function uploadMenuImageAction(formData: FormData): Promise<{ succe
     // จำกัดขนาดไฟล์ไม่เกิน 5MB
     if (file.size > 5 * 1024 * 1024) {
       return { success: false, error: 'ขนาดไฟล์รูปภาพต้องไม่เกิน 5MB' };
+    }
+
+    // ตรวจสอบ session และสิทธิ์เข้าถึงร้าน
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนอัปโหลดรูปภาพ' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์อัปโหลดรูปภาพของร้านค้านี้' };
     }
 
     const admin = createAdminClient();
