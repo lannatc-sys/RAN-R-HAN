@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
   LayoutDashboard,
+  Map,
   Store,
   CreditCard,
   BellRing,
@@ -48,6 +49,12 @@ export function SuperadminSidebar() {
       href: '/superadmin/announcements',
       label: 'ประกาศระบบ',
       icon: BellRing,
+      exact: false,
+    },
+    {
+      href: '/superadmin/service-area-map',
+      label: 'พื้นที่ให้บริการ',
+      icon: Map,
       exact: false,
     },
   ];
