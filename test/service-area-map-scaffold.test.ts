@@ -225,24 +225,65 @@ describe('Service Area Map UI Scaffold — Contract & Isolation Guards', () => {
       );
     });
 
-    it('no file in src/app/ imports service-area-map scaffold', () => {
+    it('only the approved superadmin page imports the scaffold', () => {
+      // The editor is reachable at one address and nowhere else. Widening this
+      // list is a decision, not a detail: anything under /admin or the customer
+      // routes would expose an editor that cannot save and is not yet reviewed.
+      const APPROVED = [
+        path.join('superadmin', 'service-area-map', 'page.tsx'),
+        path.join('superadmin', 'service-area-map', 'ServiceAreaMapClient.tsx'),
+      ];
+
+      const offenders: string[] = [];
       function scanDir(dir: string) {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
           const fullPath = path.join(dir, entry.name);
           if (entry.isDirectory()) {
             scanDir(fullPath);
-          } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx'))) {
+          } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) {
             const content = fs.readFileSync(fullPath, 'utf-8');
-            assert.equal(
-              content.includes('service-area-map'),
-              false,
-              `File ${fullPath} must NOT import service-area-map scaffold`
-            );
+            if (!content.includes('service-area-map')) continue;
+            const relative = path.relative(APP_DIR, fullPath);
+            if (!APPROVED.includes(relative)) offenders.push(relative);
           }
         }
       }
       scanDir(APP_DIR);
+
+      assert.deepEqual(
+        offenders,
+        [],
+        `Only ${APPROVED.join(' and ')} may import the scaffold`
+      );
+    });
+
+    it('the approved page is the one that exists, and it sits under superadmin', () => {
+      const pagePath = path.join(APP_DIR, 'superadmin', 'service-area-map', 'page.tsx');
+      assert.ok(fs.existsSync(pagePath), 'the approved superadmin page must exist');
+
+      // Its protection is the layout guard, not the address. Assert the guard is
+      // still in place rather than trusting the route to stay unguessable.
+      const layout = fs.readFileSync(
+        path.join(APP_DIR, 'superadmin', 'layout.tsx'),
+        'utf-8'
+      );
+      assert.ok(
+        layout.includes('checkIsSuperadmin'),
+        'superadmin layout must still gate every page beneath it'
+      );
+    });
+
+    it('the scaffold itself stays free of map libraries and tile URLs', () => {
+      // Leaflet lives in the page layer, injected through renderCanvas, so the
+      // scaffold remains renderable offline and in tests.
+      for (const filePath of collectSourceFiles(SCAFFOLD_DIR)) {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        assert.equal(
+          /from '.*leaflet|require\('leaflet/.test(content),
+          false,
+          `${path.relative(SCAFFOLD_DIR, filePath)} must not import leaflet directly`
+        );
+      }
     });
   });
 });

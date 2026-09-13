@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import {
   AreaKind,
   LngLat,
+  MapCanvasRenderProps,
   PolygonDraft,
   ServiceAreaMapEditorActions,
   ServiceAreaMapEditorState,
@@ -14,6 +15,10 @@ import { MapCanvasPlaceholder } from './MapCanvasPlaceholder';
 import { PolygonDraftPanel } from './PolygonDraftPanel';
 import { EditorToolbar } from './EditorToolbar';
 
+const defaultRenderCanvas = (props: MapCanvasRenderProps) => (
+  <MapCanvasPlaceholder {...props} />
+);
+
 export interface ServiceAreaMapEditorShellProps {
   /** Initial or controlled state */
   initialState?: ServiceAreaMapEditorState;
@@ -21,12 +26,18 @@ export interface ServiceAreaMapEditorShellProps {
   actions?: Partial<ServiceAreaMapEditorActions>;
   /** Disable interactions */
   readOnly?: boolean;
+  /**
+   * Supplies the map surface. Defaults to the offline placeholder so the
+   * scaffold never pulls in a map library or reaches the network on its own.
+   */
+  renderCanvas?: (props: MapCanvasRenderProps) => React.ReactNode;
 }
 
 export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps> = ({
   initialState = DEMO_INITIAL_EDITOR_STATE,
   actions,
   readOnly = false,
+  renderCanvas,
 }) => {
   // Local state for scaffold preview interaction
   const [activeKind, setActiveKind] = useState<AreaKind>(initialState.activeAreaKind);
@@ -171,12 +182,12 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         {/* Left/Center Column: Canvas & Toolbar */}
         <div className="lg:col-span-7 xl:col-span-8 space-y-3">
-          <MapCanvasPlaceholder
-            draft={currentDraft}
-            activeKind={activeKind}
-            onAddPoint={handleAddPoint}
-            disabled={readOnly}
-          />
+          {(renderCanvas ?? defaultRenderCanvas)({
+            draft: currentDraft,
+            activeKind,
+            onAddPoint: handleAddPoint,
+            disabled: readOnly,
+          })}
           <EditorToolbar
             draft={currentDraft}
             onCloseRing={handleCloseRing}

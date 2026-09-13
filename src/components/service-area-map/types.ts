@@ -126,6 +126,18 @@ export function polygonDraftToGeoJson(draft: PolygonDraft): GeoJsonPolygon | nul
 }
 
 /**
+ * Props any map canvas must accept, whether it is the offline placeholder or a
+ * real tile-backed map. Declaring it here keeps the scaffold free of map
+ * libraries while letting a caller inject one.
+ */
+export interface MapCanvasRenderProps {
+  draft: PolygonDraft;
+  activeKind: AreaKind;
+  onAddPoint?: (kind: AreaKind, point: LngLat) => void;
+  disabled?: boolean;
+}
+
+/**
  * State for the Service Area Map Editor Shell
  */
 export interface ServiceAreaMapEditorState {
