@@ -22,10 +22,13 @@ const ids = {
   ownerA: '20000000-0000-4000-8000-000000000001',
   ownerB: '20000000-0000-4000-8000-000000000002',
   riderUser: '20000000-0000-4000-8000-000000000003',
+  superadmin: '20000000-0000-4000-8000-000000000004',
   rider: '30000000-0000-4000-8000-000000000001',
   insideOrder: '40000000-0000-4000-8000-000000000001',
   outsideOrder: '40000000-0000-4000-8000-000000000002',
   missingCoordinateOrder: '40000000-0000-4000-8000-000000000003',
+  insidePolygonOrder: '40000000-0000-4000-8000-000000000004',
+  outsidePolygonOrder: '40000000-0000-4000-8000-000000000005',
 };
 
 const allowedRoles = new Set(['authenticated', 'service_role']);
@@ -67,7 +70,7 @@ async function cleanFixtures(client) {
   await client.query('delete from public.shops where id = any($1::uuid[])', [[ids.shopA, ids.shopB]]);
   await client.query(
     'delete from auth.users where id = any($1::uuid[])',
-    [[ids.ownerA, ids.ownerB, ids.riderUser]]
+    [[ids.ownerA, ids.ownerB, ids.riderUser, ids.superadmin]]
   );
 }
 
@@ -77,8 +80,9 @@ async function seedFixtures(client) {
     `insert into auth.users (id, email)
      values ($1, 'p1-owner-a@example.invalid'),
             ($2, 'p1-owner-b@example.invalid'),
-            ($3, 'p1-rider@example.invalid')`,
-    [ids.ownerA, ids.ownerB, ids.riderUser]
+            ($3, 'p1-rider@example.invalid'),
+            ($4, 'p1-superadmin@example.invalid')`,
+    [ids.ownerA, ids.ownerB, ids.riderUser, ids.superadmin]
   );
   await client.query(
     `insert into public.shops (
@@ -92,8 +96,9 @@ async function seedFixtures(client) {
   await client.query(
     `insert into public.users (id, shop_id, role, full_name)
      values ($1, $3, 'owner', 'P1 Owner A'),
-            ($2, $4, 'owner', 'P1 Owner B')`,
-    [ids.ownerA, ids.ownerB, ids.shopA, ids.shopB]
+            ($2, $4, 'owner', 'P1 Owner B'),
+            ($5, null, 'superadmin', 'P1 Superadmin')`,
+    [ids.ownerA, ids.ownerB, ids.shopA, ids.shopB, ids.superadmin]
   );
   await client.query(
     `insert into public.riders (id, shop_id, auth_user_id, display_name, phone)
@@ -110,14 +115,23 @@ async function run() {
   try {
     await seedFixtures(admin);
 
-    const ownerSettings = await asRole(admin, 'authenticated', ids.ownerA, () =>
+    // 20260914000002 ยกสิทธิ์คุมพื้นที่จากเจ้าของร้านไปเป็น superadmin เท่านั้น
+    const superadminSettings = await asRole(admin, 'authenticated', ids.superadmin, () =>
       admin.query(
         'select public.set_shop_service_area_settings($1, true, 6000, 12000) as result',
         [ids.shopA]
       )
     );
-    assert.equal(ownerSettings.rows[0].result.service_radius_m, 6000);
-    console.log('[PASS] owner can update own shop service-area settings');
+    assert.equal(superadminSettings.rows[0].result.service_radius_m, 6000);
+    console.log('[PASS] superadmin can update shop service-area settings');
+
+    await expectDatabaseError(
+      () => asRole(admin, 'authenticated', ids.ownerA, () =>
+        admin.query('select public.set_shop_service_area_settings($1, true, 7000, 12000)', [ids.shopA])
+      ),
+      'SHOP_ACCESS_DENIED'
+    );
+    console.log('[PASS] shop owner can no longer move its own service-area boundary');
 
     await expectDatabaseError(
       () => asRole(admin, 'authenticated', ids.ownerB, () =>
@@ -128,7 +142,7 @@ async function run() {
     console.log('[PASS] cross-shop geo update is denied');
 
     await expectDatabaseError(
-      () => asRole(admin, 'authenticated', ids.ownerA, () =>
+      () => asRole(admin, 'authenticated', ids.superadmin, () =>
         admin.query('select public.update_shop_geo($1, null, null)', [ids.shopA])
       ),
       'SHOP_COORDINATES_REQUIRED'
@@ -192,6 +206,57 @@ async function run() {
     }, 'OUTSIDE_SERVICE_AREA');
     console.log('[PASS] delivery order without coordinates fails closed');
 
+    // C4 - polygon ต้องชนะรัศมีตอนรับออเดอร์จริง ไม่ใช่แค่มีคอลัมน์เก็บไว้เฉย ๆ
+    // จุด 13.7700/100.5018 ยังอยู่ในรัศมี 6 กม. แต่หลุดออกนอกสี่เหลี่ยมที่วาด
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query(
+        "select public.set_shop_service_area_polygon($1, 'customer', $2::jsonb)",
+        [
+          ids.shopA,
+          JSON.stringify({
+            type: 'Polygon',
+            coordinates: [[
+              [100.4950, 13.7500],
+              [100.5100, 13.7500],
+              [100.5100, 13.7600],
+              [100.4950, 13.7600],
+              [100.4950, 13.7500],
+            ]],
+          }),
+        ]
+      )
+    );
+
+    await admin.query(
+      `insert into public.orders (
+         id, shop_id, order_no, type, subtotal, total, delivery_address, delivery_lat, delivery_lng
+       ) values ($1, $2, 'P1-POLY-IN-001', 'delivery', 100, 100, 'inside polygon', 13.7564, 100.5018)`,
+      [ids.insidePolygonOrder, ids.shopA]
+    );
+    console.log('[PASS] delivery order inside the drawn polygon is accepted');
+
+    await expectDatabaseError(async () => {
+      await admin.query('begin');
+      try {
+        await admin.query(
+          `insert into public.orders (
+             id, shop_id, order_no, type, subtotal, total, delivery_address, delivery_lat, delivery_lng
+           ) values ($1, $2, 'P1-POLY-OUT-001', 'delivery', 100, 100, 'outside polygon inside radius', 13.7700, 100.5018)`,
+          [ids.outsidePolygonOrder, ids.shopA]
+        );
+        await admin.query('commit');
+      } catch (error) {
+        await admin.query('rollback');
+        throw error;
+      }
+    }, 'OUTSIDE_SERVICE_AREA');
+    console.log('[PASS] polygon beats the radius: inside the circle but outside the shape is rejected');
+
+    // ล้าง polygon ก่อนเทสไรเดอร์ ไม่งั้นรูปของลูกค้าจะกวนกรณีถัดไป
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query("select public.set_shop_service_area_polygon($1, 'customer', null)", [ids.shopA])
+    );
+
     await asRole(admin, 'authenticated', ids.riderUser, () =>
       admin.query('select public.start_rider_work_session($1, 13.7564, 100.5018, null)', [ids.shopA])
     );
@@ -232,7 +297,7 @@ async function run() {
     riderClient = await connect();
     await ownerClient.query('begin');
     await ownerClient.query("select pg_advisory_xact_lock(hashtextextended('shop:' || $1::text, 0))", [ids.shopA]);
-    await ownerClient.query("select set_config('request.jwt.claim.sub', $1, true)", [ids.ownerA]);
+    await ownerClient.query("select set_config('request.jwt.claim.sub', $1, true)", [ids.superadmin]);
     await ownerClient.query('set local role authenticated');
 
     const riderReport = asRole(riderClient, 'authenticated', ids.riderUser, () =>

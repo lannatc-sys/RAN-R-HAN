@@ -14,10 +14,17 @@
 | `20260914000002_superadmin_only_service_area` | **ใช่** | `update_shop_geo` และ `set_shop_service_area_settings` เหลือ `is_superadmin` + เพิ่ม `set_shop_service_area_polygon` |
 | `20260914000003_promptpay_change_requests` | **ยังไม่** | ตาราง + RPC คำขอเปลี่ยนพร้อมเพย์ |
 | `20260914000004_read_shop_area_polygons` | **ใช่** | `get_shop_area_polygons` คืน polygon เป็น GeoJSON |
+| `20260914000005_enforce_polygon_service_area` | **ยังไม่** | `enforce_service_area_for_new_orders` เรียก `is_point_in_shop_area` (C4) |
 
 ตรวจหลัง apply แล้วว่าสองฟังก์ชันแรก **ยังมี** `pg_advisory_xact_lock`, `select for update`, ลูป `order by rider_id` และ `returns jsonb` ครบ
 
-**พื้นที่ยังไม่ถูกบังคับใช้จริง** `enforce_service_area_for_new_orders` ยังไม่เรียก `is_point_in_shop_area`
+**พื้นที่ยังไม่ถูกบังคับใช้จริงบน production** โค้ด C4 เขียนและทดสอบกับ PostGIS จริงแล้ว
+(`20260914000005`) แต่ยัง **ไม่ได้ apply** เพราะเปลี่ยนพฤติกรรมการรับออเดอร์
+ต้อง apply เป็นรอบแยกเมื่อเจ้าของโปรเจกต์สั่ง
+
+**migration 20260914000001-000005 ไม่เคยถูกลงทะเบียนใน `scripts/run-db.js`**
+สามไฟล์แรกถูก apply เข้า production ด้วยมือ ฐานข้อมูลที่สร้างใหม่จาก script จึงไม่มี polygon เลย
+ตอนนี้ลงทะเบียนครบทั้งห้าไฟล์แล้ว (ขั้น 1.19-1.23)
 
 ---
 
@@ -32,6 +39,42 @@
 - backend คำขอเปลี่ยนพร้อมเพย์ + แจ้งเตือน Telegram (เงียบถ้าไม่ตั้งค่า)
 - **โหลดพื้นที่ที่บันทึกไว้กลับมาแก้ต่อได้** เลือกร้านแล้ว editor ขึ้นรูปเดิม
   ไม่ใช่ fixture สาธิต มีเทส round-trip คุมว่าเซฟแล้วโหลดแล้วเซฟซ้ำรูปไม่เพี้ยน
+
+---
+
+## รอบ 2026-09-14 (Claude Code, branch `feat/superadmin-shop-editor`)
+
+commit `089ed0f` และรอบถัดมาบน worktree `.worktrees/superadmin-shop-editor` โลคัลอย่างเดียว ยังไม่ push
+
+**งานที่ 4 — แผงแก้ข้อมูลร้านพื้นฐาน: DONE**
+- `updateShopBasicInfoAction` ใน `src/app/actions/superadmin.ts` แก้ชื่อ เบอร์โทร ที่อยู่ ลิงก์โลโก้
+- โมดัลใหม่ในหน้า `/superadmin/stores` (`StoresManagementClient.tsx`) ใช้รูปแบบเดียวกับโมดัลเปลี่ยนแพ็กเกจ
+- ไม่รับ `kds_pin` และไม่รับพร้อมเพย์ตามที่ตกลงไว้ มีเทสคุมสองข้อนี้โดยเฉพาะ
+- เขียน `audit_logs` (`user_id` / `details` / `entity_type`) ว่าแก้ฟิลด์ไหน
+- **ยังไม่มีอัปโหลดโลโก้เป็นไฟล์** รับเป็นลิงก์ https:// เท่านั้น เพราะทั้งระบบยังไม่มีที่ไหนเขียน
+  `logo_url` เลย และ `Shop.logo` ใน types เป็นคอลัมน์ผี ฐานข้อมูลมีแค่ `logo_url`
+
+**งานที่ 5 (C4) — polygon มีผลตอนรับออเดอร์: โค้ดเสร็จ ยังไม่ apply**
+- `supabase/migrations/20260914000005_enforce_polygon_service_area.sql`
+  แทนบล็อกวัดระยะเดิมด้วย `is_point_in_shop_area` ตัวเดียวกับเส้นทางอื่น
+  พฤติกรรม fail-closed เดิมคงครบเพราะ predicate คืน false ทุกกรณีที่พิกัด/รัศมีไม่ครบ
+
+**gate ฐานข้อมูลที่ค้าง Standby มานาน — ตอนนี้รันได้จริงแล้ว**
+- `test/supabase-shim.sql` (ใหม่) เติม schema `auth`/`storage`/`extensions`, role, `auth.uid()`,
+  `storage.foldername()` และย้าย postgis เข้า schema `extensions` ให้ฐานข้อมูล postgres เปล่า
+  รัน migrations ของโปรเจกต์ได้ **ใช้กับคอนเทนเนอร์ที่พร้อมทิ้งเท่านั้น**
+- ขั้นตอนที่ใช้จริง: `postgis/postgis:15-3.3` ในคอนเทนเนอร์ → apply shim → `node scripts/run-db.js`
+  → `TEST_DATABASE_URL=... npm run test:db:service-area`
+
+**เทสที่ล้าสมัยและไม่มีใครเห็นเพราะ gate นี้ไม่เคยรัน**
+`test/service-area-postgres.integration.cjs` ยังยืนยันว่า *เจ้าของร้านแก้พื้นที่ตัวเองได้*
+ซึ่งขัดกับ `20260914000002` ที่ย้ายสิทธิ์ไป superadmin ไปแล้ว แก้ให้ตรงของจริงแล้ว
+พร้อมเพิ่มเคส superadmin ทำได้ / เจ้าของร้านโดนปฏิเสธ
+
+**ยังไม่ได้ทำ / NOT PERFORMED**
+- ไม่ได้ apply `20260914000005` ลง production และไม่ได้แตะ production database
+- ไม่ได้ทดสอบ UI บนเบราว์เซอร์จริง โมดัลแก้ข้อมูลร้านตรวจด้วย build + type เท่านั้น
+- `test/supabase-shim.sql` ยังไม่ได้ผูกเข้า CI หรือ script ใด ต้องรันด้วยมือ
 
 ---
 
@@ -114,11 +157,25 @@ row lock และลูปเรียงตาม rider_id กันเดด�
 ## Gate ที่ต้องผ่านก่อน commit ทุกครั้ง
 
 ```
-npm run test:unit        ต้องได้ 268 ผ่าน 0 fail
+npm run test:unit        ต้องได้ 273 ผ่าน 0 fail (branch feat/superadmin-shop-editor)
 npx tsc --noEmit
 npm run build
 git diff --check
 ```
+
+**`test:unit` ใน `package.json` ไล่ชื่อไฟล์เทสทีละไฟล์ ไม่ได้ใช้ glob**
+เทสไฟล์ใหม่ที่ไม่ถูกเพิ่มเข้าไปในรายการนั้นจะไม่ถูกรันใน gate เลย ทั้งที่รันเดี่ยว ๆ ผ่าน
+ตอนรวมงานต้องเช็กว่าเทสใหม่ของทุก branch ถูกเพิ่มเข้ารายการแล้ว
+
+gate ฐานข้อมูล เมื่อแตะ migration หรือ RPC ของพื้นที่ให้บริการ:
+
+```
+TEST_DATABASE_URL=postgres://.../<disposable db> npm run test:db:service-area
+```
+
+ผลรันจริง 2026-09-14 บน PostGIS 3.3 ในคอนเทนเนอร์: **14 PASS 0 FAIL**
+พิสูจน์แล้วว่าไม่ใช่เทสลอย — ถอด `20260914000005` ออกแล้วเคส
+"polygon beats the radius" แดงจริง เคสอื่นยังเขียว
 
 ---
 
