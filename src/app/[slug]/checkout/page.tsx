@@ -17,6 +17,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
     .eq('slug', slug)
     .eq('is_active', true)
     .eq('status', 'active')
+    .eq('is_open', true)
     .single();
 
   if (error || !shop) {

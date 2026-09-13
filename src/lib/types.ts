@@ -21,6 +21,7 @@ export interface Shop {
   plan: string;
   status: ShopStatus;
   is_active: boolean;
+  is_open?: boolean;
   expires_at: string | null;
   plan_expires_at?: string | null;
   service_charge: number;
@@ -36,6 +37,9 @@ export interface Shop {
   telegram_enabled?: boolean;
   shop_lat?: number | null;
   shop_lng?: number | null;
+  service_area_enabled?: boolean;
+  service_radius_m?: number;
+  rider_work_radius_m?: number;
   created_at: string;
   updated_at: string;
 }
@@ -318,5 +322,3 @@ export interface DataSubjectRequest {
   completed_at?: string | null;
   created_at: string;
 }
-
-

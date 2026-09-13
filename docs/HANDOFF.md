@@ -215,17 +215,38 @@
    - บันทึกรายงานวิเคราะห์ข้อแตกต่าง (Docs Drift) ลงใน `docs/preorder-verification-report.md`
    - ชุดทดสอบ Unit Test: `test/delivery.test.ts` (10/10 PASS)
 
+### K. ระบบขอบเขตการให้บริการและพื้นที่ทำงานไรเดอร์ (Service Area Enforcement) — *เสร็จ Phase 1 🎯*
+
+บังคับใช้ที่ชั้นฐานข้อมูลแทน API เพื่อไม่ให้ข้ามผ่านได้แม้เรียกตรง
+
+1. **ลูกค้านอกเขตสั่งไม่ได้:** trigger `trg_enforce_service_area_for_new_orders` บนตาราง `orders`
+   ปฏิเสธพร้อมข้อความ `อยู่นอกเขตบริการ กรุณารอแผนการขยายการให้บริการ`
+   และ fail-closed เมื่อพิกัดร้านเป็น NULL
+2. **ไรเดอร์นอกเขตเกิน 15 นาที:** ปิด work session อัตโนมัติ กลับเข้าเขตแล้วกดเริ่มงานใหม่ได้
+   บังคับ 3 จุด — ตอน report location, sweep query และ re-check หลังจับ lock
+3. **หน้าตั้งค่า:** `/admin/service-area` (ลิงก์อยู่ใน AdminNavbar) กำหนดรัศมีลูกค้าและรัศมีไรเดอร์แยกกัน
+4. **Cron:** `/api/cron/rider-geofence-sweep` เป็น fallback ปิด session ที่ค้าง ยิงจาก GitHub Actions ทุก 5 นาที
+5. **ความปลอดภัยเชิง concurrency:** ใช้ advisory lock + re-read แบบ `FOR UPDATE` กัน race
+   ระหว่างการแก้ตั้งค่ากับ GPS ที่รายงานเข้ามา และรักษา `outside_area_since` ด้วย `coalesce`
+   เพื่อไม่ให้ reset จนเลี่ยงกฎ 15 นาทีได้
+6. **ตรวจบน PostgreSQL จริง:** migration ครบ 16 ขั้น + integration 11 สถานการณ์
+   ครอบคลุม tenant isolation, fail-closed, timer และ concurrency สอง connection โดยไม่ deadlock
+
+> ⚠️ **ยังไม่รวมการวาดขอบเขตบนแผนที่** เฟสนี้ใช้รัศมีจากพิกัดร้านก่อน
+> รายละเอียดที่เหลือ แผนงาน และความเสี่ยงที่ยังค้าง อยู่ใน [`docs/HANDOFF-service-area.md`](./HANDOFF-service-area.md)
+
 ---
 
 ## 🛡️ 3. สถานะการตรวจสอบคุณภาพ (Quality Gates)
 
 | การทดสอบ | คำสั่ง | สถานะ | หมายเหตุ |
 | :--- | :--- | :---: | :--- |
-| **Unit Tests** | `npm run test:unit` | 🟢 PASS | 169/169 tests ผ่านทั้งหมด (100%) รวม 15 Test Suites |
-| **Smoke Tests** | `npm run test:smoke` | 🟢 PASS | 4/4 suites ผ่านทั้งหมด (Encryption, Thai Errors, Zod Validation, PromptPay) |
-| **Integration & Smoke** | `npm test` | 🟢 PASS | รันทั้ง 169 unit tests + 4 smoke tests ผ่านครบถ้วน |
-| **Next.js Production Build** | `npm run build` | 🟢 PASS | ผ่านครบ 35/35 routes ไม่มี Error (รวม /rider, /rider/login, /admin/riders) |
+| **Unit Tests** | `pnpm test:unit` | 🟢 PASS | 230/230 tests ผ่านทั้งหมด (100%) รวม 71 Test Suites |
+| **Smoke Tests** | `pnpm test:smoke` | 🟢 PASS | 4/4 suites ผ่านทั้งหมด (Encryption, Thai Errors, Zod Validation, PromptPay) |
+| **Unit & Smoke** | `pnpm test` | 🟢 PASS | รันทั้ง 230 unit tests + 4 smoke tests ผ่านครบถ้วน |
+| **PostgreSQL Integration** | `pnpm test:db:service-area` | 🟢 PASS | 11/11 สถานการณ์ ยิง SQL จริงบน `supabase/postgres:15.8.1.085` (PostGIS 3.3) migration ครบ 16 ขั้น |
 | **TypeScript Strict** | `npx tsc --noEmit` | 🟢 PASS | 0 Errors |
+| **Next.js Production Build** | `pnpm build` | 🟢 PASS | 52/52 routes ผ่าน 3 รอบติดบน Node v24.19.0 (ล้าง cache 1 รอบ ใช้ cache 2 รอบ) — อาการพังก่อนหน้าเกิดจาก `node_modules` ที่ติดมาจากการย้าย SSD แก้ด้วยการติดตั้งใหม่ |
 
 ---
 
@@ -269,5 +290,5 @@
 | **Gate 4** | External Scheduler `/api/cron/dispatch-timeout` | **CONFIGURED IN CODE / NOT YET VERIFIED IN DEPLOYED PRODUCTION** | Endpoint ป้องกันด้วย `CRON_SECRET` และตั้งค่าใน `vercel.json` แล้ว — หลัง push/deploy ต้องตรวจ cron invocation จริงจาก deployment/log |
 | **Gate 5** | Live Notification & Dispatch E2E | **PASS** | ทดสอบ Full Flow บน Production DB ผ่าน PostGIS, Offer, Graceful Notification Fallback และ Atomic Accept ผ่าน |
 | **Gate 6** | Physical Device E2E (Android + iOS PWA) | **PHYSICAL DEVICE E2E: NOT YET VERIFIED** | ห้ามถือว่าผ่านจนกว่าจะทดสอบบนฮาร์ดแวร์ Android และ iPhone จริงในพื้นที่ อ.เมือง แม่ฮ่องสอน (Background GPS / Web Push vibration) |
-| **Gate 7** | Quality Gates (Unit/Smoke/Typecheck/Build) | **ALL PASS** | Unit: 171/171 PASS, Smoke: 4/4 PASS, TSC: 0 errors, Build: 35/35 routes success |
+| **Gate 7** | Quality Gates (Unit/Smoke/Typecheck/Build/DB) | **ALL PASS** | Unit: 230/230, Smoke: 4/4, PostgreSQL integration: 11/11, TSC: 0 errors, Build: 52/52 routes (3 รอบติด) |
 | **Gate 8** | Git Branch & PR Organization | **READY** | แบ่งเป็น 4 คอมมิตแบบ atomic บน `feat/rider-system-phase1` โดยไม่แตะต้อง main |

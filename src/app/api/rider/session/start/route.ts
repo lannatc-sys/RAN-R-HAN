@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
  * POST /api/rider/session/start
  * ไรเดอร์กด "Start Work" เพื่อเปิด Work Session ใหม่
  *
- * Body: { shop_id: string, device_info?: object }
+ * Body: { shop_id: string, lat: number, lng: number, device_info?: object }
  * Returns: { session_id: string, started_at: string }
  */
 export async function POST(req: NextRequest) {
@@ -19,86 +19,60 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { shop_id, device_info } = body;
+    const { shop_id, lat, lng, device_info } = body;
 
     if (!shop_id) {
       return NextResponse.json({ error: 'shop_id is required' }, { status: 400 });
     }
 
-    // 2. หา rider record ของ user นี้
-    const { data: rider, error: riderError } = await supabase
-      .from('riders')
-      .select('id, status')
-      .eq('auth_user_id', user.id)
-      .eq('shop_id', shop_id)
-      .single();
-
-    if (riderError || !rider) {
+    if (
+      typeof lat !== 'number' ||
+      typeof lng !== 'number' ||
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
       return NextResponse.json(
-        { error: 'ไม่พบข้อมูลไรเดอร์ในร้านค้านี้' },
-        { status: 404 }
+        { code: 'INVALID_COORDINATES', error: 'lat and lng are required and must be numbers' },
+        { status: 400 }
       );
     }
 
-    if (rider.status !== 'active') {
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       return NextResponse.json(
-        { error: 'บัญชีไรเดอร์ถูกระงับหรือไม่ได้ใช้งาน' },
-        { status: 403 }
+        { code: 'INVALID_COORDINATES', error: 'ค่า lat/lng ไม่ถูกต้อง' },
+        { status: 400 }
       );
     }
 
-    // 3. ตรวจว่ามี session เปิดอยู่แล้วหรือไม่
-    const { data: existingSession } = await supabase
-      .from('rider_work_sessions')
-      .select('id, started_at')
-      .eq('rider_id', rider.id)
-      .eq('status', 'open')
-      .maybeSingle();
+    // 2. เรียก RPC start_rider_work_session
+    const { data: result, error: rpcError } = await supabase.rpc('start_rider_work_session', {
+      p_shop_id: shop_id,
+      p_lat: lat,
+      p_lng: lng,
+      p_device_info: device_info ?? null,
+    });
 
-    if (existingSession) {
-      // มี session เปิดอยู่แล้ว → ส่งกลับ session เดิม (idempotent)
-      return NextResponse.json({
-        session_id: existingSession.id,
-        started_at: existingSession.started_at,
-        resumed: true,
-      });
-    }
-
-    // 4. สร้าง session ใหม่
-    const { data: newSession, error: insertError } = await supabase
-      .from('rider_work_sessions')
-      .insert({
-        rider_id: rider.id,
-        shop_id,
-        status: 'open',
-        device_info: device_info ?? null,
-      })
-      .select('id, started_at')
-      .single();
-
-    if (insertError || !newSession) {
-      // Unique constraint uq_rider_one_open_work_session means a concurrent
-      // request already opened a session for this rider between our check
-      // above and this insert. Re-select and return it — same shape as the
-      // "already open" response — instead of a raw 500.
-      if (insertError?.code === '23505') {
-        const { data: raceSession } = await supabase
-          .from('rider_work_sessions')
-          .select('id, started_at')
-          .eq('rider_id', rider.id)
-          .eq('status', 'open')
-          .maybeSingle();
-
-        if (raceSession) {
-          return NextResponse.json({
-            session_id: raceSession.id,
-            started_at: raceSession.started_at,
-            resumed: true,
-          });
-        }
+    if (rpcError) {
+      if (rpcError.message.includes('OUTSIDE_WORK_AREA:')) {
+        return NextResponse.json(
+          {
+            code: 'OUTSIDE_WORK_AREA',
+            error: 'คุณอยู่นอกเขตพื้นที่การทำงาน กรุณากลับเข้าเขตพื้นที่ก่อนเริ่มงาน',
+          },
+          { status: 403 }
+        );
+      }
+      if (rpcError.message.includes('RIDER_NOT_FOUND_OR_INACTIVE')) {
+         return NextResponse.json(
+          {
+            code: 'RIDER_NOT_FOUND_OR_INACTIVE',
+            error: 'ไม่พบข้อมูลไรเดอร์ในร้านค้านี้ หรือบัญชีถูกระงับ',
+          },
+          { status: 404 }
+        );
       }
 
-      console.error('[session/start] Insert error:', insertError);
+      console.error('[session/start] RPC error:', rpcError);
       return NextResponse.json(
         { error: 'ไม่สามารถเปิด Work Session ได้' },
         { status: 500 }
@@ -106,9 +80,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      session_id: newSession.id,
-      started_at: newSession.started_at,
-      resumed: false,
+      session_id: result.session_id,
+      started_at: result.started_at,
+      resumed: result.resumed,
     });
   } catch (err) {
     console.error('[session/start] Unexpected error:', err);

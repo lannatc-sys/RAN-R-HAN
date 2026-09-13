@@ -26,19 +26,29 @@ async function main() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
   const admin = createAdminClient();
 
+  // Credentials must never be hardcoded: this script writes them into a live
+  // Supabase auth system via the service-role key.
+  const pilotPassword = process.env.PILOT_RIDER_PASSWORD;
+  if (!pilotPassword) {
+    console.error('PILOT_RIDER_PASSWORD is not set — refusing to run.');
+    console.error('Generate one and add it to .env.local:');
+    console.error('  openssl rand -base64 32');
+    process.exit(1);
+  }
+
   const shopId = '9ba07a9c-3ef7-4de8-a632-03680c38ca9d'; // ครัวป้าแดง
 
   const riderConfigs = [
     {
       email: 'rider1.kruapa@gmail.com',
-      password: 'RiderPass1234!',
+      password: pilotPassword,
       display_name: 'สมชาย ขี่เร็ว',
       phone: '0891112233',
       vehicle_type: 'motorcycle',
     },
     {
       email: 'rider2.kruapa@gmail.com',
-      password: 'RiderPass1234!',
+      password: pilotPassword,
       display_name: 'วิชัย บริการดี',
       phone: '0894445566',
       vehicle_type: 'motorcycle',

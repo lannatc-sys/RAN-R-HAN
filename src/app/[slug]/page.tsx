@@ -18,6 +18,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
     .eq('slug', slug)
     .eq('is_active', true)
     .eq('status', 'active')
+    .eq('is_open', true)
     .single();
 
   if (shopError || !shop) {

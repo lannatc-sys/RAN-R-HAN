@@ -1,14 +1,125 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
 import { encryptApiKey } from '@/lib/crypto';
+import { formatThaiError } from '@/lib/thai-errors';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 function safeRevalidate(path: string) {
   try {
     revalidatePath(path);
   } catch {
     // Ignore when called outside HTTP request lifecycle
+  }
+}
+
+const shopOpenStatusSchema = z.object({
+  shop_id: z.string().uuid(),
+  is_open: z.boolean(),
+});
+
+const serviceAreaSettingsSchema = z.object({
+  shop_id: z.string().uuid(),
+  service_area_enabled: z.boolean(),
+  service_radius_m: z.number().finite().positive().max(200000),
+  rider_work_radius_m: z.number().finite().positive().max(200000),
+});
+
+export async function updateServiceAreaSettingsAction(data: {
+  shop_id: string;
+  service_area_enabled: boolean;
+  service_radius_m: number;
+  rider_work_radius_m: number;
+}): Promise<{
+  success: boolean;
+  settings?: {
+    service_area_enabled: boolean;
+    service_radius_m: number;
+    rider_work_radius_m: number;
+  };
+  error?: string;
+}> {
+  const validated = serviceAreaSettingsSchema.safeParse(data);
+  if (!validated.success) {
+    return { success: false, error: 'ข้อมูลขอบเขตบริการไม่ถูกต้อง' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนแก้ไขการตั้งค่า' };
+    }
+
+    const { data: result, error } = await supabase.rpc('set_shop_service_area_settings', {
+      p_shop_id: validated.data.shop_id,
+      p_enabled: validated.data.service_area_enabled,
+      p_service_radius_m: validated.data.service_radius_m,
+      p_rider_work_radius_m: validated.data.rider_work_radius_m,
+    });
+
+    if (error) {
+      return { success: false, error: formatThaiError(error) };
+    }
+
+    const settings = result as {
+      service_area_enabled: boolean;
+      service_radius_m: number;
+      rider_work_radius_m: number;
+    };
+    safeRevalidate('/admin/service-area');
+
+    return { success: true, settings };
+  } catch (error: unknown) {
+    return { success: false, error: formatThaiError(error) };
+  }
+}
+
+/**
+ * เปิดหรือปิดรับออเดอร์ของร้านผ่าน RPC ที่ตรวจสิทธิ์สมาชิกของร้าน
+ * ใช้ session-bound client เพื่อให้ auth.uid() พร้อมสำหรับ has_shop_access().
+ */
+export async function updateShopOpenStatusAction(data: {
+  shop_id: string;
+  is_open: boolean;
+}): Promise<{ success: boolean; isOpen?: boolean; error?: string }> {
+  const validated = shopOpenStatusSchema.safeParse(data);
+  if (!validated.success) {
+    return { success: false, error: 'ข้อมูลสถานะร้านไม่ถูกต้อง' };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนเปลี่ยนสถานะร้าน' };
+    }
+
+    const { data: result, error } = await supabase.rpc('set_shop_open_status', {
+      p_shop_id: validated.data.shop_id,
+      p_is_open: validated.data.is_open,
+    });
+
+    if (error) {
+      return { success: false, error: formatThaiError(error) };
+    }
+
+    const response = result as { slug?: string; is_open?: boolean } | null;
+    safeRevalidate('/admin/settings');
+    if (response?.slug) {
+      safeRevalidate(`/${response.slug}`);
+      safeRevalidate(`/${response.slug}/checkout`);
+    }
+
+    return {
+      success: true,
+      isOpen: response?.is_open ?? validated.data.is_open,
+    };
+  } catch (error: unknown) {
+    return { success: false, error: formatThaiError(error) };
   }
 }
 
@@ -35,7 +146,7 @@ export async function updateShopSettingsAction(data: {
     .eq('id', data.shop_id);
 
   if (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: formatThaiError(error) };
   }
 
   safeRevalidate('/admin/settings');
@@ -68,7 +179,7 @@ export async function grantSupportAccessAction(
     return { success: true, expiresAt };
   } catch (err: any) {
     console.error('grantSupportAccessAction error:', err);
-    return { success: false, error: err.message || 'Failed to grant support access' };
+    return { success: false, error: formatThaiError(err) };
   }
 }
 
@@ -96,7 +207,7 @@ export async function revokeSupportAccessAction(
     return { success: true };
   } catch (err: any) {
     console.error('revokeSupportAccessAction error:', err);
-    return { success: false, error: err.message || 'Failed to revoke support access' };
+    return { success: false, error: formatThaiError(err) };
   }
 }
 
@@ -132,13 +243,13 @@ export async function saveSlipCredentialsAction(data: {
     );
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: formatThaiError(error) };
     }
 
     revalidatePath('/admin/settings');
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err.message || 'Failed to encrypt and save credentials' };
+    return { success: false, error: formatThaiError(err) };
   }
 }
 
@@ -178,7 +289,7 @@ export async function updateKdsPinAction(data: {
     .eq('id', data.shop_id);
 
   if (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: formatThaiError(error) };
   }
 
   safeRevalidate('/admin/settings');
@@ -209,7 +320,7 @@ export async function updateFulfillmentChannelsAction(data: {
       .eq('id', data.shop_id);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: formatThaiError(error) };
     }
 
     safeRevalidate('/admin/settings');
@@ -218,12 +329,14 @@ export async function updateFulfillmentChannelsAction(data: {
     return { success: true };
   } catch (err: any) {
     console.error('updateFulfillmentChannelsAction error:', err);
-    return { success: false, error: err.message || 'Failed to update channels' };
+    return { success: false, error: formatThaiError(err) };
   }
 }
 
 /**
  * อัปเดตพิกัดที่ตั้งร้านค้า (shop_lat, shop_lng) สำหรับระบบจัดส่งและค้นหาไรเดอร์
+ * ใช้ RPC update_shop_geo ซึ่งจัดการ lock, re-evaluate rider timers,
+ * และตรวจสิทธิ์ผ่าน has_shop_access() ในฐานข้อมูล
  */
 export async function updateShopGeoAction(data: {
   shop_id: string;
@@ -237,7 +350,7 @@ export async function updateShopGeoAction(data: {
       return { success: false, error: 'ไม่พบรหัสร้านค้า' };
     }
 
-    // Validation: ต้องระบุทั้งคู่ หรือเว้นว่างทั้งคู่
+    // --- Input Validation first (cheap, no I/O, testable without request scope) ---
     const hasLat = shop_lat !== null && shop_lat !== undefined && !isNaN(shop_lat);
     const hasLng = shop_lng !== null && shop_lng !== undefined && !isNaN(shop_lng);
 
@@ -254,25 +367,29 @@ export async function updateShopGeoAction(data: {
       }
     }
 
-    const admin = createAdminClient();
-    const { error } = await admin
-      .from('shops')
-      .update({
-        shop_lat: hasLat ? shop_lat : null,
-        shop_lng: hasLng ? shop_lng : null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', shop_id);
+    // --- DB-authoritative RPC: auth + lock + rider re-evaluation in one transaction ---
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนแก้ไขการตั้งค่า' };
+    }
+
+    const { error } = await supabase.rpc('update_shop_geo', {
+      p_shop_id: shop_id,
+      p_shop_lat: hasLat ? shop_lat : null,
+      p_shop_lng: hasLng ? shop_lng : null,
+    });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: formatThaiError(error) };
     }
 
     safeRevalidate('/admin/settings');
+    safeRevalidate('/admin/service-area');
     return { success: true };
   } catch (err: any) {
     console.error('updateShopGeoAction error:', err);
-    return { success: false, error: err.message || 'Failed to update shop coordinates' };
+    return { success: false, error: formatThaiError(err) };
   }
 }
 

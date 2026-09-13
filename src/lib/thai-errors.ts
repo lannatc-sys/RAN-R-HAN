@@ -18,6 +18,9 @@ export function formatThaiError(error: any): string {
   if (msg.includes('SHOP_NOT_FOUND')) {
     return 'ไม่พบร้านค้านี้ หรือร้านค้าปิดให้บริการชั่วคราว';
   }
+  if (msg.includes('SHOP_CLOSED')) {
+    return 'ร้านปิดรับออเดอร์ชั่วคราว กรุณาลองใหม่เมื่อร้านเปิดให้บริการ';
+  }
   if (msg.includes('EMPTY_CART')) {
     return 'ไม่มีรายการอาหารในตะกร้า กรุณาเลือกเมนูก่อนสั่งซื้อ';
   }
@@ -45,6 +48,26 @@ export function formatThaiError(error: any): string {
   if (msg.includes('ORDER_LOCKED')) {
     return 'คำสั่งซื้อนี้กำลังถูกประมวลผลอยู่ กรุณารอสักครู่';
   }
+  if (msg.includes('OUTSIDE_SERVICE_AREA')) {
+    return 'อยู่นอกเขตบริการ กรุณารอแผนการขยายการให้บริการ';
+  }
+  if (msg.includes('OUTSIDE_WORK_AREA')) {
+    return 'คุณอยู่นอกเขตพื้นที่การทำงาน กรุณากลับเข้าเขตพื้นที่ก่อนเริ่มงาน';
+  }
+  if (msg.includes('SHOP_COORDINATES_REQUIRED')) {
+    return 'กรุณาตั้งค่าพิกัดร้านให้เรียบร้อยก่อนเปิดใช้ขอบเขตบริการ';
+  }
+  if (msg.includes('INVALID_SERVICE_AREA_RADIUS')) {
+    return 'ระยะขอบเขตต้องมากกว่า 0 และไม่เกิน 200 กิโลเมตร';
+  }
+  if (msg.includes('INVALID_COORDINATES')) {
+    return 'ค่าพิกัดไม่ถูกต้อง กรุณาระบุทั้งละติจูดและลองจิจูดให้ครบถ้วน';
+  }
+  if (msg.includes('SHOP_ACCESS_DENIED')) {
+    return 'คุณไม่มีสิทธิ์แก้ไขการตั้งค่าของร้านนี้';
+  }
 
-  return msg || 'เกิดข้อผิดพลาดในการทำรายการ กรุณาลองใหม่อีกครั้ง';
+  // Unknown database errors may contain constraint names, table names, or SQL
+  // details. Never return that raw message across a client boundary.
+  return 'เกิดข้อผิดพลาดในการทำรายการ กรุณาลองใหม่อีกครั้ง';
 }

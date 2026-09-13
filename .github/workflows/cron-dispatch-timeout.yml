@@ -1,0 +1,30 @@
+name: Dispatch Timeout Cron (Fallback / Manual)
+
+on:
+  schedule:
+    # Run every 5 minutes as fallback (GitHub Actions minimum interval)
+    # Primary 1-minute schedule should use cron-job.org
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  dispatch-timeout:
+    name: Trigger /api/cron/dispatch-timeout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Dispatch Timeout Request
+        run: |
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://ran-r-han.vercel.app/api/cron/dispatch-timeout)
+
+          BODY=$(echo "$RESPONSE" | sed -e '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d: -f2)
+
+          echo "HTTP Status: $STATUS"
+          echo "Response Body: $BODY"
+
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::error::Dispatch timeout job failed with status $STATUS"
+            exit 1
+          fi

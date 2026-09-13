@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "workflowVersion": "1.1",
+  "profile": "compact",
+  "createdAt": "2026-09-12T09:41:46.981Z",
+  "updatedAt": "2026-09-12T09:58:45.598Z",
+  "currentPhase": "evidence",
+  "humanReview": "final-only",
+  "phases": {
+    "setup": "complete",
+    "evidence": "complete",
+    "plan": "pending",
+    "execution": "pending",
+    "results": "pending",
+    "crossReview": "pending",
+    "stageGate": "pending",
+    "final": "pending"
+  },
+  "revisionRounds": 0,
+  "revisions": [],
+  "pendingRevisionId": null,
+  "stageGate": {
+    "decision": null,
+    "score": null,
+    "dimensions": null,
+    "blockers": 0
+  },
+  "finalStale": false,
+  "budgets": {
+    "maxSpecialists": 1,
+    "maxConcurrent": 1,
+    "maxWaves": 1,
+    "maxRevisionRounds": 2,
+    "paidTools": false,
+    "credentialedPrivateSystems": false,
+    "externalWrites": false
+  },
+  "metrics": {
+    "phaseTransitions": 2,
+    "executionAttempts": 0
+  },
+  "lastReason": null
+}

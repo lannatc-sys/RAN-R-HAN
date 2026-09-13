@@ -42,6 +42,7 @@ export default async function HomePage() {
       .select('*')
       .eq('is_active', true)
       .eq('status', 'active')
+      .eq('is_open', true)
       .order('created_at', { ascending: false });
 
     activeShops = (shops as Shop[]) || [];
@@ -81,8 +82,12 @@ export default async function HomePage() {
                 <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 <span>ร้านค้าของคุณ ({user.email})</span>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                เปิดบริการ
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                userShop.is_open !== false
+                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                  : 'bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300'
+              }`}>
+                {userShop.is_open !== false ? 'เปิดรับออเดอร์' : 'ปิดรับออเดอร์'}
               </span>
             </div>
 
@@ -99,11 +104,11 @@ export default async function HomePage() {
                 <span>จัดการหลังร้าน (KDS)</span>
               </Link>
               <Link
-                href={`/${userShop.slug}`}
+                href={userShop.is_open !== false ? `/${userShop.slug}` : '/admin/settings'}
                 className="flex items-center justify-center gap-2 py-2.5 px-3 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl shadow-xs transition-all min-h-[40px]"
               >
                 <Store className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>เปิดเมนูสั่งอาหาร</span>
+                <span>{userShop.is_open !== false ? 'เปิดเมนูสั่งอาหาร' : 'ตั้งค่าเปิดร้าน'}</span>
               </Link>
             </div>
           </div>

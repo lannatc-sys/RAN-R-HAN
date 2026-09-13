@@ -11,6 +11,7 @@ import {
   revokeSupportAccessAction,
   updateFulfillmentChannelsAction,
   updateShopGeoAction,
+  updateShopOpenStatusAction,
 } from '@/app/actions/settings';
 import {
   updateShopTelegramSettingsAction,
@@ -42,6 +43,8 @@ import {
   ExternalLink,
   MapPin,
   Crosshair,
+  Power,
+  PowerOff,
 } from 'lucide-react';
 
 interface SettingsClientProps {
@@ -97,6 +100,49 @@ export function SettingsClient({
   const [isSavingShop, setIsSavingShop] = useState(false);
   const [shopSuccess, setShopSuccess] = useState(false);
   const [shopError, setShopError] = useState<string | null>(null);
+
+  // Shop operational open/closed state
+  const [isShopOpen, setIsShopOpen] = useState(shop.is_open !== false);
+  const [isUpdatingOpenStatus, setIsUpdatingOpenStatus] = useState(false);
+  const [openStatusMessage, setOpenStatusMessage] = useState<string | null>(null);
+  const [openStatusError, setOpenStatusError] = useState<string | null>(null);
+
+  const handleShopOpenStatusChange = async (nextIsOpen: boolean) => {
+    if (nextIsOpen === isShopOpen || isUpdatingOpenStatus) return;
+
+    if (
+      !nextIsOpen &&
+      !window.confirm(
+        'ยืนยันปิดรับออเดอร์? หน้าร้านออนไลน์จะไม่แสดงจนกว่าจะเปิดรับออเดอร์อีกครั้ง'
+      )
+    ) {
+      return;
+    }
+
+    setIsUpdatingOpenStatus(true);
+    setOpenStatusMessage(null);
+    setOpenStatusError(null);
+
+    const result = await updateShopOpenStatusAction({
+      shop_id: shop.id,
+      is_open: nextIsOpen,
+    });
+
+    setIsUpdatingOpenStatus(false);
+    if (!result.success) {
+      setOpenStatusError(result.error || 'ไม่สามารถเปลี่ยนสถานะร้านได้');
+      return;
+    }
+
+    setIsShopOpen(result.isOpen ?? nextIsOpen);
+    setOpenStatusMessage(
+      nextIsOpen
+        ? 'เปิดรับออเดอร์แล้ว หน้าร้านออนไลน์พร้อมใช้งาน'
+        : 'ปิดรับออเดอร์แล้ว หน้าร้านออนไลน์ถูกซ่อน'
+    );
+    router.refresh();
+    setTimeout(() => setOpenStatusMessage(null), 4000);
+  };
 
   // PIN Settings State
   const [currentPinInput, setCurrentPinInput] = useState('');
@@ -429,6 +475,94 @@ export function SettingsClient({
           <span>ล็อคหน้าจอนี้</span>
         </button>
       </div>
+
+      {/* Shop Open / Closed Status */}
+      <section
+        aria-labelledby="shop-open-status-heading"
+        className={`p-6 rounded-3xl border shadow-xs space-y-4 ${
+          isShopOpen
+            ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800'
+            : 'bg-red-50/70 dark:bg-red-950/30 border-red-200 dark:border-red-800'
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              {isShopOpen ? (
+                <Power className="w-5 h-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              ) : (
+                <PowerOff className="w-5 h-5 text-red-600 dark:text-red-400" aria-hidden="true" />
+              )}
+              <h2
+                id="shop-open-status-heading"
+                className="text-sm font-bold text-stone-900 dark:text-stone-100"
+              >
+                สถานะหน้าร้านออนไลน์
+              </h2>
+            </div>
+            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+              {isShopOpen
+                ? 'ร้านกำลังเปิดรับออเดอร์ ลูกค้าสามารถเข้าดูเมนูและสั่งอาหารได้'
+                : 'ร้านปิดรับออเดอร์ หน้าร้านและหน้าชำระเงินจะไม่แสดงต่อลูกค้า'}
+            </p>
+          </div>
+
+          <span
+            className={`self-start sm:self-auto px-3 py-1 rounded-full text-xs font-bold border ${
+              isShopOpen
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700'
+                : 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700'
+            }`}
+          >
+            {isShopOpen ? '● เปิดรับออเดอร์' : '● ปิดรับออเดอร์'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => handleShopOpenStatusChange(true)}
+            disabled={isUpdatingOpenStatus || isShopOpen}
+            aria-pressed={isShopOpen}
+            className="min-h-11 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {isUpdatingOpenStatus && !isShopOpen ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Power className="w-4 h-4" aria-hidden="true" />
+            )}
+            เปิดรับออเดอร์
+          </button>
+          <button
+            type="button"
+            onClick={() => handleShopOpenStatusChange(false)}
+            disabled={isUpdatingOpenStatus || !isShopOpen}
+            aria-pressed={!isShopOpen}
+            className="min-h-11 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {isUpdatingOpenStatus && isShopOpen ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <PowerOff className="w-4 h-4" aria-hidden="true" />
+            )}
+            ปิดรับออเดอร์
+          </button>
+        </div>
+
+        <div aria-live="polite" aria-atomic="true">
+          {openStatusMessage && (
+            <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
+              {openStatusMessage}
+            </p>
+          )}
+          {openStatusError && (
+            <p className="text-xs font-medium text-red-800 dark:text-red-300 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+              {openStatusError}
+            </p>
+          )}
+        </div>
+      </section>
 
       {/* Today's Sales Report Card */}
       <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-6 rounded-3xl text-white shadow-sm space-y-4">
