@@ -127,8 +127,6 @@ export async function updateShopOpenStatusAction(data: {
 export async function updateShopSettingsAction(data: {
   shop_id: string;
   name: string;
-  promptpay_id: string;
-  promptpay_name: string;
   service_charge: number;
   vat_mode: 'none' | 'inclusive' | 'exclusive';
 }) {
@@ -148,12 +146,13 @@ export async function updateShopSettingsAction(data: {
 
     const admin = createAdminClient();
 
+    // หมายเลขพร้อมเพย์ถูกล็อกให้เปลี่ยนผ่านคำขออนุมัติเท่านั้น
+    // (requestPromptpayChangeAction -> review_promptpay_change) ห้ามเขียน
+    // เลขและชื่อบัญชีรับเงินผ่านเส้นทางนี้อีก
     const { error } = await admin
       .from('shops')
       .update({
         name: data.name,
-        promptpay_id: data.promptpay_id || null,
-        promptpay_name: data.promptpay_name || null,
         service_charge: data.service_charge,
         vat_mode: data.vat_mode,
         updated_at: new Date().toISOString(),
@@ -500,6 +499,47 @@ export async function updateShopGeoAction(data: {
 }
 
 
+
+/**
+ * อ่านสถานะคำขอเปลี่ยนพร้อมเพย์ที่ค้างอยู่ของร้าน (ถ้ามี)
+ *
+ * คืนเฉพาะสถานะกับเวลาที่ยื่น ไม่คืนเลขเต็ม เลขเต็มดูได้เฉพาะ
+ * หน้าคำขออนุมัติฝั่ง superadmin
+ */
+export async function getPendingPromptpayRequestAction(
+  shopId: string
+): Promise<{ success: boolean; hasPending?: boolean; requestedAt?: string | null; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
+    }
+
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์ดูข้อมูลของร้านค้านี้' };
+    }
+
+    const admin = createAdminClient();
+    const { data: pending, error } = await admin
+      .from('promptpay_change_requests')
+      .select('requested_at')
+      .eq('shop_id', shopId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (error) {
+      return { success: false, error: formatThaiError(error) };
+    }
+
+    return { success: true, hasPending: Boolean(pending), requestedAt: pending?.requested_at ?? null };
+  } catch (err: unknown) {
+    return { success: false, error: formatThaiError(err) };
+  }
+}
 
 /**
  * ร้านยื่นคำขอเปลี่ยนหมายเลขพร้อมเพย์
