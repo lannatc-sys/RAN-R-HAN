@@ -13,9 +13,6 @@
 ### เอกสารสำคัญที่ควรอ่าน:
 - 📌 **[Project Knowledge](file:///d:/system%20make/Ran-R-HAN/docs/KNOWLEDGE.md)** — แหล่งความจริงหลัก (Single Source of Truth) ของโปรเจกต์
 - 🗺️ **[Router Map](file:///d:/system%20make/Ran-R-HAN/docs/router-map.md)** — แผนผังหน้าจอทั้งหมดและสิทธิ์การเข้าถึง
-- 📐 **[System Blueprint](file:///d:/system%20make/Ran-R-HAN/docs/Blueprint.md)** — สถาปัตยกรรมและขอบเขตฟังก์ชันระบบ
-- 📝 **[TODO & Roadmap](file:///d:/system%20make/Ran-R-HAN/docs/TODO.md)** — รายการงานที่ทำเสร็จแล้วและงานที่ต้องทำต่อ
-- 🚀 **[Deployment Guide](file:///d:/system%20make/Ran-R-HAN/docs/DEPLOY.md)** — คู่มือการ Deploy ขึ้น Vercel และ Supabase
 
 ---
 

@@ -64,8 +64,6 @@ supabase/
 │   ├── 20260904000002_rls_policies.sql     ← RLS + Helper functions
 │   └── 20260906000001_pickup_mvp.sql       ← Pickup/Delivery MVP
 docs/
-├── DEPLOY.md                               ← คู่มือ Deploy
-└── zone-delivery-system-plan.md            ← แผนระบบเขตและการส่งของ
 ```
 
 ---
@@ -160,7 +158,6 @@ SUPER_ADMIN_USER=             ← email superadmin (comma-separated)
 
 ## 9. ระบบที่กำลังพัฒนา (Zone & Delivery System)
 
-> ดูรายละเอียดฉบับเต็มที่ [zone-delivery-system-plan.md](./zone-delivery-system-plan.md)
 
 ### ข้อตัดสินใจหลัก
 - ลูกค้า **พิมพ์คอมเมนต์ Facebook เหมือนเดิม** ห้ามบังคับกดลิงก์

@@ -18,10 +18,8 @@
 - **ห้ามเดาหรือสมมุติโครงสร้างข้อมูลเอง**: อ้างอิงจากเอกสารแกนหลักและฐานข้อมูลจริงเสมอ
 - **ลำดับความสำคัญของเอกสาร**:
   1. [docs/KNOWLEDGE.md](file:///d:/system%20make/Ran-R-HAN/docs/KNOWLEDGE.md) — สถาปัตยกรรม, Tech Stack, กฎเหล็ก และ File Structure
-  2. [docs/Blueprint.md](file:///d:/system%20make/Ran-R-HAN/docs/Blueprint.md) — ขอบเขตงาน (Scope) และโจทย์ทางธุรกิจของร้านค้าในเทศบาลเมืองแม่ฮ่องสอน
   3. [docs/router-map.md](file:///d:/system%20make/Ran-R-HAN/docs/router-map.md) — แผนผังเส้นทางและสิทธิ์การเข้าถึงทั้งหมด
   4. `supabase/migrations/` — Database DDL, RLS Policies และ RPC Functions จริง
-  5. [docs/TODO.md](file:///d:/system%20make/Ran-R-HAN/docs/TODO.md) — แผนงานและข้อตกลงที่ตัดสินใจไปแล้ว
 
 ---
 

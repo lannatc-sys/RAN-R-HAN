@@ -16,7 +16,7 @@
 ---
 
 ## 🏛️ มาตรฐาน 5 เสาหลัก
-1. **Source of Truth:** อ้างอิงจาก `docs/KNOWLEDGE.md`, `docs/Blueprint.md`, `docs/router-map.md`, และ Schema Migration จริงเสมอ
+1. **Source of Truth:** อ้างอิงจาก `docs/KNOWLEDGE.md`, `docs/router-map.md`, และ Schema Migration จริงเสมอ
 2. **State:** บังคับใช้ Order Transition ผ่าน `isValidOrderStatusTransition()`
 3. **Artifact:** อัปเดตเอกสารและโค้ดให้สอดคล้องกัน
 4. **Quality Gate:** ผ่าน Unit test, Smoke test, และ Build 100% ก่อนจบงาน
