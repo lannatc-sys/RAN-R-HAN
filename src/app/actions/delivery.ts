@@ -497,7 +497,11 @@ export async function deleteTripItemAction(itemId: string, tripId: string) {
       return { success: false, error: 'ไม่มีสิทธิ์เข้าถึงข้อมูลนี้' };
     }
 
-    const { error } = await admin.from('delivery_trip_items').delete().eq('id', itemId);
+    const { error } = await admin
+      .from('delivery_trip_items')
+      .delete()
+      .eq('id', itemId)
+      .eq('trip_id', tripId);
     if (error) return { success: false, error: formatThaiError(error) };
 
     safeRevalidate(`/admin/delivery/trips/${tripId}`);
@@ -759,7 +763,11 @@ export async function deletePreorderItemAction(itemId: string, roundId: string) 
       return { success: false, error: 'ไม่มีสิทธิ์เข้าถึงข้อมูลนี้' };
     }
 
-    const { error } = await admin.from('preorder_items').delete().eq('id', itemId);
+    const { error } = await admin
+      .from('preorder_items')
+      .delete()
+      .eq('id', itemId)
+      .eq('round_id', roundId);
     if (error) return { success: false, error: formatThaiError(error) };
 
     safeRevalidate(`/admin/delivery/preorder/${roundId}`);

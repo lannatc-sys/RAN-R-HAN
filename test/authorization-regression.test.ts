@@ -213,3 +213,26 @@ describe('Error leakage prevention', () => {
     );
   });
 });
+
+describe('Tenant-scoped deletes: child rows must be scoped to their parent', () => {
+  const delivery = source('src/app/actions/delivery.ts');
+
+  // Verifying the parent's shop_id is not enough: the delete itself must also be
+  // filtered by the parent id, or a caller can pair their own parent id with
+  // another shop's child id and delete across tenants.
+  it('deletePreorderItemAction scopes the delete by round_id', () => {
+    assert.match(
+      delivery,
+      /\.from\('preorder_items'\)\s*\.delete\(\)\s*\.eq\('id', itemId\)\s*\.eq\('round_id', roundId\)/,
+      'preorder item delete must be filtered by round_id, not by the item id alone'
+    );
+  });
+
+  it('deleteTripItemAction scopes the delete by trip_id', () => {
+    assert.match(
+      delivery,
+      /\.from\('delivery_trip_items'\)\s*\.delete\(\)\s*\.eq\('id', itemId\)\s*\.eq\('trip_id', tripId\)/,
+      'trip item delete must be filtered by trip_id, not by the item id alone'
+    );
+  });
+});
