@@ -43,9 +43,19 @@ src/
 │   │   ├── orders/          ← KDS คิวออเดอร์
 │   │   ├── menu/            ← จัดการเมนู
 │   │   ├── settings/        ← ตั้งค่าร้าน
-│   │   └── walk-in/         ← สั่งแทนลูกค้าหน้าร้าน
+│   │   ├── walk-in/         ← สั่งแทนลูกค้าหน้าร้าน
+│   │   ├── delivery/        ← locations / trips / preorder
+│   │   ├── dispatch/        ← จ่ายงานไรเดอร์
+│   │   ├── riders/          ← จัดการไรเดอร์
+│   │   ├── service-area/    ← ตั้งค่าพื้นที่ให้บริการ (geofence)
+│   │   └── settlement/      ← ปิดยอดรายวัน
+│   ├── rider/               ← PWA ฝั่งไรเดอร์ (+ /rider/login)
+│   ├── superadmin/          ← stores / plans / announcements
 │   ├── api/
+│   │   ├── cron/            ← data-retention, dispatch-timeout, rider-geofence-sweep
+│   │   ├── rider/           ← location, session, offer, order, orders, summary
 │   │   ├── push/subscribe/  ← Web Push subscribe endpoint
+│   │   ├── telegram/webhook/← รับ Webhook จาก Telegram bot
 │   │   └── webhooks/slipok/ ← รับ Webhook สลิปจาก SlipOK
 │   ├── order/[orderId]/     ← หน้าติดตามสถานะออเดอร์
 │   └── actions/             ← Server Actions
@@ -59,13 +69,13 @@ src/
 │   ├── theme/               ← Dark/Light Mode
 │   └── thai-errors.ts       ← แปล Error Code เป็นภาษาไทย
 supabase/
-├── migrations/
-│   ├── 20260904000001_initial_schema.sql   ← Schema หลัก
-│   ├── 20260904000002_rls_policies.sql     ← RLS + Helper functions
-│   └── 20260906000001_pickup_mvp.sql       ← Pickup/Delivery MVP
-docs/
-├── DEPLOY.md                               ← คู่มือ Deploy
-└── zone-delivery-system-plan.md            ← แผนระบบเขตและการส่งของ
+└── migrations/              ← 20 migrations (ดู `ls supabase/migrations/` สำหรับรายการล่าสุด)
+    ├── 20260904000001_initial_schema.sql        ← Schema หลัก
+    ├── 20260904000002_rls_policies.sql          ← RLS + Helper functions
+    ├── 20260906000001_pickup_mvp.sql            ← Pickup/Delivery MVP
+    ├── 20260910000001_delivery_system.sql       ← Zone & Delivery
+    ├── 20260911000001_rider_system.sql          ← ระบบไรเดอร์
+    └── 20260912000006_service_area_enforcement.sql ← geofence ระดับ DB
 ```
 
 ---
@@ -95,15 +105,52 @@ docs/
 - `shops.has_printer`, `device_mode`, `kds_pin`, `allow_delivery`, `allow_dine_in`, `allow_takeaway`
 - `shops.support_access_expires_at` → Consent-based Superadmin access
 
-### ตารางที่จะเพิ่ม (Zone & Delivery System — ยังไม่ได้สร้าง)
+### Zone & Delivery System (สร้างและใช้งานจริงแล้ว)
 
 | Table | ความรับผิดชอบ |
 |:--|:--|
-| `delivery_locations` | ตัวแปรสถานที่หลัก (Master Data, lat/lng คงที่จาก Google Earth) |
+| `delivery_locations` | ตัวแปรสถานที่หลัก (Master Data, lat/lng คงที่) |
 | `delivery_trips` | เที่ยวส่งของ (มี cutoff_at, delivery_time_window) |
 | `delivery_trip_items` | รายการส่งรายบุคคลในแต่ละเที่ยว |
+| `delivery_events` | เหตุการณ์ระหว่างส่ง (พร้อม gps_lat/gps_lng) |
 | `preorder_rounds` | รอบพรีออเดอร์ |
 | `preorder_items` | ออเดอร์จองในรอบ (มี raw_input_text) |
+
+### Rider System (สร้างและใช้งานจริงแล้ว)
+
+| Table | ความรับผิดชอบ |
+|:--|:--|
+| `riders` | ข้อมูลไรเดอร์ |
+| `rider_work_sessions` | รอบทำงาน (เปิด/ปิดกะ) |
+| `rider_current_locations` | ตำแหน่งล่าสุด — `lat`/`lng`/`geom` (PostGIS) + `outside_area_since` |
+| `dispatch_offers` | ข้อเสนองานแบบ sequential offer |
+| `pod_uploads` | หลักฐานการส่ง (Proof of Delivery) พร้อมพิกัด |
+| `rider_pool_ledger` | บัญชีค่ารอบไรเดอร์ |
+| `daily_settlements` | ปิดยอดรายวัน |
+| `settlement_line_items` | รายการย่อยในการปิดยอด |
+
+### PDPA / Telegram / Audit
+
+| Table | ความรับผิดชอบ |
+|:--|:--|
+| `audit_logs` | บันทึกการกระทำ (ถูก purge โดย cron data-retention) |
+| `consent_logs` | บันทึกความยินยอม PDPA |
+| `data_subject_requests` | คำขอใช้สิทธิ์ของเจ้าของข้อมูล |
+| `telegram_link_tokens` | Token ผูกบัญชี Telegram |
+
+### คอลัมน์ geo ที่ต้องรู้ก่อนแตะระบบแผนที่
+
+PostGIS **3.3.7** ติดตั้งแล้วใน schema `extensions`
+
+| ตาราง | คอลัมน์ |
+|:--|:--|
+| `shops` | `shop_lat`, `shop_lng`, `service_area_enabled`, `service_radius_m`, `rider_work_radius_m` |
+| `rider_current_locations` | `lat`, `lng`, `geom` (PostGIS), `accuracy`, `heading`, `speed`, `outside_area_since` |
+| `delivery_locations` | `lat`, `lng`, `zone_name` |
+| `orders` | `delivery_lat`, `delivery_lng` |
+| `delivery_events`, `pod_uploads` | `gps_lat`, `gps_lng` |
+
+> การบังคับใช้พื้นที่ให้บริการอยู่ที่ **ชั้น database** (`enforce_service_area_for_new_orders`) ไม่ใช่ชั้น app — อย่าสร้าง logic ตรวจพื้นที่ซ้ำในฝั่ง frontend
 
 ---
 
@@ -116,6 +163,29 @@ docs/
 | `generate_order_no(shop_id)` | Internal | สร้างเลขออเดอร์ A001, A002 รายวัน |
 | `has_shop_access(shop_id)` | RLS | เช็คสิทธิ์เข้าถึงข้อมูลร้าน |
 | `is_shop_owner(shop_id)` | RLS | เช็คสิทธิ์เจ้าของร้าน |
+
+### Rider / Dispatch / Geo
+
+| Function | Caller | ความรับผิดชอบ |
+|:--|:--|:--|
+| `start_rider_work_session(...)` | rider | เปิดกะทำงาน |
+| `close_rider_work_session(...)` | rider | ปิดกะทำงาน |
+| `report_rider_location(...)` | rider | ส่งพิกัดล่าสุด (เขียน `geom`) |
+| `find_available_riders(...)` | service_role | หาไรเดอร์ว่างตามระยะ |
+| `respond_to_dispatch_offer(...)` | rider | รับ/ปฏิเสธงาน |
+| `finalize_rider_delivery_event(...)` | rider | ปิดงานส่ง |
+| `calc_distance_meters(...)` | Internal | คำนวณระยะทาง |
+| `enforce_service_area_for_new_orders()` | Trigger | บังคับพื้นที่ให้บริการตอนสร้างออเดอร์ |
+| `set_shop_service_area_settings(...)` | owner | ตั้งค่ารัศมีพื้นที่ให้บริการ |
+| `update_shop_geo(...)` | owner | อัปเดตพิกัดร้าน |
+| `create_daily_settlement_draft(...)` | owner | สร้างร่างปิดยอดรายวัน |
+
+### เรียกจาก cron ทุกนาที — ห้ามแก้ signature
+
+| Function | เรียกโดย |
+|:--|:--|
+| `sweep_expired_rider_geofence_sessions()` | `/api/cron/rider-geofence-sweep` |
+| `expire_dispatch_offers()` | `/api/cron/dispatch-timeout` |
 
 ---
 

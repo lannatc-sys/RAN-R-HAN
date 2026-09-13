@@ -50,100 +50,56 @@
 | `/api/webhooks/slipok` | POST | รับ Webhook สลิปจาก SlipOK | Secret Header |
 | `/api/cron/data-retention` | GET/POST | ลบข้อมูลตามนโยบาย Retention (PDPA) | Bearer CRON_SECRET |
 | `/api/telegram/webhook` | POST | รับ Event จาก Telegram Bot (เชื่อมโยง chat_id ออเดอร์ลูกค้า) | Secret Header / Public |
+| `/api/cron/dispatch-timeout` | GET/POST | หมดเวลาข้อเสนองาน แล้วจ่ายต่อ | Bearer CRON_SECRET |
+| `/api/cron/rider-geofence-sweep` | GET/POST | ปิดกะไรเดอร์ที่อยู่นอกพื้นที่เกิน 15 นาที | Bearer CRON_SECRET |
 | `/auth/callback` | GET | Supabase OAuth Callback | — |
 
 ---
 
-## Routes ที่จะเพิ่มใหม่ (Delivery System — ยังไม่สร้าง)
+## Delivery Routes (สร้างแล้ว)
 
-> เพิ่มเป็น Sub-module ใน `/admin/delivery/` แยกขาดจาก routes เดิมทั้งหมด
-> Layout เดิม `app/admin/layout.tsx` ครอบคลุมให้อัตโนมัติ (Auth + Navbar)
-
-| Route | บทบาท |
-|:--|:--|
-| `/admin/delivery` | → redirect ไป `/admin/delivery/trips` |
-| `/admin/delivery/locations` | จัดการสถานที่รับสินค้า (Master Data) |
-| `/admin/delivery/trips` | รายการเที่ยวส่งของทั้งหมด |
-| `/admin/delivery/trips/new` | สร้างเที่ยวส่งของใหม่ |
-| `/admin/delivery/trips/[id]` | แผนที่ + รายการส่งรายบุคคลของเที่ยวนั้น |
-| `/admin/delivery/preorder` | รายการรอบพรีออเดอร์ทั้งหมด |
-| `/admin/delivery/preorder/new` | เปิดรอบพรีออเดอร์ใหม่ |
-| `/admin/delivery/preorder/[id]` | กรอกออเดอร์จากคอมเมนต์ + OCR/Parser |
-
----
-
-## จุดที่ต้องแตะโค้ดเดิม (Minimal Touch Points)
-
-| ไฟล์ | การเปลี่ยนแปลง | ขนาดผลกระทบ |
+| Route | File | บทบาท |
 |:--|:--|:--|
-| `components/admin/AdminNavbar.tsx` | เพิ่มลิงก์ "จัดส่ง" 1 รายการ | 🟢 เล็กน้อย |
-| `lib/types.ts` | เพิ่ม Type สำหรับ DeliveryLocation, DeliveryTrip, PreorderRound | 🟢 เล็กน้อย (append เท่านั้น) |
+| `/admin/delivery` | `app/admin/delivery/` | ภาพรวมระบบจัดส่ง |
+| `/admin/delivery/locations` | `app/admin/delivery/locations/` | จัดการสถานที่หลัก (Master Data) |
+| `/admin/delivery/trips` | `app/admin/delivery/trips/` | รายการเที่ยวส่งของ |
+| `/admin/delivery/trips/new` | `app/admin/delivery/trips/new/` | สร้างเที่ยวส่งใหม่ |
+| `/admin/delivery/trips/[id]` | `app/admin/delivery/trips/[id]/` | รายละเอียดเที่ยวส่ง |
+| `/admin/delivery/preorder` | `app/admin/delivery/preorder/` | รายการรอบพรีออเดอร์ |
+| `/admin/delivery/preorder/[id]` | `app/admin/delivery/preorder/[id]/` | จัดการออเดอร์ในรอบ |
 
-**ไฟล์ที่ไม่แตะเลย:**
-- `app/[slug]/` และ `app/order/` — Public routes ทั้งหมด
-- `app/admin/orders/` — KDS ที่มีอยู่
-- `app/admin/menu/` — จัดการเมนู
-- `app/admin/settings/` — ตั้งค่าร้าน
-- `app/admin/walk-in/` — สั่งแทนลูกค้า
-- `app/superadmin/` — ทุกหน้า Superadmin
-- `app/actions/order.ts`, `auth.ts`, `menu.ts`, `settings.ts` — Server Actions เดิม
-- `app/api/webhooks/`, `app/api/push/` — API Routes เดิม
+## Rider & Dispatch Routes (สร้างแล้ว)
 
----
+| Route | File | บทบาท | Auth |
+|:--|:--|:--|:--|
+| `/rider` | `app/rider/page.tsx` | PWA ฝั่งไรเดอร์ — กะงาน, รับงาน, ส่งพิกัด | rider |
+| `/rider/login` | `app/rider/login/page.tsx` | เข้าสู่ระบบไรเดอร์ | Public |
+| `/admin/dispatch` | `app/admin/dispatch/` | จ่ายงานไรเดอร์ | owner/staff |
+| `/admin/riders` | `app/admin/riders/` | จัดการไรเดอร์ | owner |
+| `/admin/service-area` | `app/admin/service-area/` | ตั้งค่าพื้นที่ให้บริการ (geofence) | owner |
+| `/admin/settlement` | `app/admin/settlement/` | ปิดยอดรายวัน | owner |
 
-## Server Actions ที่จะเพิ่มใหม่ (ไฟล์ใหม่ทั้งหมด)
+### Rider API
 
-```
-app/actions/
-├── order.ts        ← เดิม ไม่แตะ
-├── menu.ts         ← เดิม ไม่แตะ
-├── settings.ts     ← เดิม ไม่แตะ
-├── auth.ts         ← เดิม ไม่แตะ
-├── superadmin.ts   ← เดิม ไม่แตะ
-└── delivery.ts     ← ใหม่ (CRUD delivery_locations, trips, items, preorder)
-```
+| Route | Method | บทบาท |
+|:--|:--|:--|
+| `/api/rider/location` | POST | ส่งพิกัดล่าสุด → `report_rider_location` |
+| `/api/rider/session/start` | POST | เปิดกะ |
+| `/api/rider/session/close` | POST | ปิดกะ |
+| `/api/rider/session/active` | GET | กะที่เปิดอยู่ |
+| `/api/rider/offers/active` | GET | ข้อเสนองานที่ค้างอยู่ |
+| `/api/rider/offer/[offerId]/respond` | POST | รับ/ปฏิเสธงาน |
+| `/api/rider/orders/active` | GET | งานที่กำลังทำ |
+| `/api/rider/order/[orderId]/event` | POST | บันทึกเหตุการณ์ระหว่างส่ง |
+| `/api/rider/order/[orderId]/pod` | POST | อัปโหลดหลักฐานการส่ง |
+| `/api/rider/summary` | GET | สรุปรายได้/รอบงาน |
 
----
-
-## API Routes ที่จะเพิ่มใหม่
-
-```
-app/api/
-├── push/           ← เดิม ไม่แตะ (Web Push สำหรับ Staff/KDS)
-├── webhooks/       ← เดิม ไม่แตะ (SlipOK Webhook)
-├── cron/           ← เดิม ไม่แตะ (Data Retention)
-├── delivery/
-│   └── parse-text/ ← ใหม่ (Text Parser + OCR endpoint)
-│       └── route.ts
-└── telegram/       ← ใหม่ (Telegram Customer Order Updates)
-    └── webhook/
-        └── route.ts
-```
+ทุก endpoint ใต้ `/api/rider/*` ต้องเป็น rider ที่ผูกกับร้านนั้น (`is_rider_of_shop`)
 
 ---
 
-## สรุป Dependency Map
+## หมายเหตุสำหรับงานที่จะแตะพื้นที่/แผนที่
 
-```
-[Admin Layout] ─────────────────────────────────────┐
-     │                                               │
-     ├── /admin/orders      (เดิม - ไม่แตะ)          │
-     ├── /admin/menu        (เดิม - ไม่แตะ)          │
-     ├── /admin/settings    (เดิม - ไม่แตะ)          │
-     ├── /admin/walk-in     (เดิม - ไม่แตะ)          │
-     │                                               │
-     └── /admin/delivery    (ใหม่ - แยกขาด)          │
-          ├── /locations                             │
-          ├── /trips                                 │
-          │    └── /[id]  ──── Leaflet Map           │
-          └── /preorder                              │
-               └── /[id]  ──── Parser/OCR           │
-                                                     │
-[delivery.ts Actions] ─── [DB: delivery_locations,  │
-                               delivery_trips,       │
-                               delivery_trip_items,  │
-                               preorder_rounds,      │
-                               preorder_items]        │
-                                   ↑                 │
-                      (ไม่แตะตารางเดิมเลย)           │
-```
+การบังคับพื้นที่ให้บริการทำที่ **ชั้น database** ผ่าน `enforce_service_area_for_new_orders` ไม่ใช่ที่ route — การเพิ่มหน้าจอแผนที่ไม่ควรมี logic ตรวจพื้นที่ของตัวเอง
+
+`/api/cron/rider-geofence-sweep` และ `/api/cron/dispatch-timeout` ถูกยิงทุกนาทีจาก cron-job.org บน production
