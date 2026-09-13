@@ -1,0 +1,29 @@
+name: Daily Data Retention Cron
+
+on:
+  schedule:
+    # Run once a day at 20:00 UTC (03:00 AM Bangkok time)
+    - cron: '0 20 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  data-retention:
+    name: Trigger /api/cron/data-retention
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Data Retention Request
+        run: |
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://ran-r-han.vercel.app/api/cron/data-retention)
+
+          BODY=$(echo "$RESPONSE" | sed -e '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d: -f2)
+
+          echo "HTTP Status: $STATUS"
+          echo "Response Body: $BODY"
+
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::error::Data retention job failed with status $STATUS"
+            exit 1
+          fi
