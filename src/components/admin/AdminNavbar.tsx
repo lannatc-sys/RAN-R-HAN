@@ -11,6 +11,7 @@ import {
   Store,
   Truck,
   UtensilsCrossed,
+  MapPin,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -32,6 +33,7 @@ export function AdminNavbar({ shopId, shopName }: AdminNavbarProps) {
     { href: '/admin/orders', label: t.nav.queue, icon: ChefHat },
     { href: '/admin/walk-in', label: t.nav.walkIn, icon: ShoppingBag },
     { href: '/admin/delivery', label: lang === 'th' ? 'จัดส่ง/รอบส่ง' : 'Delivery', icon: Truck },
+    { href: '/admin/service-area', label: lang === 'th' ? 'ขอบเขตบริการ' : 'Service Area', icon: MapPin },
     { href: '/admin/menu', label: t.nav.menu, icon: UtensilsCrossed },
     { href: '/admin/settings', label: t.nav.settings, icon: Settings },
   ];

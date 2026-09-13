@@ -6,7 +6,7 @@ const { Client } = require('pg');
 const envPath = path.join(__dirname, '..', '.env.local');
 let connectionString = process.env.DATABASE_URL;
 
-if (fs.existsSync(envPath)) {
+if (!connectionString && fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf-8');
   for (const line of envContent.split('\n')) {
     const trimmed = line.trim();
@@ -21,6 +21,11 @@ if (!connectionString) {
   console.error('ERROR: DATABASE_URL is not set in environment or .env.local');
   process.exit(1);
 }
+
+const databaseHost = new URL(connectionString).hostname;
+const isLocalDatabase = ['localhost', '127.0.0.1', '::1'].includes(databaseHost);
+const useSsl = process.env.DATABASE_SSL === 'true'
+  || (process.env.DATABASE_SSL !== 'false' && !isLocalDatabase);
 
 // Postgres error codes for "already exists" — safe to skip when re-running this
 // script against a database that has already had some/all migrations applied.
@@ -54,7 +59,7 @@ async function runDatabaseSetup() {
   console.log('Connecting to PostgreSQL database...');
   const client = new Client({
     connectionString,
-    ssl: { rejectUnauthorized: false },
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
   });
 
   const migrationsDir = path.join(__dirname, '..', 'supabase', 'migrations');
@@ -87,6 +92,8 @@ async function runDatabaseSetup() {
     await runMigrationFile(client, migrationsDir, '20260912000002_lock_down_payment_rpc.sql', '1.12', 'Payment RPC lockdown applied.');
     await runMigrationFile(client, migrationsDir, '20260912000003_dispatch_order_lock.sql', '1.13', 'Dispatch order-scoped unique index applied.');
     await runMigrationFile(client, migrationsDir, '20260912000004_rider_telegram_notification.sql', '1.14', 'Rider telegram & push channels schema applied.');
+    await runMigrationFile(client, migrationsDir, '20260912000005_shop_open_status.sql', '1.15', 'Shop open/closed status schema and enforcement applied.');
+    await runMigrationFile(client, migrationsDir, '20260912000006_service_area_enforcement.sql', '1.16', 'Service-area and rider geofence enforcement applied.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');

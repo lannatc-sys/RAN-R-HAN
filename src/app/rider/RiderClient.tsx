@@ -76,6 +76,15 @@ interface OfferPayload {
   } | null;
 }
 
+function isGeolocationError(error: unknown): error is GeolocationPositionError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'number'
+  );
+}
+
 export function RiderClient({
   rider,
   initialSession,
@@ -103,6 +112,7 @@ export function RiderClient({
   const [tick, setTick] = useState(0);
   const [podFile, setPodFile] = useState<File | null>(null);
   const [breakdownNote, setBreakdownNote] = useState('');
+  const [outsideArea, setOutsideArea] = useState(false);
 
   const coordsRef = useRef<{ lat: number; lng: number; accuracy?: number; heading?: number; speed?: number } | null>(null);
 
@@ -184,6 +194,23 @@ export function RiderClient({
     };
   }, [rider, hasOpenSession, refreshJobs, refreshSummary]);
 
+  /* ------------------- GPS pre-check (before session) ---------------------- */
+  useEffect(() => {
+    if (hasOpenSession) return; // full watch runs below
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGpsError(rt.gpsDenied);
+      return;
+    }
+
+    // One-shot check: detect denied permission early so the rider
+    // sees the error banner *before* tapping "Start Work".
+    navigator.geolocation.getCurrentPosition(
+      () => setGpsError(null),
+      () => setGpsError(rt.gpsDenied),
+      { enableHighAccuracy: false, maximumAge: 60000, timeout: 5000 }
+    );
+  }, [hasOpenSession, rt.gpsDenied]);
+
   /* ----------------------------------- GPS ------------------------------------ */
   useEffect(() => {
     if (!hasOpenSession) {
@@ -214,17 +241,44 @@ export function RiderClient({
   }, [hasOpenSession, rt.gpsDenied]);
 
   useEffect(() => {
-    if (pingIntervalMs <= 0) return;
+    if (pingIntervalMs <= 0 || !rider) return;
 
     const send = async () => {
       const c = coordsRef.current;
-      if (!c) return;
+      if (!c || !rider) return;
       try {
-        await fetch('/api/rider/location', {
+        const res = await fetch('/api/rider/location', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(c),
+          body: JSON.stringify({ ...c, shop_id: rider.shop_id }),
         });
+
+        const data = await res.json();
+        if (!res.ok) {
+          if (data.code === 'WORK_SESSION_REQUIRED') {
+            setSession(null);
+            setOffer(null);
+            coordsRef.current = null;
+            setOutsideArea(false);
+            setMessage({
+              type: 'error',
+              text: 'ระบบปิดการทำงานแล้ว กรุณากลับเข้าเขตพื้นที่และกดเริ่มงานใหม่',
+            });
+          }
+          return;
+        }
+
+        setOutsideArea(data.inside_area === false);
+        if (data.auto_closed === true) {
+          setSession(null);
+          setOffer(null);
+          coordsRef.current = null;
+          setOutsideArea(false);
+          setMessage({
+            type: 'error',
+            text: 'เซสชันถูกปิดเนื่องจากอยู่นอกพื้นที่ทำงานเกิน 15 นาที กรุณากลับเข้าเขตพื้นที่และกดเริ่มงานใหม่',
+          });
+        }
       } catch {
         /* noop — online-first: พิกัดหลุดไม่ทำให้ flow งานพัง */
       }
@@ -233,7 +287,7 @@ export function RiderClient({
     send();
     const id = window.setInterval(send, pingIntervalMs);
     return () => window.clearInterval(id);
-  }, [pingIntervalMs]);
+  }, [pingIntervalMs, rider]);
 
   /* ---------------------------------- actions --------------------------------- */
   const showError = (text: string) => setMessage({ type: 'error', text });
@@ -242,12 +296,30 @@ export function RiderClient({
     if (!rider) return;
     setBusy(true);
     setMessage(null);
+    setGpsError(null);
+
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGpsError(rt.gpsDenied);
+      setBusy(false);
+      return;
+    }
+
     try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 10000,
+        });
+      });
+
       const res = await fetch('/api/rider/session/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           shop_id: rider.shop_id,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
           device_info: { ua: navigator.userAgent, lang },
         }),
       });
@@ -257,9 +329,14 @@ export function RiderClient({
         return;
       }
       setSession({ id: data.session_id, started_at: data.started_at });
+      setOutsideArea(false);
       refreshJobs();
-    } catch {
-      showError(rt.offlineNetwork);
+    } catch (err: unknown) {
+      if (isGeolocationError(err)) {
+        setGpsError('ไม่สามารถดึงพิกัด GPS ได้ กรุณาอนุญาตการเข้าถึงตำแหน่ง');
+      } else {
+        showError(rt.offlineNetwork);
+      }
     } finally {
       setBusy(false);
     }
@@ -440,12 +517,17 @@ export function RiderClient({
       {!isOnlineNetwork && (
         <Banner tone="warn" icon={<WifiOff className="w-4 h-4" />}>{rt.offlineNetwork}</Banner>
       )}
-      {gpsError && hasOpenSession && (
+      {gpsError && (
         <Banner tone="warn" icon={<MapPin className="w-4 h-4" />}>{gpsError}</Banner>
       )}
       {message && (
         <Banner tone={message.type === 'error' ? 'error' : 'success'} icon={message.type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}>
           {message.text}
+        </Banner>
+      )}
+      {outsideArea && (
+        <Banner tone="warn" icon={<AlertCircle className="w-4 h-4" />}>
+          คุณได้อยู่นอกเขตพื้นที่การทำงาน กรุณากลับเข้าเขตพื้นที่ภายใน 15 นาที กรณีเกิน 15 นาที สามารถกดเริ่มงานใหม่ เพื่อกลับมาทำงานได้ดังเดิม
         </Banner>
       )}
 
