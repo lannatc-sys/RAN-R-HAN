@@ -558,6 +558,80 @@ export async function createStoreFromSuperadminAction(data: {
   }
 }
 
+export interface ShopBasicInfoInput {
+  shopId: string;
+  name: string;
+  phone: string;
+  address: string;
+  logoUrl: string;
+}
+
+/**
+ * Superadmin แก้ข้อมูลร้านพื้นฐานแทนเจ้าของร้าน โดยไม่ต้องสวมรอยเข้าร้าน
+ *
+ * ตั้งใจรับเฉพาะสี่ฟิลด์นี้ ไม่รับ kds_pin เพราะเป็นรหัสเข้าใช้งาน และไม่รับ
+ * พร้อมเพย์เพราะเปลี่ยนปลายทางเงิน ต้องไปทางคำขออนุมัติเท่านั้น
+ * (`requestPromptpayChangeAction` / `review_promptpay_change`)
+ */
+export async function updateShopBasicInfoAction(
+  input: ShopBasicInfoInput
+): Promise<{ success: boolean; shop?: Partial<Shop>; error?: string }> {
+  try {
+    const { isSuperadmin, user } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    const name = input.name.trim();
+    if (!name) {
+      return { success: false, error: 'ต้องระบุชื่อร้าน' };
+    }
+
+    const phone = input.phone.trim();
+    if (phone && !/^[0-9]{9,10}$/.test(phone)) {
+      return { success: false, error: 'เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก' };
+    }
+
+    const logoUrl = input.logoUrl.trim();
+    if (logoUrl && !/^https:\/\//i.test(logoUrl)) {
+      return { success: false, error: 'ลิงก์โลโก้ต้องขึ้นต้นด้วย https://' };
+    }
+
+    const patch = {
+      name,
+      phone: phone || null,
+      address: input.address.trim() || null,
+      logo_url: logoUrl || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const admin = createAdminClient();
+    const { error } = await admin.from('shops').update(patch).eq('id', input.shopId);
+    if (error) throw error;
+
+    // แก้ข้อมูลร้านของคนอื่นต้องมีร่องรอยไว้ตรวจย้อนหลัง เก็บเฉพาะฟิลด์ที่แก้
+    try {
+      await admin.from('audit_logs').insert({
+        shop_id: input.shopId,
+        user_id: user?.id ?? null,
+        action: 'superadmin_update_shop_basic_info',
+        entity_type: 'shops',
+        entity_id: input.shopId,
+        details: { fields: Object.keys(patch).filter((k) => k !== 'updated_at') },
+      });
+    } catch (auditErr) {
+      console.warn('[Audit Log Warning]:', auditErr);
+    }
+
+    safeRevalidate('/superadmin');
+    safeRevalidate('/superadmin/stores');
+    return { success: true, shop: patch };
+  } catch (err: any) {
+    console.error('updateShopBasicInfoAction error:', err);
+    return { success: false, error: 'บันทึกข้อมูลร้านไม่สำเร็จ' };
+  }
+}
+
 /**
  * สวมรอยเข้าร้าน (Impersonate) เพื่อเข้าไปดูหน้า KDS / Walk-in / Settings ของร้านลูกค้านั้น
  */

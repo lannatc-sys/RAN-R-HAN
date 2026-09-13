@@ -252,6 +252,7 @@ describe('Superadmin server actions authorization guards', () => {
     'getAllStoresAction',
     'updateStoreStatusAction',
     'updateStorePlanAction',
+    'updateShopBasicInfoAction',
   ];
 
   for (const fnName of superadminActions) {
@@ -276,6 +277,22 @@ describe('Superadmin server actions authorization guards', () => {
       );
     });
   }
+
+  // Superadmin แก้ข้อมูลร้านแทนเจ้าของร้านได้ แต่ต้องไม่เปิดทางให้แก้รหัส KDS
+  // หรือปลายทางเงิน พร้อมเพย์ต้องผ่านคำขออนุมัติเท่านั้น
+  it('updateShopBasicInfoAction never writes kds_pin or promptpay fields', () => {
+    const fn = extractFn('updateShopBasicInfoAction');
+    assert.ok(!/kds_pin/.test(fn), 'updateShopBasicInfoAction must not touch kds_pin');
+    assert.ok(!/promptpay/i.test(fn), 'updateShopBasicInfoAction must not touch promptpay fields');
+  });
+
+  it('updateShopBasicInfoAction does not return the raw database error to the client', () => {
+    const fn = extractFn('updateShopBasicInfoAction');
+    assert.ok(
+      !/error:\s*err\.message/.test(fn),
+      'updateShopBasicInfoAction must map failures to a fixed Thai message'
+    );
+  });
 });
 
 describe('SlipOK settings domain allowlist and authorization guards', () => {
