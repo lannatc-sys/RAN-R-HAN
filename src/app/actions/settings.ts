@@ -6,6 +6,7 @@ import { encryptApiKey } from '@/lib/crypto';
 import { formatThaiError } from '@/lib/thai-errors';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { notifySuperadmin, maskDigits } from '@/lib/telegram';
 
 function safeRevalidate(path: string) {
   try {
@@ -498,3 +499,73 @@ export async function updateShopGeoAction(data: {
   }
 }
 
+
+
+/**
+ * ร้านยื่นคำขอเปลี่ยนหมายเลขพร้อมเพย์
+ *
+ * ร้านเปลี่ยนเองไม่ได้เพราะนี่คือปลายทางที่เงินลูกค้าวิ่งไป การเปลี่ยนจึงต้อง
+ * ผ่านการอนุมัติและมีร่องรอย ตัว RPC เป็นคนตรวจรูปแบบและกันคำขอซ้ำ
+ */
+export async function requestPromptpayChangeAction(data: {
+  shopId: string;
+  promptpayId: string;
+  promptpayName: string;
+  reason?: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('request_promptpay_change', {
+      p_shop_id: data.shopId,
+      p_promptpay_id: data.promptpayId,
+      p_promptpay_name: data.promptpayName,
+      p_reason: data.reason ?? null,
+    });
+
+    if (error) {
+      const msg = String(error.message || '');
+      if (msg.includes('INVALID_PROMPTPAY_FORMAT')) {
+        return { success: false, error: 'หมายเลขพร้อมเพย์ต้องเป็นเบอร์โทร 10 หลัก หรือเลขบัตรประชาชน 13 หลัก' };
+      }
+      if (msg.includes('PROMPTPAY_REQUEST_ALREADY_PENDING')) {
+        return { success: false, error: 'มีคำขอที่รออนุมัติอยู่แล้ว กรุณารอผลก่อนยื่นใหม่' };
+      }
+      if (msg.includes('PROMPTPAY_UNCHANGED')) {
+        return { success: false, error: 'ข้อมูลที่ขอเปลี่ยนเหมือนกับค่าเดิม' };
+      }
+      if (msg.includes('PROMPTPAY_NAME_REQUIRED')) {
+        return { success: false, error: 'กรุณาระบุชื่อบัญชีพร้อมเพย์' };
+      }
+      throw error;
+    }
+
+    // แจ้งเตือนล้มเหลวไม่ทำให้คำขอล้ม คำขออยู่ในคิวแล้ว
+    const { data: shop } = await supabase
+      .from('shops')
+      .select('name')
+      .eq('id', data.shopId)
+      .single();
+
+    await notifySuperadmin(
+      [
+        '*คำขอเปลี่ยนพร้อมเพย์*',
+        `ร้าน: ${shop?.name ?? data.shopId}`,
+        `หมายเลขใหม่: ${maskDigits(data.promptpayId)}`,
+        `ชื่อบัญชี: ${data.promptpayName}`,
+        data.reason ? `เหตุผล: ${data.reason}` : null,
+        '',
+        'เปิดหน้า คำขออนุมัติ ในระบบเพื่อดูเลขเต็มและอนุมัติ',
+      ]
+        .filter(Boolean)
+        .join('\n')
+    );
+
+    revalidatePath('/admin/settings');
+    return { success: true };
+  } catch (err: any) {
+    // ข้อความจากฐานข้อมูลห้ามหลุดถึง client ปลายทางได้แค่ข้อความคงที่
+    // กรณีที่ผู้ใช้ต้องรู้สาเหตุจริงถูกแปลไว้แล้วข้างบนก่อนถึงจุดนี้
+    console.error('requestPromptpayChangeAction error:', err);
+    return { success: false, error: 'ยื่นคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' };
+  }
+}

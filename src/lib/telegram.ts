@@ -17,6 +17,27 @@ export function isTelegramConfigured(): boolean {
   return Boolean(token && token.trim().length > 0);
 }
 
+/**
+ * Chat ที่ผู้ดูแลแพลตฟอร์มใช้รับแจ้งเตือน ต่างจาก chat ของร้านและของลูกค้า
+ */
+export function getSuperadminChatId(): string | undefined {
+  const raw = process.env.TELEGRAM_SUPERADMIN_CHAT_ID;
+  return raw && raw.trim().length > 0 ? raw.trim() : undefined;
+}
+
+/**
+ * ปิดบังตัวเลขให้เหลือ 4 ตัวท้าย
+ *
+ * หมายเลขพร้อมเพย์อาจเป็นเลขบัตรประชาชน ซึ่งไม่ควรถูกส่งเต็มไปนอนอยู่ใน
+ * ประวัติแชท Telegram การแจ้งเตือนบอกแค่พอให้รู้ว่าคำขอไหน ส่วนเลขเต็ม
+ * ดูได้ในระบบตอนกดอนุมัติ
+ */
+export function maskDigits(value: string | null | undefined): string {
+  const digits = String(value ?? '').replace(/[^0-9]/g, '');
+  if (digits.length <= 4) return digits ? '•'.repeat(digits.length) : '-';
+  return '•'.repeat(digits.length - 4) + digits.slice(-4);
+}
+
 export interface SendTelegramOptions {
   parse_mode?: 'Markdown' | 'HTML';
   disable_web_page_preview?: boolean;
@@ -154,4 +175,25 @@ export async function sendTestTelegramMessage(
   const botUsername = getTelegramBotUsername();
   const text = `🔔 *ทดสอบการแจ้งเตือนจาก ${shopName}*\n\nระบบเชื่อมต่อ Telegram Bot (@${botUsername}) เรียบร้อยแล้ว! พร้อมรับการแจ้งเตือนสถานะออเดอร์ทันทีเมื่ออาหารพร้อมเสิร์ฟ ✅`;
   return sendTelegramMessage(chatId, text, { parse_mode: 'Markdown' });
+}
+
+/**
+ * แจ้งผู้ดูแลแพลตฟอร์ม เงียบถ้ายังไม่ได้ตั้ง chat id
+ *
+ * การแจ้งเตือนล้มเหลวต้องไม่ทำให้การกระทำหลักล้มตาม คำขอที่บันทึกลงฐานข้อมูล
+ * แล้วยังอยู่ในคิวให้เห็นในระบบเสมอ Telegram เป็นแค่ทางลัดให้รู้เร็วขึ้น
+ */
+export async function notifySuperadmin(
+  text: string
+): Promise<{ success: boolean; skipped?: boolean; error?: string }> {
+  const chatId = getSuperadminChatId();
+  if (!chatId) return { success: false, skipped: true };
+  if (!isTelegramConfigured()) return { success: false, skipped: true };
+
+  try {
+    return await sendTelegramMessage(chatId, text, { parse_mode: 'Markdown' });
+  } catch (err: any) {
+    console.error('notifySuperadmin error:', err);
+    return { success: false, error: err?.message || 'notify failed' };
+  }
 }
