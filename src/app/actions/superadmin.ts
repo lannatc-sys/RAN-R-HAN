@@ -328,6 +328,43 @@ export async function setShopServiceAreaPolygonAction(input: {
 }
 
 /**
+ * อ่านรูปหลายเหลี่ยมที่ร้านนี้บันทึกไว้ กลับมาเป็น GeoJSON
+ *
+ * คอลัมน์เป็น geography ซึ่งผ่าน PostgREST มาเป็น WKB hex ใช้ในเบราว์เซอร์ไม่ได้
+ * จึงต้องผ่าน RPC ที่แปลงให้
+ */
+export async function getShopAreaPolygonsAction(shopId: string): Promise<{
+  success: boolean;
+  customer?: unknown | null;
+  rider?: unknown | null;
+  error?: string;
+}> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_shop_area_polygons', {
+      p_shop_id: shopId,
+    });
+
+    if (error) throw error;
+
+    const result = (data ?? {}) as { customer?: unknown; rider?: unknown };
+    return {
+      success: true,
+      customer: result.customer ?? null,
+      rider: result.rider ?? null,
+    };
+  } catch (err: any) {
+    console.error('getShopAreaPolygonsAction error:', err);
+    return { success: false, error: 'โหลดพื้นที่ที่บันทึกไว้ไม่สำเร็จ' };
+  }
+}
+
+/**
  * อัปเดตสถานะร้านค้า (Active / Suspended / Expired)
  */
 export async function updateStoreStatusAction(

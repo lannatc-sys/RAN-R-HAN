@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  geoJsonToPolygonDraft,
   isClosedRing,
   polygonDraftToGeoJson,
   toCounterClockwise,
@@ -147,6 +148,61 @@ describe('Service Area Map UI Scaffold — Contract & Isolation Guards', () => {
         geoJson?.coordinates[0],
         DEMO_CUSTOMER_POLYGON_DRAFT.coordinates,
         'normalising must not reorder a ring that is already correct'
+      );
+    });
+
+    it('a saved polygon round-trips back into an editable draft', () => {
+      const geoJson = polygonDraftToGeoJson(DEMO_CUSTOMER_POLYGON_DRAFT);
+      assert.ok(geoJson, 'the fixture serialises');
+
+      const back = geoJsonToPolygonDraft(geoJson, 'customer', {
+        id: 'reloaded',
+        fallbackRadiusMeters: 5000,
+        label: 'พื้นที่ลูกค้า',
+      });
+
+      assert.ok(back, 'stored GeoJSON must come back as a draft');
+      assert.equal(back!.status, 'closed', 'a stored ring is already closed');
+      assert.deepEqual(
+        back!.coordinates,
+        geoJson!.coordinates[0],
+        'every vertex survives the round trip'
+      );
+      assert.deepEqual(
+        polygonDraftToGeoJson(back!),
+        geoJson,
+        'reloading then saving again must not alter the geometry'
+      );
+    });
+
+    it('unusable stored geometry yields null rather than a broken draft', () => {
+      const base = { id: 'x', fallbackRadiusMeters: 0, label: 'x' };
+      assert.equal(geoJsonToPolygonDraft(null, 'customer', base), null, 'null');
+      assert.equal(
+        geoJsonToPolygonDraft({ type: 'Point', coordinates: [97.9, 19.3] }, 'customer', base),
+        null,
+        'a point is not an area'
+      );
+      assert.equal(
+        geoJsonToPolygonDraft(
+          { type: 'Polygon', coordinates: [[[97.9, 19.3], [97.91, 19.3]]] },
+          'customer',
+          base
+        ),
+        null,
+        'two vertices cannot enclose anything'
+      );
+      assert.equal(
+        geoJsonToPolygonDraft(
+          {
+            type: 'Polygon',
+            coordinates: [[[97.9, 19.3], [97.91, 19.3], [97.905, 19.31], [97.92, 19.32]]],
+          },
+          'customer',
+          base
+        ),
+        null,
+        'an unclosed ring is not a saved area'
       );
     });
 

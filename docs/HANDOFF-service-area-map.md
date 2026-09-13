@@ -13,6 +13,7 @@
 | `20260914000001_service_area_polygon` | **ใช่** | เพิ่ม `shops.service_area_polygon`, `rider_work_area_polygon`, ฟังก์ชัน `is_point_in_shop_area`, `parse_area_polygon` |
 | `20260914000002_superadmin_only_service_area` | **ใช่** | `update_shop_geo` และ `set_shop_service_area_settings` เหลือ `is_superadmin` + เพิ่ม `set_shop_service_area_polygon` |
 | `20260914000003_promptpay_change_requests` | **ยังไม่** | ตาราง + RPC คำขอเปลี่ยนพร้อมเพย์ |
+| `20260914000004_read_shop_area_polygons` | **ใช่** | `get_shop_area_polygons` คืน polygon เป็น GeoJSON |
 
 ตรวจหลัง apply แล้วว่าสองฟังก์ชันแรก **ยังมี** `pg_advisory_xact_lock`, `select for update`, ลูป `order by rider_id` และ `returns jsonb` ครบ
 
@@ -29,6 +30,8 @@
 - ปุ่มบันทึกพื้นที่ → `set_shop_service_area_polygon`
 - เจ้าของร้านดูพิกัดและรัศมีได้แต่แก้ไม่ได้ (คุมด้วยค่าคงที่ไฟล์ละตัว)
 - backend คำขอเปลี่ยนพร้อมเพย์ + แจ้งเตือน Telegram (เงียบถ้าไม่ตั้งค่า)
+- **โหลดพื้นที่ที่บันทึกไว้กลับมาแก้ต่อได้** เลือกร้านแล้ว editor ขึ้นรูปเดิม
+  ไม่ใช่ fixture สาธิต มีเทส round-trip คุมว่าเซฟแล้วโหลดแล้วเซฟซ้ำรูปไม่เพี้ยน
 
 ---
 

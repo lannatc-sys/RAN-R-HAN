@@ -1,16 +1,22 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MapPin, MapPinOff, CircleCheck, CircleSlash, Crosshair, Save } from 'lucide-react';
 import { ServiceAreaMapEditorShell } from '@/components/service-area-map';
 import type { ShopAreaPin } from '@/app/actions/superadmin';
 import {
+  getShopAreaPolygonsAction,
   setShopLocationAction,
   setShopServiceAreaPolygonAction,
 } from '@/app/actions/superadmin';
-import { polygonDraftToGeoJson, type PolygonDraft } from '@/components/service-area-map';
+import {
+  geoJsonToPolygonDraft,
+  polygonDraftToGeoJson,
+  type PolygonDraft,
+  type ServiceAreaMapEditorState,
+} from '@/components/service-area-map';
 
 // Leaflet touches window on import, so it must stay out of the server render.
 const ServiceAreaLeafletCanvas = dynamic(
@@ -33,6 +39,49 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
     located[0]?.id ?? null
   );
   const selected = located.find((s) => s.id === selectedShopId) ?? null;
+
+  // พื้นที่ที่ร้านนี้บันทึกไว้ ใช้เป็นค่าตั้งต้นของ editor แทน fixture สาธิต
+  const [seed, setSeed] = useState<ServiceAreaMapEditorState | null>(null);
+  const [loadingSeed, setLoadingSeed] = useState(false);
+
+  useEffect(() => {
+    if (!selectedShopId) {
+      setSeed(null);
+      return;
+    }
+    let alive = true;
+    setLoadingSeed(true);
+    void (async () => {
+      const res = await getShopAreaPolygonsAction(selectedShopId);
+      if (!alive) return;
+      setLoadingSeed(false);
+      if (!res.success) {
+        setSeed(null);
+        return;
+      }
+      const shop = located.find((x) => x.id === selectedShopId);
+      const blank = (kind: 'customer' | 'rider'): PolygonDraft => ({
+        id: `${selectedShopId}-${kind}`,
+        kind,
+        coordinates: [],
+        status: 'empty',
+        fallbackRadiusMeters:
+          (kind === 'customer' ? shop?.service_radius_m : shop?.rider_work_radius_m) ?? 0,
+        label: kind === 'customer' ? 'พื้นที่ลูกค้า' : 'พื้นที่ไรเดอร์',
+      });
+      setSeed({
+        activeAreaKind: 'customer',
+        customerDraft:
+          geoJsonToPolygonDraft(res.customer, 'customer', blank('customer')) ??
+          blank('customer'),
+        riderDraft:
+          geoJsonToPolygonDraft(res.rider, 'rider', blank('rider')) ?? blank('rider'),
+      });
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [selectedShopId, located]);
 
   const [pinMode, setPinMode] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -199,7 +248,14 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
         </div>
       )}
 
+      {loadingSeed ? (
+        <div className="bg-white border border-slate-200 rounded-xl p-6 text-sm text-slate-600">
+          กำลังโหลดพื้นที่ที่บันทึกไว้...
+        </div>
+      ) : (
       <ServiceAreaMapEditorShell
+        key={selectedShopId ?? 'none'}
+        {...(seed ? { initialState: seed } : {})}
         renderCanvas={(props) => {
           draftRef.current = props.draft;
           return (
@@ -214,6 +270,7 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
           );
         }}
       />
+      )}
     </div>
   );
 }

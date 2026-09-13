@@ -130,6 +130,48 @@ export function polygonDraftToGeoJson(draft: PolygonDraft): GeoJsonPolygon | nul
 }
 
 /**
+ * Rebuilds an editable draft from a stored GeoJSON Polygon.
+ *
+ * The inverse of polygonDraftToGeoJson, so a shop's saved area comes back as
+ * something the editor can show and change rather than starting from the demo
+ * fixture every time the page loads.
+ *
+ * Returns null for anything that is not a usable exterior ring. Holes are
+ * dropped on purpose: the editor cannot draw them, and silently keeping a hole
+ * that the next save would discard is worse than showing only what can be
+ * edited.
+ */
+export function geoJsonToPolygonDraft(
+  geojson: unknown,
+  kind: AreaKind,
+  base: Pick<PolygonDraft, 'id' | 'fallbackRadiusMeters' | 'label'>
+): PolygonDraft | null {
+  const candidate = geojson as GeoJsonPolygon | null;
+  if (!candidate || candidate.type !== 'Polygon') return null;
+
+  const ring = candidate.coordinates?.[0];
+  if (!Array.isArray(ring) || ring.length < 4) return null;
+
+  const coordinates: LngLat[] = [];
+  for (const point of ring) {
+    if (!Array.isArray(point) || point.length < 2) return null;
+    const [lng, lat] = point;
+    if (typeof lng !== 'number' || typeof lat !== 'number') return null;
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+    coordinates.push([lng, lat]);
+  }
+
+  if (!isClosedRing(coordinates)) return null;
+
+  return {
+    ...base,
+    kind,
+    coordinates,
+    status: 'closed',
+  };
+}
+
+/**
  * Props any map canvas must accept, whether it is the offline placeholder or a
  * real tile-backed map. Declaring it here keeps the scaffold free of map
  * libraries while letting a caller inject one.
