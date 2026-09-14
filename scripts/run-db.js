@@ -103,6 +103,7 @@ async function runDatabaseSetup() {
     await runMigrationFile(client, migrationsDir, '20260914000003_promptpay_change_requests.sql', '1.21', 'PromptPay change request queue and review RPC applied.');
     await runMigrationFile(client, migrationsDir, '20260914000004_read_shop_area_polygons.sql', '1.22', 'Shop area polygons read RPC (GeoJSON) applied.');
     await runMigrationFile(client, migrationsDir, '20260914000005_enforce_polygon_service_area.sql', '1.23', 'Order intake enforcement switched to the polygon-aware predicate applied.');
+    await runMigrationFile(client, migrationsDir, '20260914000006_tighten_customer_data_rls.sql', '1.24', 'Customer data RLS tightened: orders/order_items/payments no longer readable by anon.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');

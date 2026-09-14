@@ -23,14 +23,109 @@
 
 สถานะ GitHub/Vercel เปลี่ยนได้ ให้ตรวจใหม่ก่อน merge หรือ deploy
 
+## 1.5 รอบ 2026-09-14 — สอง PR ที่เปิดค้างอยู่ อ่านก่อนเริ่มงาน
+
+มีสอง branch ที่ทำคู่ขนานและ **ยังไม่ merge** อย่าเริ่มงานใหม่ทับสองอันนี้
+
+### PR #4 — `feat/service-area-integration`
+
+https://github.com/lannatc-sys/RAN-R-HAN/pull/4 (ฐานจาก `feat/service-area-map-ui-scaffold`)
+
+รวมสี่งาน: ล็อกพร้อมเพย์ฝั่งร้าน, เมนูคำขออนุมัติฝั่ง superadmin,
+แผงแก้ข้อมูลร้านพื้นฐาน, และ C4 (polygon มีผลตอนรับออเดอร์)
+
+รายละเอียดเต็ม กับดัก และงานที่เหลือของสายนี้อยู่ใน
+[`docs/HANDOFF-service-area-map.md`](./HANDOFF-service-area-map.md) **บน branch นั้น**
+(ไฟล์ยังไม่ได้เข้า main จึงยังไม่เห็นจาก main)
+
+gate ที่รันจริง: unit 303/303, tsc exit 0, build 37/37,
+`test:db:service-area` 14 PASS 0 FAIL บน PostGIS 3.3 ในคอนเทนเนอร์
+
+### PR สาย security — `fix/security-hardening-phase05`
+
+ฐานจาก `main` (`7f123df`) แยกจาก PR #4 โดยตั้งใจ ไม่มีไฟล์ทับกัน merge ก่อนหลังได้อิสระ
+
+ที่มา: รีวิวรอบ 2026-09-14 (Claude + opencode + agent อีกตัว) เจอช่องโหว่ที่
+**มีอยู่บน main มาก่อน** ไม่ได้เกิดจาก PR #4 ทุกข้อไล่ตรวจกับโค้ดจริงแล้ว ไม่ได้เชื่อตามรายงาน
+
+| # | เรื่อง | สถานะ |
+| :-- | :-- | :-- |
+| 1 | RLS `orders` / `order_items` / `payments` เขียน `using (has_shop_access(...) or true)` — `or true` ทำให้ anon key อ่านชื่อ เบอร์โทร ที่อยู่ลูกค้าได้ทุกร้าน | **แก้แล้ว** `20260914000006` |
+| 2 | `updateShopTelegramSettingsAction` ตรวจแค่ล็อกอิน ไม่ตรวจ `has_shop_access` ก่อนใช้ admin client (IDOR) | **แก้แล้ว** |
+| 3 | `timeoutOfferAction` อยู่ในไฟล์ `'use server'` โดยไม่มีการตรวจสิทธิ์ = endpoint สาธารณะจับ advisory lock | **แก้แล้ว** ย้ายไป `src/lib/dispatch-timeout.ts` |
+| 4 | `payment.ts` รับ `api_url` จากฐานข้อมูลเป็น URL อะไรก็ได้ แล้วส่ง API key ที่ถอดรหัสแล้ว + สลิปลูกค้าไปปลายทางนั้น | **แก้แล้ว** allowlist `api.slipok.com` |
+| 5 | `/api/telegram/webhook` ไม่ตรวจ `x-telegram-bot-api-secret-token` | **แก้แล้ว** fail-closed |
+| 6 | `impersonateStoreAction` ไม่ตรวจ superadmin ก่อนตั้ง cookie | **แก้แล้ว** (ทุกหน้าที่อ่าน cookie ตรวจซ้ำอยู่แล้ว จึงไม่เคย exploit ได้ เป็นการอุด defence-in-depth) |
+
+**ข้อ 1 เปลี่ยนพฤติกรรมหน้าลูกค้า** หน้า `/order/[orderId]` เคยรับสถานะสดผ่าน
+realtime subscription ด้วย anon key ซึ่งเป็นเหตุผลเดียวที่ RLS ต้องเปิดให้ anon
+เปลี่ยนเป็น poll ผ่าน `getOrderTrackingSnapshotAction` ทุก 8 วินาทีแทน
+action คืนเฉพาะ `status` / `payment.status` / `payment.method` ไม่คืนข้อมูลส่วนตัวลูกค้า
+
+**ห้าม apply `20260914000006` ก่อน deploy โค้ดหน้า tracker ตัวใหม่**
+ไม่งั้นลูกค้าจะค้างที่สถานะเดิมจนกว่าจะรีเฟรชเอง
+
+หลักฐานที่รันจริง (2026-09-14):
+
+```
+unit               271/271 ผ่าน 0 fail (89 suites)
+tsc --noEmit       exit 0
+build              compile ผ่าน, static 37/37
+git diff --check   exit 0
+run-db.js          ทุกขั้นถึง 1.19 SUCCESS บน PostGIS 3.3 ในคอนเทนเนอร์
+```
+
+พิสูจน์ที่ระดับฐานข้อมูลจริง ไม่ใช่แค่ regex:
+
+```
+policy เดิม (or true)  anon select orders -> 1 แถว พร้อมเบอร์โทรลูกค้า
+policy ใหม่            anon select orders -> 0 แถว
+                       authenticated คนนอกร้าน -> 0 แถว
+                       owner ของร้านนั้น       -> 1 แถว
+```
+
+เทส `test/security-hardening-phase05.test.ts` (17 เคส) รันกับ `main` ที่ยังไม่แก้
+**fail 13/13** ที่รันถึง (อีก 4 เคสหยุดเพราะไฟล์ migration ยังไม่มี) ไม่ใช่เทสลอย
+
+**ต้องตั้งค่าก่อน deploy:** `TELEGRAM_WEBHOOK_SECRET` บน Vercel และเรียก
+`setWebhook` ของ Telegram ด้วย `secret_token` ค่าเดียวกัน ไม่ตั้ง = บอทตอบ 500 ทุก request
+(เจตนา fail-closed ตามกฎข้อ 11 ของ handoff นี้)
+
+### ยังไม่ได้ทำ — NOT PERFORMED ทั้งสอง PR
+
+- ไม่ได้ apply migration ใดลง production (`20260914000003`, `000005`, `000006`)
+- ไม่ได้ทดสอบ UI บนเบราว์เซอร์จริง
+- ไม่ได้ทดสอบหน้า tracker ตัว poll กับออเดอร์จริง
+- ไม่ได้ทดสอบ Telegram webhook หลังใส่ secret
+
+---
+
 ## 2. ลำดับงานถัดไป
 
-1. Merge PR #2 เมื่อเจ้าของโปรเจกต์อนุมัติ
-2. ซิงก์ `fix/auth-idor-hardening` กับ `main` หลัง merge และตรวจไม่ให้ diff ของ PR #2 ซ้ำ
-3. รัน targeted security tests แล้วเปิด PR แยกสำหรับ auth/IDOR hardening
-4. Deploy และตรวจ cron บน production
-5. ทดสอบภาคสนามบน Android และ iPhone จริง
-6. ทำ Service Area Map ต่อจาก migration WIP บน `feat/service-area-map`
+แผนที่เจ้าของโปรเจกต์อนุมัติแล้ว (2026-09-14) เรียงตามนี้
+
+| Phase | งาน | สถานะ |
+| :-- | :-- | :-- |
+| 0.1 | เปิด PR #4 | **DONE** |
+| 0.2 | รีวิว PR #4 (คนตรวจคนละตัวกับคนเขียน) | **DONE** ไม่มี blocker แก้ 1 ข้อแล้ว |
+| 0.5 | ปิดช่องโหว่ 6 ข้อที่รีวิวเจอ | **DONE** รอ merge |
+| 1 | apply `20260914000003` + ตั้ง `TELEGRAM_SUPERADMIN_CHAT_ID` + ทดสอบวงจรอนุมัติ | ยังไม่เริ่ม |
+| 0.3 | UAT บนเบราว์เซอร์จริง 4 จอ | ยังไม่เริ่ม (ต้องรอ Phase 1) |
+| 0.4 | merge PR #4 + deploy | ยังไม่เริ่ม |
+| 2 | apply `20260914000005` (C4) เป็นรอบแยก | ยังไม่เริ่ม |
+| 4.1 | แก้ PKCE/login (ดูข้อ 9) | **ยังไม่เริ่ม — บล็อก pilot** |
+| 3 | pilot ร้านแรก: ปักหมุด 3 ร้านที่เหลือ, วาด polygon, เปิด `service_area_enabled` ทีละร้าน | ยังไม่เริ่ม |
+| 4.2 | ทดสอบภาคสนามแม่ฮ่องสอน (Android + iPhone จริง) | ยังไม่เริ่ม |
+
+**gate ก่อน apply C4:** ยืนยันก่อนว่า `select count(*) filter (where service_area_enabled) from public.shops` = 0
+ถ้าเป็น 0 การ apply จะไม่เปลี่ยนพฤติกรรมที่สังเกตได้เลย (blast radius ศูนย์)
+ถ้าไม่ใช่ 0 ต้องมีแผน rollback เต็มรูปก่อน
+
+**ลำดับ apply migration ที่ต้องรักษา**
+
+1. `20260914000006` (ปิดรู RLS) — **ต้อง deploy โค้ดหน้า tracker ตัวใหม่ก่อน**
+2. `20260914000003` (ตารางคำขอพร้อมเพย์) — เพิ่มของใหม่ล้วน ย้อนกลับด้วยการ drop
+3. `20260914000005` (C4) — รอบแยก ย้อนกลับด้วยการรัน `20260912000006` ซ้ำ
 
 ห้าม commit, push, merge, deploy หรือแก้ production โดยไม่มีคำสั่งจากเจ้าของโปรเจกต์
 

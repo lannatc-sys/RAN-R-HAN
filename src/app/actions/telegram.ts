@@ -86,6 +86,15 @@ export async function updateShopTelegramSettingsAction(
       return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
     }
 
+    // ล็อกอินอย่างเดียวไม่พอ — action นี้เป็น endpoint สาธารณะและใช้ admin client
+    // ถ้าไม่ผูกกับร้าน ใครที่ล็อกอินก็สั่งเปิด/ปิด Telegram ของร้านอื่นได้
+    const { data: hasAccess } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์จัดการการตั้งค่าของร้านค้านี้' };
+    }
+
     const admin = createAdminClient();
     const { error } = await admin
       .from('shops')
@@ -96,7 +105,9 @@ export async function updateShopTelegramSettingsAction(
       .eq('id', shopId);
 
     if (error) {
-      return { success: false, error: error.message };
+      // ห้ามคืนข้อความจากฐานข้อมูลดิบกลับ client
+      console.error('updateShopTelegramSettingsAction db error:', error);
+      return { success: false, error: 'บันทึกการตั้งค่าไม่สำเร็จ' };
     }
 
     try {

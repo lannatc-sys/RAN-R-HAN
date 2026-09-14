@@ -711,6 +711,13 @@ export async function updateShopBasicInfoAction(
  * สวมรอยเข้าร้าน (Impersonate) เพื่อเข้าไปดูหน้า KDS / Walk-in / Settings ของร้านลูกค้านั้น
  */
 export async function impersonateStoreAction(shopId: string): Promise<{ success: boolean }> {
+  // ทุกหน้าที่อ่าน cookie นี้เรียก checkIsSuperadmin() ซ้ำอยู่แล้ว คนอื่นตั้ง cookie
+  // ไปก็ไม่ได้อะไร แต่ action นี้เป็น endpoint สาธารณะ ไม่ควรปล่อยให้ตั้งได้ตั้งแต่แรก
+  const { isSuperadmin } = await checkIsSuperadmin();
+  if (!isSuperadmin) {
+    return { success: false };
+  }
+
   const cookieStore = await cookies();
   cookieStore.set('impersonated_shop_id', shopId, {
     path: '/',

@@ -136,14 +136,29 @@ export async function uploadAndVerifySlipAction(formData: FormData): Promise<{
     }
 
     // 3. กำหนด Endpoint URL ของ SlipOK
-    let targetUrl = 'https://api.slipok.com/api/line/apikey/1';
+    //
+    // settings.ts กัน allowlist ตอนเขียนค่าแล้ว แต่ตอนใช้ต้องกันซ้ำ แถวเก่าที่บันทึก
+    // ไว้ก่อนมี allowlist หรือค่าที่ถูกแก้ตรงในฐานข้อมูล จะทำให้เรายิง API key
+    // ที่ถอดรหัสแล้วพร้อมรูปสลิปของลูกค้าไปยังปลายทางของคนอื่น
+    const SLIPOK_HOST = 'api.slipok.com';
+    let targetUrl = `https://${SLIPOK_HOST}/api/line/apikey/1`;
     if (creds.api_url && creds.api_url.trim().length > 0) {
       const rawUrl = creds.api_url.trim();
       if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
-        targetUrl = rawUrl;
+        let parsed: URL;
+        try {
+          parsed = new URL(rawUrl);
+        } catch {
+          return { success: false, error: 'ค่าตั้งค่าระบบตรวจสลิปของร้านไม่ถูกต้อง กรุณาติดต่อร้านค้า' };
+        }
+        if (parsed.protocol !== 'https:' || parsed.hostname !== SLIPOK_HOST) {
+          console.error('[Slip Verification] refused non-SlipOK endpoint:', parsed.hostname);
+          return { success: false, error: 'ค่าตั้งค่าระบบตรวจสลิปของร้านไม่ถูกต้อง กรุณาติดต่อร้านค้า' };
+        }
+        targetUrl = parsed.toString();
       } else {
         // หากกรอกเฉพาะ branch id หรือตัวเลข
-        targetUrl = `https://api.slipok.com/api/line/apikey/${rawUrl}`;
+        targetUrl = `https://${SLIPOK_HOST}/api/line/apikey/${encodeURIComponent(rawUrl)}`;
       }
     }
 

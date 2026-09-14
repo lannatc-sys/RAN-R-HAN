@@ -49,8 +49,11 @@ describe('Cron Dispatch Timeout — Security & Access Control', () => {
 });
 
 describe('Cron Dispatch Timeout — RPC Failure Behavior', () => {
+  // ตรรกะ RPC ย้ายจาก src/app/actions/dispatch.ts ไป src/lib/dispatch-timeout.ts
+  // เพราะไฟล์ actions เป็น 'use server' ทุก export จึงเป็น endpoint สาธารณะ
+  // และฟังก์ชันนี้ไม่มีการตรวจสิทธิ์ในตัวเอง (20260914 security hardening)
   it('action ต้อง throw error เมื่อ RPC call ล้มเหลว (ไม่ swallow)', () => {
-    const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
+    const dispatchContent = readProjectFile('src/lib/dispatch-timeout.ts');
 
     const throwIdx = dispatchContent.indexOf('throw new Error(');
     assert(
@@ -60,7 +63,7 @@ describe('Cron Dispatch Timeout — RPC Failure Behavior', () => {
   });
 
   it('action ต้อง log critical error เมื่อ permission denied หรือ function ไม่มี', () => {
-    const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
+    const dispatchContent = readProjectFile('src/lib/dispatch-timeout.ts');
 
     assert(
       dispatchContent.includes('permission denied') || dispatchContent.includes('does not exist'),
@@ -217,14 +220,14 @@ describe('Cron Dispatch Timeout — End-to-End Behavior', () => {
     if (dispatchOrderIdx !== -1) {
       const section = dispatchContent.substring(dispatchOrderIdx, dispatchOrderIdx + 2000);
       assert(
-        section.includes('await timeoutOfferAction()'),
-        'dispatchOrderAction ต้องยังคงเรียก timeoutOfferAction เป็น fallback'
+        section.includes('await expireDispatchOffers()'),
+        'dispatchOrderAction ต้องยังคงเรียก expireDispatchOffers เป็น fallback'
       );
     }
   });
 
   it('action ต้อง log ผลลัพธ์สรุปทุกครั้งที่ RPC สำเร็จ', () => {
-    const dispatchContent = readProjectFile('src/app/actions/dispatch.ts');
+    const dispatchContent = readProjectFile('src/lib/dispatch-timeout.ts');
 
     const successLogIdx = dispatchContent.indexOf('[dispatch/cron]');
     if (successLogIdx !== -1) {

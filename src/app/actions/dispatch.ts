@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { notifyRiderNewOffer } from '@/lib/rider-notification';
+import { expireDispatchOffers } from '@/lib/dispatch-timeout';
 
 // ==============================================================================
 // Types
@@ -84,7 +85,7 @@ export async function dispatchOrderAction(
   // กลับเป็น pending ทันที ถ้า sweep รันหลัง mark dispatching มันจะ undo สถานะที่เพิ่งตั้งไป
   // และปล่อยให้ order ค้างเป็น pending ทั้งที่ offer รอบใหม่ถูกสร้างและ active อยู่จริง
   try {
-    await timeoutOfferAction();
+    await expireDispatchOffers();
   } catch (err) {
     console.warn('[dispatch] timeout sweep failed (non-critical):', err);
   }
@@ -316,46 +317,15 @@ function scoreCandidates(candidates: CandidateRider[]): CandidateRider[] {
 
 
 // ==============================================================================
-// timeoutOfferAction — Cron Job เรียกตรวจ Offer ที่หมดเวลา
+// ปิด Offer ที่หมดเวลา — ย้ายไป src/lib/dispatch-timeout.ts
 // ==============================================================================
 
-export async function timeoutOfferAction(): Promise<{ timed_out: number; redispatched: number; errors: number }> {
-  const adminClient = createAdminClient();
-
-  // ใช้ RPC expire_dispatch_offers() แทนการ Query/direct update
-  // RPC นี้ใช้ advisory lock + FOR UPDATE เพื่อป้องกัน concurrent run
-  // และคืน summary (expired/redispatched/errors) สำหรับ logging
-  // SECURITY: function นี้ restricted ให้ service_role เท่านั้น (migration 20260912000001)
-  const { data, error } = await adminClient
-    .rpc('expire_dispatch_offers')
-    .single();
-
-  // CRITICAL: ห้ามกลืน infrastructure/RPC failure
-  // - error ที่เป็น "function does not exist" หรือ "permission denied" = ปัญหาที่ต้อง fix ทันที
-  // - error ที่เป็น network/timeout = transient, แต่ยังต้อง report ข upward
-  if (error) {
-    const errorMessage = error.message || String(error);
-    console.error('[dispatch] expire_dispatch_offers RPC call failed:', errorMessage);
-
-    // แยกกรณี permission error ออกมาเด่นชัด — มักหมายถึง migration ไม่ได้รัน
-    if (errorMessage.includes('permission denied') || errorMessage.includes('does not exist')) {
-      console.error(
-        '[dispatch] CRITICAL: expire_dispatch_offers() ไม่สามารถเรียกใช้ได้ — ตรวจสอบว่า migration 20260912000001 ถูก apply แล้ว และ service_role มี GRANT EXECUTE'
-      );
-    }
-
-    // Throw error ขึ้นไปให้ route จัดการ — ไม่ swallow
-    throw new Error(`expire_dispatch_offers RPC failed: ${errorMessage}`);
-  }
-
-  const result = (data as any) || {};
-  const timed_out = result.expired_count || 0;
-  const redispatched = result.redispatched_count || 0;
-  const errors = result.error_count || 0;
-
-  console.log(
-    `[dispatch/cron] expire_dispatch_offers result: expired=${timed_out}, redispatched=${redispatched}, errors=${errors}, run_at=${result.run_at}`
-  );
-
-  return { timed_out, redispatched, errors };
-}
+/**
+ * หมายเหตุความปลอดภัย: ตรรกะปิด offer ที่หมดเวลาถูกย้ายไป
+ * `src/lib/dispatch-timeout.ts` แล้ว
+ *
+ * ไฟล์นี้เป็น `'use server'` ทุก export จึงกลายเป็น HTTP endpoint สาธารณะ
+ * ฟังก์ชันนั้นเรียก admin client และจับ advisory lock โดยไม่มีการตรวจสิทธิ์
+ * ใครก็ยิงซ้ำ ๆ เพื่อแย่ง lock ได้ ตอนนี้เรียกได้จาก
+ * `/api/cron/dispatch-timeout` ซึ่งตรวจ CRON_SECRET เท่านั้น
+ */
