@@ -98,6 +98,7 @@ async function runDatabaseSetup() {
     await runMigrationFile(client, migrationsDir, '20260912000006_service_area_enforcement.sql', '1.16', 'Service-area and rider geofence enforcement applied.');
     await runMigrationFile(client, migrationsDir, '20260913000001_secure_payment_slips_storage_policy.sql', '1.17', 'Payment slips storage RLS policy scoped to shop access applied.');
     await runMigrationFile(client, migrationsDir, '20260913000002_secure_payment_slips_upload_policy.sql', '1.18', 'Payment slips upload INSERT policy restricted to authenticated shop members with path/size limits applied.');
+    await runMigrationFile(client, migrationsDir, '20260914000006_tighten_customer_data_rls.sql', '1.19', 'Customer data RLS tightened: orders/order_items/payments no longer readable by anon.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');

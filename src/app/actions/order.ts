@@ -253,3 +253,62 @@ export async function confirmCashPaymentAction(orderId: string) {
     return { success: false, error: formatThaiError(error) };
   }
 }
+
+/**
+ * สถานะล่าสุดของออเดอร์สำหรับหน้าติดตามของลูกค้า
+ *
+ * เดิมหน้า /order/[orderId] รับอัปเดตผ่าน realtime subscription ด้วย anon key
+ * ซึ่งบังคับให้ RLS ของ orders/payments ต้องเปิดให้ anon อ่านได้ กลายเป็นว่า
+ * ใครก็ดึงออเดอร์ทุกร้านได้ ปิดรูนั้นด้วย 20260914000006 แล้วให้หน้าติดตาม
+ * มาถามสถานะทางนี้แทน
+ *
+ * สิทธิ์ที่ใช้คือ "รู้ order id" เหมือนเดิมทุกประการ — ตัวหน้าเว็บเองก็เปิดด้วย
+ * uuid นี้อยู่แล้ว แต่คืนเฉพาะฟิลด์ที่เปลี่ยนตามเวลา ไม่คืนทั้งแถว
+ * ชื่อ เบอร์โทร ที่อยู่ลูกค้าไม่ผ่านทางนี้
+ */
+export async function getOrderTrackingSnapshotAction(orderId: string): Promise<{
+  success: boolean;
+  status?: string;
+  paymentStatus?: string | null;
+  paymentMethod?: string | null;
+  error?: string;
+}> {
+  try {
+    if (!orderId || !/^[0-9a-f-]{36}$/i.test(orderId)) {
+      return { success: false, error: 'ไม่พบคำสั่งซื้อนี้' };
+    }
+
+    const admin = createAdminClient();
+
+    const { data: order, error: orderError } = await admin
+      .from('orders')
+      .select('status')
+      .eq('id', orderId)
+      .maybeSingle();
+
+    if (orderError) {
+      return { success: false, error: formatThaiError(orderError) };
+    }
+    if (!order) {
+      return { success: false, error: 'ไม่พบคำสั่งซื้อนี้' };
+    }
+
+    const { data: payment } = await admin
+      .from('payments')
+      .select('status, method')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    return {
+      success: true,
+      status: order.status,
+      paymentStatus: payment?.status ?? null,
+      paymentMethod: payment?.method ?? null,
+    };
+  } catch (err: unknown) {
+    console.error('getOrderTrackingSnapshotAction error:', err);
+    return { success: false, error: 'ตรวจสอบสถานะไม่สำเร็จ' };
+  }
+}

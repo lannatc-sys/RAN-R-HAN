@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { timeoutOfferAction } from '@/app/actions/dispatch';
+import { expireDispatchOffers } from '@/lib/dispatch-timeout';
 
 /**
  * GET|POST /api/cron/dispatch-timeout
@@ -18,7 +18,7 @@ async function handle(req: NextRequest) {
   }
 
   try {
-    const result = await timeoutOfferAction();
+    const result = await expireDispatchOffers();
     console.log(
       `[cron/dispatch-timeout] สำเร็จ: expired=${result.timed_out ?? 0}, redispatched=${result.redispatched ?? 0}, errors=${result.errors ?? 0}, ran_at=${new Date().toISOString()}`
     );
