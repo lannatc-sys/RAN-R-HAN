@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Order, Shop, Payment } from '@/lib/types';
-import { createClient } from '@/lib/supabase/client';
+import { getOrderTrackingSnapshotAction } from '@/app/actions/order';
 import {
   CheckCircle2,
   Clock,
@@ -141,42 +141,45 @@ export function OrderTrackerClient({
     }
   };
 
-  // Subscribe to real-time updates for this order and payment
+  // ถามสถานะเป็นระยะแทน realtime subscription
+  //
+  // เดิมหน้านี้ subscribe postgres_changes ด้วย anon key ซึ่งบังคับให้ RLS ของ
+  // orders/payments ต้องเปิดให้ anon อ่านได้ กลายเป็นว่าใครก็ดึงออเดอร์ทุกร้านได้
+  // (แก้ด้วย migration 20260914000006) ตอนนี้ถามผ่าน server action ที่คืนเฉพาะ
+  // ฟิลด์สถานะ ข้อมูลลูกค้าไม่วิ่งผ่านเส้นทางนี้เลย
+  //
+  // ponytail: poll ทุก 8 วินาที ถ้าต้องการสดกว่านี้ค่อยย้ายไป Supabase
+  // Realtime Authorization แบบ private channel
   useEffect(() => {
-    const supabase = createClient();
+    const FINAL_STATUSES = ['served', 'completed', 'cancelled'];
+    if (FINAL_STATUSES.includes(order.status)) return;
 
-    const orderChannel = supabase
-      .channel(`order_${order.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'orders',
-          filter: `id=eq.${order.id}`,
-        },
-        (payload) => {
-          setOrder((prev) => ({ ...prev, ...(payload.new as Order) }));
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'payments',
-          filter: `order_id=eq.${order.id}`,
-        },
-        (payload) => {
-          setPayment(payload.new as Payment);
-        }
-      )
-      .subscribe();
+    let cancelled = false;
+
+    const poll = async () => {
+      const res = await getOrderTrackingSnapshotAction(order.id);
+      if (cancelled || !res.success) return;
+
+      if (res.status && res.status !== order.status) {
+        setOrder((prev) => ({ ...prev, status: res.status as Order['status'] }));
+      }
+      if (res.paymentStatus) {
+        setPayment((prev) =>
+          prev
+            ? { ...prev, status: res.paymentStatus as Payment['status'], method: (res.paymentMethod ?? prev.method) as Payment['method'] }
+            : prev
+        );
+      }
+    };
+
+    const timer = setInterval(poll, 8000);
+    poll();
 
     return () => {
-      supabase.removeChannel(orderChannel);
+      cancelled = true;
+      clearInterval(timer);
     };
-  }, [order.id]);
+  }, [order.id, order.status]);
 
   const isDelivery = order.type === 'delivery';
   const isDineIn = order.type === 'dine_in';

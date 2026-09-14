@@ -4,6 +4,18 @@ import { sendTelegramMessage } from '@/lib/telegram';
 
 export async function POST(req: NextRequest) {
   try {
+    // Telegram ส่ง header นี้มาทุก request ถ้าตั้ง secret_token ตอน setWebhook
+    // ไม่ตรวจ = ใครก็ยิง payload ปลอมเข้ามาสั่งบอทได้
+    // fail-closed: ไม่ตั้ง env = ปฏิเสธทุก request ไม่ใช่ปล่อยผ่าน
+    const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error('[telegram/webhook] TELEGRAM_WEBHOOK_SECRET is not configured');
+      return NextResponse.json({ error: 'Webhook secret is not configured' }, { status: 500 });
+    }
+    if (req.headers.get('x-telegram-bot-api-secret-token') !== webhookSecret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
 
     // ตรวจสอบว่ามี message และ chat id หรือไม่
