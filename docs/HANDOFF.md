@@ -95,32 +95,105 @@ PR #2 อยู่บน branch `codex/admin-mobile-nav` และรวม:
 
 หลัง PR #2 merge ต้องตรวจ ancestry/diff ใหม่ก่อนเปิด PR ของ branch นี้
 
-## 5. Service Area Map ระยะที่ 2
+## 5. Service Area Map & PromptPay Approval
 
-Requirement: superadmin คลิกหมุดทีละจุดบนแผนที่และปิดเป็น polygon แยกสองเขต:
+> รวมจาก `docs/HANDOFF-service-area-map.md` ที่เคยแยกออกไป ไฟล์นั้นถูกลบแล้ว
+> เพราะผิดกฎข้อ 9 ของ AGENTS.md และเนื้อหาเริ่มขัดกันเองจริง ๆ
+> (หัวไฟล์บอกว่างาน 2-5 merge แล้ว ท้ายไฟล์บอกว่ายังไม่ได้ทำ)
 
-- เขตที่ลูกค้าสั่งอาหารได้
-- เขตพื้นที่ทำงานของไรเดอร์
+อยู่บน branch `feat/service-area-integration` — [PR #4](https://github.com/lannatc-sys/RAN-R-HAN/pull/4)
 
-สถานะ: **PARTIAL — เริ่ม migration แล้ว แต่ UI/RPC/tests ยังไม่ครบ**
+### สถานะ migration บน production
 
-Branch `feat/service-area-map` มี WIP commit:
+ตรวจสดจาก Supabase เมื่อ 2026-09-14:
 
-- `6e75007` — เพิ่ม `supabase/migrations/20260913000001_service_area_polygon.sql`
+| migration | apply แล้ว | ผล |
+| :--- | :--- | :--- |
+| `20260914000001_service_area_polygon` | **ใช่** | `shops.service_area_polygon`, `rider_work_area_polygon`, `is_point_in_shop_area`, `parse_area_polygon` |
+| `20260914000002_superadmin_only_service_area` | **ใช่** | `update_shop_geo` / `set_shop_service_area_settings` เหลือ `is_superadmin` + `set_shop_service_area_polygon` |
+| `20260914000004_read_shop_area_polygons` | **ใช่** | `get_shop_area_polygons` คืน polygon เป็น GeoJSON |
+| `20260914000003_promptpay_change_requests` | **ยังไม่** | ตาราง + RPC คำขอเปลี่ยนพร้อมเพย์ |
+| `20260914000005_enforce_polygon_service_area` | **ยังไม่** | ให้ polygon ลูกค้ามีผลตอนรับออเดอร์ (C4) |
 
-งานที่เหลือ:
+### ทำเสร็จแล้วใน PR #4
 
-1. รีวิว migration WIP กับ migrations ล่าสุด ป้องกันเลขและ function signature ชนกัน
-2. Predicate กลางใช้ polygon ก่อน และ fallback เป็น radius เมื่อร้านยังไม่มี polygon
-3. ใช้ predicate เดียวกันครบ order, rider start, GPS report, sweep, shop geo และ settings
-4. ตรวจ GeoJSON, geometry type, จำนวนจุด, `ST_IsValid` และเพดานขนาดพื้นที่
-5. สร้าง `ServiceAreaMapEditor.tsx` ด้วย Leaflet
-6. คลิกจุดแรกเพื่อปิด polygon และสลับแก้พื้นที่ลูกค้า/ไรเดอร์จากหน้าเดียว
-7. คงช่อง radius เป็น fallback สำหรับร้านเดิม
-8. ใช้ OSM เป็นค่าเริ่มต้นเพื่อลดค่าใช้จ่าย
-9. เพิ่ม unit/static tests และ PostgreSQL integration tests สำหรับ polygon
+- หน้า `/superadmin/service-area-map` วาด polygon บน Leaflet จริง เลือกร้าน ปักหมุด
+  โหลดพื้นที่ที่บันทึกไว้กลับมาแก้ต่อได้ มีเทส round-trip คุมว่าเซฟ→โหลด→เซฟซ้ำรูปไม่เพี้ยน
+- ล็อกช่องพร้อมเพย์ฝั่งร้าน + ปุ่มขอแก้ไข และถอด `promptpay_id`/`promptpay_name`
+  ออกจาก `updateShopSettingsAction` แล้ว
+- เมนู "คำขออนุมัติ" + หน้า `/superadmin/approvals` พร้อม badge จำนวนค้าง
+- แผงแก้ข้อมูลร้านพื้นฐานในหน้า `/superadmin/stores` (ไม่รวม `kds_pin` และพร้อมเพย์)
+- C4 — `enforce_service_area_for_new_orders` เรียก `is_point_in_shop_area` (ยังไม่ apply)
+- Control เปิด/ปิด `service_area_enabled` และรัศมี fallback ฝั่ง superadmin
 
-ห้ามนำ migration WIP ไป production จนกว่า UI, RPC, authorization และ integration tests จะครบ
+### ⚠️ ช่องว่างที่ยังเปิดอยู่ — polygon ของไรเดอร์ยังไม่มีผลเลย
+
+`is_point_in_shop_area` ถูกเรียกจาก **`enforce_service_area_for_new_orders` ที่เดียว**
+เส้นทางที่เหลืออีกห้าจุดใน `20260912000006` ยังเรียก `calc_distance_meters` ตรง ๆ
+
+- `start_rider_work_session`
+- `report_rider_location`
+- `sweep_expired_rider_geofence_sessions`
+- `set_shop_service_area_settings`
+- `update_shop_geo`
+
+แปลว่า **`shops.rider_work_area_polygon` เก็บได้แต่ไม่มีผลกับอะไรเลย**
+ต้องมี migration รอบถัดไปกวาดทั้งห้าจุด โดย**ห้ามคัดลอก body มาเขียนใหม่**
+(ดูกับดักข้อ 1) และต้องเพิ่ม PostGIS test เคสจุดอยู่ในรัศมีแต่นอก polygon ของไรเดอร์
+สำหรับ start / report / sweep / การตั้งค่า
+
+เจอโดยรีวิวของ Codex ก่อนหน้านี้เอกสารและคำอธิบาย PR เขียนผิดว่าใช้ predicate ร่วมกันแล้ว
+
+### งานที่เหลือ เรียงตามที่ควรทำ
+
+1. apply `20260914000003` แล้วตั้ง `TELEGRAM_SUPERADMIN_CHAT_ID`
+2. UAT บนเบราว์เซอร์จริงทั้งสี่จอ
+3. merge PR #4 แล้ว deploy
+4. apply `20260914000005` เป็นรอบแยก — ก่อน apply ต้องยืนยัน
+   `select count(*) filter (where service_area_enabled) from public.shops` = 0
+   ถ้าเป็น 0 การ apply จะไม่เปลี่ยนพฤติกรรมที่สังเกตได้เลย
+5. กวาดห้าจุดที่เหลือให้ใช้ `is_point_in_shop_area` (ช่องว่างข้างบน)
+
+### กับดักที่เสียเวลาไปแล้ว อย่าเหยียบซ้ำ
+
+1. **ห้ามคัดลอก body ของ RPC มาเขียนใหม่** `update_shop_geo` และ
+   `set_shop_service_area_settings` มี advisory lock, row lock และลูปเรียงตาม
+   `rider_id` กันเดดล็อก การเขียนใหม่จากที่เห็นบางส่วนทำตกไปแล้วครั้งหนึ่ง
+   วิธีที่ใช้จริงคือให้ migration อ่าน `pg_get_functiondef` แล้วแทนที่เฉพาะ
+   บรรทัดตรวจสิทธิ์ และ raise ถ้าหาไม่เจอ
+2. **`audit_logs` ใช้ชื่อคอลัมน์ `user_id` และ `details`** ไม่ใช่ `actor_id` / `detail`
+   และ `entity_type` เป็น NOT NULL
+3. **ห้าม `settings.ts` คืน `error.message` ดิบ** ต้องแปลเป็นข้อความคงที่ก่อนส่งกลับ client
+   เทส `authorization-regression` จับได้จริงมาแล้ว
+4. **Superadmin เป็นธีมสว่าง ไม่ใช่ธีมมืด** `bg-slate-100/70` พร้อมไซด์บาร์มืด
+   ห้ามใส่คลาส `dark` ที่ตัวครอบ และหน้า superadmin อื่นใช้ `dark:` เป็นศูนย์ทุกไฟล์
+5. **ทิศวงแหวน polygon ไม่ทำให้พื้นที่กลับด้าน** ทดสอบกับ PostGIS 3.3.7 แล้ว
+   `ST_Covers` ตอบเหมือนกันทั้งตามเข็มและทวนเข็ม `toCounterClockwise` เก็บไว้
+   เพราะ RFC 7946 ไม่ใช่เพราะกันบั๊ก
+6. **isolation gate จับ import ไม่ใช่คำในไฟล์** `revalidatePath('/superadmin/service-area-map')`
+   เคยทำให้เทสแดงมาแล้ว ตอนนี้แก้ให้จับเฉพาะ import จริง
+7. **เลขพร้อมเพย์อาจเป็นเลขบัตรประชาชน** เป็นข้อมูลส่วนบุคคลตาม PDPA
+   ห้ามส่งเต็มเข้า Telegram ใช้ `maskDigits` เลขเต็มแสดงได้เฉพาะหน้า `/superadmin/approvals`
+8. **`shell` ของ editor default เป็น `DEMO_INITIAL_EDITOR_STATE`** ถ้า mount โดยไม่ส่ง
+   `initialState` หน้าจริงจะขึ้นรูปสาธิตแล้วปุ่มบันทึกของจริงเขียนทับพื้นที่ร้านได้
+   หน้า production ต้องส่ง `mode="live"` และ mount เฉพาะตอนโหลดสำเร็จ
+9. **`test:unit` กับ `test` ใน `package.json` เป็นคนละรายการ** CI รัน `pnpm test`
+   เทสที่เพิ่มเข้าแต่ `test:unit` จะไม่ถูกรันใน CI เลย มีเทสคุมให้สองรายการตรงกันแล้ว
+
+### ข้อมูลจริงที่ควรรู้
+
+- ร้านทั้งหมด 4 ร้าน ปักหมุดแล้วเพียง 1 ร้าน (ครัวป้าแดง `19.3005, 97.9678`)
+- **ยังไม่มีร้านใดเปิด `service_area_enabled`** เส้นทางบังคับใช้พื้นที่จึงยังไม่เคย
+  ทำงานจริงบน production สักครั้ง
+- `TELEGRAM_SUPERADMIN_CHAT_ID` ยังไม่ได้ตั้ง การแจ้งเตือนจะถูกข้ามอย่างเงียบ ๆ
+
+### วิธีย้อนกลับ
+
+- สิทธิ์เจ้าของร้าน: เปลี่ยน `is_superadmin()` กลับเป็น `has_shop_access(p_shop_id)`
+  ในสองฟังก์ชัน แล้วตั้ง `SHOP_CAN_EDIT_SERVICE_AREA` / `SHOP_CAN_EDIT_LOCATION` เป็น `true`
+- polygon: คอลัมน์และฟังก์ชันเพิ่มเข้ามาเฉย ๆ ลบได้ถ้าต้องการ
+- C4: รัน `20260912000006` ซ้ำ enforce function จะกลับไปวัดระยะแบบเดิม
+- คำขอพร้อมเพย์: drop ตารางและ RPC ได้ ไม่มีใครพึ่งพานอกจากหน้า approvals
 
 ## 6. หลักฐานคุณภาพล่าสุด
 

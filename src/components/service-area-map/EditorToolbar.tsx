@@ -93,7 +93,12 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         </button>
       </div>
 
-      {/* Right: Mock Save Placeholder Button */}
+      {/*
+        ปุ่มบันทึกจำลอง มีเฉพาะโหมด scaffold
+        หน้าจริงส่ง onSavePlaceholder เป็น undefined เข้ามาและมีปุ่มบันทึกของตัวเอง
+        ถ้ายังโชว์ปุ่มนี้ผู้ใช้จะกดผิดแล้วเข้าใจว่าบันทึกแล้วทั้งที่ไม่มีอะไรถูกเขียน
+      */}
+      {onSavePlaceholder && (
       <div className="w-full sm:w-auto flex justify-end">
         <button
           type="button"
@@ -114,6 +119,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
           <span>บันทึกพื้นที่ (Scaffold Mock)</span>
         </button>
       </div>
+      )}
     </div>
   );
 };

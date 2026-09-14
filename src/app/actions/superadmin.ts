@@ -137,7 +137,7 @@ export async function getPlatformStatsAction(): Promise<{
     };
   } catch (err: any) {
     console.error('getPlatformStatsAction error:', err);
-    return { success: false, error: err.message || 'Failed to fetch platform stats' };
+    return { success: false, error: 'โหลดสถิติแพลตฟอร์มไม่สำเร็จ' };
   }
 }
 
@@ -186,7 +186,7 @@ export async function getAllStoresAction(query?: string, statusFilter?: string):
     return { success: true, stores };
   } catch (err: any) {
     console.error('getAllStoresAction error:', err);
-    return { success: false, error: err.message || 'Failed to fetch stores' };
+    return { success: false, error: 'โหลดรายชื่อร้านค้าไม่สำเร็จ' };
   }
 }
 
@@ -246,7 +246,7 @@ export async function getShopsForAreaMapAction(): Promise<{
     return { success: true, shops };
   } catch (err: any) {
     console.error('getShopsForAreaMapAction error:', err);
-    return { success: false, error: err.message || 'Failed to fetch shops' };
+    return { success: false, error: 'โหลดรายชื่อร้านค้าไม่สำเร็จ' };
   }
 }
 
@@ -285,7 +285,7 @@ export async function setShopLocationAction(input: {
     return { success: true };
   } catch (err: any) {
     console.error('setShopLocationAction error:', err);
-    return { success: false, error: err.message || 'ปักหมุดร้านไม่สำเร็จ' };
+    return { success: false, error: 'ปักหมุดร้านไม่สำเร็จ' };
   }
 }
 
@@ -323,7 +323,70 @@ export async function setShopServiceAreaPolygonAction(input: {
     if (msg.includes('SERVICE_AREA_POLYGON_TOO_LARGE')) {
       return { success: false, error: 'พื้นที่ที่วาดใหญ่เกินเพดานที่ระบบอนุญาต' };
     }
-    return { success: false, error: err.message || 'บันทึกพื้นที่ไม่สำเร็จ' };
+    return { success: false, error: 'บันทึกพื้นที่ไม่สำเร็จ' };
+  }
+}
+
+/**
+ * เปิด/ปิดการจำกัดพื้นที่ และตั้งรัศมี fallback ของร้าน
+ *
+ * 20260914000002 ย้ายสิทธิ์ RPC นี้ไปเป็น superadmin เท่านั้น และหน้าฝั่งร้าน
+ * ถูกปิดปุ่มไปพร้อมกัน ถ้าไม่มี action นี้จะไม่เหลือใครในระบบที่เปิด
+ * `service_area_enabled` ได้เลย พื้นที่ที่วาดไว้ก็จะไม่มีวันมีผล
+ *
+ * ยิง RPC ผ่าน session client ไม่ใช่ admin client เพื่อให้ `is_superadmin()`
+ * ในตัว RPC ทำงานเป็นด่านที่สอง และ advisory lock กับลูปปิด session ของไรเดอร์
+ * ที่อยู่ใน RPC ยังทำงานครบเหมือนเดิม
+ */
+export async function setShopServiceAreaSettingsAction(input: {
+  shopId: string;
+  enabled: boolean;
+  serviceRadiusM: number;
+  riderWorkRadiusM: number;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    if (
+      !Number.isFinite(input.serviceRadiusM) ||
+      !Number.isFinite(input.riderWorkRadiusM) ||
+      input.serviceRadiusM <= 0 ||
+      input.riderWorkRadiusM <= 0
+    ) {
+      return { success: false, error: 'รัศมีต้องเป็นตัวเลขมากกว่าศูนย์' };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('set_shop_service_area_settings', {
+      p_shop_id: input.shopId,
+      p_enabled: input.enabled,
+      p_service_radius_m: input.serviceRadiusM,
+      p_rider_work_radius_m: input.riderWorkRadiusM,
+    });
+
+    if (error) throw error;
+
+    revalidatePath('/superadmin/service-area-map');
+    return { success: true };
+  } catch (err: unknown) {
+    console.error('setShopServiceAreaSettingsAction error:', err);
+    const msg = String((err as { message?: string })?.message || '');
+    if (msg.includes('SHOP_COORDINATES_REQUIRED')) {
+      return { success: false, error: 'ต้องปักหมุดพิกัดร้านก่อนจึงจะเปิดการจำกัดพื้นที่ได้' };
+    }
+    if (msg.includes('INVALID_SERVICE_AREA_RADIUS')) {
+      return { success: false, error: 'รัศมีอยู่นอกช่วงที่ระบบอนุญาต' };
+    }
+    if (msg.includes('SHOP_NOT_FOUND')) {
+      return { success: false, error: 'ไม่พบร้านค้านี้' };
+    }
+    if (msg.includes('SHOP_ACCESS_DENIED')) {
+      return { success: false, error: 'ไม่มีสิทธิ์ตั้งค่าพื้นที่ของร้านนี้' };
+    }
+    return { success: false, error: 'บันทึกการตั้งค่าพื้นที่ไม่สำเร็จ' };
   }
 }
 
@@ -395,7 +458,7 @@ export async function updateStoreStatusAction(
     return { success: true };
   } catch (err: any) {
     console.error('updateStoreStatusAction error:', err);
-    return { success: false, error: err.message || 'Failed to update store status' };
+    return { success: false, error: 'เปลี่ยนสถานะร้านไม่สำเร็จ' };
   }
 }
 
@@ -431,7 +494,7 @@ export async function updateStorePlanAction(
     return { success: true };
   } catch (err: any) {
     console.error('updateStorePlanAction error:', err);
-    return { success: false, error: err.message || 'Failed to update store plan' };
+    return { success: false, error: 'เปลี่ยนแพ็กเกจร้านไม่สำเร็จ' };
   }
 }
 
@@ -466,7 +529,7 @@ export async function toggleStoreDeliveryOverrideAction(
     return { success: true };
   } catch (err: any) {
     console.error('toggleStoreDeliveryOverrideAction error:', err);
-    return { success: false, error: err.message || 'Failed to toggle store delivery override' };
+    return { success: false, error: 'เปลี่ยนการตั้งค่าจัดส่งไม่สำเร็จ' };
   }
 }
 
@@ -496,7 +559,7 @@ export async function deleteStoreAction(
     return { success: true };
   } catch (err: any) {
     console.error('deleteStoreAction error:', err);
-    return { success: false, error: err.message || 'Failed to delete store' };
+    return { success: false, error: 'ลบร้านค้าไม่สำเร็จ' };
   }
 }
 
@@ -554,7 +617,7 @@ export async function createStoreFromSuperadminAction(data: {
     return { success: true, shopId: newShop.id };
   } catch (err: any) {
     console.error('createStoreFromSuperadminAction error:', err);
-    return { success: false, error: err.message || 'Failed to create new store' };
+    return { success: false, error: 'สร้างร้านค้าใหม่ไม่สำเร็จ' };
   }
 }
 
@@ -606,21 +669,33 @@ export async function updateShopBasicInfoAction(
     };
 
     const admin = createAdminClient();
-    const { error } = await admin.from('shops').update(patch).eq('id', input.shopId);
-    if (error) throw error;
 
-    // แก้ข้อมูลร้านของคนอื่นต้องมีร่องรอยไว้ตรวจย้อนหลัง เก็บเฉพาะฟิลด์ที่แก้
-    try {
-      await admin.from('audit_logs').insert({
-        shop_id: input.shopId,
-        user_id: user?.id ?? null,
-        action: 'superadmin_update_shop_basic_info',
-        entity_type: 'shops',
-        entity_id: input.shopId,
-        details: { fields: Object.keys(patch).filter((k) => k !== 'updated_at') },
-      });
-    } catch (auditErr) {
-      console.warn('[Audit Log Warning]:', auditErr);
+    // บันทึกร่องรอยก่อนแก้ข้อมูลจริง
+    //
+    // เดิมเขียน shops ก่อนแล้วค่อยพยายาม insert audit แบบ best-effort
+    // audit ล้มเมื่อไหร่ข้อมูลก็เปลี่ยนไปแล้วโดยไม่มีใครรู้ ซึ่งขัดกับเจตนาของ
+    // การมี audit ตั้งแต่แรก สลับลำดับให้ audit ล้ม = ไม่แก้ข้อมูล
+    const { error: auditError } = await admin.from('audit_logs').insert({
+      shop_id: input.shopId,
+      user_id: user?.id ?? null,
+      action: 'superadmin_update_shop_basic_info',
+      entity_type: 'shops',
+      entity_id: input.shopId,
+      details: { fields: Object.keys(patch).filter((k) => k !== 'updated_at') },
+    });
+    if (auditError) {
+      console.error('updateShopBasicInfoAction audit insert failed:', auditError);
+      return { success: false, error: 'บันทึกร่องรอยการแก้ไขไม่สำเร็จ จึงไม่แก้ข้อมูลร้าน' };
+    }
+
+    const { data: updated, error } = await admin
+      .from('shops')
+      .update(patch)
+      .eq('id', input.shopId)
+      .select('id');
+    if (error) throw error;
+    if (!updated || updated.length === 0) {
+      return { success: false, error: 'ไม่พบร้านค้านี้' };
     }
 
     safeRevalidate('/superadmin');

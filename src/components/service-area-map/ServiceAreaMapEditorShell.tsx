@@ -31,6 +31,14 @@ export interface ServiceAreaMapEditorShellProps {
    * scaffold never pulls in a map library or reaches the network on its own.
    */
   renderCanvas?: (props: MapCanvasRenderProps) => React.ReactNode;
+  /**
+   * 'scaffold' คือหน้าสาธิตที่ไม่ต่อฐานข้อมูล ใช้ป้ายเตือนและปุ่มบันทึกจำลอง
+   * 'live' คือหน้าจริงที่ผู้เรียกมีปุ่มบันทึกของตัวเองและเขียนฐานข้อมูลจริง
+   *
+   * โหมด live ต้องไม่มีป้าย "แยกขาดจากฐานข้อมูลจริง" และต้องไม่มีปุ่มบันทึกจำลอง
+   * ปนอยู่ ไม่งั้นผู้ใช้กดผิดปุ่มแล้วเข้าใจว่าบันทึกไปแล้วทั้งที่ไม่มีอะไรถูกเขียน
+   */
+  mode?: 'scaffold' | 'live';
 }
 
 export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps> = ({
@@ -38,7 +46,9 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
   actions,
   readOnly = false,
   renderCanvas,
+  mode = 'scaffold',
 }) => {
+  const isLive = mode === 'live';
   // Local state for scaffold preview interaction
   const [activeKind, setActiveKind] = useState<AreaKind>(initialState.activeAreaKind);
   const [customerDraft, setCustomerDraft] = useState<PolygonDraft>(initialState.customerDraft);
@@ -126,10 +136,18 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
     setFeedbackMessage('จำลองการบันทึกขอบเขต (Scaffold Preview Only — ไม่มีการส่งข้อมูลไปยังเซิร์ฟเวอร์)');
   };
 
+  const toolbarSave = isLive ? undefined : handleSavePlaceholder;
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6">
-      {/* Top Scaffold Alert Banner */}
-      <header className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-900 shadow-sm">
+      {/* Top Banner — ข้อความต่างกันตามโหมด */}
+      <header
+        className={`rounded-xl p-4 shadow-sm border ${
+          isLive
+            ? 'bg-white border-slate-200 text-slate-900'
+            : 'bg-amber-50 border-amber-200 text-amber-900'
+        }`}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-2.5">
             <span className="text-xl" aria-hidden="true">
@@ -140,13 +158,17 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
                 ระบบจัดการขอบเขตพื้นที่บริการด้วยรูปหลายเหลี่ยม (Service Area Map Editor)
               </h2>
               <p className="text-xs text-slate-600 mt-0.5">
-                โครงร่างหน้าจอจำลอง (Scaffold UI) — แยกขาดจากฐานข้อมูลจริง เพื่อการทดสอบ UX/UI ก่อนเชื่อมต่อ Leaflet Engine
+                {isLive
+                  ? 'คลิกบนแผนที่เพื่อวางจุด คลิกจุดแรกซ้ำเพื่อปิดวงแหวน แล้วกดปุ่มบันทึกพื้นที่ด้านบน'
+                  : 'โครงร่างหน้าจอจำลอง (Scaffold UI) — แยกขาดจากฐานข้อมูลจริง เพื่อการทดสอบ UX/UI ก่อนเชื่อมต่อ Leaflet Engine'}
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs bg-amber-200/70 text-amber-900 font-semibold px-2.5 py-1 rounded-full border border-amber-300 whitespace-nowrap">
-            SCAFFOLD MODE
-          </span>
+          {!isLive && (
+            <span className="self-start sm:self-center text-xs bg-amber-200/70 text-amber-900 font-semibold px-2.5 py-1 rounded-full border border-amber-300 whitespace-nowrap">
+              SCAFFOLD MODE
+            </span>
+          )}
         </div>
       </header>
 
@@ -193,7 +215,7 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
             onCloseRing={handleCloseRing}
             onUndoPoint={handleUndoPoint}
             onResetDraft={handleResetDraft}
-            onSavePlaceholder={handleSavePlaceholder}
+            onSavePlaceholder={toolbarSave}
             disabled={readOnly}
           />
         </div>
