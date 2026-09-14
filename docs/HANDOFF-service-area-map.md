@@ -3,6 +3,9 @@
 > อัปเดต 2026-09-14 เวลา ~01:40 Asia/Bangkok
 > branch `feat/service-area-map-ui-scaffold` ล่าสุด `16c6447` push แล้ว
 > worktree `D:\system make\Ran-R-HAN\.worktrees\service-area-map-ui-scaffold`
+>
+> อัปเดต 2026-09-14 (งานที่ 1 — ล็อกพร้อมเพย์ฝั่งร้าน, branch `feat/promptpay-lock-ui`)
+> ทำเสร็จแล้ว รายละเอียดดูหัวข้อ "งานที่ 1 — ผลตรวจจริง" ท้ายไฟล์
 
 ---
 
@@ -188,6 +191,53 @@ TEST_DATABASE_URL=postgres://.../<disposable db> npm run test:db:service-area
   และบอทยังไม่ตอบ `/start` ซึ่งเป็นคนละเรื่องกับงานนี้
 
 ## ย้อนกลับ
+
+- สิทธิ์เจ้าของร้าน: เปลี่ยน `is_superadmin()` กลับเป็น
+  `has_shop_access(p_shop_id)` ในสองฟังก์ชัน แล้วตั้งค่าคงที่
+  `SHOP_CAN_EDIT_SERVICE_AREA` และ `SHOP_CAN_EDIT_LOCATION` เป็น `true`
+- polygon: คอลัมน์และฟังก์ชันเพิ่มเข้ามาเฉย ๆ ยังไม่มีใครเรียก ลบได้ถ้าต้องการ
+
+---
+
+## งานที่ 1 — ผลตรวจจริง (ล็อกช่องพร้อมเพย์ฝั่งร้าน + ปุ่มขอแก้ไข)
+
+ทำบน branch `feat/promptpay-lock-ui` (worktree
+`D:\system make\Ran-R-HAN\.worktrees\promptpay-lock-ui`) ขอบเขตตาม task:
+`src/app/admin/settings/SettingsClient.tsx`, `src/app/actions/settings.ts`,
+`test/promptpay-lock-ui.test.ts` (ไฟล์ใหม่), `docs/HANDOFF-service-area-map.md`
+
+- ช่อง `promptpayId` / `promptpayName` เป็น read-only ด้วย
+  `SHOP_CAN_EDIT_PROMPTPAY = false` รูปแบบเดียวกับ `SHOP_CAN_EDIT_LOCATION`
+  (`disabled` + `readOnly` + พื้นหลัง `bg-stone-50`)
+- แสดงประเภทเลขปัจจุบัน: 10 หลัก = เบอร์โทรศัพท์, 13 หลัก = เลขบัตรประชาชน
+  (`getPromptpayIdKind`)
+- ปุ่ม "ขอแก้ไขพร้อมเพย์" เปิดฟอร์ม เรียก `requestPromptpayChangeAction`
+  ตัวเดิม (ไม่เขียน action ใหม่) ถ้ามีคำขอค้างแสดง "รออนุมัติ" แทนปุ่ม
+  สถานะค้างอ่านผ่าน `getPendingPromptpayRequestAction` ตัวใหม่
+  (คืนแค่ `hasPending` + `requestedAt` ไม่คืนเลขเต็ม)
+- `promptpay_id` / `promptpay_name` ถูกเอาออกจาก `updateShopSettingsAction`
+  ทั้งฝั่ง client (ไม่ส่ง) และฝั่ง server (ไม่รับ/ไม่เขียน) ร้านแก้ผ่านฟอร์มหลักไม่ได้แล้ว
+- กับดัก: `settings.ts` ยังคืนเฉพาะข้อความไทยคงที่ผ่าน `formatThaiError`
+  ไม่คืน `error.message` ดิบ, Telegram ใช้ `maskDigits` เหมือนเดิม,
+  ธีม admin ไม่เปลี่ยน (ใช้คลาส stone/amber เดิมของไฟล์)
+
+Gate รันจริง:
+
+- `npm run test:unit` → 270 ผ่าน 0 fail
+- `npx tsx --test test/promptpay-lock-ui.test.ts` → 10 ผ่าน 0 fail
+  (พิสูจน์ไม่ใช่เทสต์ลอย: stash โค้ดกลับเป็นก่อนแก้แล้วรัน ได้ fail 7/10 จากนั้น pop คืน)
+- `npx tsc --noEmit` → ผ่าน (exit 0)
+- `npm run build` → ผ่าน
+- `git diff --check` → ผ่าน
+- สแกน secret ก่อน commit (`git diff --cached | grep -inE ...`) →
+  ไม่พบค่าเพิ่มใหม่ (match เดียวคือคอมเมนต์เดิม `SLIPOK_API_KEY` ในบรรทัด context)
+
+NOT PERFORMED:
+
+- `pnpm test:db:service-area` (งานนี้ไม่แตะ migration จึงไม่ต้องรัน)
+- ทดสอบ UI บนเบราว์เซอร์จริง / ทดสอบยื่นคำขอชน production database
+- งานที่ 2-5 ใน handoff นี้ยังไม่ได้ทำ (เมนูคำขออนุมัติฝั่ง superadmin,
+  apply migration 20260914000003, แผงแก้ข้อมูลร้าน, C4 enforce polygon)
 
 - สิทธิ์เจ้าของร้าน: เปลี่ยน `is_superadmin()` กลับเป็น
   `has_shop_access(p_shop_id)` ในสองฟังก์ชัน แล้วตั้งค่าคงที่
