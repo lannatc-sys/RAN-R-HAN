@@ -420,3 +420,178 @@ AI ตัวถัดไป:
 - `PARTIAL` — ทำบางส่วน
 - `BLOCKED` — ไปต่อไม่ได้เพราะ dependency/authority/environment
 - `NOT VERIFIED` — ยังไม่ได้ทดสอบจริง
+
+---
+
+## 13. รอบ 2026-09-15 — Staging Infrastructure Preparation (Claude)
+
+ขอบเขตรอบนี้ **เฉพาะ infrastructure** ไม่แตะ Telegram implementation, Core Flow business logic,
+Service Area หรือ Rider Monitor เลยสักไฟล์ ไม่มี source code เปลี่ยน มีแค่ไฟล์นี้ไฟล์เดียว
+
+### 13.1 Supabase staging — DONE
+
+| รายการ | ค่า |
+| --- | --- |
+| project ref | `uorbgwnedirqtwphzcaj` (name `RAN-R-HAN-staging`) |
+| org | `SAMMORKCODEING` (`lsxzpbrckmjmscilsmle`) — org เดียวกับ production |
+| region | `ap-northeast-1` ตรงกับ production |
+| ค่าใช้จ่าย | $0/เดือน (free tier) |
+| API URL | `https://uorbgwnedirqtwphzcaj.supabase.co` |
+
+production project `hqfzahyvwsjrvlgvaxda` **ไม่ถูกแตะ** ทำแค่ `list_projects` อ่านอย่างเดียว
+
+### 13.2 Migration chain — DONE (รันจริง ไม่ใช่ regex)
+
+รัน `node scripts/run-db.js` ด้วย staging `DATABASE_URL` — **24/24 ขั้น SUCCESS, 0 error, 0 skip**
+ตั้งแต่ `run_all.sql` ถึง `20260914000006_tighten_customer_data_rls.sql`
+
+ตรวจซ้ำผ่าน Supabase API: **31 ตาราง ใน `public`, RLS เปิดครบทั้ง 31 ตาราง**
+`delivery_locations` มี 7 แถว (default ของ migration) ที่เหลือ 0 แถวก่อนใส่ test fixtures
+
+> **กับดักที่เจอ:** connection string แบบ direct (`db.<ref>.supabase.co`) resolve ไม่ได้บนเครื่องนี้
+> (`getaddrinfo ENOENT` — IPv6-only) ต้องใช้ **session pooler `aws-0-ap-northeast-1.pooler.supabase.com:5432`**
+> ทั้งในเครื่องและบน Vercel ทดสอบแล้ว `aws-0:5432` ต่อติด
+
+`get_advisors security` บน staging: **0 ERROR** มีแต่ WARN เชิงโครงสร้าง 3 กลุ่ม
+(SECURITY DEFINER function เรียกได้จาก `anon` 13 ตัว / จาก `authenticated` 24 ตัว,
+leaked-password protection ปิดอยู่) ทั้งหมดมาจาก migration chain เอง ไม่ใช่ของใหม่ที่รอบนี้สร้าง
+production ก็จะขึ้นชุดเดียวกัน — **ยังไม่ได้ตรวจเทียบกับ production advisors: NOT VERIFIED**
+
+### 13.3 Vercel Preview → staging — DONE
+
+branch ที่ใช้: **`feat/telegram-operational-gateway`** (tip `ba0ee71`)
+ยืนยัน `git merge-base --is-ancestor 8f9e0de ba0ee71` = YES ไม่ย้อนกลับเก่ากว่า `8f9e0de`
+
+**วิธีที่ใช้ และเหตุผล:** env ของเดิมทุกตัวเป็น record เดียวที่ผูก `Preview, Production` พร้อมกัน
+`vercel env rm <name> preview` จึงเสี่ยงลบ record ที่ production ใช้อยู่
+เลยใช้ **branch-scoped Preview env** ทั้งหมด (16 ตัว) ซึ่งเป็น record แยกและ override เฉพาะ branch นี้
+record เดิมไม่ถูกแตะสักตัว ตรวจหลังทำแล้วว่า `DATABASE_URL (Preview, Production)` ยังอยู่ครบ
+
+| กลุ่ม | ตัวแปร |
+| --- | --- |
+| Supabase staging | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` |
+| generate ใหม่เฉพาะ staging | `CREDENTIALS_ENCRYPTION_KEY`, `CRON_SECRET`, `TELEGRAM_WEBHOOK_SECRET`, `SLIPOK_WEBHOOK_SECRET`, `VAPID_PRIVATE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_SUBJECT` |
+| test superadmin | `SUPER_ADMIN_USER`, `SUPER_ADMIN` |
+
+ไม่มีตัวไหน reuse ค่าจาก production ทั้งหมดใส่ผ่าน stdin ไม่เคย print ค่าออกมา
+
+`SUPABASE_SERVICE_ROLE_KEY` ใส่เป็นค่า `sb_secret_…` ของ staging ตามที่
+[`src/lib/supabase/admin.ts:12-18`](../src/lib/supabase/admin.ts) รองรับ (`SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SECRET_KEY`
+และข้อความ error บอกให้ก๊อป secret key มาใส่) staging project ใหม่ไม่ได้เปิด legacy JWT service_role ไว้
+
+### 13.4 ⚠️ landmine ที่เจอระหว่างทาง — ยังไม่แก้ (นอกขอบเขตรอบนี้)
+
+[`src/lib/supabase/admin.ts:8-11`](../src/lib/supabase/admin.ts) มี **hardcoded production URL เป็น fallback**
+
+```ts
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.SUPABASE_URL ||
+  'https://hqfzahyvwsjrvlgvaxda.supabase.co';   // ← fallback ไป production
+```
+
+รอบนี้ตั้ง env ครบทั้งสองตัวจึงไม่ทำงาน แต่ถ้า env หลุดหายเมื่อไหร่
+**admin client ของ staging จะเงียบ ๆ ไปเขียน production ด้วย service-role key** ควรเปลี่ยนเป็น throw
+
+### 13.5 Test fixtures บน staging — DONE
+
+สร้างผ่าน Supabase Auth Admin API (`email_confirm: true` ทั้งคู่ ล็อกอินได้ทันที ไม่ต้องยืนยันเมล)
+รหัสผ่านอยู่ใน `.env.staging.generated` บนเครื่อง (gitignored) **ไม่ได้เขียนลงเอกสารนี้**
+
+| อีเมล | `users.role` | shop | rider |
+| --- | --- | --- | --- |
+| `staging-superadmin@example.com` | `superadmin` | – | – |
+| `staging-shoprider@example.com` | `owner` | `staging-test-shop` | มี `riders` row, status `active` |
+
+`staging-shoprider@example.com` = user คนเดียวที่มี **ทั้ง Shop และ Rider** ตามที่ขอ
+(`public.users.shop_id` ชี้ร้าน และ `public.riders.auth_user_id` ชี้ auth user เดียวกัน)
+
+ร้าน `staging-test-shop`: `is_open=true`, `allow_delivery=true`, `is_delivery_enabled=true`,
+`shop_lat/lng = 18.7883 / 98.9853` (เชียงใหม่), `service_area_enabled` = **false ตาม default**
+— ตั้งใจไม่เปิด geofence เพื่อไม่ให้บล็อก E2E รอบแรก ถ้า Muse ต้องทดสอบ service area ให้เปิดเอง
+
+### 13.6 พิสูจน์ว่า Preview ชี้ staging จริง — DONE
+
+preview URL: `https://ran-r-han-git-feat-telegram-operational-gateway-maehongson.vercel.app`
+
+**ก่อน** ตั้ง env — grep JS chunk ที่ build แล้ว: `1 × hqfzahyvwsjrvlgvaxda.supabase.co`
+**หลัง** ตั้ง env + redeploy: `2 × uorbgwnedirqtwphzcaj.supabase.co`, **0 × hqfzahyvwsjrvlgvaxda**
+
+พิสูจน์ฝั่ง server ด้วย slug ที่มีอยู่เฉพาะใน staging:
+
+```
+PREVIEW  /staging-test-shop -> HTTP 200  (render ชื่อ "Staging Test Shop")
+PROD     /staging-test-shop -> HTTP 404
+```
+
+client bundle และ server render ชี้ staging ทั้งคู่
+
+### 13.7 Production changes = NONE
+
+- Supabase `hqfzahyvwsjrvlgvaxda`: อ่านอย่างเดียว ไม่มี migration/DDL/DML
+- Vercel production deployment ล่าสุดยังเป็นตัวเดิมอายุ 11 ชม. (เกิดก่อนงานรอบนี้) ไม่มี deploy ใหม่
+- `ran-r-han.vercel.app` ยัง HTTP 200 และ bundle ยังชี้ `hqfzahyvwsjrvlgvaxda`
+- Vercel env record ที่ผูก `Preview, Production` ไม่ถูกแก้/ลบสักตัว
+- ไม่ได้ `setWebhook` production ไม่ได้ตั้ง `TELEGRAM_BOT_TOKEN` บน Preview
+
+### 13.8 ส่งต่อให้ Muse — Telegram E2E checklist J
+
+พร้อมแล้ว: staging DB + preview + test users
+ยังไม่ทำ (เจตนา ปล่อยให้ Muse ตัดสินใจ):
+
+- `TELEGRAM_BOT_TOKEN` / `TELEGRAM_BOT_USERNAME` / `TELEGRAM_SUPERADMIN_CHAT_ID` บน Preview — **ยังไม่ตั้ง**
+  แปลว่า preview ยิง Telegram production ไม่ได้ ตั้งใจกันพลาด
+- `TELEGRAM_WEBHOOK_SECRET` ของ staging ตั้งไว้แล้ว (ค่าใหม่) อยู่ใน `.env.staging.generated`
+- `setWebhook` — **NOT PERFORMED** เป็นงานของ Muse
+
+**BLOCKED / ข้อจำกัดที่ต้องรู้:**
+
+- **Google OAuth ใช้ไม่ได้บน preview** — `GOOGLE_Client_*` ยัง inherit ของ production ซึ่งตั้ง callback ไว้ที่
+  production Supabase มติรอบนี้คือ SKIP ให้ E2E ใช้ email/password แทน
+- `SUPABASE_ANON_KEY` (ไม่มี prefix `NEXT_PUBLIC_`) — **ตรวจแล้ว ไม่ใช่ปัญหา** ใช้ที่เดียวคือ
+  [`src/lib/supabase/server.ts:14`](../src/lib/supabase/server.ts) เป็น fallback **ลำดับที่สาม**
+  ต่อจาก `NEXT_PUBLIC_SUPABASE_ANON_KEY` และ `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  ซึ่งตั้ง branch-scoped ไว้ครบแล้ว จึงไม่มีทางถูกใช้บน preview
+
+### 13.9 Quality gates รอบนี้ — รันจริงที่ commit `ba0ee71` ตัวที่ deploy อยู่
+
+รันใน worktree แยกแบบ detached ที่ `ba0ee71` (ตาม AGENTS.md ข้อ 1 — ไม่รันกับ tree ที่เก่ากว่าโค้ดที่ deploy)
+`pnpm install --frozen-lockfile` ใหม่ทั้งชุด เสร็จแล้วลบ worktree และคอนเทนเนอร์ทิ้ง
+
+| gate | ผล |
+| --- | --- |
+| `pnpm test:unit` | **462 pass / 0 fail / 0 skip**, 144 suites, 14.9s |
+| `npx tsc --noEmit` | **exit 0** |
+| `pnpm build` | **exit 0**, compiled successfully 46s, static pages **38/38** |
+| `pnpm test:db:service-area` | **23 PASS / 0 FAIL**, exit 0 บน PostGIS 3.3 |
+
+`test:db:service-area` รันกับคอนเทนเนอร์ `postgis/postgis:15-3.3` (ฐานข้อมูลใช้แล้วทิ้งชื่อ `ranrhan_test`)
+ตามลำดับ: `test/supabase-shim.sql` → `scripts/run-db.js` (32 SUCCESS, 0 error) → integration test
+**ไม่ได้รันกับ staging** เพราะเทสต์ใส่ fixture UUID ตายตัว ไม่อยากให้ปนกับข้อมูลที่ Muse จะใช้ E2E
+
+> **เจอระหว่างทาง:** `scripts/run-db.js` **รันซ้ำบนฐานข้อมูลที่ migrate แล้วไม่ผ่าน**
+> ตายที่ `MIGRATION_PATTERN_COUNT_MISMATCH: ข้อความที่ 2 ต้องเจอพอดี 1 ครั้ง`
+> (self-check ในไฟล์ migration นับ pattern ซ้ำหลัง `create or replace` รอบสอง)
+> staging รันไปรอบเดียวจึงไม่โดน แต่ **อย่ารัน `db:setup` ซ้ำบน staging** ถ้าไม่ได้ตั้งใจ
+
+### 13.10 landmine เพิ่มเติม — กวาดทั้ง repo ตาม AGENTS.md ข้อ 4
+
+ไม่ได้มีแค่ `admin.ts` ไฟล์เดียวอย่างที่รายงานตอนแรก กวาดด้วย
+`grep -rn "hqfzahyvwsjrvlgvaxda\|sb_publishable_HLIHXc9dap3u"` เจอ **6 จุดใน 4 ไฟล์**
+
+| ไฟล์:บรรทัด | ค่า hardcode |
+| --- | --- |
+| `src/lib/supabase/admin.ts:11` | production URL |
+| `src/lib/supabase/client.ts:6` | production URL |
+| `src/lib/supabase/client.ts:10` | production publishable key |
+| `src/lib/supabase/server.ts:10` | production URL |
+| `src/lib/supabase/server.ts:15` | production publishable key |
+| `scripts/seed-demo-shops.js:32` | production storage CDN URL |
+
+ทั้งหมดเป็น fallback ท้ายสุดเมื่อ env ว่าง รอบนี้ตั้ง env ครบจึงไม่ทำงาน
+แต่ถ้า env หลุดเมื่อไหร่ โค้ดจะ **เงียบ ๆ วิ่งไป production** แทนที่จะพัง — ที่อันตรายสุดคือ `admin.ts`
+เพราะคู่กับ service-role key **ยังไม่แก้รอบนี้ เป็นงานนอกขอบเขต** ควรเปลี่ยนเป็น throw ทั้งชุด
+
+**ยังไม่ได้ตรวจ (NOT VERIFIED):** ไม่ได้เทียบ `get_advisors` ของ staging กับ production
+เพราะกฎรอบนี้คือห้ามแตะ production เหตุผลที่เชื่อว่า WARN ชุดนั้นไม่ใช่ของใหม่คือ
+function ที่ถูกเตือนทั้งหมดถูกนิยามใน migration chain เดียวกันที่ production ก็รันไปแล้ว
