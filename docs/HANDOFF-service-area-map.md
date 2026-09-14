@@ -1,8 +1,35 @@
 # Handoff — Service Area Map & PromptPay Approval
 
-> อัปเดต 2026-09-14 เวลา ~01:40 Asia/Bangkok
-> branch `feat/service-area-map-ui-scaffold` ล่าสุด `16c6447` push แล้ว
-> worktree `D:\system make\Ran-R-HAN\.worktrees\service-area-map-ui-scaffold`
+> อัปเดต 2026-09-14 Asia/Bangkok
+> **branch ที่รวมงานแล้ว: `feat/service-area-integration`** (โลคัล ยังไม่ push)
+> worktree `D:\system make\Ran-R-HAN\.worktrees\superadmin-shop-editor`
+> ฐานเดิม `feat/service-area-map-ui-scaffold` `94d5295`
+
+## รวมงานสามสายแล้ว
+
+| งาน | branch ต้นทาง | commit |
+| :--- | :--- | :--- |
+| 1. ล็อกพร้อมเพย์ + ปุ่มขอแก้ไข (ฝั่งร้าน) | `feat/promptpay-lock-ui` | `eb781b2` |
+| 2. เมนูคำขออนุมัติ (ฝั่ง superadmin) | `feat/superadmin-approvals` | `6fb4cb1` |
+| 4. แผงแก้ข้อมูลร้านพื้นฐาน | `feat/superadmin-shop-editor` | `089ed0f` |
+| 5. C4 polygon มีผลตอนรับออเดอร์ | `feat/superadmin-shop-editor` | `6357575` |
+
+merge ทั้งสองครั้งไม่มี conflict `SuperadminSidebar.tsx` ถูกแก้จาก branch เดียวจริง ๆ
+และ `docs/HANDOFF-service-area-map.md` auto-merge ผ่าน
+
+**ผลรัน gate บน tree ที่รวมแล้ว (2026-09-14)**
+
+```
+npm run test:unit    303 ผ่าน 0 fail (90 suites)
+npx tsc --noEmit     exit 0
+npm run build        compile ผ่าน, static 37/37, มี route /superadmin/approvals
+git diff --check     exit 0
+```
+
+303 = 273 (ฐาน + งาน 4/5) + 10 (promptpay lock) + 20 (approvals)
+
+**แก้ตอนรวม:** เพิ่ม `test/promptpay-lock-ui.test.ts` และ `test/superadmin-approvals.test.ts`
+เข้า `test:unit` ใน `package.json` ก่อนหน้านี้ทั้งสองไฟล์ไม่ถูกรันใน gate เลย
 >
 > อัปเดต 2026-09-14 (งานที่ 1 — ล็อกพร้อมเพย์ฝั่งร้าน, branch `feat/promptpay-lock-ui`)
 > ทำเสร็จแล้ว รายละเอียดดูหัวข้อ "งานที่ 1 — ผลตรวจจริง" ท้ายไฟล์
@@ -188,6 +215,9 @@ TEST_DATABASE_URL=postgres://.../<disposable db> npm run test:db:service-area
 ```
 
 ผลรันจริง 2026-09-14 บน PostGIS 3.3 ในคอนเทนเนอร์: **14 PASS 0 FAIL**
+รันบนชุด migration ชุดเดียวกับที่อยู่ใน `feat/service-area-integration` ตอนนี้
+(รวม `20260914000003` ที่ apply ผ่านขั้น 1.21 ได้จริง) แต่ **ไม่ได้รันซ้ำหลัง merge**
+เพราะ merge ไม่ได้แตะไฟล์ SQL เลยสักไฟล์
 พิสูจน์แล้วว่าไม่ใช่เทสลอย — ถอด `20260914000005` ออกแล้วเคส
 "polygon beats the radius" แดงจริง เคสอื่นยังเขียว
 
