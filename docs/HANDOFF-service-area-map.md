@@ -97,16 +97,27 @@ commit `089ed0f` และรอบถัดมาบน worktree `.worktrees/su
 **อย่าลืม** `promptpay_id` / `promptpay_name` ยังถูกส่งใน `updateShopSettingsAction`
 ต้องเอาสองฟิลด์นี้ออกจากเส้นทางนั้น ไม่งั้นร้านยังแก้ได้ผ่านฟอร์มตั้งค่าหลัก
 
-### 2. เมนูใหม่ "คำขออนุมัติ" ฝั่ง superadmin
+### 2. เมนูใหม่ "คำขออนุมัติ" ฝั่ง superadmin — เสร็จ 2026-09-14 (branch feat/superadmin-approvals)
 
 - action ใน `src/app/actions/superadmin.ts`
-  - `listPromptpayRequestsAction()` — อ่านคิว ยังไม่ได้เขียน
+  - `listPromptpayRequestsAction()` — อ่านคิว pending ผ่าน admin client (bypass RLS
+    ที่เปิดเฉพาะคนของร้าน) ตรวจ `checkIsSuperadmin()` ก่อนเสมอ
+  - `getPendingPromptpayCountAction()` — นับคิวอย่างเดียวสำหรับ badge ไซด์บาร์
+    ไม่ดึงเลขเต็มทุกหน้า (PDPA)
   - `reviewPromptpayRequestAction(requestId, approve, note)` — เรียก RPC
-    `review_promptpay_change` ยังไม่ได้เขียน
-- หน้า `src/app/superadmin/approvals/page.tsx` ยังไม่ได้สร้าง
-- เพิ่มเมนูใน `src/components/superadmin/SuperadminSidebar.tsx`
-  (ทำแบบเดียวกับ "พื้นที่ให้บริการ" ที่เพิ่มไว้แล้ว) พร้อมตัวเลขจำนวนคำขอค้าง
-- แสดงเลขเต็มได้เฉพาะหน้านี้ ที่อื่นให้ใช้ `maskDigits` จาก `src/lib/telegram.ts`
+    `review_promptpay_change(p_request_id, p_approve, p_note)` ผ่าน session-bound
+    client ตรง signature ใน migration 20260914000003 เป๊ะ
+- หน้า `src/app/superadmin/approvals/page.tsx` + `ApprovalsClient.tsx` สร้างแล้ว
+  แสดงคิว ปุ่มอนุมัติ/ปฏิเสธ พร้อมช่องหมายเหตุ (สูงสุด 500 ตัวอักษร)
+- เมนูใน `src/components/superadmin/SuperadminSidebar.tsx` เพิ่มแล้วแบบเดียวกับ
+  "พื้นที่ให้บริการ" พร้อม badge จำนวนคำขอค้าง
+- แสดงเลขเต็มเฉพาะหน้านี้ ที่อื่นใช้ `maskDigits` (Telegram ใน settings.ts ใช้อยู่แล้ว)
+  error แปลเป็นข้อความไทยคงที่ ไม่คืน `error.message` ดิบ
+- หลักฐานรันจริง: `npm run test:unit` 270 ผ่าน 0 fail,
+  `npx tsx --test test/superadmin-approvals.test.ts` 20 ผ่าน 0 fail
+  (รันบน tree ก่อนแก้ได้ fail 20/20 — ไม่ใช่เทสต์ลอย),
+  `npx tsc --noEmit` ผ่าน, `npm run build` ผ่าน (มี route /superadmin/approvals),
+  `git diff --check` ผ่าน
 
 ### 3. apply migration 20260914000003
 
