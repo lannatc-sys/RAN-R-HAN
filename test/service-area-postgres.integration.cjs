@@ -293,6 +293,140 @@ async function run() {
     );
     console.log('[PASS] rider can start work again after returning inside area');
 
+    // ------------------------------------------------------------------
+    // polygon ของไรเดอร์ต้องมีผลจริง ไม่ใช่แค่คอลัมน์ที่เก็บไว้เฉย ๆ
+    //
+    // ทุกเคสในบล็อกนี้ใช้จุด 13.7700/100.5018 ซึ่งห่างจากร้านราว 1.5 กม.
+    // ยัง **อยู่ใน** รัศมีไรเดอร์ แต่ **หลุดออกนอก** สี่เหลี่ยมที่วาด
+    // ถ้าโค้ดยังวัดด้วยรัศมีอย่างเดียว ทุกเคสจะผ่านแบบผิด ๆ
+    // ------------------------------------------------------------------
+    const riderAreaBox = JSON.stringify({
+      type: 'Polygon',
+      coordinates: [[
+        [100.4950, 13.7500],
+        [100.5100, 13.7500],
+        [100.5100, 13.7600],
+        [100.4950, 13.7600],
+        [100.4950, 13.7500],
+      ]],
+    });
+    const INSIDE = { lat: 13.7564, lng: 100.5018 };
+    const OUTSIDE_SHAPE_INSIDE_RADIUS = { lat: 13.7700, lng: 100.5018 };
+
+    const readTimer = async () => {
+      const res = await admin.query(
+        `select l.outside_area_since is not null as timer_started,
+                s.status::text as session_status
+           from public.rider_current_locations l
+           left join public.rider_work_sessions s on s.id = l.work_session_id
+          where l.rider_id = $1`,
+        [ids.rider]
+      );
+      return res.rows[0];
+    };
+
+    // ปิด session ที่เปิดค้างอยู่ก่อน จะได้ทดสอบการเริ่มงานใหม่แบบสะอาด
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.close_rider_work_session(null)')
+    );
+
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query("select public.set_shop_service_area_polygon($1, 'rider', $2::jsonb)", [
+        ids.shopA,
+        riderAreaBox,
+      ])
+    );
+
+    // 1. เริ่มงานจากจุดที่อยู่ในรัศมีแต่นอกรูป ต้องถูกปฏิเสธ
+    await expectDatabaseError(
+      () => asRole(admin, 'authenticated', ids.riderUser, () =>
+        admin.query('select public.start_rider_work_session($1, $2, $3, null)', [
+          ids.shopA,
+          OUTSIDE_SHAPE_INSIDE_RADIUS.lat,
+          OUTSIDE_SHAPE_INSIDE_RADIUS.lng,
+        ])
+      ),
+      'OUTSIDE_WORK_AREA'
+    );
+    console.log('[PASS] rider polygon: start is refused inside the radius but outside the shape');
+
+    // 2. เริ่มงานจากในรูปได้ตามปกติ
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.start_rider_work_session($1, $2, $3, null)', [
+        ids.shopA,
+        INSIDE.lat,
+        INSIDE.lng,
+      ])
+    );
+    console.log('[PASS] rider polygon: start is allowed inside the shape');
+
+    // 3. รายงานพิกัดที่นอกรูปแต่ในรัศมี ต้องเริ่มจับเวลา
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.report_rider_location($1, $2, $3, null, null, null)', [
+        ids.shopA,
+        OUTSIDE_SHAPE_INSIDE_RADIUS.lat,
+        OUTSIDE_SHAPE_INSIDE_RADIUS.lng,
+      ])
+    );
+    assert.deepEqual(await readTimer(), { timer_started: true, session_status: 'open' });
+    console.log('[PASS] rider polygon: GPS report outside the shape starts the timer');
+
+    // 4. ขยายรัศมีจนใหญ่เกินจริง ต้องไม่ล้างตัวจับเวลา เพราะ polygon ชนะรัศมี
+    //    ก่อนแก้ ฟังก์ชันนี้วัดด้วยรัศมีใหม่แล้วจะล้าง outside_area_since ทิ้ง
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.set_shop_service_area_settings($1, true, 6000, 50000)', [ids.shopA])
+    );
+    assert.equal(
+      (await readTimer()).timer_started,
+      true,
+      'ขยายรัศมีไม่ควรดึงไรเดอร์ที่อยู่นอก polygon กลับเข้าเขต'
+    );
+    console.log('[PASS] rider polygon: widening the radius does not clear the timer');
+
+    // 5. ย้ายพิกัดร้านไปทับตัวไรเดอร์ ก็ยังต้องไม่ล้างตัวจับเวลา ด้วยเหตุผลเดียวกัน
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.update_shop_geo($1, $2, $3)', [
+        ids.shopA,
+        OUTSIDE_SHAPE_INSIDE_RADIUS.lat,
+        OUTSIDE_SHAPE_INSIDE_RADIUS.lng,
+      ])
+    );
+    assert.equal(
+      (await readTimer()).timer_started,
+      true,
+      'ย้ายพิกัดร้านไม่ควรดึงไรเดอร์ที่อยู่นอก polygon กลับเข้าเขต'
+    );
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.update_shop_geo($1, 13.7563, 100.5018)', [ids.shopA])
+    );
+    console.log('[PASS] rider polygon: moving the shop pin does not clear the timer');
+
+    // 6. เกิน grace period แล้ว sweep ต้องปิด session โดยตัดสินจาก polygon
+    await admin.query(
+      "update public.rider_current_locations set outside_area_since = now() - interval '16 minutes' where rider_id = $1",
+      [ids.rider]
+    );
+    const riderPolygonSweep = await asRole(admin, 'service_role', null, () =>
+      admin.query('select public.sweep_expired_rider_geofence_sessions() as closed_count')
+    );
+    assert.equal(riderPolygonSweep.rows[0].closed_count, 1, 'sweep ต้องปิด session ของไรเดอร์ที่อยู่นอก polygon');
+    console.log('[PASS] rider polygon: sweep closes the session using the shape, not the radius');
+
+    // คืนสภาพให้เคสถัดไป ลบ polygon ไรเดอร์และเปิด session ใหม่จากในเขต
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query("select public.set_shop_service_area_polygon($1, 'rider', null)", [ids.shopA])
+    );
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.set_shop_service_area_settings($1, true, 6000, 12000)', [ids.shopA])
+    );
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.start_rider_work_session($1, $2, $3, null)', [
+        ids.shopA,
+        INSIDE.lat,
+        INSIDE.lng,
+      ])
+    );
+
     ownerClient = await connect();
     riderClient = await connect();
     await ownerClient.query('begin');
