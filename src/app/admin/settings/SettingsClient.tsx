@@ -511,7 +511,7 @@ export function SettingsClient({
     setIsTestingTelegram(true);
     setTestResult(null);
 
-    const res = await sendTelegramTestAction(testChatId.trim(), shop.name);
+    const res = await sendTelegramTestAction(shop.id, testChatId.trim(), shop.name);
     setIsTestingTelegram(false);
 
     if (res.success) {
