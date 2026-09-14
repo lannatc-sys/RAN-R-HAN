@@ -8,9 +8,15 @@ interface PolygonDraftPanelProps {
   draft: PolygonDraft;
   className?: string;
   readOnly?: boolean;
+  mode?: 'scaffold' | 'live';
 }
 
-export const PolygonDraftPanel: React.FC<PolygonDraftPanelProps> = ({ draft, className = '', readOnly = false }) => {
+export const PolygonDraftPanel: React.FC<PolygonDraftPanelProps> = ({
+  draft,
+  className = '',
+  readOnly = false,
+  mode = 'scaffold',
+}) => {
   const isCustomer = draft.kind === 'customer';
   const closed = isClosedRing(draft.coordinates);
   const pointCount = draft.coordinates.length;
@@ -154,16 +160,17 @@ export const PolygonDraftPanel: React.FC<PolygonDraftPanelProps> = ({ draft, cla
         )}
       </div>
 
-      {/* Scaffold Sandbox Alert */}
-      <div className="bg-slate-100 p-3 rounded-lg text-[11px] text-slate-600 flex items-center justify-between gap-2 border border-slate-200">
-        <span className="flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-          โครงสร้างจำลอง UI (Scaffold Preview) — ไม่เชื่อมต่อฐานข้อมูลหรือ API จริง
-        </span>
-        <span className="font-mono text-[10px] bg-slate-200 px-1.5 py-0.5 rounded">
-          UI-ONLY
-        </span>
-      </div>
+      {mode === 'scaffold' && (
+        <div className="bg-slate-100 p-3 rounded-lg text-[11px] text-slate-600 flex items-center justify-between gap-2 border border-slate-200">
+          <span className="flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            โครงสร้างจำลอง UI (Scaffold Preview) — ไม่เชื่อมต่อฐานข้อมูลหรือ API จริง
+          </span>
+          <span className="font-mono text-[10px] bg-slate-200 px-1.5 py-0.5 rounded">
+            UI-ONLY
+          </span>
+        </div>
+      )}
     </section>
   );
 };

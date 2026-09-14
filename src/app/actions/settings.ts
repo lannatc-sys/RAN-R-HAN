@@ -129,6 +129,7 @@ export async function updateShopSettingsAction(data: {
   name: string;
   service_charge: number;
   vat_mode: 'none' | 'inclusive' | 'exclusive';
+  delivery_base_fee: number;
 }) {
   try {
     const supabase = await createClient();
@@ -144,6 +145,13 @@ export async function updateShopSettingsAction(data: {
       return { success: false, error: 'ไม่มีสิทธิ์แก้ไขการตั้งค่าของร้านนี้' };
     }
 
+    // ค่าส่งถูกบังคับช่วงที่ฐานข้อมูลด้วย constraint อยู่แล้ว ตรวจซ้ำที่นี่
+    // เพื่อให้ผู้ใช้ได้ข้อความไทยแทน error ดิบจาก Postgres
+    const deliveryBaseFee = Number(data.delivery_base_fee);
+    if (!Number.isFinite(deliveryBaseFee) || deliveryBaseFee < 0 || deliveryBaseFee > 1000) {
+      return { success: false, error: 'ค่าส่งต้องเป็นตัวเลข 0-1000 บาท' };
+    }
+
     const admin = createAdminClient();
 
     // หมายเลขพร้อมเพย์ถูกล็อกให้เปลี่ยนผ่านคำขออนุมัติเท่านั้น
@@ -155,6 +163,7 @@ export async function updateShopSettingsAction(data: {
         name: data.name,
         service_charge: data.service_charge,
         vat_mode: data.vat_mode,
+        delivery_base_fee: deliveryBaseFee,
         updated_at: new Date().toISOString(),
       })
       .eq('id', data.shop_id);

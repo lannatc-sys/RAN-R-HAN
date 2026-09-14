@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { formatThaiError } from '@/lib/thai-errors';
 import { sendPushToShop } from '@/lib/push';
 import { sendOrderStatusMessage } from '@/lib/telegram';
+import { shouldAutoDispatch } from '@/lib/dispatch-trigger';
 
 export async function createPickupOrderAction(rawInput: CreateOrderInput) {
   try {
@@ -129,6 +130,14 @@ export async function updateOrderStatusAction(
       return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำรายการ' };
     }
 
+    // อ่านสภาพออเดอร์ก่อนเปลี่ยนสถานะ ใช้ตัดสินว่าต้องจุด dispatch ต่อหรือไม่
+    // อ่านก่อนเพื่อให้เห็น dispatch_status ณ ตอนที่ครัวกด กันการกดซ้ำสั่งจ่ายงานซ้อน
+    const { data: beforeUpdate } = await supabase
+      .from('orders')
+      .select('type, dispatch_status, delivery_lat, delivery_lng')
+      .eq('id', orderId)
+      .maybeSingle();
+
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -142,6 +151,23 @@ export async function updateOrderStatusAction(
     triggerTelegramOrderStatusNotification(orderId, newStatus).catch((err) =>
       console.error('[Telegram] Order status trigger error:', err)
     );
+
+    // ครัวกดว่าอาหารเสร็จแล้วให้จ่ายงานต่อทันที ไม่ต้องรอคนกดปุ่มในหน้าแอดมิน
+    //
+    // ตั้งใจไม่ await และไม่ให้ผลลัพธ์ของ dispatch มีผลต่อค่าที่คืนกลับ
+    // การจ่ายงานล้มเหลว เช่นยังไม่มีไรเดอร์ออนไลน์ ไม่ควรทำให้ครัวกด
+    // "อาหารเสร็จ" ไม่สำเร็จ หรือย้อนสถานะที่ครัวตั้งใจเปลี่ยนไปแล้ว
+    // ตรรกะการจ่ายงานทั้งหมดยังอยู่ที่ dispatchOrderAction ที่เดียว ไม่เขียนซ้ำ
+    if (shouldAutoDispatch(newStatus, beforeUpdate)) {
+      void import('@/app/actions/dispatch')
+        .then(({ dispatchOrderAction }) => dispatchOrderAction(orderId))
+        .then((res) => {
+          if (!res?.success) {
+            console.warn('[auto-dispatch] จ่ายงานอัตโนมัติไม่สำเร็จ:', orderId, res?.error);
+          }
+        })
+        .catch((err) => console.error('[auto-dispatch] error:', orderId, err));
+    }
 
     return { success: true };
   } catch (error: any) {

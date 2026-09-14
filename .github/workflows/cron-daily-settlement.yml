@@ -1,0 +1,29 @@
+name: Daily Settlement Draft Cron
+
+on:
+  schedule:
+    # Run once a day at 20:30 UTC (03:30 AM Bangkok time), after data retention
+    - cron: '30 20 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  daily-settlement:
+    name: Trigger /api/cron/daily-settlement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Daily Settlement Request
+        run: |
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://ran-r-han.vercel.app/api/cron/daily-settlement)
+
+          BODY=$(echo "$RESPONSE" | sed -e '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d: -f2)
+
+          echo "HTTP Status: $STATUS"
+          echo "Response Body: $BODY"
+
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::error::Daily settlement job failed with status $STATUS"
+            exit 1
+          fi

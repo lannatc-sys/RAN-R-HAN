@@ -17,6 +17,7 @@ import {
   Layers,
   Sparkles,
   ClipboardCheck,
+  RadioTower,
 } from 'lucide-react';
 
 export function SuperadminSidebar() {
@@ -71,6 +72,12 @@ export function SuperadminSidebar() {
       href: '/superadmin/service-area-map',
       label: 'พื้นที่ให้บริการ',
       icon: Map,
+      exact: false,
+    },
+    {
+      href: '/superadmin/rider-live-monitor',
+      label: 'ติดตามไรเดอร์',
+      icon: RadioTower,
       exact: false,
     },
     {
