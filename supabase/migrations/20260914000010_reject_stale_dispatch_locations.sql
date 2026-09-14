@@ -26,6 +26,10 @@ begin
   end if;
 
   v_definition := replace(pg_get_functiondef(v_oid), chr(13), '');
+  -- Windows checkouts store CRLF: strip CR from our own literals too so the
+  -- count matches regardless of the checkout line endings (same as 00007).
+  v_pattern := replace(v_pattern, chr(13), '');
+  v_replacement := replace(v_replacement, chr(13), '');
   v_occurrences := (
     length(v_definition) - length(replace(v_definition, v_pattern, ''))
   ) / length(v_pattern);
