@@ -9,6 +9,25 @@
 -- **ห้ามรันกับฐานข้อมูลจริง** ใช้กับคอนเทนเนอร์ที่พร้อมทิ้งเท่านั้น
 -- ------------------------------------------------------------------------------
 
+-- guard กันรันผิด connection string โดยไม่ตั้งใจ
+-- ไฟล์นี้มี drop extension ... cascade ถ้าหลุดไปโดนฐานข้อมูลจริงคือข้อมูลหาย
+-- เงื่อนไข: ชื่อฐานข้อมูลต้องสื่อว่าเป็นของทิ้ง และต้องยังไม่มีตาราง shops
+do $guard$
+begin
+  if current_database() !~ '(test|tmp|temp|scratch|disposable|fresh)' then
+    raise exception
+      'REFUSING TO RUN: ฐานข้อมูล % ไม่ได้ชื่อแบบใช้แล้วทิ้ง shim นี้ลบ postgis แบบ cascade',
+      current_database();
+  end if;
+
+  if to_regclass('public.shops') is not null then
+    raise exception
+      'REFUSING TO RUN: ฐานข้อมูล % มีตาราง public.shops อยู่แล้ว shim ต้องรันกับฐานข้อมูลเปล่าก่อน migrations',
+      current_database();
+  end if;
+end;
+$guard$;
+
 create schema if not exists auth;
 create schema if not exists storage;
 create schema if not exists extensions;
