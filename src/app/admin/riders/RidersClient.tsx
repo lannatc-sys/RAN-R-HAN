@@ -225,6 +225,8 @@ export function RidersClient({ riders, shopId }: RidersClientProps) {
             flex: 1,
             minWidth: '200px',
             outline: 'none',
+            color: '#1c1917',
+            background: 'white',
           }}
         />
         <select
@@ -236,12 +238,14 @@ export function RidersClient({ riders, shopId }: RidersClientProps) {
             borderRadius: '0.5rem',
             fontSize: '0.875rem',
             background: 'white',
+            color: '#1c1917',
+            colorScheme: 'light',
           }}
         >
-          <option value="all">สถานะทั้งหมด</option>
-          <option value="active">ใช้งาน</option>
-          <option value="inactive">ไม่ได้ใช้</option>
-          <option value="suspended">ระงับ</option>
+          <option value="all" style={optionStyle}>สถานะทั้งหมด</option>
+          <option value="active" style={optionStyle}>ใช้งาน</option>
+          <option value="inactive" style={optionStyle}>ไม่ได้ใช้</option>
+          <option value="suspended" style={optionStyle}>ระงับ</option>
         </select>
       </div>
 
@@ -455,11 +459,11 @@ export function RidersClient({ riders, shopId }: RidersClientProps) {
                 <select
                   value={vehicleType}
                   onChange={(e) => setVehicleType(e.target.value)}
-                  style={{ ...inputStyle, paddingLeft: '0.75rem' }}
+                  style={{ ...inputStyle, paddingLeft: '0.75rem', colorScheme: 'light' }}
                 >
-                  <option value="motorcycle">🏍️ รถมอเตอร์ไซค์</option>
-                  <option value="bicycle">🚲 จักรยาน</option>
-                  <option value="car">🚗 รถยนต์</option>
+                  <option value="motorcycle" style={optionStyle}>🏍️ รถมอเตอร์ไซค์</option>
+                  <option value="bicycle" style={optionStyle}>🚲 จักรยาน</option>
+                  <option value="car" style={optionStyle}>🚗 รถยนต์</option>
                 </select>
               </div>
 
@@ -569,6 +573,13 @@ const inputStyle: React.CSSProperties = {
   fontSize: '0.875rem',
   outline: 'none',
   boxSizing: 'border-box',
+  color: '#1c1917',
+  backgroundColor: 'white',
+};
+
+const optionStyle: React.CSSProperties = {
+  color: '#1c1917',
+  backgroundColor: 'white',
 };
 
 const thStyle: React.CSSProperties = {

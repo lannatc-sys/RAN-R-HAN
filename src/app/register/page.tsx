@@ -234,7 +234,7 @@ export default function RegisterPage() {
                 onChange={(e) => setShopName(e.target.value)}
                 placeholder="เช่น ครัวคุณยาย อาหารตามสั่ง"
                 required
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900"
               />
             </div>
           </div>
@@ -253,7 +253,7 @@ export default function RegisterPage() {
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="สมชาย"
                   required
-                  className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900"
                 />
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function RegisterPage() {
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="ใจดี"
                 required
-                className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900"
               />
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function RegisterPage() {
                 placeholder="เช่น 0812345678"
                 maxLength={10}
                 required
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900"
               />
             </div>
           </div>
@@ -305,7 +305,7 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="owner@restaurant.com"
                 required
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900"
               />
             </div>
           </div>
@@ -325,7 +325,7 @@ export default function RegisterPage() {
                   placeholder="อย่างน้อย 6 ตัว"
                   required
                   minLength={6}
-                  className="w-full pl-10 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full pl-10 pr-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900"
                 />
               </div>
             </div>
@@ -341,7 +341,7 @@ export default function RegisterPage() {
                 placeholder="พิมพ์รหัสผ่านซ้ำ"
                 required
                 minLength={6}
-                className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-stone-900"
               />
             </div>
           </div>

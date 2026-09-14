@@ -12,6 +12,8 @@ import {
   updateFulfillmentChannelsAction,
   updateShopGeoAction,
   updateShopOpenStatusAction,
+  requestPromptpayChangeAction,
+  getPendingPromptpayRequestAction,
 } from '@/app/actions/settings';
 import {
   updateShopTelegramSettingsAction,
@@ -57,6 +59,31 @@ interface SettingsClientProps {
   isPrivacyMode?: boolean;
 }
 
+/**
+ * พิกัดร้านถูกย้ายไปให้ superadmin เป็นคนปักหมุดบนแผนที่กลาง
+ * หน้านี้จึงเหลือแสดงค่าที่ใช้อยู่ ด่านจริงอยู่ที่ update_shop_geo ซึ่งตรวจ is_superadmin
+ * คืนสิทธิ์ได้โดยเปลี่ยนเป็น true พร้อมย้อน migration 20260914000002
+ */
+const SHOP_CAN_EDIT_LOCATION = false;
+
+/**
+ * หมายเลขพร้อมเพย์คือปลายทางรับเงินของร้าน ร้านแก้เองไม่ได้
+ * เปลี่ยนผ่านคำขออนุมัติเท่านั้น (requestPromptpayChangeAction)
+ * คืนสิทธิ์ได้โดยเปลี่ยนเป็น true และเขียน promptpay_id / promptpay_name
+ * กลับเข้า updateShopSettingsAction พร้อมกัน
+ */
+const SHOP_CAN_EDIT_PROMPTPAY = false;
+
+/**
+ * พร้อมเพย์รับได้สองรูปแบบ 10 หลัก = เบอร์โทร, 13 หลัก = เลขบัตรประชาชน
+ */
+export function getPromptpayIdKind(value: string | null | undefined): 'phone' | 'citizen' | 'unknown' {
+  const digits = String(value ?? '').replace(/[^0-9]/g, '');
+  if (digits.length === 10) return 'phone';
+  if (digits.length === 13) return 'citizen';
+  return 'unknown';
+}
+
 export function SettingsClient({
   shop,
   hasSlipCredentials,
@@ -82,10 +109,70 @@ export function SettingsClient({
 
   // Shop Info State
   const [name, setName] = useState(shop.name);
-  const [promptpayId, setPromptpayId] = useState(shop.promptpay_id || '');
-  const [promptpayName, setPromptpayName] = useState(shop.promptpay_name || '');
+  // พร้อมเพย์ถูกล็อก (SHOP_CAN_EDIT_PROMPTPAY = false) แสดงค่าปัจจุบันอย่างเดียว
+  // การเปลี่ยนต้องยื่นผ่าน requestPromptpayChangeAction เท่านั้น
+  const [promptpayId] = useState(shop.promptpay_id || '');
+  const [promptpayName] = useState(shop.promptpay_name || '');
   const [serviceCharge, setServiceCharge] = useState(shop.service_charge.toString());
   const [vatMode, setVatMode] = useState(shop.vat_mode);
+
+  // PromptPay change request State (ล็อกไม่ให้แก้ตรง ต้องยื่นคำขออนุมัติ)
+  const [hasPendingPromptpayRequest, setHasPendingPromptpayRequest] = useState<boolean | null>(null);
+  const [showPromptpayForm, setShowPromptpayForm] = useState(false);
+  const [newPromptpayId, setNewPromptpayId] = useState('');
+  const [newPromptpayName, setNewPromptpayName] = useState('');
+  const [promptpayReason, setPromptpayReason] = useState('');
+  const [isRequestingPromptpay, setIsRequestingPromptpay] = useState(false);
+  const [promptpayRequestError, setPromptpayRequestError] = useState<string | null>(null);
+  const [promptpayRequestSuccess, setPromptpayRequestSuccess] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPendingPromptpayRequestAction(shop.id).then((res) => {
+      if (cancelled) return;
+      if (res.success) setHasPendingPromptpayRequest(Boolean(res.hasPending));
+      else setHasPendingPromptpayRequest(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [shop.id]);
+
+  const promptpayIdKind = getPromptpayIdKind(promptpayId);
+
+  const handleRequestPromptpayChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsRequestingPromptpay(true);
+    setPromptpayRequestError(null);
+    setPromptpayRequestSuccess(false);
+
+    const res = await requestPromptpayChangeAction({
+      shopId: shop.id,
+      promptpayId: newPromptpayId.replace(/[^0-9]/g, ''),
+      promptpayName: newPromptpayName.trim(),
+      reason: promptpayReason.trim() || undefined,
+    });
+
+    setIsRequestingPromptpay(false);
+    if (!res.success) {
+      // ข้อความมาจาก action ที่แปลเป็นไทยคงที่แล้ว ไม่ต้องแปลซ้ำ
+      setPromptpayRequestError(res.error || 'ยื่นคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      // ถ้า server บอกว่ามีคำขอค้างอยู่ ให้ล็อกปุ่มทันทีโดยไม่ต้องรีเฟรช
+      if (res.error === 'มีคำขอที่รออนุมัติอยู่แล้ว กรุณารอผลก่อนยื่นใหม่') {
+        setHasPendingPromptpayRequest(true);
+        setShowPromptpayForm(false);
+      }
+      return;
+    }
+    setHasPendingPromptpayRequest(true);
+    setShowPromptpayForm(false);
+    setNewPromptpayId('');
+    setNewPromptpayName('');
+    setPromptpayReason('');
+    setPromptpayRequestSuccess(true);
+    router.refresh();
+    setTimeout(() => setPromptpayRequestSuccess(false), 5000);
+  };
 
   // SlipOK Creds State (SLIPOK API Endpoint & SLIPOK_API_KEY)
   const [isHasCreds, setIsHasCreds] = useState(hasSlipCredentials);
@@ -316,8 +403,6 @@ export function SettingsClient({
     const res = await updateShopSettingsAction({
       shop_id: shop.id,
       name,
-      promptpay_id: promptpayId,
-      promptpay_name: promptpayName,
       service_charge: parseFloat(serviceCharge) || 0,
       vat_mode: vatMode,
     });
@@ -1167,6 +1252,8 @@ export function SettingsClient({
                 type="text"
                 value={shopLat}
                 onChange={(e) => setShopLat(e.target.value)}
+                disabled={!SHOP_CAN_EDIT_LOCATION}
+                readOnly={!SHOP_CAN_EDIT_LOCATION}
                 placeholder="เช่น 19.302145"
                 className="w-full px-3.5 py-2 rounded-xl text-xs border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
               />
@@ -1179,6 +1266,8 @@ export function SettingsClient({
                 type="text"
                 value={shopLng}
                 onChange={(e) => setShopLng(e.target.value)}
+                disabled={!SHOP_CAN_EDIT_LOCATION}
+                readOnly={!SHOP_CAN_EDIT_LOCATION}
                 placeholder="เช่น 97.965412"
                 className="w-full px-3.5 py-2 rounded-xl text-xs border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
               />
@@ -1187,6 +1276,7 @@ export function SettingsClient({
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex items-center gap-2">
+              {SHOP_CAN_EDIT_LOCATION && (
               <button
                 type="button"
                 onClick={handleGetGps}
@@ -1200,6 +1290,7 @@ export function SettingsClient({
                 )}
                 <span>ดึงพิกัดปัจจุบัน (GPS)</span>
               </button>
+              )}
 
               {shopLat && shopLng && !isNaN(parseFloat(shopLat)) && !isNaN(parseFloat(shopLng)) && (
                 <a
@@ -1214,6 +1305,7 @@ export function SettingsClient({
               )}
             </div>
 
+            {SHOP_CAN_EDIT_LOCATION ? (
             <button
               type="submit"
               disabled={isSavingGeo}
@@ -1226,6 +1318,12 @@ export function SettingsClient({
               )}
               <span>บันทึกพิกัดร้าน</span>
             </button>
+            ) : (
+              <p className="text-xs text-stone-600 dark:text-stone-400 max-w-md">
+                ตำแหน่งร้านถูกปักหมุดโดยผู้ดูแลแพลตฟอร์มบนแผนที่กลาง
+                หากตำแหน่งไม่ถูกต้องกรุณาติดต่อผู้ดูแลระบบ
+              </p>
+            )}
           </div>
         </form>
       </div>
@@ -1376,16 +1474,21 @@ export function SettingsClient({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                หมายเลขพร้อมเพย์ (เบอร์โทร 10 หลัก หรือ เลขบัตร ปชช. 13 หลัก)
+                หมายเลขพร้อมเพย์
               </label>
               <input
                 type="text"
                 value={promptpayId}
-                onChange={(e) => setPromptpayId(e.target.value.replace(/[^0-9]/g, ''))}
+                disabled={!SHOP_CAN_EDIT_PROMPTPAY}
+                readOnly={!SHOP_CAN_EDIT_PROMPTPAY}
                 placeholder="เช่น 0891234567"
-                required
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
+              <span className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 block">
+                {promptpayIdKind === 'phone' && 'ประเภท: เบอร์โทรศัพท์ (10 หลัก)'}
+                {promptpayIdKind === 'citizen' && 'ประเภท: เลขบัตรประชาชน (13 หลัก)'}
+                {promptpayIdKind === 'unknown' && 'ประเภท: -'}
+              </span>
             </div>
 
             <div>
@@ -1395,13 +1498,130 @@ export function SettingsClient({
               <input
                 type="text"
                 value={promptpayName}
-                onChange={(e) => setPromptpayName(e.target.value)}
+                disabled={!SHOP_CAN_EDIT_PROMPTPAY}
+                readOnly={!SHOP_CAN_EDIT_PROMPTPAY}
                 placeholder="เช่น นางสมศรี มีโชค"
-                required
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
           </div>
+
+          {!SHOP_CAN_EDIT_PROMPTPAY && (
+            <div className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-800/40 space-y-3">
+              <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
+                หมายเลขพร้อมเพย์เป็นปลายทางรับเงินของร้าน จึงล็อกไม่ให้แก้ไขโดยตรง
+                หากต้องการเปลี่ยน กรุณายื่นคำขอเพื่อให้ผู้ดูแลแพลตฟอร์มอนุมัติ
+              </p>
+
+              {promptpayRequestSuccess && (
+                <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>ยื่นคำขอเปลี่ยนพร้อมเพย์เรียบร้อยแล้ว กรุณารอผู้ดูแลอนุมัติ</span>
+                </div>
+              )}
+
+              {promptpayRequestError && !showPromptpayForm && (
+                <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{promptpayRequestError}</span>
+                </div>
+              )}
+
+              {hasPendingPromptpayRequest ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                  <Clock className="w-3.5 h-3.5" />
+                  รออนุมัติ — มีคำขอเปลี่ยนพร้อมเพย์กำลังรอผู้ดูแลตรวจสอบ
+                </span>
+              ) : showPromptpayForm ? (
+                <form onSubmit={handleRequestPromptpayChange} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                        หมายเลขพร้อมเพย์ใหม่ (เบอร์โทร 10 หลัก หรือ เลขบัตร ปชช. 13 หลัก)
+                      </label>
+                      <input
+                        type="text"
+                        value={newPromptpayId}
+                        onChange={(e) => setNewPromptpayId(e.target.value.replace(/[^0-9]/g, ''))}
+                        placeholder="เช่น 0891234567"
+                        required
+                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                        ชื่อบัญชีพร้อมเพย์ใหม่
+                      </label>
+                      <input
+                        type="text"
+                        value={newPromptpayName}
+                        onChange={(e) => setNewPromptpayName(e.target.value)}
+                        placeholder="เช่น นางสมศรี มีโชค"
+                        required
+                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                      เหตุผลที่ขอเปลี่ยน (ถ้ามี)
+                    </label>
+                    <input
+                      type="text"
+                      value={promptpayReason}
+                      onChange={(e) => setPromptpayReason(e.target.value)}
+                      placeholder="เช่น เปลี่ยนบัญชีรับเงินของร้าน"
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  {promptpayRequestError && (
+                    <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{promptpayRequestError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPromptpayForm(false);
+                        setPromptpayRequestError(null);
+                      }}
+                      className="px-4 py-2 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 rounded-xl text-xs font-bold cursor-pointer"
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isRequestingPromptpay}
+                      className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                    >
+                      {isRequestingPromptpay ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5" />
+                      )}
+                      <span>ยื่นคำขอเปลี่ยนพร้อมเพย์</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPromptpayForm(true);
+                    setPromptpayRequestError(null);
+                  }}
+                  className="px-4 py-2 border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-900 dark:text-amber-300 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>ขอแก้ไขพร้อมเพย์</span>
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

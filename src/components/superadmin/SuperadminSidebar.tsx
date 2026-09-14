@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getPendingPromptpayCountAction } from '@/app/actions/superadmin';
 import {
   LayoutDashboard,
+  Map,
   Store,
   CreditCard,
   BellRing,
@@ -13,11 +16,25 @@ import {
   ShieldAlert,
   Layers,
   Sparkles,
+  ClipboardCheck,
 } from 'lucide-react';
 
 export function SuperadminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [pendingApprovals, setPendingApprovals] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPendingPromptpayCountAction().then((res) => {
+      if (!cancelled && res.success) {
+        setPendingApprovals(res.count ?? 0);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -48,6 +65,18 @@ export function SuperadminSidebar() {
       href: '/superadmin/announcements',
       label: 'ประกาศระบบ',
       icon: BellRing,
+      exact: false,
+    },
+    {
+      href: '/superadmin/service-area-map',
+      label: 'พื้นที่ให้บริการ',
+      icon: Map,
+      exact: false,
+    },
+    {
+      href: '/superadmin/approvals',
+      label: 'คำขออนุมัติ',
+      icon: ClipboardCheck,
       exact: false,
     },
   ];
@@ -93,6 +122,11 @@ export function SuperadminSidebar() {
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
+                {item.href === '/superadmin/approvals' && pendingApprovals > 0 ? (
+                  <span className="ml-auto inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold">
+                    {pendingApprovals > 99 ? '99+' : pendingApprovals}
+                  </span>
+                ) : null}
               </Link>
             );
           })}

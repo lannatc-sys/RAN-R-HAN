@@ -7,6 +7,7 @@ import {
   updateStorePlanAction,
   impersonateStoreAction,
   deleteStoreAction,
+  updateShopBasicInfoAction,
 } from '@/app/actions/superadmin';
 import type { Shop, ShopStatus } from '@/lib/types';
 import {
@@ -25,6 +26,7 @@ import {
   AlertCircle,
   LogIn,
   Trash2,
+  Pencil,
 } from 'lucide-react';
 
 interface StoreItem extends Shop {
@@ -46,6 +48,12 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
   const [editingShop, setEditingShop] = useState<StoreItem | null>(null);
   const [newPlan, setNewPlan] = useState<string>('standard');
   const [isSavingPlan, setIsSavingPlan] = useState(false);
+
+  // Edit Basic Info Modal State
+  const [infoShop, setInfoShop] = useState<StoreItem | null>(null);
+  const [infoForm, setInfoForm] = useState({ name: '', phone: '', address: '', logoUrl: '' });
+  const [isSavingInfo, setIsSavingInfo] = useState(false);
+  const [infoError, setInfoError] = useState<string | null>(null);
 
   // Filter stores locally for quick response
   const filteredStores = stores.filter((shop) => {
@@ -106,6 +114,37 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
     }
   };
 
+  const openInfoModal = (shop: StoreItem) => {
+    setInfoShop(shop);
+    setInfoError(null);
+    setInfoForm({
+      name: shop.name || '',
+      phone: shop.phone || '',
+      address: shop.address || '',
+      logoUrl: shop.logo_url || '',
+    });
+  };
+
+  const handleSaveInfo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!infoShop) return;
+
+    setIsSavingInfo(true);
+    setInfoError(null);
+    const res = await updateShopBasicInfoAction({ shopId: infoShop.id, ...infoForm });
+    setIsSavingInfo(false);
+
+    if (!res.success) {
+      setInfoError(res.error || 'บันทึกข้อมูลร้านไม่สำเร็จ');
+      return;
+    }
+
+    setStores((prev) =>
+      prev.map((s) => (s.id === infoShop.id ? { ...s, ...res.shop } : s))
+    );
+    setInfoShop(null);
+  };
+
   // Delete Store Handler
   const handleDeleteStore = async (shop: StoreItem) => {
     const confirmed = window.confirm(
@@ -147,7 +186,7 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ค้นหาตามชื่อร้าน, Slug, หรือเบอร์โทร..."
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
           />
         </div>
 
@@ -156,12 +195,13 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+            style={{ colorScheme: 'light' }}
+            className="w-full sm:w-auto px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
           >
-            <option value="all">สถานะทั้งหมด</option>
-            <option value="active">เปิดบริการ (Active)</option>
-            <option value="suspended">ระงับชั่วคราว (Suspended)</option>
-            <option value="expired">หมดอายุ (Expired)</option>
+            <option value="all" className="bg-white text-slate-900">สถานะทั้งหมด</option>
+            <option value="active" className="bg-white text-slate-900">เปิดบริการ (Active)</option>
+            <option value="suspended" className="bg-white text-slate-900">ระงับชั่วคราว (Suspended)</option>
+            <option value="expired" className="bg-white text-slate-900">หมดอายุ (Expired)</option>
           </select>
         </div>
       </div>
@@ -280,6 +320,17 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                             <span className="hidden md:inline">เข้าจัดการ</span>
                           </button>
 
+                          {/* Edit Basic Info */}
+                          <button
+                            type="button"
+                            disabled={isLoading}
+                            onClick={() => openInfoModal(shop)}
+                            title="แก้ชื่อ เบอร์โทร ที่อยู่ และโลโก้ของร้านนี้"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+
                           {/* Toggle Status */}
                           <button
                             type="button"
@@ -339,12 +390,13 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                 <select
                   value={newPlan}
                   onChange={(e) => setNewPlan(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                  style={{ colorScheme: 'light' }}
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
                 >
-                  <option value="basic">Basic (ทดลองใช้ / ไม่เกิน 50 บิล)</option>
-                  <option value="standard">Standard (ร้านขนาดกลาง)</option>
-                  <option value="pro">Pro (ไม่จำกัดบิล + Realtime)</option>
-                  <option value="enterprise">Enterprise (กำหนดเอง)</option>
+                  <option value="basic" className="bg-white text-slate-900">Basic (ทดลองใช้ / ไม่เกิน 50 บิล)</option>
+                  <option value="standard" className="bg-white text-slate-900">Standard (ร้านขนาดกลาง)</option>
+                  <option value="pro" className="bg-white text-slate-900">Pro (ไม่จำกัดบิล + Realtime)</option>
+                  <option value="enterprise" className="bg-white text-slate-900">Enterprise (กำหนดเอง)</option>
                 </select>
               </div>
 
@@ -363,6 +415,93 @@ export function StoresManagementClient({ initialStores }: StoresManagementClient
                 >
                   {isSavingPlan ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   <span>บันทึกแพ็กเกจ</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Basic Info */}
+      {infoShop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">แก้ข้อมูลร้านพื้นฐาน</h3>
+              <p className="text-xs text-slate-500 mt-0.5">ร้าน: {infoShop.name} (/{infoShop.slug})</p>
+            </div>
+
+            <form onSubmit={handleSaveInfo} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ชื่อร้าน</label>
+                <input
+                  type="text"
+                  value={infoForm.name}
+                  onChange={(e) => setInfoForm((f) => ({ ...f, name: e.target.value }))}
+                  required
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">เบอร์โทร</label>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={infoForm.phone}
+                  onChange={(e) => setInfoForm((f) => ({ ...f, phone: e.target.value }))}
+                  placeholder="0812345678"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ที่อยู่</label>
+                <textarea
+                  value={infoForm.address}
+                  onChange={(e) => setInfoForm((f) => ({ ...f, address: e.target.value }))}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900 resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ลิงก์โลโก้ (https://)</label>
+                <input
+                  type="url"
+                  value={infoForm.logoUrl}
+                  onChange={(e) => setInfoForm((f) => ({ ...f, logoUrl: e.target.value }))}
+                  placeholder="https://..."
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-slate-900"
+                />
+              </div>
+
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                รหัส KDS และพร้อมเพย์แก้จากหน้านี้ไม่ได้ พร้อมเพย์ต้องผ่านคำขออนุมัติเท่านั้น
+              </p>
+
+              {infoError && (
+                <div className="flex items-start gap-1.5 text-[11px] text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" />
+                  <span>{infoError}</span>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setInfoShop(null)}
+                  className="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingInfo}
+                  className="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-all disabled:opacity-50"
+                >
+                  {isSavingInfo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>บันทึกข้อมูลร้าน</span>
                 </button>
               </div>
             </form>
