@@ -294,6 +294,12 @@ describe('Routing: verified holders only, never raw chat ids', () => {
     assert.deepEqual(chats, [111]);
   });
 
+  it('capacity rejection surfaces the 2-job limit message', () => {
+    const code = stripTs(source('src/app/api/telegram/webhook/route.ts'));
+    assert.match(code, /RIDER_CAPACITY_REACHED/);
+    assert.match(code, /เกิน 2 งาน/);
+  });
+
   it('offer buttons exclude expired offers like the text does', () => {
     const code = stripTs(source('src/app/api/telegram/webhook/route.ts'));
     const start = code.indexOf("data === 'r:offers'");

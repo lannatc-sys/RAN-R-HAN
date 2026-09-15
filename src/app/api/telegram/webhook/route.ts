@@ -270,7 +270,16 @@ async function handleCallback(admin: any, query: any) {
       p_offer_id: offerId,
       p_action: action,
     });
-    await ack(error ? 'ตอบรับไม่สำเร็จ สถานะอาจเปลี่ยนแล้ว' : action === 'accept' ? 'รับงานแล้ว' : 'ปฏิเสธแล้ว');
+    const errText = error ? String((error as any)?.message ?? error) : '';
+    await ack(
+      !error
+        ? action === 'accept'
+          ? 'รับงานแล้ว'
+          : 'ปฏิเสธแล้ว'
+        : errText.includes('RIDER_CAPACITY_REACHED')
+          ? 'รับงานซ้อนเกิน 2 งานแล้ว ส่งงานปัจจุบันก่อนนะคะ'
+          : 'ตอบรับไม่สำเร็จ สถานะอาจเปลี่ยนแล้ว'
+    );
     await send(await riderJobsText(admin, identity));
     return;
   }
