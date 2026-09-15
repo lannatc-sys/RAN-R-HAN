@@ -272,6 +272,16 @@ describe('Markdown safety: dynamic values never break Telegram parsing', () => {
     assert.doesNotMatch(text, /[^\\]_transit/);
   });
 
+  it('every mini app target resolves to a real route', async () => {
+    const { MINI_APP_PATHS } = await import('../src/lib/telegram-menu');
+    const { existsSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    for (const [key, path] of Object.entries(MINI_APP_PATHS)) {
+      const page = resolve(root, 'src/app', `.${path}`, 'page.tsx');
+      assert.ok(existsSync(page), `mini app ${key} must map to an existing page (got ${path})`);
+    }
+  });
+
   it('underscore shop names are escaped in picker and home', async () => {
     const { buildShopPicker, buildShopHome } = await import('../src/lib/telegram-menu');
     const shops = [{ shop_id: 's1', shop_name: 'Shop_A', role: 'owner', source: 'users' as const }];
