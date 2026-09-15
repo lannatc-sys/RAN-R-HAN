@@ -148,6 +148,41 @@ export async function settlementText(
   );
 }
 
+/** Daily summary for owned riders: offers by outcome + deliveries by state. */
+export async function riderSummaryText(
+  admin: AdminClient,
+  identity: ResolvedTelegramIdentity
+): Promise<string> {
+  if (identity.riders.length === 0) return '🛵 คุณยังไม่มี rider identity ที่ผูกไว้ค่ะ';
+  const riderIds = identity.riders.map((r) => r.rider_id);
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  const { data: offers } = await admin
+    .from('dispatch_offers')
+    .select('status')
+    .in('rider_id', riderIds)
+    .gte('offered_at', dayStart.toISOString());
+  const { data: orders } = await admin
+    .from('orders')
+    .select('dispatch_status')
+    .in('assigned_rider_id', riderIds)
+    .gte('created_at', dayStart.toISOString());
+  const count = (rows: any[] | null, key: string, val: string) =>
+    (rows ?? []).filter((r) => r[key] === val).length;
+  const accepted = count(offers, 'status', 'accepted');
+  const rejected = count(offers, 'status', 'rejected');
+  const expired = count(offers, 'status', 'expired');
+  const delivered = count(orders, 'dispatch_status', 'delivered');
+  const active = (orders ?? []).filter((o: any) =>
+    ['assigned', 'in_transit'].includes(o.dispatch_status)
+  ).length;
+  return (
+    `🧾 *สรุปงานวันนี้*\n` +
+    `รับงาน: ${accepted} · ปฏิเสธ: ${rejected} · หมดเวลา: ${expired}\n` +
+    `ส่งสำเร็จ: ${delivered} · กำลังส่ง: ${active}`
+  );
+}
+
 /** 6. My verified account: identity, roles, shops, rider. */
 export function accountText(identity: ResolvedTelegramIdentity): string {
   const shops =

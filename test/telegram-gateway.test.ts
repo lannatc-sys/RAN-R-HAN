@@ -152,10 +152,13 @@ describe('Role menu: buttons follow the verified roles only', () => {
     const id = await resolveTelegramIdentity(admin, 111);
     assert.ok(id);
     const menu = buildMainMenu(id);
-    assert.match(JSON.stringify(menu.keyboard), /s:list/);
-    assert.match(JSON.stringify(menu.keyboard), /ร้านค้า/);
-    assert.match(JSON.stringify(menu.keyboard), /ทั่วไป/);
-    assert.match(JSON.stringify(menu.keyboard), /m:noop/);
+    assert.match(JSON.stringify(menu.keyboard), /m:shop/);
+    assert.doesNotMatch(JSON.stringify(menu.keyboard), /s:list/);
+    const { buildShopMenu } = await import('../src/lib/telegram-menu');
+    const sub = JSON.stringify(buildShopMenu(id).keyboard);
+    assert.match(sub, /s:list/);
+    assert.match(sub, /o:mine/);
+    assert.match(sub, /st:menu/);
     const picker = buildShopPicker(id.shops);
     assert.equal(picker.keyboard.length, 2);
   });
@@ -172,10 +175,13 @@ describe('Role menu: buttons follow the verified roles only', () => {
     const id = await resolveTelegramIdentity(admin, 333);
     assert.ok(id);
     const dump = JSON.stringify(buildMainMenu(id).keyboard);
-    assert.match(dump, /r:status/);
-    assert.match(dump, /r:offers/);
-    assert.match(dump, /ไรเดอร์/);
+    assert.match(dump, /m:rider/);
     assert.doesNotMatch(dump, /s:list|🏪 ร้านค้า/);
+    const { buildRiderMenu } = await import('../src/lib/telegram-menu');
+    const sub = JSON.stringify(buildRiderMenu().keyboard);
+    assert.match(sub, /r:offers/);
+    assert.match(sub, /r:summary/);
+    assert.doesNotMatch(sub, /r:status/);
   });
 
   it('identity without roles sees only account and help', async () => {

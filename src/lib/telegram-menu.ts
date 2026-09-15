@@ -53,7 +53,7 @@ function sectionHeader(label: string): TelegramButton {
   return { text: `━━━ ${label} ━━━`, callback_data: 'm:noop' };
 }
 
-/** Main menu for a verified identity. Unverified callers never reach here. */
+/** Main menu: top-level sections drill down into submenus. */
 export function buildMainMenu(identity: ResolvedTelegramIdentity): {
   text: string;
   keyboard: TelegramKeyboard;
@@ -63,19 +63,10 @@ export function buildMainMenu(identity: ResolvedTelegramIdentity): {
   const hasRider = identity.riders.length > 0;
 
   if (hasShops) {
-    rows.push([sectionHeader('🏪 ร้านค้า')]);
-    rows.push([{ text: '📦 ออเดอร์ของฉัน', callback_data: 'o:mine' }]);
-    rows.push([
-      identity.shops.length === 1
-        ? { text: '🏪 ร้านค้าของฉัน', callback_data: `s:${identity.shops[0].shop_id}` }
-        : { text: '🏪 ร้านค้าของฉัน', callback_data: 's:list' },
-    ]);
-    rows.push([{ text: '💰 รายได้ / Settlement', callback_data: 'st:menu' }]);
+    rows.push([{ text: '🏪 ร้านค้า', callback_data: 'm:shop' }]);
   }
   if (hasRider) {
-    rows.push([sectionHeader('🛵 ไรเดอร์')]);
-    rows.push([{ text: '📊 สถานะไรเดอร์', callback_data: 'r:status' }]);
-    rows.push([{ text: '📋 งานของฉัน', callback_data: 'r:offers' }]);
+    rows.push([{ text: '🛵 ไรเดอร์', callback_data: 'm:rider' }]);
   }
   if (identity.is_superadmin) {
     rows.push([sectionHeader('🛠️ ผู้ดูแลระบบ')]);
@@ -83,8 +74,7 @@ export function buildMainMenu(identity: ResolvedTelegramIdentity): {
     rows.push([{ text: '📍 GPS / พื้นที่บริการ', callback_data: 'map:menu' }]);
     rows.push([{ text: '🔔 การแจ้งเตือน', callback_data: 'n:menu' }]);
   }
-  rows.push([sectionHeader('👤 ทั่วไป')]);
-  rows.push([{ text: '👤 บัญชีของฉัน', callback_data: 'm:acct' }]);
+  rows.push([{ text: '👤 ข้อมูลส่วนตัว', callback_data: 'm:acct' }]);
   rows.push([{ text: '❓ ช่วยเหลือ', callback_data: 'm:help' }]);
 
   const roleBits: string[] = [];
@@ -97,6 +87,41 @@ export function buildMainMenu(identity: ResolvedTelegramIdentity): {
   return {
     text: `🏠 *เมนูหลัก*\nสิทธิ์ของคุณ: ${roleBits.join(' · ') || 'ผู้ใช้ทั่วไป'}`,
     keyboard: rows,
+  };
+}
+
+/** Shop submenu: orders, my shops, settlement. */
+export function buildShopMenu(identity: ResolvedTelegramIdentity): {
+  text: string;
+  keyboard: TelegramKeyboard;
+} {
+  return {
+    text: '🏪 *ร้านค้า*',
+    keyboard: [
+      [{ text: '📦 ออเดอร์ของฉัน', callback_data: 'o:mine' }],
+      [
+        identity.shops.length === 1
+          ? { text: '🏬 ร้านค้าของฉัน', callback_data: `s:${identity.shops[0].shop_id}` }
+          : { text: '🏬 ร้านค้าของฉัน', callback_data: 's:list' },
+      ],
+      [{ text: '💰 รายได้ / Settlement', callback_data: 'st:menu' }],
+      [{ text: '◀️ กลับเมนูหลัก', callback_data: 'm:menu' }],
+    ],
+  };
+}
+
+/** Rider submenu: jobs and daily summary (no self-status check). */
+export function buildRiderMenu(): {
+  text: string;
+  keyboard: TelegramKeyboard;
+} {
+  return {
+    text: '🛵 *ไรเดอร์*',
+    keyboard: [
+      [{ text: '📋 งานของฉัน', callback_data: 'r:offers' }],
+      [{ text: '🧾 สรุปงานทั้งวัน', callback_data: 'r:summary' }],
+      [{ text: '◀️ กลับเมนูหลัก', callback_data: 'm:menu' }],
+    ],
   };
 }
 

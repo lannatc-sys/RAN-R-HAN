@@ -11,7 +11,9 @@ import {
   HELP_TEXT,
   VERIFY_PROMPT_TEXT,
   buildMainMenu,
+  buildRiderMenu,
   buildShopHome,
+  buildShopMenu,
   buildShopPicker,
   miniAppButton,
 } from '@/lib/telegram-menu';
@@ -20,6 +22,7 @@ import {
   myOrdersText,
   riderJobsText,
   riderStatusText,
+  riderSummaryText,
   settlementText,
   shopStatusText,
 } from '@/lib/telegram-queries';
@@ -119,6 +122,26 @@ async function handleCallback(admin: any, query: any) {
     await sendMenu(chatId, identity);
     return;
   }
+  if (data === 'm:shop') {
+    await ack();
+    if (identity.shops.length === 0) {
+      await send('🏪 คุณยังไม่มีร้านที่ดูแลค่ะ');
+      return;
+    }
+    const menu = buildShopMenu(identity);
+    await send(menu.text, menu.keyboard);
+    return;
+  }
+  if (data === 'm:rider') {
+    await ack();
+    if (identity.riders.length === 0) {
+      await send('🛵 คุณยังไม่มี rider identity ที่ผูกไว้ค่ะ');
+      return;
+    }
+    const menu = buildRiderMenu();
+    await send(menu.text, menu.keyboard);
+    return;
+  }
   if (data === 'm:acct') {
     await ack();
     await send(accountText(identity));
@@ -201,6 +224,11 @@ async function handleCallback(admin: any, query: any) {
   if (data === 'r:status') {
     await ack();
     await send(await riderStatusText(admin, identity));
+    return;
+  }
+  if (data === 'r:summary') {
+    await ack();
+    await send(await riderSummaryText(admin, identity));
     return;
   }
   if (data === 'r:offers') {
