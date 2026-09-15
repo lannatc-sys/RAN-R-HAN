@@ -3,9 +3,12 @@
  *
  * Every query is scoped by a verified identity resolved up front. Outputs
  * are minimized: order numbers and statuses only — never customer phones,
- * names, or delivery addresses in chat.
+ * names, or delivery addresses in chat. Values coming from the database
+ * (names, statuses) are escaped for legacy Telegram Markdown so strings
+ * like `in_transit` cannot break message parsing.
  */
 import type { ResolvedTelegramIdentity } from './telegram-identity';
+import { escapeTelegramMarkdown as esc } from './telegram';
 
 type AdminClient = {
   from: (table: string) => any;
@@ -15,7 +18,7 @@ const ACTIVE_DISPATCH = ['assigned', 'in_transit'];
 
 function orderLine(o: any): string {
   const no = String(o.order_no ?? '?').padStart(4, '0');
-  return `#${no} · ${o.dispatch_status ?? o.status ?? '-'}`;
+  return `#${esc(no)} · ${esc(o.dispatch_status ?? o.status ?? '-')}`;
 }
 
 /** 1. My active orders across all shops I hold. */
@@ -55,7 +58,7 @@ export async function shopStatusText(
     .in('dispatch_status', ACTIVE_DISPATCH);
   const active = (actives ?? []).length;
   const open = shop?.is_open ? '🟢 เปิด' : '🔴 ปิด';
-  return `🏪 *${shopName}*\nสถานะ: ${open}\nActive orders: ${active} งาน`;
+  return `🏪 *${esc(shopName)}*\nสถานะ: ${open}\nActive orders: ${active} งาน`;
 }
 
 /** 3. My rider identities: session, GPS age/stale, inside/outside. */
@@ -88,7 +91,7 @@ export async function riderStatusText(
       gps = stale ? `GPS เก่า (${Math.floor(ageS / 60)} นาที)` : `GPS ปัจจุบัน (${ageS} วินาที)`;
       area = loc.outside_area_since ? ' · อยู่นอกเขต' : ' · อยู่ในเขต';
     }
-    lines.push(`• *${r.display_name}* (${r.shop_name}): ${state} · ${gps}${area}`);
+    lines.push(`• *${esc(r.display_name)}* (${esc(r.shop_name)}): ${state} · ${gps}${area}`);
   }
   return `🛵 *สถานะไรเดอร์*\n` + lines.join('\n');
 }
@@ -118,8 +121,9 @@ export async function riderJobsText(
   const out: string[] = [];
   if (live.length > 0) {
     for (const o of live) {
-      const no = String(o.orders?.order_no ?? '?').padStart(4, '0');
-      out.push(`• offer #${no} (id \`${o.id}\`)`);
+      const orderRef = Array.isArray(o.orders) ? o.orders[0] : o.orders;
+      const no = String(orderRef?.order_no ?? '?').padStart(4, '0');
+      out.push(`• offer #${esc(no)} (id \`${o.id}\`)`);
     }
   }
   for (const d of deliveries ?? []) out.push(`• ส่งอยู่ ${orderLine(d)}`);
@@ -140,10 +144,10 @@ export async function settlementText(
     .order('settlement_date', { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (error || !data) return `💰 *${shopName}*\nยังไม่มีข้อมูล settlement ค่ะ`;
+  if (error || !data) return `💰 *${esc(shopName)}*\nยังไม่มีข้อมูล settlement ค่ะ`;
   return (
-    `💰 *Settlement ${shopName}*\n` +
-    `วันที่: ${data.settlement_date} (${data.status})\n` +
+    `💰 *Settlement ${esc(shopName)}*\n` +
+    `วันที่: ${esc(data.settlement_date)} (${esc(data.status)})\n` +
     `ออเดอร์: ${data.total_orders} · จ่ายไรเดอร์: ${data.total_rider_payout}`
   );
 }
@@ -187,16 +191,16 @@ export async function riderSummaryText(
 export function accountText(identity: ResolvedTelegramIdentity): string {
   const shops =
     identity.shops.length > 0
-      ? identity.shops.map((s) => `• ${s.shop_name} (${s.role})`).join('\n')
+      ? identity.shops.map((s) => `• ${esc(s.shop_name)} (${esc(s.role)})`).join('\n')
       : '• -';
   const riders =
     identity.riders.length > 0
-      ? identity.riders.map((r) => `• ${r.display_name} @ ${r.shop_name}`).join('\n')
+      ? identity.riders.map((r) => `• ${esc(r.display_name)} @ ${esc(r.shop_name)}`).join('\n')
       : '• -';
   return (
     `👤 *บัญชีของฉัน*\n` +
-    `ยืนยันเมื่อ: ${identity.verified_at}\n` +
-    `บทบาทหลัก: ${identity.is_superadmin ? 'superadmin' : identity.role}\n` +
+    `ยืนยันเมื่อ: ${esc(identity.verified_at)}\n` +
+    `บทบาทหลัก: ${esc(identity.is_superadmin ? 'superadmin' : identity.role)}\n` +
     `ร้านที่ดูแล:\n${shops}\n` +
     `ไรเดอร์:\n${riders}`
   );

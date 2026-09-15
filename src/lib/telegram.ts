@@ -117,6 +117,17 @@ export async function sendTelegramMessage(
 }
 
 /**
+ * Escape ข้อความจากฐานข้อมูลก่อนใส่ใน Markdown เก่า
+ *
+ * legacy Markdown ตี `_` (เช่นใน `in_transit`) ว่าเปิด italic ถ้าไม่มีตัวปิด
+ * Telegram จะตอบ 400 แล้วข้อความหายเงียบ จึงต้อง escape ค่าที่มาจาก DB
+ * ทุกครั้ง ข้อความคงที่ในโค้ดไม่ต้อง escape
+ */
+export function escapeTelegramMarkdown(value: string | number | null | undefined): string {
+  return String(value ?? '').replace(/([\\_*`[\]])/g, '\\$1');
+}
+
+/**
  * ตอบ callback_query เพื่อปิดสถานะ loading บนปุ่ม
  */
 export async function answerTelegramCallback(

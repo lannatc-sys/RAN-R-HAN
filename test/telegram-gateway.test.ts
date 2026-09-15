@@ -246,6 +246,40 @@ describe('Queries: empty states and PII minimization', () => {
   });
 });
 
+describe('Markdown safety: dynamic values never break Telegram parsing', () => {
+  it('escapes legacy-Markdown metacharacters', async () => {
+    const { escapeTelegramMarkdown } = await import('../src/lib/telegram');
+    assert.equal(escapeTelegramMarkdown('in_transit'), 'in\\_transit');
+    assert.equal(escapeTelegramMarkdown('a*b`c[d]e\\f'), 'a\\*b\\`c\\[d\\]e\\\\f');
+    assert.equal(escapeTelegramMarkdown(null), '');
+  });
+
+  it('in_transit dispatch status survives Telegram parsing', async () => {
+    const { riderJobsText } = await import('../src/lib/telegram-queries');
+    const admin = mockAdmin({
+      ...baseFixtures(),
+      orders: [{
+        order_no: 'TG9001', dispatch_status: 'in_transit', assigned_rider_id: 'rider-1',
+        shop_id: 'shop-a',
+      }],
+    });
+    const text = await riderJobsText(admin, {
+      telegram_user_id: 333, user_id: 'u-rider', role: 'staff', is_superadmin: false,
+      verified_at: '',
+      shops: [], riders: [{ rider_id: 'rider-1', shop_id: 'shop-a', shop_name: 'ร้านเอ', display_name: 'ไรเดอร์หนึ่ง' }],
+    });
+    assert.match(text, /in\\_transit/);
+    assert.doesNotMatch(text, /[^\\]_transit/);
+  });
+
+  it('underscore shop names are escaped in picker and home', async () => {
+    const { buildShopPicker, buildShopHome } = await import('../src/lib/telegram-menu');
+    const shops = [{ shop_id: 's1', shop_name: 'Shop_A', role: 'owner', source: 'users' as const }];
+    assert.equal(buildShopPicker(shops).keyboard[0][0].text, 'Shop\\_A (owner)');
+    assert.match(buildShopHome(shops[0]).text, /Shop\\_A/);
+  });
+});
+
 describe('Routing: verified holders only, never raw chat ids', () => {
   it('shop routing reaches holders and excludes blanket superadmin', async () => {
     const { getVerifiedChatsForShop } = await import('../src/lib/telegram-routing');

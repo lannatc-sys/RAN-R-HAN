@@ -10,6 +10,7 @@ import type {
   ResolvedTelegramIdentity,
   TelegramShopMembership,
 } from './telegram-identity';
+import { escapeTelegramMarkdown as esc } from './telegram';
 
 export interface TelegramButton {
   text: string;
@@ -133,7 +134,7 @@ export function buildShopPicker(shops: TelegramShopMembership[]): {
   return {
     text: '🏪 *เลือกร้าน* — ทุกคำสั่งถัดไปจะใช้ร้านนี้',
     keyboard: shops.map((s) => [
-      { text: `${s.shop_name} (${s.role})`, callback_data: `s:${s.shop_id}` },
+      { text: `${esc(s.shop_name)} (${esc(s.role)})`, callback_data: `s:${s.shop_id}` },
     ]),
   };
 }
@@ -154,7 +155,7 @@ export function buildShopHome(shop: TelegramShopMembership): {
   const settings = miniAppButton('⚙️ ตั้งค่าร้าน', 'settings', shop.shop_id);
   if (settings) keyboard.push([settings]);
   keyboard.push([{ text: '◀️ กลับเมนูหลัก', callback_data: 'm:menu' }]);
-  return { text: `🏪 *${shop.shop_name}*`, keyboard };
+  return { text: `🏪 *${esc(shop.shop_name)}*`, keyboard };
 }
 
 /** Static help text (no role data inside). */
