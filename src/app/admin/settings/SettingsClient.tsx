@@ -114,6 +114,9 @@ export function SettingsClient({
   const [promptpayId] = useState(shop.promptpay_id || '');
   const [promptpayName] = useState(shop.promptpay_name || '');
   const [serviceCharge, setServiceCharge] = useState(shop.service_charge.toString());
+  const [deliveryBaseFee, setDeliveryBaseFee] = useState(
+    (shop.delivery_base_fee ?? 0).toString()
+  );
   const [vatMode, setVatMode] = useState(shop.vat_mode);
 
   // PromptPay change request State (ล็อกไม่ให้แก้ตรง ต้องยื่นคำขออนุมัติ)
@@ -405,6 +408,7 @@ export function SettingsClient({
       name,
       service_charge: parseFloat(serviceCharge) || 0,
       vat_mode: vatMode,
+      delivery_base_fee: parseFloat(deliveryBaseFee) || 0,
     });
 
     setIsSavingShop(false);
@@ -511,7 +515,7 @@ export function SettingsClient({
     setIsTestingTelegram(true);
     setTestResult(null);
 
-    const res = await sendTelegramTestAction(testChatId.trim(), shop.name);
+    const res = await sendTelegramTestAction(shop.id, testChatId.trim(), shop.name);
     setIsTestingTelegram(false);
 
     if (res.success) {
@@ -1637,6 +1641,25 @@ export function SettingsClient({
                 onChange={(e) => setServiceCharge(e.target.value)}
                 className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                ค่าส่งต่อออเดอร์ (บาท)
+              </label>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                max="1000"
+                value={deliveryBaseFee}
+                onChange={(e) => setDeliveryBaseFee(e.target.value)}
+                placeholder="เช่น 20"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <span className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 block">
+                คิดเฉพาะออเดอร์แบบจัดส่ง ออเดอร์ที่สั่งไปแล้วจะไม่เปลี่ยนตามค่าใหม่
+              </span>
             </div>
 
             <div>

@@ -141,6 +141,34 @@ describe('Server action ที่ใช้ admin client ต้องตรวจ
   });
 });
 
+describe('Telegram test action ต้องผูกกับร้านที่ผู้ใช้มีสิทธิ์', () => {
+  it('ตรวจ login และ has_shop_access ก่อนส่งข้อความออกไป', () => {
+    const fn = extractFn(source('src/app/actions/telegram.ts'), 'sendTelegramTestAction');
+    const authIdx = fn.indexOf('auth.getUser()');
+    const accessIdx = fn.indexOf('has_shop_access');
+    const sendIdx = fn.indexOf('sendTestTelegramMessage(');
+
+    assert.ok(authIdx !== -1, 'ต้องตรวจ session ด้วย auth.getUser()');
+    assert.ok(accessIdx !== -1, 'ต้องตรวจ has_shop_access ของร้าน');
+    assert.ok(sendIdx !== -1, 'ต้องยังส่งข้อความทดสอบได้');
+    assert.ok(authIdx < accessIdx, 'ต้องตรวจ login ก่อนตรวจสิทธิ์ร้าน');
+    assert.ok(accessIdx < sendIdx, 'ต้องตรวจสิทธิ์ร้านก่อนส่งข้อความออกไป');
+    assert.match(fn, /lookup_shop_id:\s*shopId/);
+    assert.match(fn.slice(authIdx, accessIdx), /if\s*\(\s*userError\s*\|\|\s*!user\s*\)\s*\{\s*return\b/);
+    assert.match(fn.slice(accessIdx, sendIdx), /if\s*\(\s*!hasAccess\s*\)\s*\{\s*return\b/);
+  });
+
+  it('caller ส่ง shop.id ของหน้าตั้งค่ามาให้ action ตรวจสิทธิ์', () => {
+    const settings = source('src/app/admin/settings/SettingsClient.tsx');
+    assert.match(settings, /sendTelegramTestAction\(\s*shop\.id\s*,/);
+  });
+
+  it('ไม่คืนข้อความ exception ดิบกลับ client', () => {
+    const fn = extractFn(source('src/app/actions/telegram.ts'), 'sendTelegramTestAction');
+    assert.ok(!/error:\s*err(?:or)?\.message/.test(fn));
+  });
+});
+
 describe('ตรรกะ cron ต้องไม่อยู่ในไฟล์ use server', () => {
   it('dispatch.ts ไม่ export timeoutOfferAction แล้ว', () => {
     const dispatch = source('src/app/actions/dispatch.ts');

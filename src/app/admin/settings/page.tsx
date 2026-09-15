@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { cookies } from 'next/headers';
 import { SettingsClient } from './SettingsClient';
+import { TelegramLinkCard } from '@/components/telegram/TelegramLinkCard';
 import { Shop } from '@/lib/types';
 import { redirect } from 'next/navigation';
 import { checkIsSuperadmin } from '@/app/actions/superadmin';
@@ -72,14 +73,17 @@ export default async function AdminSettingsPage() {
   const todayOrderCount = validOrders.length;
 
   return (
-    <SettingsClient
-      shop={shop as Shop}
-      hasSlipCredentials={!!creds}
-      slipProvider={creds?.slip_check_provider || 'slipok'}
-      initialApiUrl={creds?.api_url || ''}
-      todaySales={todaySales}
-      todayOrderCount={todayOrderCount}
-      isPrivacyMode={isPrivacyMode}
-    />
+    <div className="space-y-4">
+      <SettingsClient
+        shop={shop as Shop}
+        hasSlipCredentials={!!creds}
+        slipProvider={creds?.slip_check_provider || 'slipok'}
+        initialApiUrl={creds?.api_url || ''}
+        todaySales={todaySales}
+        todayOrderCount={todayOrderCount}
+        isPrivacyMode={isPrivacyMode}
+      />
+      <TelegramLinkCard />
+    </div>
   );
 }

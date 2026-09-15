@@ -104,6 +104,15 @@ async function runDatabaseSetup() {
     await runMigrationFile(client, migrationsDir, '20260914000004_read_shop_area_polygons.sql', '1.22', 'Shop area polygons read RPC (GeoJSON) applied.');
     await runMigrationFile(client, migrationsDir, '20260914000005_enforce_polygon_service_area.sql', '1.23', 'Order intake enforcement switched to the polygon-aware predicate applied.');
     await runMigrationFile(client, migrationsDir, '20260914000006_tighten_customer_data_rls.sql', '1.24', 'Customer data RLS tightened: orders/order_items/payments no longer readable by anon.');
+    await runMigrationFile(client, migrationsDir, '20260914000007_rider_polygon_enforcement.sql', '1.25', 'Rider start, GPS report, sweep, settings, and geo updates switched to the central area predicate.');
+    // 00008 is reserved for Claude's fixed delivery-fee migration. The runner
+    // skips a missing file, so this registration is safe until both lanes merge.
+    await runMigrationFile(client, migrationsDir, '20260914000008_delivery_fee.sql', '1.26', 'Fixed per-shop delivery fee and order snapshot applied.');
+    await runMigrationFile(client, migrationsDir, '20260914000009_rider_live_monitor.sql', '1.27', 'Superadmin Rider Live Monitor snapshot RPC applied.');
+    await runMigrationFile(client, migrationsDir, '20260914000010_reject_stale_dispatch_locations.sql', '1.28', 'Stale rider GPS locations excluded from dispatch selection.');
+    await runMigrationFile(client, migrationsDir, '20260914000011_pod_completes_order.sql', '1.29', 'POD delivery completion closes the order lifecycle applied.');
+    await runMigrationFile(client, migrationsDir, '20260914000012_telegram_identity_members.sql', '1.30', 'Multi-shop membership and verified Telegram identity applied.');
+    await runMigrationFile(client, migrationsDir, '20260914000013_telegram_actor_actions.sql', '1.31', 'Telegram actor wrappers for offer response and shop open status applied.');
 
     // 2. Run seed data (seed.sql) - Optional via --seed flag
     const shouldSeed = process.argv.includes('--seed');

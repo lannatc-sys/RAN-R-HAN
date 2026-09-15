@@ -38,9 +38,19 @@ export function maskDigits(value: string | null | undefined): string {
   return '•'.repeat(digits.length - 4) + digits.slice(-4);
 }
 
+export interface TelegramInlineButton {
+  text: string;
+  callback_data?: string;
+  web_app?: { url: string };
+}
+
 export interface SendTelegramOptions {
   parse_mode?: 'Markdown' | 'HTML';
   disable_web_page_preview?: boolean;
+  /** Inline keyboard / Mini App buttons. Payloads are re-verified server-side. */
+  reply_markup?: {
+    inline_keyboard: TelegramInlineButton[][];
+  };
 }
 
 /**
@@ -76,6 +86,7 @@ export async function sendTelegramMessage(
         text,
         parse_mode: options.parse_mode || 'Markdown',
         disable_web_page_preview: options.disable_web_page_preview ?? true,
+        ...(options.reply_markup ? { reply_markup: options.reply_markup } : {}),
       }),
       signal: controller.signal,
     });
@@ -102,6 +113,40 @@ export async function sendTelegramMessage(
       success: false,
       error: err.name === 'AbortError' ? 'Telegram request timed out' : (err.message || 'Unknown network error'),
     };
+  }
+}
+
+/**
+ * Escape ข้อความจากฐานข้อมูลก่อนใส่ใน Markdown เก่า
+ *
+ * legacy Markdown ตี `_` (เช่นใน `in_transit`) ว่าเปิด italic ถ้าไม่มีตัวปิด
+ * Telegram จะตอบ 400 แล้วข้อความหายเงียบ จึงต้อง escape ค่าที่มาจาก DB
+ * ทุกครั้ง ข้อความคงที่ในโค้ดไม่ต้อง escape
+ */
+export function escapeTelegramMarkdown(value: string | number | null | undefined): string {
+  return String(value ?? '').replace(/([\\_*`[\]])/g, '\\$1');
+}
+
+/**
+ * ตอบ callback_query เพื่อปิดสถานะ loading บนปุ่ม
+ */
+export async function answerTelegramCallback(
+  callbackQueryId: string,
+  text?: string
+): Promise<void> {
+  const token = getTelegramBotToken();
+  if (!token || !callbackQueryId) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        callback_query_id: callbackQueryId,
+        ...(text ? { text } : {}),
+      }),
+    });
+  } catch (err: any) {
+    console.error('[Telegram] answerCallbackQuery failed:', err?.message || err);
   }
 }
 

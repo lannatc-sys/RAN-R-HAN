@@ -32,16 +32,30 @@ const ServiceAreaLeafletCanvas = dynamic(
   }
 );
 
+function patchShopAreaPin(
+  shops: ShopAreaPin[],
+  shopId: string,
+  patch: Partial<ShopAreaPin>
+) {
+  return shops.map((shop) => (shop.id === shopId ? { ...shop, ...patch } : shop));
+}
+
 export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
+  const [shopState, setShopState] = useState<ShopAreaPin[]>(shops);
+
+  useEffect(() => {
+    setShopState(shops);
+  }, [shops]);
+
   // ต้อง memo ไม่งั้น array ได้ identity ใหม่ทุก render และ effect ที่มันอยู่ใน deps
   // จะวนเรียก server action ไม่จบ (setSeed -> render -> located ใหม่ -> effect -> โหลดอีก)
   const located = useMemo(
-    () => shops.filter((s) => s.shop_lat !== null && s.shop_lng !== null),
-    [shops]
+    () => shopState.filter((s) => s.shop_lat !== null && s.shop_lng !== null),
+    [shopState]
   );
   const unlocated = useMemo(
-    () => shops.filter((s) => s.shop_lat === null || s.shop_lng === null),
-    [shops]
+    () => shopState.filter((s) => s.shop_lat === null || s.shop_lng === null),
+    [shopState]
   );
 
   const [selectedShopId, setSelectedShopId] = useState<string | null>(
@@ -49,7 +63,7 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
   );
   // เลือกจาก shops ทั้งหมด ไม่ใช่เฉพาะร้านที่ปักหมุดแล้ว ร้านใหม่ที่ยังไม่มีพิกัด
   // ต้องเลือกได้เพื่อจะปักหมุดครั้งแรก
-  const selected = shops.find((s) => s.id === selectedShopId) ?? null;
+  const selected = shopState.find((s) => s.id === selectedShopId) ?? null;
   const selectedIsLocated = selected
     ? selected.shop_lat !== null && selected.shop_lng !== null
     : false;
@@ -87,7 +101,7 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
         setSeedState('error');
         return;
       }
-      const shop = shops.find((x) => x.id === selectedShopId);
+      const shop = shopState.find((x) => x.id === selectedShopId);
       const blank = (kind: 'customer' | 'rider'): PolygonDraft => ({
         id: `${selectedShopId}-${kind}`,
         kind,
@@ -110,14 +124,14 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
     return () => {
       alive = false;
     };
-  }, [selectedShopId, shops, reloadToken]);
+  }, [selectedShopId, shopState, reloadToken]);
 
   useEffect(() => {
-    const shop = shops.find((x) => x.id === selectedShopId) ?? null;
+    const shop = shopState.find((x) => x.id === selectedShopId) ?? null;
     setEnabledDraft(Boolean(shop?.service_area_enabled));
     setServiceRadiusDraft(shop?.service_radius_m != null ? String(shop.service_radius_m) : '');
     setRiderRadiusDraft(shop?.rider_work_radius_m != null ? String(shop.rider_work_radius_m) : '');
-  }, [selectedShopId, shops]);
+  }, [selectedShopId, shopState]);
 
   const handleSaveSettings = () => {
     if (!selectedShopId) return;
@@ -129,6 +143,15 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
         serviceRadiusM: Number(serviceRadiusDraft),
         riderWorkRadiusM: Number(riderRadiusDraft),
       });
+      if (res.success && res.shop) {
+        const savedShop = res.shop;
+        setShopState((current) => patchShopAreaPin(current, selectedShopId, {
+          service_area_enabled: savedShop.service_area_enabled,
+          service_radius_m: savedShop.service_radius_m,
+          rider_work_radius_m: savedShop.rider_work_radius_m,
+        }));
+        setReloadToken((n) => n + 1);
+      }
       setMessage(
         res.success
           ? { ok: true, text: 'บันทึกการตั้งค่าพื้นที่เรียบร้อย' }
@@ -182,6 +205,13 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
         lng: lngLat[0],
         lat: lngLat[1],
       });
+      if (res.success && res.shop) {
+        const savedShop = res.shop;
+        setShopState((current) => patchShopAreaPin(current, selectedShopId, {
+          shop_lat: savedShop.shop_lat,
+          shop_lng: savedShop.shop_lng,
+        }));
+      }
       setMessage(
         res.success
           ? { ok: true, text: 'ปักหมุดร้านเรียบร้อย' }
@@ -206,6 +236,7 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
         kind: draft.kind,
         geojson,
       });
+      if (res.success) setReloadToken((n) => n + 1);
       setMessage(
         res.success
           ? { ok: true, text: 'บันทึกพื้นที่เรียบร้อย' }
@@ -235,7 +266,7 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
               ก่อนจึงจะปักหมุดครั้งแรกได้ ถ้ากรองเฉพาะร้านที่ปักหมุดแล้ว
               ร้านใหม่จะไม่มีทางเข้าสู่สถานะมีพิกัดเลย
             */}
-            {shops.map((shop) => {
+            {shopState.map((shop) => {
               const active = shop.id === selectedShopId;
               const isLocated = shop.shop_lat !== null && shop.shop_lng !== null;
               return (
@@ -466,7 +497,7 @@ export function ServiceAreaMapClient({ shops }: { shops: ShopAreaPin[] }) {
 
       {seedState === 'ready' && seed && (
         <ServiceAreaMapEditorShell
-          key={selectedShopId ?? 'none'}
+          key={`${selectedShopId ?? 'none'}:${reloadToken}`}
           mode="live"
           initialState={seed}
           renderCanvas={(props) => {

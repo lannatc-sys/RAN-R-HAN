@@ -91,6 +91,11 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
     finalTotal += vatAmount;
   }
 
+  // ค่าส่งคิดเฉพาะ delivery และบวกหลัง VAT ให้ตรงกับที่ create_pickup_order ทำ
+  // ยอดจริงมาจากฝั่งฐานข้อมูลเสมอ ตรงนี้แสดงให้ลูกค้าเห็นก่อนกดสั่งเท่านั้น
+  const deliveryFee = orderType === 'delivery' ? Number(shop.delivery_base_fee ?? 0) : 0;
+  finalTotal += deliveryFee;
+
   // ดึงพิกัด GPS ผ่าน HTML5 Geolocation API
   const handleGetGPS = () => {
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
@@ -694,6 +699,12 @@ export function CheckoutClient({ shop }: CheckoutClientProps) {
                 <div className="flex justify-between">
                   <span>{lang === 'th' ? 'ภาษีมูลค่าเพิ่ม' : 'VAT'} (7%)</span>
                   <span>{vatAmount.toLocaleString(lang === 'th' ? 'th-TH' : 'en-US')} {t.common.currency}</span>
+                </div>
+              )}
+              {deliveryFee > 0 && (
+                <div className="flex justify-between">
+                  <span>{lang === 'th' ? 'ค่าส่ง' : 'Delivery fee'}</span>
+                  <span>{deliveryFee.toLocaleString(lang === 'th' ? 'th-TH' : 'en-US')} {t.common.currency}</span>
                 </div>
               )}
               <div className="flex justify-between text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 pt-2 border-t border-stone-100 dark:border-stone-800">

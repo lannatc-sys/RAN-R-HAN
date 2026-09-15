@@ -222,7 +222,7 @@ export const ServiceAreaMapEditorShell: React.FC<ServiceAreaMapEditorShellProps>
 
         {/* Right Column: Detailed Polygon Properties & Precedence Status */}
         <div className="lg:col-span-5 xl:col-span-4">
-          <PolygonDraftPanel draft={currentDraft} readOnly={readOnly} />
+          <PolygonDraftPanel draft={currentDraft} readOnly={readOnly} mode={mode} />
         </div>
       </div>
     </div>

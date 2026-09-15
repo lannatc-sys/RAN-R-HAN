@@ -127,19 +127,42 @@ export async function updateShopTelegramSettingsAction(
  * ทดสอบส่งข้อความไปยัง Telegram Chat ID
  */
 export async function sendTelegramTestAction(
+  shopId: string,
   chatId: string,
   shopName?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: 'กรุณาเข้าสู่ระบบก่อนส่งข้อความทดสอบ' };
+    }
+
+    const { data: hasAccess, error: accessError } = await supabase.rpc('has_shop_access', {
+      lookup_shop_id: shopId,
+    });
+    if (accessError) {
+      console.error('sendTelegramTestAction access check failed:', accessError);
+      return { success: false, error: 'ตรวจสอบสิทธิ์ร้านค้าไม่สำเร็จ' };
+    }
+    if (!hasAccess) {
+      return { success: false, error: 'ไม่มีสิทธิ์ส่งข้อความทดสอบสำหรับร้านค้านี้' };
+    }
+
     const cleanId = chatId.trim();
     if (!cleanId) {
       return { success: false, error: 'กรุณาระบุ Telegram Chat ID' };
     }
 
     const res = await sendTestTelegramMessage(cleanId, shopName || 'RAN-R-HAN');
-    return res;
+    if (!res.success) {
+      console.error('sendTelegramTestAction Telegram request failed:', res.error);
+      return { success: false, error: 'ส่งข้อความทดสอบไม่สำเร็จ กรุณาตรวจสอบ Chat ID และกด Start บอทก่อน' };
+    }
+    return { success: true };
   } catch (err: any) {
     console.error('sendTelegramTestAction error:', err);
-    return { success: false, error: err.message || 'Failed to send test message' };
+    return { success: false, error: 'ส่งข้อความทดสอบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' };
   }
 }

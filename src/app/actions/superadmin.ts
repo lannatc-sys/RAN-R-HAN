@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import type { PlatformStats, Shop, ShopStatus } from '@/lib/types';
+import type { RiderLiveMonitorRow } from '@/lib/rider-live-monitor';
 
 function safeRevalidate(path: string) {
   try {
@@ -202,6 +203,17 @@ export interface ShopAreaPin {
   rider_work_radius_m: number | null;
 }
 
+type ShopLocationResult = {
+  shop_lat: number;
+  shop_lng: number;
+};
+
+type ShopAreaSettingsResult = {
+  service_area_enabled: boolean;
+  service_radius_m: number;
+  rider_work_radius_m: number;
+};
+
 /**
  * ร้านทั้งหมดสำหรับชั้นปักหมุดบนแผนที่พื้นที่ให้บริการ
  *
@@ -261,7 +273,7 @@ export async function setShopLocationAction(input: {
   shopId: string;
   lat: number;
   lng: number;
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; shop?: ShopLocationResult; error?: string }> {
   try {
     const { isSuperadmin } = await checkIsSuperadmin();
     if (!isSuperadmin) {
@@ -282,7 +294,10 @@ export async function setShopLocationAction(input: {
     if (error) throw error;
 
     revalidatePath('/superadmin/service-area-map');
-    return { success: true };
+    return {
+      success: true,
+      shop: { shop_lat: input.lat, shop_lng: input.lng },
+    };
   } catch (err: any) {
     console.error('setShopLocationAction error:', err);
     return { success: false, error: 'ปักหมุดร้านไม่สำเร็จ' };
@@ -343,7 +358,7 @@ export async function setShopServiceAreaSettingsAction(input: {
   enabled: boolean;
   serviceRadiusM: number;
   riderWorkRadiusM: number;
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; shop?: ShopAreaSettingsResult; error?: string }> {
   try {
     const { isSuperadmin } = await checkIsSuperadmin();
     if (!isSuperadmin) {
@@ -360,7 +375,7 @@ export async function setShopServiceAreaSettingsAction(input: {
     }
 
     const supabase = await createClient();
-    const { error } = await supabase.rpc('set_shop_service_area_settings', {
+    const { data, error } = await supabase.rpc('set_shop_service_area_settings', {
       p_shop_id: input.shopId,
       p_enabled: input.enabled,
       p_service_radius_m: input.serviceRadiusM,
@@ -370,7 +385,18 @@ export async function setShopServiceAreaSettingsAction(input: {
     if (error) throw error;
 
     revalidatePath('/superadmin/service-area-map');
-    return { success: true };
+    const saved = (data ?? {}) as Partial<ShopAreaSettingsResult>;
+    return {
+      success: true,
+      shop: {
+        service_area_enabled:
+          saved.service_area_enabled ?? input.enabled,
+        service_radius_m: Number(saved.service_radius_m ?? input.serviceRadiusM),
+        rider_work_radius_m: Number(
+          saved.rider_work_radius_m ?? input.riderWorkRadiusM
+        ),
+      },
+    };
   } catch (err: unknown) {
     console.error('setShopServiceAreaSettingsAction error:', err);
     const msg = String((err as { message?: string })?.message || '');
@@ -424,6 +450,85 @@ export async function getShopAreaPolygonsAction(shopId: string): Promise<{
   } catch (err: any) {
     console.error('getShopAreaPolygonsAction error:', err);
     return { success: false, error: 'โหลดพื้นที่ที่บันทึกไว้ไม่สำเร็จ' };
+  }
+}
+
+/**
+ * Snapshot สำหรับหน้าติดตามไรเดอร์ของ superadmin
+ *
+ * ใช้ session client เพื่อให้ RPC ตรวจ auth.uid()/is_superadmin() ซ้ำที่ฐานข้อมูล
+ * และ RPC จำกัดคอลัมน์ไว้แล้ว จึงไม่ส่งเบอร์โทรหรือข้อมูลลูกค้าออกมา
+ */
+export async function getRiderLiveMonitorSnapshotAction(): Promise<{
+  success: boolean;
+  riders?: RiderLiveMonitorRow[];
+  snapshotAt?: string;
+  error?: string;
+}> {
+  try {
+    const { isSuperadmin } = await checkIsSuperadmin();
+    if (!isSuperadmin) {
+      return { success: false, error: 'Unauthorized: เฉพาะผู้ดูแลระบบสูงสุดเท่านั้น' };
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_rider_live_monitor_snapshot', {
+      p_shop_id: null,
+    });
+    if (error) throw error;
+
+    const nullableNumber = (value: unknown) =>
+      value === null || value === undefined ? null : Number(value);
+    const riders: RiderLiveMonitorRow[] = ((data ?? []) as Record<string, unknown>[]).map(
+      (row) => ({
+        rider_id: String(row.rider_id),
+        shop_id: String(row.shop_id),
+        shop_name: String(row.shop_name),
+        display_name: String(row.display_name),
+        rider_status: String(row.rider_status),
+        work_session_id: row.work_session_id ? String(row.work_session_id) : null,
+        session_started_at: row.session_started_at ? String(row.session_started_at) : null,
+        lat: nullableNumber(row.lat),
+        lng: nullableNumber(row.lng),
+        accuracy: nullableNumber(row.accuracy),
+        heading: nullableNumber(row.heading),
+        speed: nullableNumber(row.speed),
+        location_updated_at: row.location_updated_at
+          ? String(row.location_updated_at)
+          : null,
+        gps_age_seconds: nullableNumber(row.gps_age_seconds),
+        location_is_stale: Boolean(row.location_is_stale),
+        outside_area_since: row.outside_area_since
+          ? String(row.outside_area_since)
+          : null,
+        inside_work_area:
+          row.inside_work_area === null || row.inside_work_area === undefined
+            ? null
+            : Boolean(row.inside_work_area),
+        service_area_enabled: Boolean(row.service_area_enabled),
+        uses_rider_polygon: Boolean(row.uses_rider_polygon),
+        active_order_id: row.active_order_id ? String(row.active_order_id) : null,
+        active_order_no: row.active_order_no ? String(row.active_order_no) : null,
+        active_order_dispatch_status: row.active_order_dispatch_status
+          ? String(row.active_order_dispatch_status)
+          : null,
+        active_offer_id: row.active_offer_id ? String(row.active_offer_id) : null,
+        active_offer_order_id: row.active_offer_order_id
+          ? String(row.active_offer_order_id)
+          : null,
+        active_offer_status: row.active_offer_status
+          ? String(row.active_offer_status)
+          : null,
+        active_offer_timeout_at: row.active_offer_timeout_at
+          ? String(row.active_offer_timeout_at)
+          : null,
+      })
+    );
+
+    return { success: true, riders, snapshotAt: new Date().toISOString() };
+  } catch (err: unknown) {
+    console.error('getRiderLiveMonitorSnapshotAction error:', err);
+    return { success: false, error: 'โหลดสถานะไรเดอร์ไม่สำเร็จ' };
   }
 }
 

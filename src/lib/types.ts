@@ -25,6 +25,8 @@ export interface Shop {
   expires_at: string | null;
   plan_expires_at?: string | null;
   service_charge: number;
+  /** ค่าส่งคงที่ต่อออเดอร์ของร้าน ถูก snapshot ลง orders.delivery_fee ตอนสร้างออเดอร์ */
+  delivery_base_fee?: number;
   vat_mode: VatMode;
   has_printer: boolean;
   device_mode: 'single_device' | 'multi_device';

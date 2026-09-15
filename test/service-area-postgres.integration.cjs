@@ -15,7 +15,12 @@ if (!isLocalDatabase && process.env.ALLOW_REMOTE_TEST_DATABASE !== 'true') {
   );
 }
 
-const ssl = isLocalDatabase ? false : { rejectUnauthorized: false };
+const ssl =
+  process.env.TEST_DATABASE_SSL === 'false'
+    ? false
+    : isLocalDatabase
+      ? false
+      : { rejectUnauthorized: false };
 const ids = {
   shopA: '10000000-0000-4000-8000-000000000001',
   shopB: '10000000-0000-4000-8000-000000000002',
@@ -24,6 +29,8 @@ const ids = {
   riderUser: '20000000-0000-4000-8000-000000000003',
   superadmin: '20000000-0000-4000-8000-000000000004',
   rider: '30000000-0000-4000-8000-000000000001',
+  offlineRider: '30000000-0000-4000-8000-000000000002',
+  activeOffer: '50000000-0000-4000-8000-000000000001',
   insideOrder: '40000000-0000-4000-8000-000000000001',
   outsideOrder: '40000000-0000-4000-8000-000000000002',
   missingCoordinateOrder: '40000000-0000-4000-8000-000000000003',
@@ -45,6 +52,7 @@ async function asRole(client, role, userId, callback) {
   await client.query('begin');
   try {
     await client.query("select set_config('request.jwt.claim.sub', $1, true)", [userId || '']);
+    await client.query("select set_config('request.jwt.claim.role', $1, true)", [role]);
     await client.query(`set local role ${role}`);
     const result = await callback();
     await client.query('commit');
@@ -102,8 +110,9 @@ async function seedFixtures(client) {
   );
   await client.query(
     `insert into public.riders (id, shop_id, auth_user_id, display_name, phone)
-     values ($1, $2, $3, 'P1 Rider', '0990000001')`,
-    [ids.rider, ids.shopA, ids.riderUser]
+     values ($1, $2, $3, 'P1 Rider', '0990000001'),
+            ($4, $2, null, 'P1 Offline Rider', '0990000002')`,
+    [ids.rider, ids.shopA, ids.riderUser, ids.offlineRider]
   );
 }
 
@@ -292,6 +301,195 @@ async function run() {
       admin.query('select public.start_rider_work_session($1, 13.7564, 100.5018, null)', [ids.shopA])
     );
     console.log('[PASS] rider can start work again after returning inside area');
+
+    // Polygon ของไรเดอร์ต้องมีผลใน start/report/sweep และการประเมินซ้ำ
+    // ตอนเปลี่ยน settings/พิกัดร้าน จุด OUTSIDE_SHAPE ยังอยู่ในรัศมี 12 กม.
+    const riderAreaBox = JSON.stringify({
+      type: 'Polygon',
+      coordinates: [[
+        [100.4950, 13.7500],
+        [100.5100, 13.7500],
+        [100.5100, 13.7600],
+        [100.4950, 13.7600],
+        [100.4950, 13.7500],
+      ]],
+    });
+    const INSIDE = { lat: 13.7564, lng: 100.5018 };
+    const OUTSIDE_SHAPE = { lat: 13.7700, lng: 100.5018 };
+    const readTimer = async () => {
+      const state = await admin.query(
+        `select l.outside_area_since is not null as timer_started,
+                s.status::text as session_status
+           from public.rider_current_locations l
+           left join public.rider_work_sessions s on s.id = l.work_session_id
+          where l.rider_id = $1`,
+        [ids.rider]
+      );
+      return state.rows[0];
+    };
+
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.close_rider_work_session(null)')
+    );
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query("select public.set_shop_service_area_polygon($1, 'rider', $2::jsonb)", [
+        ids.shopA,
+        riderAreaBox,
+      ])
+    );
+
+    await expectDatabaseError(
+      () => asRole(admin, 'authenticated', ids.riderUser, () =>
+        admin.query('select public.start_rider_work_session($1, $2, $3, null)', [
+          ids.shopA,
+          OUTSIDE_SHAPE.lat,
+          OUTSIDE_SHAPE.lng,
+        ])
+      ),
+      'OUTSIDE_WORK_AREA'
+    );
+    console.log('[PASS] rider polygon rejects start outside shape but inside radius');
+
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.start_rider_work_session($1, $2, $3, null)', [
+        ids.shopA,
+        INSIDE.lat,
+        INSIDE.lng,
+      ])
+    );
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.report_rider_location($1, $2, $3, null, null, null)', [
+        ids.shopA,
+        OUTSIDE_SHAPE.lat,
+        OUTSIDE_SHAPE.lng,
+      ])
+    );
+    assert.deepEqual(await readTimer(), { timer_started: true, session_status: 'open' });
+    console.log('[PASS] rider polygon starts outside timer from GPS report');
+
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.set_shop_service_area_settings($1, true, 6000, 50000)', [ids.shopA])
+    );
+    assert.equal((await readTimer()).timer_started, true);
+    console.log('[PASS] widening fallback radius does not override rider polygon');
+
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.update_shop_geo($1, $2, $3)', [
+        ids.shopA,
+        OUTSIDE_SHAPE.lat,
+        OUTSIDE_SHAPE.lng,
+      ])
+    );
+    assert.equal((await readTimer()).timer_started, true);
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.update_shop_geo($1, 13.7563, 100.5018)', [ids.shopA])
+    );
+    console.log('[PASS] moving shop pin does not override rider polygon');
+
+    await admin.query(
+      "update public.rider_current_locations set outside_area_since = now() - interval '16 minutes' where rider_id = $1",
+      [ids.rider]
+    );
+    const riderPolygonSweep = await asRole(admin, 'service_role', null, () =>
+      admin.query('select public.sweep_expired_rider_geofence_sessions() as closed_count')
+    );
+    assert.equal(riderPolygonSweep.rows[0].closed_count, 1);
+    console.log('[PASS] sweep closes a session using rider polygon');
+
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query("select public.set_shop_service_area_polygon($1, 'rider', null)", [ids.shopA])
+    );
+    await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select public.set_shop_service_area_settings($1, true, 6000, 12000)', [ids.shopA])
+    );
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.start_rider_work_session($1, $2, $3, null)', [
+        ids.shopA,
+        INSIDE.lat,
+        INSIDE.lng,
+      ])
+    );
+    await asRole(admin, 'authenticated', ids.riderUser, () =>
+      admin.query('select public.report_rider_location($1, $2, $3, null, null, null)', [
+        ids.shopA,
+        INSIDE.lat,
+        INSIDE.lng,
+      ])
+    );
+
+    // สร้างเฉพาะ fixture ใน disposable Docker DB เพื่อพิสูจน์ snapshot contract
+    await admin.query(
+      `update public.orders
+          set assigned_rider_id = $1, dispatch_status = 'in_transit'
+        where id = $2`,
+      [ids.rider, ids.insideOrder]
+    );
+    await admin.query(
+      `insert into public.dispatch_offers (
+         id, order_id, rider_id, shop_id, status, dispatch_round, timeout_at
+       ) values ($1, $2, $3, $4, 'offered', 1, now() + interval '1 minute')`,
+      [ids.activeOffer, ids.insideOrder, ids.offlineRider, ids.shopA]
+    );
+
+    await expectDatabaseError(
+      () => asRole(admin, 'authenticated', ids.ownerA, () =>
+        admin.query('select * from public.get_rider_live_monitor_snapshot(null)')
+      ),
+      'SHOP_ACCESS_DENIED'
+    );
+    console.log('[PASS] non-superadmin cannot read Rider Live Monitor snapshot');
+
+    const snapshot = await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select * from public.get_rider_live_monitor_snapshot(null)')
+    );
+    assert.equal(snapshot.rows.length, 2, 'snapshot must include online and offline riders');
+    const onlineRider = snapshot.rows.find((row) => row.rider_id === ids.rider);
+    const offlineRider = snapshot.rows.find((row) => row.rider_id === ids.offlineRider);
+    assert.ok(onlineRider.work_session_id);
+    assert.equal(
+      onlineRider.location_is_stale,
+      false,
+      `expected fresh GPS, got age=${onlineRider.gps_age_seconds}s updated=${onlineRider.location_updated_at}`
+    );
+    assert.equal(onlineRider.inside_work_area, true);
+    assert.equal(onlineRider.active_order_id, ids.insideOrder);
+    assert.equal(offlineRider.work_session_id, null);
+    assert.equal(offlineRider.lat, null);
+    assert.equal(offlineRider.active_offer_id, ids.activeOffer);
+    for (const forbidden of ['phone', 'delivery_address', 'customer_name', 'customer_phone']) {
+      assert.equal(forbidden in onlineRider, false, `snapshot leaked ${forbidden}`);
+    }
+    console.log('[PASS] snapshot includes every rider and active work without PII');
+
+    const freshEligible = await asRole(admin, 'service_role', null, () =>
+      admin.query(
+        'select * from public.find_available_riders($1, $2, $3, 12000, $4::uuid[])',
+        [ids.shopA, INSIDE.lat, INSIDE.lng, []]
+      )
+    );
+    assert.equal(freshEligible.rows.some((row) => row.id === ids.rider), true);
+
+    await admin.query(
+      "update public.rider_current_locations set updated_at = now() - interval '2 minutes' where rider_id = $1",
+      [ids.rider]
+    );
+    const staleEligible = await asRole(admin, 'service_role', null, () =>
+      admin.query(
+        'select * from public.find_available_riders($1, $2, $3, 12000, $4::uuid[])',
+        [ids.shopA, INSIDE.lat, INSIDE.lng, []]
+      )
+    );
+    assert.equal(staleEligible.rows.length, 0, 'stale GPS must return an empty eligible set');
+    console.log('[PASS] stale GPS returns no eligible rider without raising an error');
+
+    const staleSnapshot = await asRole(admin, 'authenticated', ids.superadmin, () =>
+      admin.query('select * from public.get_rider_live_monitor_snapshot($1)', [ids.shopA])
+    );
+    assert.equal(
+      staleSnapshot.rows.find((row) => row.rider_id === ids.rider).location_is_stale,
+      true
+    );
+    console.log('[PASS] snapshot exposes GPS staleness using the same 90-second threshold');
 
     ownerClient = await connect();
     riderClient = await connect();

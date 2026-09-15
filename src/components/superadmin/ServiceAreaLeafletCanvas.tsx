@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type {
   AreaKind,
   LngLat,
@@ -50,6 +50,7 @@ export default function ServiceAreaLeafletCanvas({
   const shopLayerRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
   const selectShopRef = useRef<(id: string) => void>(() => {});
+  const [mapReady, setMapReady] = useState(false);
   selectShopRef.current = (id: string) => onSelectShop?.(id);
 
   // Keeps the click handler reading fresh props without tearing the map down.
@@ -92,6 +93,7 @@ export default function ServiceAreaLeafletCanvas({
       // Shops sit beneath the draft so a vertex is never hidden by a pin.
       shopLayerRef.current = L.layerGroup().addTo(map);
       layerRef.current = L.layerGroup().addTo(map);
+      setMapReady(true);
     });
 
     return () => {
@@ -101,6 +103,7 @@ export default function ServiceAreaLeafletCanvas({
         mapRef.current = null;
         layerRef.current = null;
         shopLayerRef.current = null;
+        setMapReady(false);
       }
     };
   }, []);
@@ -117,6 +120,12 @@ export default function ServiceAreaLeafletCanvas({
       if (shop.shop_lat === null || shop.shop_lng === null) continue;
       const at: [number, number] = [shop.shop_lat, shop.shop_lng];
       const selected = shop.id === selectedShopId;
+
+      if (selected) {
+        mapRef.current?.setView(at, Math.max(mapRef.current.getZoom(), DEFAULT_ZOOM), {
+          animate: false,
+        });
+      }
 
       // The radius a shop uses today, so it is visible what a polygon replaces.
       const radius =
@@ -150,7 +159,7 @@ export default function ServiceAreaLeafletCanvas({
         })
         .addTo(layer);
     }
-  }, [shops, selectedShopId, activeKind]);
+  }, [shops, selectedShopId, activeKind, mapReady]);
 
   // Redraw whenever the draft changes.
   useEffect(() => {
@@ -184,7 +193,7 @@ export default function ServiceAreaLeafletCanvas({
         .bindTooltip(String(index + 1), { permanent: false })
         .addTo(layer);
     });
-  }, [draft, activeKind]);
+  }, [draft, activeKind, mapReady]);
 
   const closed = isClosedRing(draft.coordinates);
 

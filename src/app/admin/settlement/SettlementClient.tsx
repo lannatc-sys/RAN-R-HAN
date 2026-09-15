@@ -1,5 +1,9 @@
 'use client';
 
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { createDailySettlementDraftAction } from '@/app/actions/settlement';
+
 interface Settlement {
   id: string;
   settlement_date: string;
@@ -46,6 +50,29 @@ export function SettlementClient({ shopId, settlements, todaySettlement }: Settl
   const totalCompleted = settlements.filter((s) => s.status === 'completed').length;
   const totalException = settlements.filter((s) => s.status === 'exception').length;
 
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  // ปุ่มนี้เป็นทางสำรองของ cron รายวัน ทั้งสองทางเรียก RPC ตัวเดียวกัน
+  // RPC เป็น idempotent อยู่แล้ว กดซ้ำวันเดิมจึงได้ใบเดิม ไม่เกิดใบซ้ำ
+  const handleCreateDraft = (settlementDate?: string) => {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await createDailySettlementDraftAction({ shopId, settlementDate });
+      setMessage(
+        res.success
+          ? { ok: true, text: 'ออกใบค่ารอบเรียบร้อย' }
+          : { ok: false, text: res.error ?? 'ออกใบค่ารอบไม่สำเร็จ' }
+      );
+      if (res.success) router.refresh();
+    });
+  };
+
+  const yesterdayBangkok = new Date(Date.now() + 7 * 60 * 60 * 1000);
+  yesterdayBangkok.setUTCDate(yesterdayBangkok.getUTCDate() - 1);
+  const yesterdayIso = yesterdayBangkok.toISOString().slice(0, 10);
+
   return (
     <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header */}
@@ -56,6 +83,40 @@ export function SettlementClient({ shopId, settlements, todaySettlement }: Settl
         <p style={{ color: '#64748b', marginTop: '0.25rem', fontSize: '0.875rem' }}>
           ประวัติการจ่ายเงิน 30 วัน · สำเร็จ {totalCompleted} รอบ · Exception {totalException} รอบ
         </p>
+
+        <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => handleCreateDraft(yesterdayIso)}
+            disabled={pending}
+            style={{
+              padding: '0.5rem 0.875rem',
+              borderRadius: '0.5rem',
+              border: '1px solid #cbd5e1',
+              background: pending ? '#f1f5f9' : '#0f172a',
+              color: pending ? '#94a3b8' : '#ffffff',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              cursor: pending ? 'not-allowed' : 'pointer',
+            }}
+          >
+            ออกใบค่ารอบของ {yesterdayIso}
+          </button>
+          <span style={{ color: '#64748b', fontSize: '0.6875rem' }}>
+            ปกติระบบออกให้อัตโนมัติทุกเช้า ปุ่มนี้ไว้เรียกซ้ำเมื่อรอบอัตโนมัติไม่ทำงาน กดซ้ำได้ ไม่เกิดใบซ้ำ
+          </span>
+          {message && (
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: message.ok ? '#15803d' : '#b91c1c',
+              }}
+            >
+              {message.text}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Today's Settlement Banner */}

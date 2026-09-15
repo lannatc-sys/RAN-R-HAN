@@ -1,5 +1,6 @@
 import webpush from 'web-push';
 import { sendTelegramMessage, isTelegramConfigured } from './telegram';
+import { getVerifiedChatForRider } from './telegram-routing';
 
 // Init VAPID
 try {
@@ -39,10 +40,11 @@ export function formatRiderOfferTelegramMessage(
   deliveryAddress: string,
   estimatedDistanceKm: number | null,
   timeoutSeconds: number,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || 'https://ran-r-han.vercel.app'
+  appUrl?: string
 ): string {
   const distanceStr = estimatedDistanceKm !== null ? `${estimatedDistanceKm.toFixed(1)} กม.` : 'ไม่ระบุ';
   const cleanAddress = deliveryAddress.trim() || 'ตามหมุดแผนที่';
+  const configuredUrl = (appUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? '').trim();
 
   return (
     `🛵 *มีงานจัดส่งอาหารใหม่!*\n` +
@@ -52,7 +54,9 @@ export function formatRiderOfferTelegramMessage(
     `📏 *ระยะทางโดยประมาณ:* ${distanceStr}\n` +
     `⏱️ *เวลาตอบรับ:* ภายใน *${timeoutSeconds}* วินาที\n` +
     `━━━━━━━━━━━━━━━━━\n` +
-    `👉 [กดที่นี่เพื่อเปิดแอปและรับงาน](${appUrl}/rider)`
+    (configuredUrl
+      ? `👉 [กดที่นี่เพื่อเปิดแอปและรับงาน](${configuredUrl}/rider)`
+      : `👉 เปิดแอปร้านเพื่อรับงาน`)
   );
 }
 
@@ -146,8 +150,10 @@ export async function notifyRiderNewOffer(
     }
 
     // 3. Channel 2: Telegram Bot (Fallback / Supplementary)
-    // ส่ง Telegram หากมี telegram_chat_id และระบบตั้งค่า Telegram ไว้
-    if (rider.telegram_chat_id && isTelegramConfigured()) {
+    // Verified-only: operator-typed riders.telegram_chat_id is never trusted.
+    // Sends go to the verified Telegram account owning this rider, if any.
+    const verifiedChat = await getVerifiedChatForRider(adminClient, riderId);
+    if (verifiedChat && isTelegramConfigured()) {
       try {
         const tgText = formatRiderOfferTelegramMessage(
           details.orderNo,
@@ -156,19 +162,21 @@ export async function notifyRiderNewOffer(
           details.timeoutSeconds
         );
 
-        const tgRes = await sendTelegramMessage(rider.telegram_chat_id, tgText, {
+        const tgRes = await sendTelegramMessage(verifiedChat, tgText, {
           parse_mode: 'Markdown',
         });
 
         if (tgRes.success) {
           result.telegramSent = true;
-          console.log(`[Rider Notification] Sent Telegram message to rider chat ${rider.telegram_chat_id}`);
+          console.log(`[Rider Notification] Sent Telegram offer to verified rider account`);
         } else {
           console.warn(`[Rider Notification] Telegram message failed: ${tgRes.error}`);
         }
       } catch (tgErr) {
         console.warn('[Rider Notification] Telegram notification attempt failed:', tgErr);
       }
+    } else if (isTelegramConfigured()) {
+      console.log(`[Rider Notification] Skipped Telegram: rider has no verified account`);
     }
 
     return result;

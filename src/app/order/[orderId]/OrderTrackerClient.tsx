@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Order, Shop, Payment } from '@/lib/types';
 import { getOrderTrackingSnapshotAction } from '@/app/actions/order';
+import { isOrderTrackingFinal } from '@/lib/order-tracking';
 import {
   CheckCircle2,
   Clock,
@@ -151,8 +152,9 @@ export function OrderTrackerClient({
   // ponytail: poll ทุก 8 วินาที ถ้าต้องการสดกว่านี้ค่อยย้ายไป Supabase
   // Realtime Authorization แบบ private channel
   useEffect(() => {
-    const FINAL_STATUSES = ['served', 'completed', 'cancelled'];
-    if (FINAL_STATUSES.includes(order.status)) return;
+    // ออเดอร์จัดส่งเดินต่อจาก served ไป completed หลังไรเดอร์ส่งของ
+    // (20260914000011) จึงหยุดถามที่ served ไม่ได้ ส่วนแบบอื่นจบที่ served เหมือนเดิม
+    if (isOrderTrackingFinal(order.status, order.type)) return;
 
     let cancelled = false;
 
@@ -179,7 +181,7 @@ export function OrderTrackerClient({
       cancelled = true;
       clearInterval(timer);
     };
-  }, [order.id, order.status]);
+  }, [order.id, order.status, order.type]);
 
   const isDelivery = order.type === 'delivery';
   const isDineIn = order.type === 'dine_in';
