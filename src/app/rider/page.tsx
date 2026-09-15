@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { RiderClient } from './RiderClient';
+import { TelegramLinkCard } from '@/components/telegram/TelegramLinkCard';
 
 export const metadata = {
   title: 'RAN-R-HAN ไรเดอร์',
@@ -33,9 +34,12 @@ export default async function RiderHomePage() {
     : { data: null };
 
   return (
-    <RiderClient
-      rider={rider ?? null}
-      initialSession={session ?? null}
-    />
+    <div className="space-y-4">
+      <RiderClient
+        rider={rider ?? null}
+        initialSession={session ?? null}
+      />
+      <TelegramLinkCard />
+    </div>
   );
 }

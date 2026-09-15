@@ -1,5 +1,6 @@
 import { listTelegramIdentitiesAction } from '@/app/actions/telegram-admin';
 import { TelegramAdminClient } from './TelegramAdminClient';
+import { TelegramLinkCard } from '@/components/telegram/TelegramLinkCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,8 @@ export default async function TelegramAdminPage() {
           ทดสอบหรือยกเลิกได้ทีละบัญชี ไม่ต้องกรอก chat id เอง
         </p>
       </header>
+
+      <TelegramLinkCard />
 
       <TelegramAdminClient
         initialRows={result.rows ?? []}
