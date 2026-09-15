@@ -23,7 +23,7 @@ export type TelegramKeyboard = TelegramButton[][];
 
 /** Mini App targets. Keys map to in-app routes; shop scope appended. */
 const MINI_APP_PATHS: Record<string, string> = {
-  kds: '/admin/kds',
+  kds: '/admin/orders',
   settings: '/admin/settings',
   'service-area': '/superadmin/service-area-map',
   rider: '/rider',
