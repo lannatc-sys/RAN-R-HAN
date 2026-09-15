@@ -170,6 +170,7 @@ describe('Role menu: buttons follow the verified roles only', () => {
     assert.ok(id);
     const dump = JSON.stringify(buildMainMenu(id).keyboard);
     assert.match(dump, /r:status/);
+    assert.match(dump, /r:offers/);
     assert.doesNotMatch(dump, /s:list|🏪/);
   });
 

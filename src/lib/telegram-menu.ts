@@ -67,6 +67,7 @@ export function buildMainMenu(identity: ResolvedTelegramIdentity): {
   }
   if (hasRider) {
     rows.push([{ text: '🛵 ไรเดอร์', callback_data: 'r:status' }]);
+    rows.push([{ text: '📋 งานของฉัน', callback_data: 'r:offers' }]);
   }
   if (hasShops || identity.is_superadmin) {
     rows.push([{ text: '💰 รายได้ / Settlement', callback_data: 'st:menu' }]);
