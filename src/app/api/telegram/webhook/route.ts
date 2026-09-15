@@ -110,6 +110,10 @@ async function handleCallback(admin: any, query: any) {
     });
 
   // Main navigation -----------------------------------------------------------
+  if (data === 'm:noop') {
+    await ack();
+    return;
+  }
   if (data === 'm:menu') {
     await ack();
     await sendMenu(chatId, identity);
@@ -247,11 +251,23 @@ async function handleCallback(admin: any, query: any) {
     if (identity.shops.length === 1 && !identity.is_superadmin) {
       const s = identity.shops[0];
       await send(await settlementText(admin, s.shop_id, s.shop_name));
-    } else {
+    } else if (identity.shops.length > 0) {
       await send(
         '💰 *เลือกดู settlement รายร้าน*',
         identity.shops.map((s) => [{ text: s.shop_name, callback_data: `st:${s.shop_id}` }])
       );
+    } else if (identity.is_superadmin) {
+      const { data: all } = await admin
+        .from('shops')
+        .select('id, name')
+        .order('name')
+        .limit(20);
+      await send(
+        '💰 *เลือกดู settlement รายร้าน*',
+        (all ?? []).map((s: any) => [{ text: String(s.name), callback_data: `st:${s.id}` }])
+      );
+    } else {
+      await send('💰 คุณยังไม่มีร้านที่ดูแลค่ะ');
     }
     return;
   }
@@ -263,8 +279,13 @@ async function handleCallback(admin: any, query: any) {
       return;
     }
     const shop = identity.shops.find((s) => s.shop_id === shopId);
+    let shopName = shop?.shop_name ?? 'ร้านค้า';
+    if (!shop && identity.is_superadmin) {
+      const { data: row } = await admin.from('shops').select('name').eq('id', shopId).maybeSingle();
+      if (row?.name) shopName = String(row.name);
+    }
     await ack();
-    await send(await settlementText(admin, shopId, shop?.shop_name ?? 'ร้านค้า'));
+    await send(await settlementText(admin, shopId, shopName));
     return;
   }
 

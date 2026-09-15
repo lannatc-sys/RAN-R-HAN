@@ -48,6 +48,11 @@ export function miniAppButton(
   return { text, web_app_url: url };
 }
 
+/** Non-action section divider row (acked silently, never acts). */
+function sectionHeader(label: string): TelegramButton {
+  return { text: `━━━ ${label} ━━━`, callback_data: 'm:noop' };
+}
+
 /** Main menu for a verified identity. Unverified callers never reach here. */
 export function buildMainMenu(identity: ResolvedTelegramIdentity): {
   text: string;
@@ -58,24 +63,27 @@ export function buildMainMenu(identity: ResolvedTelegramIdentity): {
   const hasRider = identity.riders.length > 0;
 
   if (hasShops) {
+    rows.push([sectionHeader('🏪 ร้านค้า')]);
     rows.push([{ text: '📦 ออเดอร์ของฉัน', callback_data: 'o:mine' }]);
     rows.push([
       identity.shops.length === 1
         ? { text: '🏪 ร้านค้าของฉัน', callback_data: `s:${identity.shops[0].shop_id}` }
         : { text: '🏪 ร้านค้าของฉัน', callback_data: 's:list' },
     ]);
-  }
-  if (hasRider) {
-    rows.push([{ text: '🛵 ไรเดอร์', callback_data: 'r:status' }]);
-    rows.push([{ text: '📋 งานของฉัน', callback_data: 'r:offers' }]);
-  }
-  if (hasShops || identity.is_superadmin) {
     rows.push([{ text: '💰 รายได้ / Settlement', callback_data: 'st:menu' }]);
   }
+  if (hasRider) {
+    rows.push([sectionHeader('🛵 ไรเดอร์')]);
+    rows.push([{ text: '📊 สถานะไรเดอร์', callback_data: 'r:status' }]);
+    rows.push([{ text: '📋 งานของฉัน', callback_data: 'r:offers' }]);
+  }
   if (identity.is_superadmin) {
+    rows.push([sectionHeader('🛠️ ผู้ดูแลระบบ')]);
+    rows.push([{ text: '💰 Settlement ทุกร้าน', callback_data: 'st:menu' }]);
     rows.push([{ text: '📍 GPS / พื้นที่บริการ', callback_data: 'map:menu' }]);
     rows.push([{ text: '🔔 การแจ้งเตือน', callback_data: 'n:menu' }]);
   }
+  rows.push([sectionHeader('👤 ทั่วไป')]);
   rows.push([{ text: '👤 บัญชีของฉัน', callback_data: 'm:acct' }]);
   rows.push([{ text: '❓ ช่วยเหลือ', callback_data: 'm:help' }]);
 

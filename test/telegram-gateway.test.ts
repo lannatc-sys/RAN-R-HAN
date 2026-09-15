@@ -153,6 +153,9 @@ describe('Role menu: buttons follow the verified roles only', () => {
     assert.ok(id);
     const menu = buildMainMenu(id);
     assert.match(JSON.stringify(menu.keyboard), /s:list/);
+    assert.match(JSON.stringify(menu.keyboard), /ร้านค้า/);
+    assert.match(JSON.stringify(menu.keyboard), /ทั่วไป/);
+    assert.match(JSON.stringify(menu.keyboard), /m:noop/);
     const picker = buildShopPicker(id.shops);
     assert.equal(picker.keyboard.length, 2);
   });
@@ -171,7 +174,8 @@ describe('Role menu: buttons follow the verified roles only', () => {
     const dump = JSON.stringify(buildMainMenu(id).keyboard);
     assert.match(dump, /r:status/);
     assert.match(dump, /r:offers/);
-    assert.doesNotMatch(dump, /s:list|🏪/);
+    assert.match(dump, /ไรเดอร์/);
+    assert.doesNotMatch(dump, /s:list|🏪 ร้านค้า/);
   });
 
   it('identity without roles sees only account and help', async () => {
