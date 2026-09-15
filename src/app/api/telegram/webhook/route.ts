@@ -237,10 +237,12 @@ async function handleCallback(admin: any, query: any) {
     const riderIds = identity.riders.map((r) => r.rider_id);
     const { data: offers } = await admin
       .from('dispatch_offers')
-      .select('id')
+      .select('id, timeout_at')
       .in('rider_id', riderIds)
       .eq('status', 'offered');
-    const live = (offers ?? []).slice(0, 3);
+    const live = (offers ?? [])
+      .filter((o: any) => !o.timeout_at || new Date(o.timeout_at) > new Date())
+      .slice(0, 3);
     const keyboard: { text: string; callback_data?: string; web_app_url?: string }[][] = live.flatMap((o: any) => [[
       { text: `✅ รับ ${String(o.id).slice(0, 8)}`, callback_data: `of:${o.id}:accept` },
       { text: `❌ ปฏิเสธ`, callback_data: `of:${o.id}:reject` },

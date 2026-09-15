@@ -294,6 +294,14 @@ describe('Routing: verified holders only, never raw chat ids', () => {
     assert.deepEqual(chats, [111]);
   });
 
+  it('offer buttons exclude expired offers like the text does', () => {
+    const code = stripTs(source('src/app/api/telegram/webhook/route.ts'));
+    const start = code.indexOf("data === 'r:offers'");
+    const block = code.slice(start, code.indexOf('offerMatch', start));
+    assert.match(block, /timeout_at/);
+    assert.match(block, /new Date\(o\.timeout_at\) > new Date\(\)/);
+  });
+
   it('offer routing resolves through riders.auth_user_id only', async () => {
     const { getVerifiedChatForRider } = await import('../src/lib/telegram-routing');
     const admin = mockAdmin({
